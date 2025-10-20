@@ -32,7 +32,7 @@ new #[Layout('layouts.guest')] class extends Component
         <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="username" />
+            <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full bg-white/5 border-spigo-violet/30 focus:border-spigo-lime focus:ring-spigo-lime" type="email" name="email" required autofocus autocomplete="username" />
             <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
         </div>
 
@@ -40,10 +40,10 @@ new #[Layout('layouts.guest')] class extends Component
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />
 
-            <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+            <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full bg-white/5 border-spigo-violet/30 focus:border-spigo-lime focus:ring-spigo-lime"
+                          type="password"
+                          name="password"
+                          required autocomplete="current-password" />
 
             <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
         </div>
@@ -51,28 +51,36 @@ new #[Layout('layouts.guest')] class extends Component
         <!-- Remember Me -->
         <div class="block mt-4">
             <label for="remember" class="inline-flex items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
+                <input wire:model="form.remember" id="remember" type="checkbox" class="rounded bg-spigo-dark border-spigo-violet/30 text-spigo-blue focus:ring-spigo-blue" name="remember">
+                <span class="ms-2 text-sm text-gray-400">{{ __('Remember me') }}</span>
             </label>
         </div>
 
         <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}" wire:navigate>
+                <a class="underline text-sm text-gray-400 hover:text-spigo-lime rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-spigo-lime" href="{{ route('password.request') }}" wire:navigate>
                     {{ __('Forgot your password?') }}
                 </a>
             @endif
 
-            <x-primary-button class="ms-3">
+            <x-primary-button class="ms-3 bg-spigo-blue hover:bg-spigo-blue/80 focus:bg-spigo-blue/90 active:bg-spigo-blue/95 focus:ring-spigo-lime">
                 {{ __('Log in') }}
             </x-primary-button>
         </div>
-
-        <!-- Login com o google -->
-        <div class="flex items-center justify-center mt-4">
-            <a href="{{ route('google.redirect') }}" class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" wire:navigate>
-                {{ __('Login com o Google') }}
-            </a>
-        </div>
     </form>
+
+    <div class="relative flex py-5 items-center">
+        <div class="flex-grow border-t border-spigo-violet/20"></div>
+        <span class="flex-shrink mx-4 text-gray-400 text-sm">OU</span>
+        <div class="flex-grow border-t border-spigo-violet/20"></div>
+    </div>
+
+
+    <!-- Login com o google -->
+    <div class="flex items-center justify-center">
+        <a href="{{ route('google.redirect') }}" class="w-full inline-flex items-center justify-center px-4 py-2 bg-white/90 border border-transparent rounded-md font-semibold text-xs text-spigo-dark uppercase tracking-widest hover:bg-white focus:bg-white active:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-spigo-lime focus:ring-offset-2 focus:ring-offset-spigo-dark transition ease-in-out duration-150">
+            <i class="fa-brands fa-google mr-2"></i>
+            {{ __('Login com o Google') }}
+        </a>
+    </div>
 </div>

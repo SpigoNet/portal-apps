@@ -16,34 +16,27 @@ class EnsureUserIsAdmin
             return redirect()->route('login');
         }
 
-        // --- PONTO DE VERIFICAÇÃO 1 ---
-        // Vamos garantir que estamos procurando pelo link EXATO que está no seeder.
         $adminApp = PortalApp::where('start_link', '/admin/apps')->first();
 
-        // **DEBUG**: Se quiser confirmar que o app está sendo encontrado, descomente a linha abaixo.
-        // A página vai parar e mostrar os dados do App de Admin ou 'null'.
-        // dd($adminApp);
 
         if (!$adminApp) {
-            // Se o app não for encontrado, é uma falha de configuração.
             return redirect()->route('dashboard')->with('error', 'O aplicativo de administração não foi encontrado no banco de dados.');
         }
 
-        // --- PONTO DE VERIFICAÇÃO 2 ---
-        // Esta é a verificação mais crucial. Ela olha na tabela 'portal_app_user'.
-        // Usando o próprio relacionamento, perguntamos: "Este usuário possui este app específico?"
-        $userIsAdmin = Auth::user()->portalApps->contains($adminApp);
+        // --- LÓGICA CORRIGIDA ---
+        // Em vez de carregar todos os apps do usuário para a memória e depois verificar,
+        // esta abordagem faz uma pergunta direta e eficiente ao banco de dados:
+        // "Na relação 'portalApps' deste usuário, existe um registro com o ID do app de admin?"
+        // Isso evita problemas de comparação de objetos e é mais performático.
+        $userIsAdmin = Auth::user()->portalApps()->where('portal_app_id', $adminApp->id)->exists();
 
-        // **DEBUG**: Descomente a linha abaixo para ver o resultado (true ou false) da verificação.
-        // Se aqui retornar 'false', mesmo o app aparecendo na lista, há algo muito estranho.
+        // **DEBUG**: Se ainda precisar, descomente a linha abaixo para ver o resultado (true ou false).
         // dd($userIsAdmin);
 
         if (!$userIsAdmin) {
-            // Se o usuário não tem a permissão, redireciona com a mensagem de erro.
             return redirect()->route('dashboard')->with('error', 'Acesso não autorizado a esta área.');
         }
 
-        // Se passou em todas as verificações, o usuário é um admin. Pode seguir.
         return $next($request);
     }
 }

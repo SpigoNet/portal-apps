@@ -2,9 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\WelcomeController; // Adicionado
 
 
-Route::view('/', 'welcome');
+Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
 use App\Http\Controllers\DashboardController;
 Route::get('/dashboard', [DashboardController::class, 'index'])

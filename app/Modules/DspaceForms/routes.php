@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Modules\DspaceForms\Http\Controllers\DspaceValuePairsListController;
 use App\Modules\DspaceForms\Http\Controllers\DspaceFormsController;
 
 // Você pode criar um middleware específico se precisar de um controle de acesso mais granular
@@ -12,8 +13,16 @@ Route::middleware(['web', 'admin'])
         Route::get('/', [DspaceFormsController::class, 'index'])->name('index');
         Route::get('/export-all-zip', [DspaceFormsController::class, 'exportAllAsZip'])->name('export.zip');
 
-        // Aqui entrariam as rotas para os CRUDs completos
-        // Ex: Route::resource('maps', FormMapController::class);
-        // Ex: Route::resource('lists', ValuePairListController::class);
-        // Ex: Route::resource('lists.pairs', ValuePairController::class);
+        Route::prefix('value-pairs')->controller(DspaceValuePairsListController::class)->name('value-pairs.')->group(function () {
+            Route::get('/', 'index')->name('index'); // Lista todas as listas
+            Route::get('/{list}/edit', 'edit')->name('edit'); // Edita itens de uma lista
+            Route::post('/{list}/store', 'store')->name('store'); // Adiciona item
+            Route::put('/{list}/update/{pair}', 'update')->name('update'); // Atualiza item (usado com formulário inline)
+            Route::delete('/{list}/destroy/{pair}', 'destroy')->name('destroy'); // Remove item
+            Route::post('/{list}/move/{pair}', 'move')->name('move'); // Mover item (up/down)
+
+            Route::post('/{list}/sort-alpha', 'sortAlphabetical')->name('sort.alphabetical');
+
+        });
+
     });

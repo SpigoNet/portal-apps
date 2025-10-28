@@ -12,6 +12,7 @@ class DspaceValuePair extends Model
 
     protected $table = 'dspace_value_pairs';
     protected $fillable = ['list_id', 'displayed_value', 'stored_value', 'order'];
+    protected $primaryKey = 'id';
 
     public function list(): BelongsTo
     {

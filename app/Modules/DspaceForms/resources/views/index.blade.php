@@ -13,15 +13,14 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                <!-- Card de Formulários -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900 dark:text-gray-100">
                         <div class="flex items-center">
-                            <i class="fa-solid fa-wpforms fa-2x text-indigo-500 mr-4"></i>
+                            <i class="fa-solid fa-file-alt fa-2x text-indigo-500 mr-4"></i>
                             <div>
-                                <h3 class="text-lg font-semibold">Formulários de Submissão</h3>
+                                <h3 class="text-lg font-semibold">Lista de Formulários</h3>
                                 <p class="text-2xl font-bold">{{ $stats['forms_count'] }}</p>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">formulários configurados</p>
                             </div>
@@ -34,20 +33,37 @@
                     </div>
                 </div>
 
-                <!-- Card de Vocabulários -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900 dark:text-gray-100">
                         <div class="flex items-center">
                             <i class="fa-solid fa-list-check fa-2x text-green-500 mr-4"></i>
                             <div>
-                                <h3 class="text-lg font-semibold">Vocabulários Controlados</h3>
+                                <h3 class="text-lg font-semibold">Vocabulários e Listas</h3>
                                 <p class="text-2xl font-bold">{{ $stats['vocabularies_count'] }}</p>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">listas de valores gerenciadas</p>
                             </div>
                         </div>
                         <div class="mt-4 text-right">
-                            <a href="#" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold">
+                            <a href="{{ route('dspace-forms.value-pairs.index') }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold">
                                 Gerenciar Vocabulários &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900 dark:text-gray-100">
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-link fa-2x text-orange-500 mr-4"></i>
+                            <div>
+                                <h3 class="text-lg font-semibold">Vínculos Comunidade/Coleção</h3>
+                                <p class="text-2xl font-bold">{{ $stats['maps_count'] }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">vínculos configurados</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-right">
+                            <a href="#" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold">
+                                Gerenciar Vínculos &rarr;
                             </a>
                         </div>
                     </div>
@@ -57,4 +73,3 @@
         </div>
     </div>
 </x-app-layout>
-

@@ -4,10 +4,13 @@ namespace App\Modules\DspaceForms\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\DspaceForms\Models\DspaceForm;
+use App\Modules\DspaceForms\Models\DspaceFormMap;
 use App\Modules\DspaceForms\Models\DspaceValuePairsList;
+use App\Modules\DspaceForms\Models\SubmissionProcess;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
+
 
 class DspaceFormsController extends Controller
 {
@@ -17,9 +20,14 @@ class DspaceFormsController extends Controller
     public function index()
     {
         $stats = [
-            'submission_processes_count' => SubmissionProcess::count(),
+            // Manter a contagem de Formulários
             'forms_count' => DspaceForm::count(),
+            // Manter a contagem de Vocabulários (inclui listas de valor)
             'vocabularies_count' => DspaceValuePairsList::count(),
+            // Adicionar a contagem de Vínculos (Mapeamentos)
+            'maps_count' => DspaceFormMap::count(),
+            // Opcional: A contagem de processos de submissão pode ser útil, mas o usuário pediu "Vínculos"
+            // 'submission_processes_count' => SubmissionProcess::count(),
         ];
         return view('DspaceForms::index', compact('stats'));
     }

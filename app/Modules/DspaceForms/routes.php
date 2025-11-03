@@ -22,6 +22,9 @@ Route::middleware(['web', 'admin'])
             Route::post('/{list}/move/{pair}', 'move')->name('move'); // Mover item (up/down)
 
             Route::post('/{list}/sort-alpha', 'sortAlphabetical')->name('sort.alphabetical');
+            Route::post('/', 'createList')->name('storeNewList'); // Cria nova lista
+            Route::delete('/{list}', 'destroyList')->name('destroyList'); // Remove lista
+
 
         });
 

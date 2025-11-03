@@ -3,22 +3,99 @@
 namespace App\Modules\DspaceForms\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\DspaceForms\Models\DspaceFormField;
 use App\Modules\DspaceForms\Models\DspaceValuePairsList;
 use App\Modules\DspaceForms\Models\DspaceValuePair;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class DspaceValuePairsListController extends Controller
 {
-    /**
-     * Exibe a lista de todos os Vocabulários/Listas de Valores disponíveis para edição.
-     */
     public function index()
     {
-        // Usa withCount para contar os itens na lista de forma eficiente
-        $lists = DspaceValuePairsList::withCount('pairs')->orderBy('name')->get();
+        // 1. Obtém todos os nomes de vocabulários e listas usados nos formulários.
+        $usedVocabularies = DspaceFormField::whereNotNull('vocabulary')
+            ->distinct()
+            ->pluck('vocabulary')
+            ->toArray();
 
-        return view('DspaceForms::value-pairs-index', compact('lists'));
+        $usedValuePairs = DspaceFormField::whereNotNull('value_pairs_name')
+            ->distinct()
+            ->pluck('value_pairs_name')
+            ->toArray();
+
+        $allUsedNames = array_unique(array_merge($usedVocabularies, $usedValuePairs));
+
+
+        // 2. Busca todas as listas com contagem de pares
+        $allLists = DspaceValuePairsList::withCount('pairs')->orderBy('name')->get();
+
+        // 3. Divide as listas em "Em Uso" e "Fora de Uso"
+        $usedLists = $allLists->filter(function ($list) use ($allUsedNames) {
+            return in_array($list->name, $allUsedNames);
+        });
+
+        $unusedLists = $allLists->reject(function ($list) use ($allUsedNames) {
+            return in_array($list->name, $allUsedNames);
+        });
+
+
+        // 4. Retorna as coleções separadas para a view
+        return view('DspaceForms::value-pairs-index', [
+            'usedLists' => $usedLists,
+            'unusedLists' => $unusedLists,
+        ]);
+    }
+
+    /**
+     * Adiciona uma nova lista de valores/vocabulário ao banco de dados.
+     */
+    public function createList(Request $request)
+    {
+        $validated = $request->validate([
+            // Garante que o nome é único e não é 'riccps'
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('dspace_value_pairs_lists', 'name'),
+                'not_in:riccps'
+            ],
+            'dc_term' => 'nullable|string|max:255',
+        ]);
+
+        DspaceValuePairsList::create($validated);
+
+        return redirect()->route('dspace-forms.value-pairs.index')->with('success', "Lista '{$validated['name']}' criada com sucesso! Você pode agora adicionar itens.");
+    }
+
+    /**
+     * Remove uma lista de valores (apenas se não estiver em uso e estiver vazia).
+     */
+    public function destroyList(DspaceValuePairsList $list)
+    {
+        // 1. Não permite a exclusão da lista 'riccps'
+        if ($list->name === 'riccps') {
+            return redirect()->route('dspace-forms.value-pairs.index')->with('error', 'A lista "riccps" não pode ser excluída.');
+        }
+
+        // 2. Verifica se a lista está em uso
+        $isUsedAsVocabulary = DspaceFormField::where('vocabulary', $list->name)->exists();
+        $isUsedAsValuePair = DspaceFormField::where('value_pairs_name', $list->name)->exists();
+
+        if ($isUsedAsVocabulary || $isUsedAsValuePair) {
+            return redirect()->route('dspace-forms.value-pairs.index')->with('error', "A lista '{$list->name}' está em uso em um ou mais formulários e não pode ser excluída.");
+        }
+
+        // 3. Verifica se a lista está vazia (pairs_count deve ser 0)
+        if ($list->pairs()->count() > 0) {
+            return redirect()->route('dspace-forms.value-pairs.index')->with('error', "A lista '{$list->name}' não está vazia. Remova todos os {$list->pairs()->count()} itens antes de excluir.");
+        }
+
+        $list->delete();
+
+        return redirect()->route('dspace-forms.value-pairs.index')->with('success', "Lista '{$list->name}' excluída com sucesso.");
     }
 
     /**

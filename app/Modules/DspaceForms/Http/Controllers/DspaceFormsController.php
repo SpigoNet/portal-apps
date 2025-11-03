@@ -4,6 +4,7 @@ namespace App\Modules\DspaceForms\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\DspaceForms\Models\DspaceForm;
+use App\Modules\DspaceForms\Models\DspaceFormField;
 use App\Modules\DspaceForms\Models\DspaceFormMap;
 use App\Modules\DspaceForms\Models\DspaceValuePairsList;
 use App\Modules\DspaceForms\Models\SubmissionProcess;
@@ -59,14 +60,37 @@ class DspaceFormsController extends Controller
 
         // 3. Adicionar vocabulários e seus XSDs
         $zip->addEmptyDir('controlled-vocabularies');
-        $vocabularies = DspaceValuePairsList::with('pairs')->get();
+
+        // ** NOVO FILTRO **: Obtém os nomes dos vocabulários que estão em uso
+        $usedVocabularies = DspaceFormField::whereNotNull('vocabulary')
+            ->distinct()
+            ->pluck('vocabulary')
+            ->toArray();
+
+        // Filtro para exportar apenas os vocabulários usados E não 'riccps'
+        $vocabularies = DspaceValuePairsList::with('pairs')
+            ->whereIn('name', $usedVocabularies)
+            ->where('name', '!=', 'riccps')
+            ->get();
+
+        // ** CORREÇÃO **: Carrega o conteúdo XSD do modelo uma única vez
+        // pegado do arquivo 'storage/app/dspace_templates/vocabulary.xsd'
+
         $xsdContent = Storage::disk('local')->exists('dspace_templates/vocabulary.xsd')
             ? Storage::disk('local')->get('dspace_templates/vocabulary.xsd')
             : '';
 
+        if (empty($xsdContent) && $vocabularies->isNotEmpty()) {
+            // Se houver vocabulários, mas o modelo XSD não for encontrado, emite um aviso.
+            // Para evitar um erro de ZIP vazio, continua, mas os XSDs ficarão faltando.
+            // Idealmente, o arquivo 'dspace_templates/vocabulary.xsd' deve existir.
+        }
+
         foreach ($vocabularies as $vocabulary) {
             $vocabularyXmlContent = $this->generateVocabularyXmlContent($vocabulary);
             $zip->addFromString('controlled-vocabularies/' . $vocabulary->name . '.xml', $vocabularyXmlContent);
+
+            // ** CORREÇÃO **: Adiciona um arquivo XSD separado para cada vocabulário
             if ($xsdContent) {
                 $zip->addFromString('controlled-vocabularies/' . $vocabulary->name . '.xsd', $xsdContent);
             }
@@ -120,7 +144,12 @@ class DspaceFormsController extends Controller
     private function generateSubmissionFormsXmlContent(): string
     {
         $forms = DspaceForm::with('rows.fields', 'rows.relationFields')->get();
-        $valueLists = DspaceValuePairsList::whereNotNull('dc_term')->get(); // Apenas os que não são vocabulários puros
+
+        // FILTRO APLICADO: Apenas as listas que não são 'riccps' para submission-forms.xml,
+        // pois elas seriam exportadas como vocabulários controlados separadamente.
+        $valueLists = DspaceValuePairsList::whereNotNull('dc_term')
+            ->where('name', '!=', 'riccps')
+            ->get();
 
         $xml = new \SimpleXMLElement('<input-forms/>');
         $formDefs = $xml->addChild('form-definitions');

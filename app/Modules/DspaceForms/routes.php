@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\DspaceForms\Http\Controllers\DspaceFormMapController;
 use Illuminate\Support\Facades\Route;
 use App\Modules\DspaceForms\Http\Controllers\DspaceValuePairsListController;
 use App\Modules\DspaceForms\Http\Controllers\DspaceFormsController;
@@ -13,6 +14,7 @@ Route::middleware(['web', 'admin'])
         Route::get('/', [DspaceFormsController::class, 'index'])->name('index');
         Route::get('/export-all-zip', [DspaceFormsController::class, 'exportAllAsZip'])->name('export.zip');
 
+        // Rotas para Listas de Valores (Value Pairs)
         Route::prefix('value-pairs')->controller(DspaceValuePairsListController::class)->name('value-pairs.')->group(function () {
             Route::get('/', 'index')->name('index'); // Lista todas as listas
             Route::get('/{list}/edit', 'edit')->name('edit'); // Edita itens de uma lista
@@ -24,8 +26,14 @@ Route::middleware(['web', 'admin'])
             Route::post('/{list}/sort-alpha', 'sortAlphabetical')->name('sort.alphabetical');
             Route::post('/', 'createList')->name('storeNewList'); // Cria nova lista
             Route::delete('/{list}', 'destroyList')->name('destroyList'); // Remove lista
+        });
 
-
+        // Rotas para Vínculos (Form Maps)
+        Route::prefix('form-maps')->controller(DspaceFormMapController::class)->name('form-maps.')->group(function () {
+            Route::get('/', 'index')->name('index'); // Lista todos os vínculos
+            Route::post('/', 'store')->name('store'); // Salva um novo vínculo
+            Route::put('/{map}', 'update')->name('update'); // Atualiza um vínculo
+            Route::delete('/{map}', 'destroy')->name('destroy'); // Exclui um vínculo
         });
 
     });

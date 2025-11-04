@@ -51,6 +51,7 @@
                     </div>
                 </div>
 
+
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900 dark:text-gray-100">
                         <div class="flex items-center">
@@ -62,7 +63,7 @@
                             </div>
                         </div>
                         <div class="mt-4 text-right">
-                            <a href="#" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold">
+                            <a href="{{ route('dspace-forms.form-maps.index') }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold">
                                 Gerenciar Vínculos &rarr;
                             </a>
                         </div>

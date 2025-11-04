@@ -8,6 +8,7 @@ use App\Modules\DspaceForms\Models\DspaceFormField;
 use App\Modules\DspaceForms\Models\DspaceFormMap;
 use App\Modules\DspaceForms\Models\DspaceValuePairsList;
 use App\Modules\DspaceForms\Models\SubmissionProcess;
+use App\Modules\DspaceForms\Models\SubmissionStep;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
@@ -105,6 +106,7 @@ class DspaceFormsController extends Controller
     {
         $maps = DspaceFormMap::all();
         $processes = SubmissionProcess::with('steps')->get();
+        $stepIds = SubmissionStep::distinct()->pluck('step_id');
 
         $xml = new \SimpleXMLElement('<item-submission />');
 
@@ -117,6 +119,51 @@ class DspaceFormsController extends Controller
                 $mapNode->addAttribute('collection-entity-type', $map->map_key);
             }
             $mapNode->addAttribute('submission-name', $map->submission_name);
+        }
+
+        $stepDefs = $xml->addChild('step-definitions');
+        foreach ($stepIds as $stepId) {
+            $stepDefNode = $stepDefs->addChild('step-definition');
+            $stepDefNode->addAttribute('id', $stepId);
+
+            // Adiciona conteúdo baseado no ID do step, conforme os exemplos
+            switch ($stepId) {
+                case 'collection':
+                    $stepDefNode->addChild('heading');
+                    $stepDefNode->addChild('processing-class', 'org.dspace.app.rest.submit.step.CollectionStep');
+                    $stepDefNode->addChild('type', 'collection');
+                    break;
+
+                case 'upload':
+                    $stepDefNode->addChild('heading', 'submit.progressbar.upload');
+                    $stepDefNode->addChild('processing-class', 'org.dspace.app.rest.submit.step.UploadStep');
+                    $stepDefNode->addChild('type', 'upload');
+                    break;
+
+                case 'license':
+                    $stepDefNode->addChild('heading', 'submit.progressbar.license');
+                    $stepDefNode->addChild('processing-class', 'org.dspace.app.rest.submit.step.LicenseStep');
+                    $stepDefNode->addChild('type', 'license');
+                    $scopeNode = $stepDefNode->addChild('scope', 'submission');
+                    $scopeNode->addAttribute('visibilityOutside', 'read-only');
+                    break;
+
+                // Caso padrão para formulários dinâmicos (ex: artigopageone, tccpagetwo, etc.)
+                default:
+                    $stepDefNode->addAttribute('mandatory', 'true');
+
+                    // Lógica para heading (stepone vs steptwo)
+                    if (str_ends_with(strtolower($stepId), 'two') || str_ends_with(strtolower($stepId), '2')) {
+                        $stepDefNode->addChild('heading', 'submit.progressbar.describe.steptwo');
+                    } else {
+                        // Fallback para todos os outros (pageone, personStep, etc.)
+                        $stepDefNode->addChild('heading', 'submit.progressbar.describe.stepone');
+                    }
+
+                    $stepDefNode->addChild('processing-class', 'org.dspace.app.rest.submit.step.DescribeStep');
+                    $stepDefNode->addChild('type', 'submission-form');
+                    break;
+            }
         }
 
         $submissionDefs = $xml->addChild('submission-definitions');
@@ -138,18 +185,25 @@ class DspaceFormsController extends Controller
         $dtd = $implementation->createDocumentType('item-submission', '', 'item-submission.dtd');
         $dom->insertBefore($dtd, $dom->documentElement);
 
-        return $dom->saveXML();
+        return $dom->saveXML(null, LIBXML_NOEMPTYTAG);
     }
 
     private function generateSubmissionFormsXmlContent(): string
     {
         $forms = DspaceForm::with('rows.fields', 'rows.relationFields')->get();
 
-        // FILTRO APLICADO: Apenas as listas que não são 'riccps' para submission-forms.xml,
-        // pois elas seriam exportadas como vocabulários controlados separadamente.
-        $valueLists = DspaceValuePairsList::whereNotNull('dc_term')
-            ->where('name', '!=', 'riccps')
+        // 1. Descobrir quais listas de valores estão REALMENTE em uso.
+        $usedListNames = DspaceFormField::whereNotNull('value_pairs_name')
+            ->where('value_pairs_name', '!=', '')
+            ->distinct()
+            ->pluck('value_pairs_name')
+            ->all();
+
+        // 2. Buscar APENAS as listas que estão em uso.
+        $valueLists = DspaceValuePairsList::with('pairs')
+            ->whereIn('name', $usedListNames)
             ->get();
+        // --- FIM DA LÓGICA ATUALIZADA ---
 
         $xml = new \SimpleXMLElement('<input-forms/>');
         $formDefs = $xml->addChild('form-definitions');
@@ -171,7 +225,7 @@ class DspaceFormsController extends Controller
                         $inputType->addAttribute('value-pairs-name', $field->value_pairs_name);
                     }
                     $fieldNode->addChild('hint', htmlspecialchars($field->hint));
-                    if ($field->required) $fieldNode->addChild('required', htmlspecialchars($field->required));
+                    if ($field->required) $fieldNode->addChild('required', htmlspecialchars($field->required ?? ''));
                     if ($field->vocabulary) {
                         $vocabNode = $fieldNode->addChild('vocabulary', $field->vocabulary);
                         if ($field->vocabulary_closed) {
@@ -191,9 +245,10 @@ class DspaceFormsController extends Controller
             foreach ($list->pairs()->orderBy('order')->get() as $pair) {
                 $pairNode = $listNode->addChild('pair');
                 $pairNode->addChild('displayed-value', htmlspecialchars($pair->displayed_value));
-                $pairNode->addChild('stored-value', htmlspecialchars($pair->stored_value));
+                $pairNode->addChild('stored-value', htmlspecialchars($pair->stored_value) ?? '');
             }
         }
+
 
         $dom = new \DOMDocument('1.0', 'UTF-8');
         $dom->preserveWhiteSpace = false;
@@ -204,7 +259,7 @@ class DspaceFormsController extends Controller
         $dtd = $implementation->createDocumentType('input-forms', '', 'submission-forms.dtd');
         $dom->insertBefore($dtd, $dom->documentElement);
 
-        return $dom->saveXML();
+        return $dom->saveXML(null, LIBXML_NOEMPTYTAG);
     }
 
     private function generateVocabularyXmlContent(DspaceValuePairsList $list): string
@@ -225,7 +280,7 @@ class DspaceFormsController extends Controller
         $dom->preserveWhiteSpace = false;
         $dom->formatOutput = true;
         $dom->loadXML($xml->asXML());
-        return $dom->saveXML();
+        return $dom->saveXML(null, LIBXML_NOEMPTYTAG);
     }
 }
 

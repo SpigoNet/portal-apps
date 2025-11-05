@@ -176,16 +176,20 @@ class DspaceFormsController extends Controller
             }
         }
 
+
         $dom = new \DOMDocument('1.0', 'UTF-8');
         $dom->preserveWhiteSpace = false;
         $dom->formatOutput = true;
         $dom->loadXML($xml->asXML());
 
+        // Expandir tags vazias
+        $this->expandEmptyTags($dom->documentElement);
+
         $implementation = new \DOMImplementation();
         $dtd = $implementation->createDocumentType('item-submission', '', 'item-submission.dtd');
         $dom->insertBefore($dtd, $dom->documentElement);
 
-        return $dom->saveXML(null, LIBXML_NOEMPTYTAG);
+        return $dom->saveXML();
     }
 
     private function generateSubmissionFormsXmlContent(): string
@@ -245,21 +249,24 @@ class DspaceFormsController extends Controller
             foreach ($list->pairs()->orderBy('order')->get() as $pair) {
                 $pairNode = $listNode->addChild('pair');
                 $pairNode->addChild('displayed-value', htmlspecialchars($pair->displayed_value));
-                $pairNode->addChild('stored-value', htmlspecialchars($pair->stored_value) ?? '');
+                $storedValue = htmlspecialchars($pair->stored_value ?? '', ENT_QUOTES, 'UTF-8');
+                $pairNode->addChild('stored-value', $storedValue !== '' ? $storedValue : '');
             }
         }
-
 
         $dom = new \DOMDocument('1.0', 'UTF-8');
         $dom->preserveWhiteSpace = false;
         $dom->formatOutput = true;
         $dom->loadXML($xml->asXML());
 
+        // Expandir tags vazias
+        $this->expandEmptyTags($dom->documentElement);
+
         $implementation = new \DOMImplementation();
         $dtd = $implementation->createDocumentType('input-forms', '', 'submission-forms.dtd');
         $dom->insertBefore($dtd, $dom->documentElement);
 
-        return $dom->saveXML(null, LIBXML_NOEMPTYTAG);
+        return $dom->saveXML();
     }
 
     private function generateVocabularyXmlContent(DspaceValuePairsList $list): string
@@ -280,7 +287,23 @@ class DspaceFormsController extends Controller
         $dom->preserveWhiteSpace = false;
         $dom->formatOutput = true;
         $dom->loadXML($xml->asXML());
-        return $dom->saveXML(null, LIBXML_NOEMPTYTAG);
+
+        $this->expandEmptyTags($dom->documentElement);
+
+        return $dom->saveXML();
+    }
+
+    private function expandEmptyTags(\DOMElement $element): void
+    {
+        if ($element->childNodes->length === 0) {
+            $element->appendChild($element->ownerDocument->createTextNode(''));
+        } else {
+            foreach ($element->childNodes as $child) {
+                if ($child instanceof \DOMElement) {
+                    $this->expandEmptyTags($child);
+                }
+            }
+        }
     }
 }
 

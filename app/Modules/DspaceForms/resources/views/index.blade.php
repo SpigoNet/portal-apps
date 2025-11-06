@@ -26,7 +26,7 @@
                             </div>
                         </div>
                         <div class="mt-4 text-right">
-                            <a href="#" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold">
+                            <a href="{{ route('dspace-forms.forms.index') }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold">
                                 Gerenciar Formulários &rarr;
                             </a>
                         </div>

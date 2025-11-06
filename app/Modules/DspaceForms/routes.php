@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\DspaceForms\Http\Controllers\DspaceFormController;
 use App\Modules\DspaceForms\Http\Controllers\DspaceFormMapController;
 use Illuminate\Support\Facades\Route;
 use App\Modules\DspaceForms\Http\Controllers\DspaceValuePairsListController;
@@ -34,6 +35,16 @@ Route::middleware(['web', 'admin'])
             Route::post('/', 'store')->name('store'); // Salva um novo vínculo
             Route::put('/{map}', 'update')->name('update'); // Atualiza um vínculo
             Route::delete('/{map}', 'destroy')->name('destroy'); // Exclui um vínculo
+        });
+
+        Route::prefix('forms')->controller(DspaceFormController::class)->name('forms.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{form}/edit', 'edit')->name('edit');
+            Route::put('/{form}', 'update')->name('update');
+            Route::delete('/{form}', 'destroy')->name('destroy');
+            // Futuras rotas aninhadas para linhas/campos podem ir aqui.
         });
 
     });

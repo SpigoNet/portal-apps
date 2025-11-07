@@ -1,8 +1,25 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Criar Novo Formulário DSpace') }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                {{ __('Criar Novo Formulário DSpace') }}
+            </h2>
+            <div class="flex space-x-2">
+                {{-- Botão para voltar ao Índice de Formulários --}}
+                <a href="{{ route('dspace-forms.forms.index') }}">
+                    <x-secondary-button>
+                        <i class="fa-solid fa-arrow-left mr-2"></i> {{ __('Voltar à Lista') }}
+                    </x-secondary-button>
+                </a>
+
+                {{-- Botão para voltar ao Início do Módulo --}}
+                <a href="{{ route('dspace-forms.index') }}">
+                    <x-secondary-button>
+                        <i class="fa-solid fa-house mr-2"></i> {{ __('Início') }}
+                    </x-secondary-button>
+                </a>
+            </div>
+        </div>
     </x-slot>
 
     <div class="py-12">

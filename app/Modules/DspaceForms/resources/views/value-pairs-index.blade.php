@@ -10,15 +10,22 @@ use Illuminate\Database\Eloquent\Collection;
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Gerenciar Vocabulários e Listas de Valores') }}
             </h2>
+            <div class="flex space-x-2">
+                {{-- Botão para voltar ao Início do Módulo --}}
+                <a href="{{ route('dspace-forms.index') }}">
+                    <x-secondary-button>
+                        <i class="fa-solid fa-house mr-2"></i> {{ __('Início') }}
+                    </x-secondary-button>
+                </a>
 
-            <!-- Botão para abrir o modal de criação -->
-            <x-primary-button
-                x-data=""
-                x-on:click.prevent="$dispatch('open-modal', 'create-list')"
-                class="bg-green-600 hover:bg-green-500 active:bg-green-700"
-            >
-                <i class="fa-solid fa-plus mr-2"></i> Criar Nova Lista
-            </x-primary-button>
+                <x-primary-button
+                    x-data=""
+                    x-on:click.prevent="$dispatch('open-modal', 'create-list')"
+                    class="bg-green-600 hover:bg-green-500 active:bg-green-700"
+                >
+                    <i class="fa-solid fa-plus mr-2"></i> Criar Nova Lista
+                </x-primary-button>
+            </div>
         </div>
     </x-slot>
 

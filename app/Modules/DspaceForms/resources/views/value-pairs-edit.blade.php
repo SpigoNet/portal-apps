@@ -4,10 +4,21 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Editando Lista: ') . $list->name }}
             </h2>
-            <a href="{{ route('dspace-forms.value-pairs.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-400 active:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                <i class="fa-solid fa-arrow-left mr-2"></i>
-                Voltar para Listas
-            </a>
+            <div class="flex space-x-2">
+                {{-- Botão para voltar ao Índice de Listas --}}
+                <a href="{{ route('dspace-forms.value-pairs.index') }}">
+                    <x-secondary-button>
+                        <i class="fa-solid fa-arrow-left mr-2"></i> {{ __('Voltar para Listas') }}
+                    </x-secondary-button>
+                </a>
+
+                {{-- Botão para voltar ao Início do Módulo --}}
+                <a href="{{ route('dspace-forms.index') }}">
+                    <x-secondary-button>
+                        <i class="fa-solid fa-house mr-2"></i> {{ __('Início') }}
+                    </x-secondary-button>
+                </a>
+            </div>
         </div>
     </x-slot>
 

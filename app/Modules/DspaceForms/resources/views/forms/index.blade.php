@@ -2,12 +2,24 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('Gerenciamento de Formulários DSpace') }}
+                {{ __('Gerenciar Formulários DSpace') }}
             </h2>
-            <a href="{{ route('dspace-forms.forms.create') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                <i class="fa-solid fa-plus mr-2"></i>
-                Novo Formulário
-            </a>
+            <div class="flex space-x-2">
+                {{-- Botão para voltar ao Início do Módulo --}}
+                <a href="{{ route('dspace-forms.index') }}">
+                    <x-secondary-button>
+                        <i class="fa-solid fa-house mr-2"></i> {{ __('Início') }}
+                    </x-secondary-button>
+                </a>
+
+                <x-primary-button
+                    x-data=""
+                    x-on:click.prevent="$dispatch('open-modal', 'create-form')"
+                    class="bg-green-600 hover:bg-green-500 active:bg-green-700"
+                >
+                    <i class="fa-solid fa-plus mr-2"></i> Criar Novo Formulário DSpace
+                </x-primary-button>
+            </div>
         </div>
     </x-slot>
 

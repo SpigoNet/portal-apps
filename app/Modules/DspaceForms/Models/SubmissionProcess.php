@@ -10,6 +10,8 @@ class SubmissionProcess extends Model
 {
     use HasFactory;
 
+    protected $table = 'dspace_submission_processes';
+
     protected $fillable = ['name'];
 
     public function steps(): HasMany

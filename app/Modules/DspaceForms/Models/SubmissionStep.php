@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class SubmissionStep extends Model
 {
     use HasFactory;
-
+    protected $table = 'dspace_submission_steps';
     protected $fillable = ['submission_process_id', 'step_id', 'order'];
 
     public function process(): BelongsTo

@@ -1,7 +1,9 @@
 <?php
 
 use App\Modules\DspaceForms\Http\Controllers\DspaceFormController;
+use App\Modules\DspaceForms\Http\Controllers\DspaceFormFieldController;
 use App\Modules\DspaceForms\Http\Controllers\DspaceFormMapController;
+use App\Modules\DspaceForms\Http\Controllers\DspaceFormRowController;
 use Illuminate\Support\Facades\Route;
 use App\Modules\DspaceForms\Http\Controllers\DspaceValuePairsListController;
 use App\Modules\DspaceForms\Http\Controllers\DspaceFormsController;
@@ -38,13 +40,31 @@ Route::middleware(['web', 'admin'])
         });
 
         Route::prefix('forms')->controller(DspaceFormController::class)->name('forms.')->group(function () {
+            // ... (Rotas CRUD de DspaceForm)
             Route::get('/', 'index')->name('index');
             Route::get('/create', 'create')->name('create');
             Route::post('/', 'store')->name('store');
             Route::get('/{form}/edit', 'edit')->name('edit');
             Route::put('/{form}', 'update')->name('update');
             Route::delete('/{form}', 'destroy')->name('destroy');
-            // Futuras rotas aninhadas para linhas/campos podem ir aqui.
+
+            // Sub-Rotas para Linhas (Rows)
+            Route::prefix('{form}/rows')->name('rows.')->group(function () {
+                Route::post('/', [DspaceFormRowController::class, 'store'])->name('store');
+                Route::delete('/{row}', [DspaceFormRowController::class, 'destroy'])->name('destroy');
+                Route::post('/{row}/move', [DspaceFormRowController::class, 'move'])->name('move'); // NOVO: Mover linha
+            });
+
+            // Sub-Rotas para Campos (Fields)
+            Route::prefix('{form}/rows/{row}/fields')->name('rows.fields.')->group(function () {
+                Route::post('/', [DspaceFormFieldController::class, 'store'])->name('store');
+                Route::put('/{field}', [DspaceFormFieldController::class, 'update'])->name('update');
+                Route::delete('/{field}', [DspaceFormFieldController::class, 'destroy'])->name('destroy');
+                Route::post('/{field}/move', [DspaceFormFieldController::class, 'move'])->name('move'); // NOVO: Mover campo
+            });
+
+            // Rota para obter dados de configuração para o formulário de campo (manter para o modal)
+            Route::get('/field-data', [DspaceFormFieldController::class, 'getFieldData'])->name('field.data');
         });
 
     });

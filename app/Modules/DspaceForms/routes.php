@@ -14,8 +14,17 @@ Route::middleware(['web', 'admin'])
     ->prefix('dspace-forms-editor')
     ->name('dspace-forms.')
     ->group(function () {
+        // Rota principal: Lida com a seleção da configuração (se config_id não estiver presente)
+        // OU exibe o dashboard filtrado (se config_id estiver presente).
         Route::get('/', [DspaceFormsController::class, 'index'])->name('index');
-        Route::get('/export-all-zip', [DspaceFormsController::class, 'exportAllAsZip'])->name('export.zip');
+
+        // Rotas de Gerenciamento de Configurações
+        Route::get('/configurations/create', [DspaceFormsController::class, 'create'])->name('configurations.create');
+        Route::post('/configurations', [DspaceFormsController::class, 'store'])->name('configurations.store');
+        Route::post('/configurations/{configuration}/duplicate', [DspaceFormsController::class, 'duplicate'])->name('configurations.duplicate');
+
+        // Rota de Exportação (Agora exige o ID da configuração)
+        Route::get('/export/{configId}', [DspaceFormsController::class, 'exportAllAsZip'])->name('export.zip');
 
         // Rotas para Listas de Valores (Value Pairs)
         Route::prefix('value-pairs')->controller(DspaceValuePairsListController::class)->name('value-pairs.')->group(function () {

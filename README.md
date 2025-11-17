@@ -1,61 +1,149 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Padrão de Desenvolvimento Modular (Laravel)1. IntroduçãoEste documento define o padrão de arquitetura para o desenvolvimento de novas funcionalidades neste repositório. O objetivo é manter uma base de código organizada, modular e consistente, seguindo os princípios estabelecidos.A arquitetura é baseada em Módulos do Laravel, onde cada módulo encapsula sua própria lógica de negócios, rotas, controllers, models e views.2. Princípios FundamentaisTodo novo desenvolvimento deve aderir estritamente aos seguintes princípios:Modularidade: Cada funcionalidade principal (ex: "Admin", "DspaceForms", "GestorDeTarefas") deve ser contida em seu próprio diretório dentro de app/Modules/.Padrão MVC Clássico (Server-Side Rendering): A aplicação segue o padrão Model-View-Controller tradicional do Laravel. Os dados não devem ser expostos via API REST para serem consumidos pelo frontend.Fluxo de Dados:Controllers são responsáveis por receber requisições HTTP, usar Models (Eloquent) para buscar ou persistir dados e, ao final, retornar uma View (Blade) compilada, passando os dados necessários diretamente para ela (ex: return view('MeuModulo::index', compact('dados'));).Sem Livewire/Volt: O uso de Livewire ou Volt é proibido para novas funcionalidades. A interatividade deve ser alcançada através de formulários HTML tradicionais, submissões de página e, apenas quando estritamente necessário, JavaScript mínimo (vanilla JS ou Alpine.js).Consistência: O padrão estabelecido pelos módulos Admin e DspaceForms (exceto pelo uso de Livewire neste último) deve ser seguido.3. Estrutura de um MóduloUm novo módulo (ex: app/Modules/NovoModulo) deve seguir esta estrutura de diretórios:app/Modules/NovoModulo/
+├── Http/
+│   └── Controllers/
+│       └── ExemploController.php
+├── Models/
+│   └── ExemploModel.php
+├── resources/
+│   └── views/
+│       ├── index.blade.php
+│       └── create.blade.php
+├── routes.php
+└── NovoModuloServiceProvider.php
+4. Guia: Criando um Novo MóduloVamos usar como exemplo a criação de um módulo chamado GestorTarefas.Passo 1: Criar a Estrutura de PastasCrie a seguinte estrutura:app/Modules/GestorTarefas/
+├── Http/
+│   └── Controllers/
+├── Models/
+├── resources/
+│   └── views/
+├── routes.php
+└── GestorTarefasServiceProvider.php
+Passo 2: Criar o Service ProviderCrie o arquivo app/Modules/GestorTarefas/GestorTarefasServiceProvider.php. Este arquivo é o coração do módulo, responsável por carregar suas rotas e views.<?php
+namespace App\Modules\GestorTarefas;
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\ServiceProvider;
 
-## About Laravel
+class GestorTarefasServiceProvider extends ServiceProvider
+{
+    /**
+     * Define o namespace do módulo para as views.
+     * @var string
+     */
+    protected $namespace = 'GestorTarefas';
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+    public function boot()
+    {
+        // Carrega as views do módulo com um namespace
+        // Ex: view('GestorTarefas::index')
+        $this->loadViewsFrom(__DIR__.'/resources/views', $this->namespace);
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+        // Carrega o arquivo de rotas do módulo
+        Route::middleware('web')
+            ->group(__DIR__ . '/routes.php');
+    }
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+    public function register()
+    {
+        //
+    }
+}
+Passo 3: Registrar o Service ProviderAdicione seu novo provider ao arquivo bootstrap/providers.php:<?php
 
-## Learning Laravel
+return [
+    App\Providers\AppServiceProvider::class,
+    App\Providers\VoltServiceProvider::class,
+    App\Modules\Admin\AdminServiceProvider::class,
+    App\Modules\DspaceForms\DspaceFormsServiceProvider::class,
+    App\Modules\GestorTarefas\GestorTarefasServiceProvider::class, // <-- ADICIONAR AQUI
+];
+Passo 4: Definir ModelosTodos os modelos Eloquent específicos deste módulo devem residir em app/Modules/GestorTarefas/Models/.As migrations continuam globais, no diretório database/migrations/.Passo 5: Definir RotasEdite o arquivo app/Modules/GestorTarefas/routes.php. Defina um prefixo e um nome de rota para evitar conflitos.<?php
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+use Illuminate\Support\Facades\Route;
+use App\Modules\GestorTarefas\Http\Controllers\TarefaController;
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Route::middleware(['web', 'auth', 'admin']) // Use os middlewares necessários (ex: 'admin')
+    ->prefix('gestor-tarefas') // Prefixo da URL (ex: /gestor-tarefas/...)
+    ->name('gestor-tarefas.') // Prefixo do nome da rota (ex: route('gestor-tarefas.index'))
+    ->group(function () {
+        
+        Route::get('/', [TarefaController::class, 'index'])->name('index');
+        Route::get('/criar', [TarefaController::class, 'create'])->name('create');
+        Route::post('/', [TarefaController::class, 'store'])->name('store');
+        
+        // Exemplo de rota resource
+        // Route::resource('tarefas', TarefaController::class);
+    });
+Passo 6: Criar o ControllerCrie o controller em app/Modules/GestorTarefas/Http/Controllers/TarefaController.php. Siga o padrão de retornar views diretamente.<?php
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+namespace App\Modules\GestorTarefas\Http\Controllers;
 
-## Laravel Sponsors
+use App\Http\Controllers\Controller;
+use App\Modules\GestorTarefas\Models\Tarefa; // Modelo do módulo
+use Illuminate\Http\Request;
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+class TarefaController extends Controller
+{
+    /**
+     * Exibe a lista de tarefas.
+     */
+    public function index()
+    {
+        // 1. Busca dados usando o Model
+        $tarefas = Tarefa::where('user_id', auth()->id())->get();
 
-### Premium Partners
+        // 2. Retorna a View do módulo, passando os dados
+        return view('GestorTarefas::index', compact('tarefas'));
+    }
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+    /**
+     * Salva uma nova tarefa.
+     */
+    public function store(Request $request)
+    {
+        // 1. Validação padrão
+        $validated = $request->validate([
+            'titulo' => 'required|string|max:255',
+            'descricao' => 'nullable|string',
+        ]);
 
-## Contributing
+        // 2. Lógica de negócios (salvar no banco)
+        auth()->user()->tarefas()->create($validated); // Exemplo
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+        // 3. Redirecionamento padrão com mensagem de sucesso
+        return redirect()->route('gestor-tarefas.index')
+                         ->with('success', 'Tarefa criada com sucesso.');
+    }
+}
+Passo 7: Criar as ViewsCrie os arquivos Blade em app/Modules/GestorTarefas/resources/views/.index.blade.php (Exemplo):<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('Minhas Tarefas') }}
+        </h2>
+    </x-slot>
 
-## Code of Conduct
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            
+            <!-- Mensagem de Sucesso -->
+            @if(session('success'))
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded" role="alert">
+                    <p>{{ session('success') }}</p>
+                </div>
+            @endif
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+                    <ul>
+                        @forelse ($tarefas as $tarefa)
+                            <li>{{ $tarefa->titulo }}</li>
+                        @empty
+                            <p>Nenhuma tarefa encontrada.</p>
+                        @endforelse
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
+5. Restrições Adicionais (O que NÃO fazer)NÃO use Livewire ou Volt: Qualquer interatividade deve ser tratada por formulários HTML, recarregamento de página ou, em último caso, JavaScript mínimo.NÃO crie endpoints de API para o Frontend: Os controllers devem sempre retornar view() ou redirect(). O frontend (Blade) não deve fazer chamadas fetch() ou axios() para buscar dados da própria aplicação.NÃO coloque Models fora da pasta Models/ do Módulo: Mantenha os modelos encapsulados (ex: app/Modules/GestorTarefas/Models/Tarefa.php).NÃO coloque lógica de negócios nas Rotas ou Views: Mantenha toda a lógica nos Controllers e Models.

@@ -55,50 +55,55 @@ app/Modules/GestorTarefas/
 
 Crie o arquivo app/Modules/GestorTarefas/GestorTarefasServiceProvider.php. Este arquivo é o coração do módulo, responsável por carregar suas rotas e views.
 
-\<?php  
-namespace App\\Modules\\GestorTarefas;
+```php
+<?php
+namespace App\Modules\GestorTarefas;
 
-use Illuminate\\Support\\Facades\\Route;  
-use Illuminate\\Support\\ServiceProvider;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\ServiceProvider;
 
-class GestorTarefasServiceProvider extends ServiceProvider  
-{  
-    /\*\*  
-     \* Define o namespace do módulo para as views.  
-     \* @var string  
-     \*/  
-    protected $namespace \= 'GestorTarefas';
+class GestorTarefasServiceProvider extends ServiceProvider
+{
+    /**
+     * Define o namespace do módulo para as views.
+     * @var string
+     */
+    protected $namespace = 'GestorTarefas';
 
-    public function boot()  
-    {  
-        // Carrega as views do módulo com um namespace  
-        // Ex: view('GestorTarefas::index')  
-        $this-\>loadViewsFrom(\_\_DIR\_\_.'/resources/views', $this-\>namespace);
+    public function boot()
+    {
+        // Carrega as views do módulo com um namespace
+        // Ex: view('GestorTarefas::index')
+        $this->loadViewsFrom(__DIR__.'/resources/views', $this->namespace);
 
-        // Carrega o arquivo de rotas do módulo  
-        Route::middleware('web')  
-            \-\>group(\_\_DIR\_\_ . '/routes.php');  
+        // Carrega o arquivo de rotas do módulo
+        Route::middleware('web')
+            ->group(__DIR__ . '/routes.php');
     }
 
-    public function register()  
-    {  
-        //  
-    }  
+    public function register()
+    {
+        //
+    }
 }
+```
+
 
 ### **Passo 3: Registrar o Service Provider**
 
 Adicione seu novo provider ao arquivo bootstrap/providers.php:
 
-\<?php
+```php
+<?php
 
-return \[  
-    App\\Providers\\AppServiceProvider::class,  
-    App\\Providers\\VoltServiceProvider::class,  
-    App\\Modules\\Admin\\AdminServiceProvider::class,  
-    App\\Modules\\DspaceForms\\DspaceFormsServiceProvider::class,  
-    App\\Modules\\GestorTarefas\\GestorTarefasServiceProvider::class, // \<-- ADICIONAR AQUI  
-\];
+return [
+    App\Providers\AppServiceProvider::class,
+    App\Providers\VoltServiceProvider::class,
+    App\Modules\Admin\AdminServiceProvider::class,
+    App\Modules\DspaceForms\DspaceFormsServiceProvider::class,
+    App\Modules\GestorTarefas\GestorTarefasServiceProvider::class, // <-- ADICIONAR AQUI
+];
+```
 
 ### **Passo 4: Definir Modelos**
 
@@ -110,69 +115,73 @@ Todos os modelos Eloquent específicos deste módulo devem residir em app/Module
 
 Edite o arquivo app/Modules/GestorTarefas/routes.php. Defina um prefixo e um nome de rota para evitar conflitos.
 
-\<?php
+```php
+<?php
 
-use Illuminate\\Support\\Facades\\Route;  
-use App\\Modules\\GestorTarefas\\Http\\Controllers\\TarefaController;
+use Illuminate\Support\Facades\Route;
+use App\Modules\GestorTarefas\Http\Controllers\TarefaController;
 
-Route::middleware(\['web', 'auth', 'admin'\]) // Use os middlewares necessários (ex: 'admin')  
-    \-\>prefix('gestor-tarefas') // Prefixo da URL (ex: /gestor-tarefas/...)  
-    \-\>name('gestor-tarefas.') // Prefixo do nome da rota (ex: route('gestor-tarefas.index'))  
-    \-\>group(function () {  
-          
-        Route::get('/', \[TarefaController::class, 'index'\])-\>name('index');  
-        Route::get('/criar', \[TarefaController::class, 'create'\])-\>name('create');  
-        Route::post('/', \[TarefaController::class, 'store'\])-\>name('store');  
-          
-        // Exemplo de rota resource  
-        // Route::resource('tarefas', TarefaController::class);  
+Route::middleware(['web', 'auth', 'admin']) // Use os middlewares necessários (ex: 'admin')
+    ->prefix('gestor-tarefas') // Prefixo da URL (ex: /gestor-tarefas/...)
+    ->name('gestor-tarefas.') // Prefixo do nome da rota (ex: route('gestor-tarefas.index'))
+    ->group(function () {
+        
+        Route::get('/', [TarefaController::class, 'index'])->name('index');
+        Route::get('/criar', [TarefaController::class, 'create'])->name('create');
+        Route::post('/', [TarefaController::class, 'store'])->name('store');
+        
+        // Exemplo de rota resource
+        // Route::resource('tarefas', TarefaController::class);
     });
+```
 
 ### **Passo 6: Criar o Controller**
 
 Crie o controller em app/Modules/GestorTarefas/Http/Controllers/TarefaController.php. Siga o padrão de retornar views diretamente.
 
-\<?php
+```php
+<?php
 
-namespace App\\Modules\\GestorTarefas\\Http\\Controllers;
+namespace App\Modules\GestorTarefas\Http\Controllers;
 
-use App\\Http\\Controllers\\Controller;  
-use App\\Modules\\GestorTarefas\\Models\\Tarefa; // Modelo do módulo  
-use Illuminate\\Http\\Request;
+use App\Http\Controllers\Controller;
+use App\Modules\GestorTarefas\Models\Tarefa; // Modelo do módulo
+use Illuminate\Http\Request;
 
-class TarefaController extends Controller  
-{  
-    /\*\*  
-     \* Exibe a lista de tarefas.  
-     \*/  
-    public function index()  
-    {  
-        // 1\. Busca dados usando o Model  
-        $tarefas \= Tarefa::where('user\_id', auth()-\>id())-\>get();
+class TarefaController extends Controller
+{
+    /**
+     * Exibe a lista de tarefas.
+     */
+    public function index()
+    {
+        // 1. Busca dados usando o Model
+        $tarefas = Tarefa::where('user_id', auth()->id())->get();
 
-        // 2\. Retorna a View do módulo, passando os dados  
-        return view('GestorTarefas::index', compact('tarefas'));  
+        // 2. Retorna a View do módulo, passando os dados
+        return view('GestorTarefas::index', compact('tarefas'));
     }
 
-    /\*\*  
-     \* Salva uma nova tarefa.  
-     \*/  
-    public function store(Request $request)  
-    {  
-        // 1\. Validação padrão  
-        $validated \= $request-\>validate(\[  
-            'titulo' \=\> 'required|string|max:255',  
-            'descricao' \=\> 'nullable|string',  
-        \]);
+    /**
+     * Salva uma nova tarefa.
+     */
+    public function store(Request $request)
+    {
+        // 1. Validação padrão
+        $validated = $request->validate([
+            'titulo' => 'required|string|max:255',
+            'descricao' => 'nullable|string',
+        ]);
 
-        // 2\. Lógica de negócios (salvar no banco)  
-        auth()-\>user()-\>tarefas()-\>create($validated); // Exemplo
+        // 2. Lógica de negócios (salvar no banco)
+        auth()->user()->tarefas()->create($validated); // Exemplo
 
-        // 3\. Redirecionamento padrão com mensagem de sucesso  
-        return redirect()-\>route('gestor-tarefas.index')  
-                         \-\>with('success', 'Tarefa criada com sucesso.');  
-    }  
+        // 3. Redirecionamento padrão com mensagem de sucesso
+        return redirect()->route('gestor-tarefas.index')
+                         ->with('success', 'Tarefa criada com sucesso.');
+    }
 }
+```
 
 ### **Passo 7: Criar as Views**
 
@@ -180,37 +189,40 @@ Crie os arquivos Blade em app/Modules/GestorTarefas/resources/views/.
 
 **index.blade.php (Exemplo):**
 
-\<x-app-layout\>  
-    \<x-slot name="header"\>  
-        \<h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight"\>  
-            {{ \_\_('Minhas Tarefas') }}  
-        \</h2\>  
-    \</x-slot\>
+```html
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('Minhas Tarefas') }}
+        </h2>
+    </x-slot>
 
-    \<div class="py-12"\>  
-        \<div class="max-w-7xl mx-auto sm:px-6 lg:px-8"\>  
-              
-            \<\!-- Mensagem de Sucesso \--\>  
-            @if(session('success'))  
-                \<div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded" role="alert"\>  
-                    \<p\>{{ session('success') }}\</p\>  
-                \</div\>  
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            
+            <!-- Mensagem de Sucesso -->
+            @if(session('success'))
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded" role="alert">
+                    <p>{{ session('success') }}</p>
+                </div>
             @endif
 
-            \<div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"\>  
-                \<div class="p-6 text-gray-900 dark:text-gray-100"\>  
-                    \<ul\>  
-                        @forelse ($tarefas as $tarefa)  
-                            \<li\>{{ $tarefa-\>titulo }}\</li\>  
-                        @empty  
-                            \<p\>Nenhuma tarefa encontrada.\</p\>  
-                        @endforelse  
-                    \</ul\>  
-                \</div\>  
-            \</div\>  
-        \</div\>  
-    \</div\>  
-\</x-app-layout\>
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+                    <ul>
+                        @forelse ($tarefas as $tarefa)
+                            <li>{{ $tarefa->titulo }}</li>
+                        @empty
+                            <p>Nenhuma tarefa encontrada.</p>
+                        @endforelse
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
+
+```
 
 ## **5\. Restrições Adicionais (O que NÃO fazer)**
 

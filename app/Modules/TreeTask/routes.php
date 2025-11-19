@@ -2,6 +2,7 @@
 
 use App\Modules\TreeTask\Http\Controllers\AnexoController;
 use App\Modules\TreeTask\Http\Controllers\FocusController;
+use App\Modules\TreeTask\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 use App\Modules\TreeTask\Http\Controllers\ProjetoController;
 use App\Modules\TreeTask\Http\Controllers\FaseController;
@@ -43,4 +44,12 @@ Route::prefix('treetask')
 
         // Nova rota para alterar APENAS o status
         Route::patch('/tarefas/{id}/status', [TarefaController::class, 'updateStatus'])->name('tarefas.updateStatus');
+
+        // Rotas de Ordenação (AJAX POST)
+        Route::post('/reorder/fases', [OrderController::class, 'reorderFases'])->name('reorder.fases');
+        Route::post('/reorder/tarefas', [OrderController::class, 'reorderTarefas'])->name('reorder.tarefas');
+        Route::post('/reorder/global', [OrderController::class, 'reorderGlobal'])->name('reorder.global');
+
+        // ... dentro do grupo de projetos
+        Route::get('/projeto/{id}/arvore', [ProjetoController::class, 'treeView'])->name('tree.view');
     });

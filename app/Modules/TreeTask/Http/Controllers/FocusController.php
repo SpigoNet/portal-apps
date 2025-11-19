@@ -12,28 +12,29 @@ class FocusController extends Controller
     {
         $userId = auth()->id();
 
-        // Busca TUDO do usuário
         $tarefas = Tarefa::with(['fase.projeto'])
             ->where('id_user_responsavel', $userId)
-            ->orderBy('prioridade', 'asc') // Ordenação secundária
+            // Ordem: Manual > Urgência > Prioridade (já definida)
+            ->orderBy('ordem_global', 'asc')
+            ->orderBy('prioridade', 'asc')
             ->orderBy('data_vencimento', 'asc')
             ->get();
 
-        // 1. Em Andamento (O que estou fazendo AGORA) - Destaque
-        $emAndamento = $tarefas->filter(function ($t) {
-            return $t->status === 'Em Andamento';
-        });
+        // 1. Em Andamento (FAZENDO AGORA)
+        $emAndamento = $tarefas->filter(fn($t) => $t->status === 'Em Andamento');
 
-        // 2. A Fazer (Backlog imediato) - Lista compacta
+        // 2. Aguardando Resposta (BLOQUEIO - Prioridade Máxima após o que está em execução)
+        $aguardando = $tarefas->filter(fn($t) => $t->status === 'Aguardando resposta');
+
+        // 3. A Fazer (BACKLOG)
         $aFazer = $tarefas->filter(function ($t) {
             return $t->status === 'A Fazer' || $t->status === 'Planejamento';
         });
 
-        // 3. Concluídas (Histórico recente) - Detalhada
-        $concluidas = $tarefas->filter(function ($t) {
-            return $t->status === 'Concluído';
-        })->take(5); // Limita a 5 últimas para não poluir
+        // 4. Concluídas
+        $concluidas = $tarefas->filter(fn($t) => $t->status === 'Concluído')->take(5);
 
-        return view('TreeTask::focus.index', compact('emAndamento', 'aFazer', 'concluidas'));
+        // Passa os 4 grupos para a view
+        return view('TreeTask::focus.index', compact('emAndamento', 'aguardando', 'aFazer', 'concluidas'));
     }
 }

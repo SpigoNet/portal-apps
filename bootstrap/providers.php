@@ -5,4 +5,5 @@ return [
     App\Providers\VoltServiceProvider::class,
     App\Modules\Admin\AdminServiceProvider::class,
     App\Modules\DspaceForms\DspaceFormsServiceProvider::class,
+    App\Modules\TreeTask\TreeTaskServiceProvider::class,
 ];

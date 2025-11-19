@@ -1,8 +1,24 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Nova Tarefa em: <span class="text-blue-600">{{ $fase->projeto->nome }} > {{ $fase->nome }}</span>
-        </h2>
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Gerenciar Tarefa') }}
+            </h2>
+
+            @if(request('origin') === 'focus')
+                <a href="{{ route('treetask.focus.index') }}" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded inline-flex items-center">
+                    ⬅ Voltar ao Foco
+                </a>
+            @elseif(isset($tarefa))
+                <a href="{{ route('treetask.show', $tarefa->fase->id_projeto) }}" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded inline-flex items-center">
+                    ⬅ Voltar ao Projeto
+                </a>
+            @else
+                <a href="{{ url()->previous() }}" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded inline-flex items-center">
+                    ⬅ Voltar
+                </a>
+            @endif
+        </div>
     </x-slot>
 
     <div class="py-12">

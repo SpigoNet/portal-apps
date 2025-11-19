@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 
 class TarefaController extends Controller
 {
+    private $statusList = 'A Fazer,Em Andamento,Concluído,Planejamento,Aguardando resposta';
     public function create($id_fase)
     {
         $fase = Fase::with('projeto')->findOrFail($id_fase);
@@ -72,6 +73,7 @@ class TarefaController extends Controller
             'id_fase' => 'required|exists:treetask_fases,id_fase', // <--- Aqui acontece a mágica da movimentação
             'id_user_responsavel' => 'required|exists:users,id',
             'prioridade' => 'nullable|string',
+            'status' => 'required|string|in:' . $this->statusList,
             'data_vencimento' => 'nullable|date',
             'estimativa_tempo' => 'nullable|numeric',
         ]);
@@ -87,6 +89,11 @@ class TarefaController extends Controller
         // Seus triggers de banco de dados (TRG_treetask_tarefa_au) rodarão automaticamente aqui
         // para atualizar o status da fase e do projeto.
 
+        if ($request->input('origin') === 'focus') {
+            return redirect()->route('treetask.focus.index')
+                ->with('success', 'Tarefa atualizada (Modo Foco).');
+        }
+
         return redirect()->route('treetask.show', $tarefa->fase->id_projeto)
             ->with('success', 'Tarefa atualizada com sucesso.');
     }
@@ -96,7 +103,7 @@ class TarefaController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|string|in:A Fazer,Em Andamento,Concluído'
+            'status' => 'required|string|in:' . $this->statusList,
         ]);
 
         $tarefa = Tarefa::findOrFail($id);

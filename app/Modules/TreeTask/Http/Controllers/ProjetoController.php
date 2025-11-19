@@ -46,12 +46,19 @@ class ProjetoController extends Controller
 
     public function show($id)
     {
-        // Carrega projeto, fases (ordenadas) e tarefas de cada fase
-        $projeto = Projeto::with(['fases' => function($query) {
-            $query->orderBy('ordem', 'asc');
+        $projeto = Projeto::with(['fases' => function($q) {
+            $q->orderBy('ordem', 'asc'); // Ordena fases
+        }, 'fases.tarefas' => function($q) {
+            $q->orderBy('ordem', 'asc'); // Ordena tarefas na fase
         }, 'fases.tarefas.responsavel'])
             ->findOrFail($id);
 
         return view('TreeTask::show', compact('projeto'));
+    }
+
+    public function treeView($id)
+    {
+        $projeto = Projeto::with(['fases.tarefas'])->findOrFail($id);
+        return view('TreeTask::tree', compact('projeto'));
     }
 }

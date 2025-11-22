@@ -3,14 +3,18 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\WelcomeController; // Adicionado
+use App\Http\Controllers\DashboardController;
 
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
-use App\Http\Controllers\DashboardController;
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+// Rota principal unificada
+Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
+
+// Redireciona dashboard antigo para a home
+Route::get('/dashboard', function () {
+    return redirect()->route('welcome');
+})->name('dashboard');
 
 
 Route::view('profile', 'profile')

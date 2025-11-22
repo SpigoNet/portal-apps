@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\TreeTask\Http\Controllers\AnexoController;
+use App\Modules\TreeTask\Http\Controllers\CelebrationController;
 use App\Modules\TreeTask\Http\Controllers\FocusController;
 use App\Modules\TreeTask\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
@@ -52,4 +53,7 @@ Route::prefix('treetask')
 
         // ... dentro do grupo de projetos
         Route::get('/projeto/{id}/arvore', [ProjetoController::class, 'treeView'])->name('tree.view');
+
+        Route::get('/tarefas/{id}/comemorar', [CelebrationController::class, 'show'])
+            ->name('celebration.show');
     });

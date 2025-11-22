@@ -109,6 +109,10 @@ class TarefaController extends Controller
         $tarefa = Tarefa::findOrFail($id);
         $tarefa->update(['status' => $request->status]);
 
+        if ($request->status === 'Concluído') {
+            return redirect()->route('treetask.celebration.show', $id);
+        }
+
         // Redireciona de volta para a lista Zen
         return redirect()->route('treetask.focus.index')
             ->with('success', "Status alterado para: {$request->status}");

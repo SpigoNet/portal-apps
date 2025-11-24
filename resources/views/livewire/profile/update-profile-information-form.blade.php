@@ -126,7 +126,7 @@ new class extends Component
 
                 <div>
                     <x-input-label for="whatsapp_apikey" :value="__('Sua API Key (CallMeBot)')" />
-                    <x-text-input wire:model="whatsapp_apikey" id="whatsapp_apikey" name="whatsapp_apikey" type="text" class="mt-1 block w-full" placeholder="Ex: 2207064" />
+                    <x-text-input wire:model="whatsapp_apikey" id="whatsapp_apikey" name="whatsapp_apikey" type="text" class="mt-1 block w-full" placeholder="Ex: 123123" />
                     <x-input-error class="mt-2" :messages="$errors->get('whatsapp_apikey')" />
                 </div>
             </div>

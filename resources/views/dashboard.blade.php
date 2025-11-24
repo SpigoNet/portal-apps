@@ -47,8 +47,10 @@
                                 @foreach ($package->visible_apps as $app)
                                     <a href="{{ url($app->start_link) }}" class="block p-4 text-center bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition-transform transform hover:scale-105">
                                         {{-- Para o ícone funcionar, adicione o Font Awesome ao seu projeto --}}
-                                        <i class="{{ $app->icon }} fa-2x mb-2 text-gray-600"></i>
-                                        <h5 class="font-bold tracking-tight text-gray-900 text-sm">
+                                            <span class="fa-3x mb-4 text-spigo-lime transition-transform group-hover:scale-110">
+                                                {{ $app->icon ?? '⚠️' }}
+                                            </span>
+                                                <h5 class="font-bold tracking-tight text-gray-900 text-sm">
                                             {{ $app->title }}
                                         </h5>
                                     </a>

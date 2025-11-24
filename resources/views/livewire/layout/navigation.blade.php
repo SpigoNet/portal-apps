@@ -79,7 +79,9 @@ new class extends Component
                                     @foreach($shortcutApps as $app)
                                         <x-dropdown-link :href="url($app->start_link)">
                                             <div class="flex items-center">
-                                                <i class="{{ $app->icon }} w-4 mr-2 text-center text-spigo-lime"></i>
+                                                <span class="{{ $app->icon }} w-4 mr-2 text-center text-spigo-lime">
+                                                    {{ $app->icon ?? '⚠️' }}
+                                                </span>
                                                 <span class="truncate">{{ $app->title }}</span>
                                             </div>
                                         </x-dropdown-link>

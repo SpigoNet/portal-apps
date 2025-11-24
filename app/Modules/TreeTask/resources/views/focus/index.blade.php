@@ -12,7 +12,18 @@
             </div>
         </div>
     </x-slot>
-
+    <style>
+        .rich-text ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        .rich-text ol { list-style-type: decimal; margin-left: 1.5rem; margin-bottom: 1rem; }
+        .rich-text li { margin-bottom: 0.25rem; }
+        .rich-text p { margin-bottom: 0.75rem; line-height: 1.6; }
+        .rich-text strong { font-weight: 700; color: #1f2937; }
+        .rich-text em { font-style: italic; }
+        .rich-text h1 { font-size: 1.5rem; font-weight: 800; margin-top: 1.5rem; margin-bottom: 1rem; }
+        .rich-text h2 { font-size: 1.25rem; font-weight: 700; margin-top: 1.25rem; margin-bottom: 0.75rem; }
+        .rich-text blockquote { border-left: 4px solid #e5e7eb; padding-left: 1rem; font-style: italic; color: #4b5563; margin-bottom: 1rem; }
+        .rich-text a { color: #2563eb; text-decoration: underline; }
+    </style>
     <div class="py-8 bg-gray-100 min-h-screen">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-10">
 
@@ -45,9 +56,13 @@
                                         </form>
                                     </div>
 
-                                    <p class="text-gray-600 text-lg leading-relaxed mb-4 bg-gray-50 p-4 rounded border border-gray-100">
-                                        {{ $tarefa->descricao ?: 'Sem descrição detalhada.' }}
-                                    </p>
+                                    <div class="text-gray-600 text-lg leading-relaxed mb-4 bg-gray-50 p-4 rounded border border-gray-100">
+                                        @if(function_exists('clean'))
+                                            {!! clean($tarefa->descricao)  ?: 'Sem descrição detalhada.' !!}
+                                        @else
+                                            {!! $tarefa->descricao  ?: 'Sem descrição detalhada.' !!}
+                                        @endif
+                                    </div>
 
                                     <div class="flex items-center text-sm text-gray-500 space-x-6">
                                     <span class="flex items-center">

@@ -1,4 +1,6 @@
 <x-app-layout>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -33,7 +35,7 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <form action="{{ route('treetask.tarefas.update', $tarefa->id_tarefa) }}" method="POST">
+                    <form id="edit-task-form" action="{{ route('treetask.tarefas.update', $tarefa->id_tarefa) }}" method="POST">
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="origin" value="{{ request('origin') }}">
@@ -70,7 +72,10 @@
 
                         <div class="mb-4">
                             <label class="block text-gray-700 text-sm font-bold mb-2">Descrição</label>
-                            <textarea name="descricao" rows="5" class="w-full border-gray-300 rounded-md shadow-sm">{{ old('descricao', $tarefa->descricao) }}</textarea>
+                            <div id="editor-container" class="bg-white" style="height: 200px;">
+                                {!! old('descricao', $tarefa->descricao) !!}
+                            </div>
+                            <input type="hidden" name="descricao" id="descricao-hidden">
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -116,4 +121,38 @@
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializa o Quill no container
+            var quill = new Quill('#editor-container', {
+                theme: 'snow',
+                placeholder: 'Descreva os detalhes da tarefa...',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+                        ['blockquote', 'code-block'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'header': [1, 2, 3, false] }],
+                        [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+                        ['clean']                                         // remove formatting button
+                    ]
+                }
+            });
+
+            // Antes do submit, copia o HTML do editor para o input hidden
+            var form = document.getElementById('edit-task-form');
+            form.onsubmit = function() {
+                // Pega o conteúdo HTML do editor
+                var description = document.querySelector('input[name=descricao]');
+                // Se o editor estiver vazio (apenas <p><br></p>), envia vazio
+                if (quill.root.innerHTML === '<p><br></p>') {
+                    description.value = '';
+                } else {
+                    description.value = quill.root.innerHTML;
+                }
+            };
+        });
+    </script>
 </x-app-layout>

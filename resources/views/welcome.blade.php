@@ -46,7 +46,9 @@
                             {{-- Nota: Usamos visible_apps que foi populado no Controller --}}
                             @foreach ($package->visible_apps as $app)
                                 <a href="{{ url($app->start_link) }}" class="group block p-6 text-center bg-white/5 rounded-lg shadow-lg hover:bg-white/10 transition-all duration-300 transform hover:-translate-y-1">
-                                    <i class="{{ $app->icon }} fa-3x mb-4 text-spigo-lime transition-transform group-hover:scale-110"></i>
+                                    <span class="fa-3x mb-4 text-spigo-lime transition-transform group-hover:scale-110">
+                                        {{ $app->icon ?? '⚠️' }}
+                                    </span>
                                     <h5 class="font-bold tracking-tight text-white text-md">
                                         {{ $app->title }}
                                     </h5>

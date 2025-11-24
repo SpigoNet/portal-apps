@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Modules\TreeTask\Http\Controllers\ProjetoController;
 use App\Modules\TreeTask\Http\Controllers\FaseController;
 use App\Modules\TreeTask\Http\Controllers\TarefaController;
+use Illuminate\Support\Facades\Artisan;
 
 Route::prefix('treetask')
     ->name('treetask.')
@@ -56,4 +57,23 @@ Route::prefix('treetask')
 
         Route::get('/tarefas/{id}/comemorar', [CelebrationController::class, 'show'])
             ->name('celebration.show');
+
+        Route::get('/forcar-envio-diario', function () {
+            // Chama o comando artisan via código
+            // O 'output' vai capturar o que o comando escreveria no terminal
+            try {
+                Artisan::call('treetask:daily-motivation'); // Pode passar ['user_id' => 1] se quiser forçar pra um só
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Comando de motivação executado com sucesso!',
+                    'log' => Artisan::output()
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $e->getMessage()
+                ], 500);
+            }
+        })->name('cron.force');
     });

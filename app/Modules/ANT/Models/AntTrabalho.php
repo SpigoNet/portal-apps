@@ -9,8 +9,8 @@ class AntTrabalho extends Model
     protected $table = 'ant_trabalhos';
 
     protected $fillable = [
-        'semestre', 'nome', 'descricao', 'materia_id',
-        'tipo_trabalho_id', 'prazo', 'maximo_alunos', 'peso_id'
+        'semestre', 'nome', 'descricao', 'dicas_correcao',
+        'materia_id', 'tipo_trabalho_id', 'prazo', 'maximo_alunos', 'peso_id'
     ];
 
     protected $casts = [

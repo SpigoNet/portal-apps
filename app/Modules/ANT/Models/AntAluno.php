@@ -1,7 +1,9 @@
 <?php
+
 namespace App\Modules\ANT\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Modules\ANT\Models\AntConfiguracao;
 
 class AntAluno extends Model
 {
@@ -13,17 +15,44 @@ class AntAluno extends Model
         return $this->belongsTo(\App\Models\User::class, 'user_id');
     }
 
-    // Configuração correta para N:N usando RA
+    /**
+     * Relacionamento Padrão: Apenas matérias do SEMESTRE ATUAL.
+     * Isso facilita o uso em $aluno->materias no dia a dia.
+     */
     public function materias()
     {
+        // Busca o semestre na configuração ou calcula fallback
+        $semestreAtual = AntConfiguracao::value('semestre_atual')
+            ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+
         return $this->belongsToMany(
             AntMateria::class,
             'ant_aluno_materia',
             'aluno_ra', // FK na tabela pivô
             'materia_id', // FK na outra tabela
-            'ra', // Chave local neste model (String RA)
+            'ra', // Chave local neste model
             'id' // Chave local no outro model
-        )->withPivot('semestre');
+        )
+            ->withPivot('semestre')
+            ->wherePivot('semestre', $semestreAtual); // <--- O FILTRO MÁGICO
+    }
+
+    /**
+     * Relacionamento Completo: Todas as matérias de TODOS os semestres.
+     * Use $aluno->historico para ver o passado.
+     */
+    public function historico()
+    {
+        return $this->belongsToMany(
+            AntMateria::class,
+            'ant_aluno_materia',
+            'aluno_ra',
+            'materia_id',
+            'ra',
+            'id'
+        )
+            ->withPivot('semestre')
+            ->orderByPivot('semestre', 'desc'); // Ordena do mais recente para o antigo
     }
 
     public function entregas()

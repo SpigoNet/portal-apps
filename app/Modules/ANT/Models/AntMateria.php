@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Modules\ANT\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,10 @@ class AntMateria extends Model
 
     public function alunos()
     {
+        // Busca o semestre na configuração ou calcula fallback
+        $semestreAtual = AntConfiguracao::value('semestre_atual')
+            ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+
         return $this->belongsToMany(
             AntAluno::class,
             'ant_aluno_materia',
@@ -23,7 +28,8 @@ class AntMateria extends Model
             'aluno_ra',
             'id',
             'ra'
-        )->withPivot('semestre');
+        )->withPivot('semestre')
+        ->wherePivot('semestre', $semestreAtual);
     }
 
     public function trabalhos()

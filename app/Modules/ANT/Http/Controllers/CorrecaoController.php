@@ -3,9 +3,12 @@
 namespace App\Modules\ANT\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\ANT\Models\AntConfiguracao;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Modules\ANT\Models\AntEntrega;
+use App\Services\PollinationService;
 
 class CorrecaoController extends Controller
 {
@@ -170,5 +173,88 @@ class CorrecaoController extends Controller
         } else {
             return null;
         }
+    }
+
+    public function iaSugestao(Request $request, $idEntrega)
+    {
+        $entrega = AntEntrega::with(['trabalho', 'aluno'])->findOrFail($idEntrega);
+        $config = AntConfiguracao::first();
+
+        // 1. Preparar Conteúdo do Aluno
+        // Vamos ler todos os arquivos de TEXTO que o aluno enviou e concatenar
+        $arquivos = json_decode($entrega->arquivos, true) ?? [];
+        $conteudoAluno = "";
+        $arquivosLidos = 0;
+
+        foreach ($arquivos as $arq) {
+            $ext = strtolower(pathinfo($arq, PATHINFO_EXTENSION));
+            // Apenas tentamos ler arquivos de código ou texto
+            if (in_array($ext, ['txt', 'sql', 'php', 'js', 'css', 'html', 'java', 'py', 'cs', 'json', 'md'])) {
+                $path = $this->getPhysicalPath($arq);
+                if (file_exists($path)) {
+                    $conteudoAluno .= "\n--- Arquivo: " . basename($arq) . " ---\n";
+                    $conteudoAluno .= file_get_contents($path);
+                    $arquivosLidos++;
+                }
+            } else {
+                $conteudoAluno .= "\n--- Arquivo: " . basename($arq) . " (Conteúdo binário/não lido) ---\n";
+            }
+        }
+
+        if ($arquivosLidos === 0 && empty($conteudoAluno)) {
+            return response()->json(['error' => 'Não foi possível ler o conteúdo dos arquivos para enviar à IA.'], 400);
+        }
+
+        // 2. Montar o Prompt
+        $systemPrompt = $config->prompt_agente ??
+            "Você é um professor universitário experiente e justo. Avalie o trabalho do aluno com base na descrição e dicas fornecidas. Retorne estritamente um JSON.";
+
+        $userPrompt = <<<EOT
+CONTEXTO DA AVALIAÇÃO:
+Título do Trabalho: {$entrega->trabalho->nome}
+Descrição do Trabalho: {$entrega->trabalho->descricao}
+Dicas/Critérios de Correção: {$entrega->trabalho->dicas_correcao}
+
+RESPOSTA DO ALUNO:
+{$conteudoAluno}
+
+---
+TAREFA:
+Analise o código/texto acima.
+1. Atribua uma nota de 0 a 10 (float).
+2. Escreva um feedback construtivo justificando a nota e apontando melhorias.
+
+FORMATO DE SAÍDA (JSON OBRIGATÓRIO):
+{
+    "nota": 0.0,
+    "feedback": "Seu texto aqui..."
+}
+Responda APENAS o JSON, sem markdown (```json) ou texto adicional.
+EOT;
+
+        // 3. Chamar o Serviço
+        $service = new PollinationService();
+        $respostaIa = $service->generateText([
+            ['role' => 'system', 'content' => $systemPrompt],
+            ['role' => 'user', 'content' => $userPrompt]
+        ], [
+            'jsonMode' => true, // O Pollination/OpenAI suporta json_object mode se o modelo permitir
+            'temperature' => 1
+        ]);
+
+        if (!$respostaIa) {
+            return response()->json(['error' => 'A IA não retornou uma resposta válida.'], 500);
+        }
+
+        // 4. Tratamento do JSON (às vezes a IA coloca ```json ... ```)
+        $jsonLimpo = preg_replace('/^```json|```$/m', '', $respostaIa);
+        $dados = json_decode($jsonLimpo, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            Log::error("Erro JSON IA: " . $respostaIa);
+            return response()->json(['error' => 'Falha ao processar o JSON da IA.', 'raw' => $respostaIa], 500);
+        }
+
+        return response()->json($dados);
     }
 }

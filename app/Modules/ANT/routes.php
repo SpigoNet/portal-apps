@@ -37,5 +37,7 @@ Route::prefix('ant')->middleware(['web', 'auth'])->group(function () {
         Route::get('/trabalho/{id}', [ProfessorController::class, 'trabalho'])->name('ant.professor.trabalho');
     });
 
+    Route::post('/correcao/{idEntrega}/ia-sugestao', [CorrecaoController::class, 'iaSugestao'])->name('ant.correcao.ia_sugestao');
+
     Route::get('/admin', [AntAdminController::class, 'index'])->name('ant.admin.home');
 });

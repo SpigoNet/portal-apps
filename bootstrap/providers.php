@@ -6,4 +6,5 @@ return [
     App\Modules\Admin\AdminServiceProvider::class,
     App\Modules\DspaceForms\DspaceFormsServiceProvider::class,
     App\Modules\TreeTask\TreeTaskServiceProvider::class,
+    App\Modules\ANT\ANTServiceProvider::class
 ];

@@ -52,7 +52,46 @@ class SendGamifiedMotivation extends Command
             ->get();
 
         if ($tarefas->isEmpty()) {
-            $this->line(" - Sem tarefas em andamento. Pulando.");
+            $this->line(" - Sem tarefas em andamento. Gerando mensagem de aviso...");
+
+            // 3. Sortear Universo (Lore) para contextualizar o tom da IA
+            $lore = LorePrompt::where('ativo', true)->inRandomOrder()->first();
+
+            // Fallback
+            if (!$lore) {
+                $lore = (object) [
+                    'universo' => 'Padrão',
+                    'prompt_personagem' => 'Você é um assistente pessoal eficiente.'
+                ];
+            }
+
+            // Montar mensagens para o Service (IA) indicando 0 tarefas e pedindo incentivo para escolher novas
+            $messages = [
+                [
+                    'role' => 'system',
+                    'content' => "ATUAR COMO: {$lore->prompt_personagem}. " .
+                        "OBJETIVO: Criar APENAS uma introdução motivacional curta (máx 200 caracteres) sobre reengajamento quando não há tarefas. " .
+                        "INSTRUÇÃO: Informe que não há tarefas e incentive a escolher novas. Use emojis. Seja direto."
+                ],
+                [
+                    'role' => 'user',
+                    'content' => "Olá! Hoje eu tenho 0 tarefas críticas em andamento. Me motive e me lembre para escolher novas tarefas!"
+                ]
+            ];
+
+            $this->line(" - Gerando texto no estilo: {$lore->universo}...");
+            $textoGerado = $this->pollinationService->generateText($messages, ['temperature' => 1]);
+
+            if ($textoGerado) {
+                $mensagemFinal = $textoGerado .
+                    "\n\n📋 *Suas Missões em Andamento:*\n\nNenhuma no momento — escolha novas tarefas para continuar progredindo!";
+
+                (new WhatsAppService())->sendToUser($user, $mensagemFinal);
+                $this->info(" - Mensagem enviada (sem tarefas).");
+            } else {
+                $this->error(" - Falha ao gerar texto para o usuário {$user->id} (sem tarefas)");
+            }
+
             return;
         }
 

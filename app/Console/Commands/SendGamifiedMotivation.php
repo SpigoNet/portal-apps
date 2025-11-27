@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\User;
 use App\Modules\TreeTask\Models\Tarefa;
 use App\Modules\TreeTask\Models\LorePrompt;
-use App\Services\PollinationService;
+use App\Services\IaService;
 use Illuminate\Support\Facades\Log;
 use App\Services\WhatsAppService;
 
@@ -15,12 +15,12 @@ class SendGamifiedMotivation extends Command
     protected $signature = 'treetask:daily-motivation {user_id? : ID opcional para enviar apenas para um usuário}';
     protected $description = 'Gera e envia a mensagem motivacional diária baseada nas tarefas pendentes.';
 
-    protected PollinationService $pollinationService;
+    protected IaService $iaService;
 
-    public function __construct(PollinationService $pollinationService)
+    public function __construct(IaService $pollinationService)
     {
         parent::__construct();
-        $this->pollinationService = $pollinationService;
+        $this->iaService = $pollinationService;
     }
 
     public function handle()
@@ -80,7 +80,7 @@ class SendGamifiedMotivation extends Command
             ];
 
             $this->line(" - Gerando texto no estilo: {$lore->universo}...");
-            $textoGerado = $this->pollinationService->generateText($messages, ['temperature' => 1]);
+            $textoGerado = $this->iaService->generateText($messages, ['temperature' => 1]);
 
             if ($textoGerado) {
                 $mensagemFinal = $textoGerado .
@@ -140,11 +140,11 @@ class SendGamifiedMotivation extends Command
 
         // 5. Gerar Texto via PollinationService
         $this->line(" - Gerando texto no estilo: {$lore->universo}...");
-        $textoGerado = $this->pollinationService->generateText($messages, ['temperature' => 1]);
+        $textoGerado = $this->iaService->generateText($messages, ['temperature' => 1]);
 
         if ($textoGerado) {
             // Monta a mensagem final: Texto da IA + Cabeçalho da Lista + Lista Formatada
-            $mensagemFinal = $textoGerado . "\n\n📋 *Suas Missões em Andamento:*\n\n" . $listaTarefas;
+            $mensagemFinal = $textoGerado . "\n\n📋 *Suas Missões em Andamento:* \n\n " . $listaTarefas . "  \n\n https://apps.spigo.net/treetask/meu-foco";
 
             (new WhatsAppService())->sendToUser($user, $mensagemFinal);
             $this->info(" - Mensagem enviada!");

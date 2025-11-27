@@ -17,6 +17,13 @@ Route::get('/dashboard', function () {
 })->name('dashboard');
 
 
+// Rota para rodar migration forçadamente
+Route::get('/run-migrations', function () {
+    \Artisan::call('migrate', ['--force' => true]);
+    return 'Migrations executed successfully.';
+})->middleware('auth')->name('run.migrations');
+
+
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');

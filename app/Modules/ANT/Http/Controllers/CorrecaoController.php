@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Modules\ANT\Models\AntEntrega;
-use App\Services\PollinationService;
+use App\Services\IaService;
 
 class CorrecaoController extends Controller
 {
@@ -214,15 +214,18 @@ CONTEXTO DA AVALIAÇÃO:
 Título do Trabalho: {$entrega->trabalho->nome}
 Descrição do Trabalho: {$entrega->trabalho->descricao}
 Dicas/Critérios de Correção: {$entrega->trabalho->dicas_correcao}
+Nome do Aluno: {$entrega->aluno->nome}
 
-RESPOSTA DO ALUNO:
+||| INICIO RESPOSTA DO ALUNO |||
 {$conteudoAluno}
-
----
+||| FIM RESPOSTA DO ALUNO |||
 TAREFA:
-Analise o código/texto acima.
+Analise o código/texto entre ||| INICIO RESPOSTA DO ALUNO ||| e ||| FIM RESPOSTA DO ALUNO |||, se não existir conteúdo do aluno, não invete, dê nota 0 e avise que não foi possível avaliar.
+O Feedback para o aluno deve ser construtivo, apontando pontos fortes e fracos, e sugerindo melhorias. Caso não consiga avaliar, explique o motivo.
+Sua resposta deve conter APENAS o seguinte formato JSON com dois campos:
 1. Atribua uma nota de 0 a 10 (float).
-2. Escreva um feedback construtivo justificando a nota e apontando melhorias.
+2. Escreva um feedback construtivo com um toque de humor justificando a nota e apontando melhorias.
+
 
 FORMATO DE SAÍDA (JSON OBRIGATÓRIO):
 {
@@ -233,7 +236,7 @@ Responda APENAS o JSON, sem markdown (```json) ou texto adicional.
 EOT;
 
         // 3. Chamar o Serviço
-        $service = new PollinationService();
+        $service = new IaService();
         $respostaIa = $service->generateText([
             ['role' => 'system', 'content' => $systemPrompt],
             ['role' => 'user', 'content' => $userPrompt]

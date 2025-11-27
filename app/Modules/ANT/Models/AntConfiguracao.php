@@ -8,7 +8,7 @@ class AntConfiguracao extends Model
 {
     protected $table = 'ant_configuracoes';
 
-    protected $fillable = ['semestre_atual', 'admins', 'prompt_agente'];
+    protected $fillable = ['semestre_atual', 'admins', 'prompt_agente', 'ia_driver', 'ia_url', 'ia_key'];
 
     /**
      * Verifica se um dado e-mail está na lista de admins.

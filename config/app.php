@@ -123,4 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'POLLINATION_API_KEY' => env('POLLINATION_API_KEY', ''),
+
 ];

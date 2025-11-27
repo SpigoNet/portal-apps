@@ -5,17 +5,17 @@ namespace App\Modules\TreeTask\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\TreeTask\Models\Tarefa;
 use App\Modules\TreeTask\Models\LorePrompt;
-use App\Services\PollinationService; // <--- Importamos o Service Global
+use App\Services\IaService; // <--- Importamos o Service Global
 use Illuminate\Http\JsonResponse;
 
 class GamificationController extends Controller
 {
-    protected PollinationService $pollinationService;
+    protected IaService $iaService;
 
     // Injeção de Dependência do Service
-    public function __construct(PollinationService $pollinationService)
+    public function __construct(IaService $iaService)
     {
-        $this->pollinationService = $pollinationService;
+        $this->iaService = $iaService;
     }
 
     public function motivacao(): JsonResponse
@@ -68,7 +68,7 @@ class GamificationController extends Controller
 
         // 5. Chamar o Service
         // Podemos passar opções extras se quisermos, ex: ['temperature' => 0.9] para ser mais criativo
-        $textoGerado = $this->pollinationService->generateText($messages, ['temperature' => 1]);
+        $textoGerado = $this->iaService->generateText($messages, ['temperature' => 1]);
 
         // Tratamento de erro caso a API falhe
         if (!$textoGerado) {

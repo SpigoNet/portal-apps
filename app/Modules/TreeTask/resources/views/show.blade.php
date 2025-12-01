@@ -49,10 +49,16 @@
                 @foreach($projeto->fases as $fase)
                     <div data-fase-id="{{ $fase->id_fase }}"
                          class="min-w-[300px] bg-gray-100 rounded-lg shadow-md max-h-full flex flex-col">
-                        <div
-                            class="fase-handle cursor-move p-4 border-b border-gray-200 bg-gray-200 rounded-t-lg flex justify-between items-center">
+                        <div class="fase-handle cursor-move p-4 border-b border-gray-200 bg-gray-200 rounded-t-lg flex justify-between items-center group">
                             <h3 class="font-bold text-gray-700">{{ $fase->nome }}</h3>
-                            <span class="text-xs text-gray-500 font-mono">{{ $fase->tarefas->count() }}</span>
+                            <div class="flex items-center space-x-2">
+                                <a href="{{ route('treetask.ai.index', ['type' => 'phase', 'id' => $fase->id_fase]) }}"
+                                   class="opacity-0 group-hover:opacity-100 text-indigo-500 hover:text-indigo-700 transition"
+                                   title="IA nesta fase">
+                                    ✨
+                                </a>
+                                <span class="text-xs text-gray-500 font-mono">{{ $fase->tarefas->count() }}</span>
+                            </div>
                         </div>
 
                         <div class="tarefas-container p-2 overflow-y-auto flex-1 space-y-2 custom-scrollbar"
@@ -75,6 +81,11 @@
         {{ $isConcluido ? 'border-green-400' : $priorityClass }}">
 
                                     <div class="flex justify-between items-start">
+
+                                        <a href="{{ route('treetask.ai.index', ['type' => 'task', 'id' => $tarefa->id_tarefa]) }}"
+                                           class="text-gray-300 hover:text-indigo-500" title="IA nesta tarefa">
+                                            ✨
+                                        </a>
 
                                         <a href="{{ route('treetask.tarefas.show', $tarefa->id_tarefa) }}" class="block flex-1">
                                             <h4 class="font-semibold text-sm mb-1

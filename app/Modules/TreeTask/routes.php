@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\TreeTask\Http\Controllers\AiCommandController;
 use App\Modules\TreeTask\Http\Controllers\AnexoController;
 use App\Modules\TreeTask\Http\Controllers\CelebrationController;
 use App\Modules\TreeTask\Http\Controllers\FocusController;
@@ -76,4 +77,8 @@ Route::prefix('treetask')
                 ], 500);
             }
         })->name('cron.force');
+
+        Route::get('/ia-comando', [AiCommandController::class, 'index'])->name('ai.index');
+        Route::post('/ia-comando/preview', [AiCommandController::class, 'preview'])->name('ai.preview');
+        Route::post('/ia-comando/executar', [AiCommandController::class, 'execute'])->name('ai.execute');
     });

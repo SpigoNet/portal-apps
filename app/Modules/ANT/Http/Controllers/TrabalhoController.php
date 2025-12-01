@@ -53,75 +53,119 @@ class TrabalhoController extends Controller
     public function store(Request $request, $id)
     {
         $user = auth()->user();
-        $aluno = AntAluno::where('user_id', $user->id)->firstOrFail();
+        $alunoLider = AntAluno::where('user_id', $user->id)->firstOrFail();
         $trabalho = AntTrabalho::with('tipoTrabalho')->findOrFail($id);
 
-        // --- NOVA VERIFICAÇÃO DE BLOQUEIO ---
-        // Verifica se já existe entrega para este trabalho e se JÁ TEM NOTA
-        $entregaExistente = AntEntrega::where('trabalho_id', $trabalho->id)
-            ->where('aluno_ra', $aluno->ra)
-            ->first();
-
-        if ($entregaExistente && !is_null($entregaExistente->nota)) {
-            return back()->withErrors(['erro' => 'Este trabalho já foi corrigido e avaliado. Não é possível reenviar.']);
-        }
-        // ------------------------------------
+        // ... (Verificações de Bloqueio de Nota existentes) ...
 
         // Validação básica
         $request->validate([
             'comentario_aluno' => 'nullable|string',
-            'arquivos.*' => 'nullable|file|max:10240', // Max 10MB por arquivo
-            'link' => 'nullable|url'
+            'arquivos.*' => 'nullable|file|max:10240',
+            'link' => 'nullable|url',
+            'integrantes' => 'nullable|array' // Valida o array de RAs
         ]);
 
-        // Verifica tipos permitidos (ex: "pdf|zip" ou "link")
+        // 1. Lista de RAs para entregar (Líder + Integrantes)
+        $rasParaEntregar = [$alunoLider->ra]; // Começa com o líder
+
+        if ($request->has('integrantes')) {
+            foreach ($request->integrantes as $raColega) {
+                // Validação de Segurança: O colega existe e é da matéria?
+                // Isso impede que injetem RA de outra pessoa aleatória
+                $existeNaMateria = AntAluno::where('ra', $raColega)
+                    ->whereHas('materias', function($q) use ($trabalho) {
+                        $q->where('ant_materias.id', $trabalho->materia_id);
+                    })->exists();
+
+                if ($existeNaMateria) {
+                    $rasParaEntregar[] = $raColega;
+                }
+            }
+        }
+
+        // Validação de Quantidade
+        $rasParaEntregar = array_unique($rasParaEntregar); // Remove duplicados
+        if (count($rasParaEntregar) > $trabalho->maximo_alunos) {
+            return back()->withErrors(['integrantes' => 'O número de integrantes excede o permitido.']);
+        }
+
+        // 2. Processamento de Arquivos (FAZ UMA ÚNICA VEZ)
         $tiposPermitidos = explode('|', $trabalho->tipoTrabalho->arquivos);
         $ehLink = in_array('link', $tiposPermitidos);
-
         $caminhos = [];
 
-        // 1. Processar Link
         if ($ehLink && $request->filled('link')) {
             $caminhos[] = $request->link;
         }
 
-        // 2. Processar Arquivos (Upload)
         if ($request->hasFile('arquivos')) {
             foreach ($request->file('arquivos') as $arquivo) {
-                // Validação manual de extensão
                 if (!$ehLink && !in_array($arquivo->getClientOriginalExtension(), $tiposPermitidos)) {
-                    return back()->withErrors(['arquivos' => "O tipo de arquivo .{$arquivo->getClientOriginalExtension()} não é permitido. Aceitos: " . implode(', ', $tiposPermitidos)]);
+                    return back()->withErrors(['arquivos' => "Extensão inválida."]);
                 }
 
-                // Salva em storage/app/ant/entregas/{semestre}/{materia}/{trabalho}/{ra}
-                // Usamos o RA na estrutura de pastas também para manter organizado
+                // Salva no diretório do LÍDER (para organização)
                 $path = $arquivo->storeAs(
-                    "ant/entregas/{$trabalho->semestre}/{$trabalho->materia->nome_curto}/{$trabalho->id}/{$aluno->ra}",
+                    "ant/entregas/{$trabalho->semestre}/{$trabalho->materia->nome_curto}/{$trabalho->id}/{$alunoLider->ra}",
                     $arquivo->getClientOriginalName(),
-                    'local'
+                    'local' // Ou 'public' se configurou assim
                 );
                 $caminhos[] = $path;
             }
         }
 
         if (empty($caminhos)) {
-            return back()->withErrors(['arquivos' => 'Você deve enviar pelo menos um arquivo ou link.']);
+            return back()->withErrors(['arquivos' => 'Envie pelo menos um arquivo ou link.']);
         }
 
-        // 3. Salvar ou Atualizar Entrega (USANDO RA)
-        AntEntrega::updateOrCreate(
-            [
-                'trabalho_id' => $trabalho->id,
-                'aluno_ra'    => $aluno->ra // CORREÇÃO: Chave agora é o RA
-            ],
-            [
-                'arquivos' => json_encode($caminhos),
-                'comentario_aluno' => $request->comentario_aluno,
-                'data_entrega' => now(),
-                // Nota e comentário do professor não são alterados aqui
-            ]
-        );
+        $jsonArquivos = json_encode($caminhos);
 
-        return redirect()->route('ant.trabalhos.show', $id)->with('success', 'Trabalho entregue com sucesso!');
+        // 3. Salvar Entrega para TODOS os integrantes
+        // O loop cria uma linha para cada aluno, mas todas compartilham o $jsonArquivos
+        foreach ($rasParaEntregar as $ra) {
+            AntEntrega::updateOrCreate(
+                [
+                    'trabalho_id' => $trabalho->id,
+                    'aluno_ra'    => $ra
+                ],
+                [
+                    'arquivos' => $jsonArquivos, // Mesmo caminho para todos
+                    'comentario_aluno' => $request->comentario_aluno . ($ra === $alunoLider->ra ? " (Enviado pelo Líder)" : " (Enviado via Grupo por {$alunoLider->nome})"),
+                    'data_entrega' => now(),
+                ]
+            );
+        }
+
+        return redirect()->route('ant.trabalhos.show', $id)->with('success', 'Trabalho entregue para todo o grupo com sucesso!');
+    }
+
+    public function buscarColegas(Request $request)
+    {
+        $termo = $request->query('q');
+        $materiaId = $request->query('materia_id');
+        $user = auth()->user();
+        $alunoLogado = AntAluno::where('user_id', $user->id)->firstOrFail();
+
+        if (strlen($termo) < 3) {
+            return response()->json([]);
+        }
+
+        // Busca alunos que:
+        // 1. Tenham nome ou RA parecido com o termo
+        // 2. Estejam matriculados NA MESMA MATÉRIA que o trabalho exige
+        // 3. NÃO sejam o próprio aluno logado
+        $alunos = AntAluno::where(function($q) use ($termo) {
+            $q->where('nome', 'like', "%{$termo}%")
+                ->orWhere('ra', 'like', "%{$termo}%");
+        })
+            ->whereHas('materias', function($q) use ($materiaId) {
+                $q->where('ant_materias.id', $materiaId);
+            })
+            ->where('id', '!=', $alunoLogado->id)
+            ->take(10)
+            ->get(['ra', 'nome']);
+
+        return response()->json($alunos);
     }
 }

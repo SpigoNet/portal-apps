@@ -85,14 +85,31 @@ class CorrecaoController extends Controller
 
     public function update(Request $request, $idEntrega)
     {
-        $entrega = AntEntrega::findOrFail($idEntrega);
-
-        $entrega->update([
-            'nota' => $request->nota,
-            'comentario_professor' => $request->comentario_professor
+        // Validação básica
+        $request->validate([
+            'nota' => 'nullable|numeric|min:0|max:10',
+            'comentario_professor' => 'nullable|string'
         ]);
 
-        return back()->with('success', 'Correção salva com sucesso.');
+        $entregaOriginal = AntEntrega::findOrFail($idEntrega);
+
+        // Lógica de Replicação para o Grupo:
+        // Buscamos todas as entregas DESSA MATÉRIA/TRABALHO que possuem EXATAMENTE O MESMO ARQUIVO.
+        // Como o upload salvou o mesmo path para todos os membros, isso identifica o grupo com segurança.
+
+        $afetados = AntEntrega::where('trabalho_id', $entregaOriginal->trabalho_id)
+            ->where('arquivos', $entregaOriginal->arquivos) // A chave mágica do grupo
+            ->update([
+                'nota' => $request->nota,
+                'comentario_professor' => $request->comentario_professor
+            ]);
+
+        // Feedback mais informativo
+        $msg = $afetados > 1
+            ? "Correção salva e replicada para os {$afetados} integrantes do grupo!"
+            : "Correção salva com sucesso.";
+
+        return back()->with('success', $msg);
     }
 
     /**

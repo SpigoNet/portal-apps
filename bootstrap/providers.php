@@ -8,4 +8,5 @@ return [
     App\Modules\TreeTask\TreeTaskServiceProvider::class,
     App\Modules\ANT\ANTServiceProvider::class,
     App\Modules\EnvioWhatsapp\EnvioWhatsappServiceProvider::class,
+    App\Modules\GestorHoras\GestorHorasServiceProvider::class,
 ];

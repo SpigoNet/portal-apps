@@ -22,9 +22,13 @@
                             </a>
                         @endif
 
-                        <button class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
+                        <a href="{{ route('ant.pesos.create') }}" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition flex items-center">
+                            <span class="material-icons text-sm mr-2">pie_chart</span>
+                            Configurar Pesos
+                        </a>
+                        <a href="{{ route('ant.professor.create') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition inline-block">
                             + Novo Trabalho / Prova
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

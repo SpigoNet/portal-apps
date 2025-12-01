@@ -54,6 +54,7 @@
                                                 Concluir
                                             </button>
                                         </form>
+
                                     </div>
 
                                     <div class="text-gray-600 text-lg leading-relaxed mb-4 bg-gray-50 p-4 rounded border border-gray-100">
@@ -70,6 +71,11 @@
                                         Vence: {{ $tarefa->data_vencimento ? \Carbon\Carbon::parse($tarefa->data_vencimento)->format('d/m') : '--' }}
                                     </span>
                                         <a href="{{ route('treetask.tarefas.edit', ['id' => $tarefa->id_tarefa, 'origin' => 'focus']) }}" class="text-blue-600 hover:underline">Editar Detalhes</a>
+                                        <a href="{{ route('treetask.ai.index', ['type' => 'task', 'id' => $tarefa->id_tarefa]) }}"
+                                           class="text-gray-300 hover:text-indigo-500 transition"
+                                           title="IA nesta tarefa">
+                                            ✨
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -195,6 +201,11 @@
                                                     {{ \Carbon\Carbon::parse($tarefa->data_vencimento)->format('d/m') }}
                                                 </span>
                                                 @endif
+                                                    <a href="{{ route('treetask.ai.index', ['type' => 'task', 'id' => $tarefa->id_tarefa]) }}"
+                                                       class="text-gray-300 hover:text-indigo-500 transition"
+                                                       title="IA nesta tarefa">
+                                                        ✨
+                                                    </a>
                                                 <a href="{{ route('treetask.tarefas.edit', ['id' => $tarefa->id_tarefa, 'origin' => 'focus']) }}" class="text-gray-400 hover:text-blue-600">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                                 </a>

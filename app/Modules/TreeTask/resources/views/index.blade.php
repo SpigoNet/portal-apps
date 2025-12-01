@@ -66,6 +66,12 @@
                                         <a href="{{ route('treetask.tree.view', $projeto->id_projeto) }}" class="text-purple-600 hover:text-purple-900 bg-purple-50 hover:bg-purple-100 px-3 py-1 rounded text-xs font-bold border border-purple-200" title="Ver Árvore Hierárquica">
                                             Árvore 🌳
                                         </a>
+
+                                        <a href="{{ route('treetask.ai.index', ['type' => 'project', 'id' => $projeto->id_projeto]) }}"
+                                           class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded text-xs font-bold border border-indigo-200 flex items-center"
+                                           title="Comando IA para este projeto">
+                                            IA ✨
+                                        </a>
                                     </div>
                                 </td>
                             </tr>

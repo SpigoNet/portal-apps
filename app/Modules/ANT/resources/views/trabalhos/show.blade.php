@@ -125,6 +125,31 @@
                                 <textarea id="comentario_aluno" name="comentario_aluno" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
                             </div>
 
+                            @if($trabalho->maximo_alunos > 1)
+                                <div class="mb-6 p-4 bg-gray-50 rounded border border-gray-200">
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">
+                                        Integrantes do Grupo (Máx: {{ $trabalho->maximo_alunos }})
+                                    </label>
+                                    <p class="text-xs text-gray-500 mb-3">Você já está incluído automaticamente. Adicione apenas seus colegas.</p>
+
+                                    <div class="relative">
+                                        <input type="text" id="busca-aluno" placeholder="Digite o Nome ou RA do colega..."
+                                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                               onkeyup="buscarColegas(this.value, {{ $trabalho->materia_id }})">
+
+                                        <div id="lista-sugestoes" class="absolute z-10 w-full bg-white shadow-lg border border-gray-200 rounded-md mt-1 hidden max-h-40 overflow-y-auto"></div>
+                                    </div>
+
+                                    <div id="container-integrantes" class="mt-3 space-y-2">
+                                        <div class="flex justify-between items-center bg-indigo-50 p-2 rounded border border-indigo-100">
+                                            <span class="text-sm font-medium text-indigo-900">{{ $aluno->nome }} (Você)</span>
+                                            <span class="text-xs text-indigo-500 font-bold">Líder</span>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="maximo_alunos" value="{{ $trabalho->maximo_alunos }}">
+                                </div>
+                            @endif
+
                             <div class="text-right">
                                 <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                     Enviar Trabalho
@@ -137,4 +162,69 @@
 
         </div>
     </div>
+    <script>
+        let integrantes = []; // Array de RAs selecionados
+
+        function buscarColegas(termo, materiaId) {
+            const lista = document.getElementById('lista-sugestoes');
+
+            if (termo.length < 3) {
+                lista.classList.add('hidden');
+                return;
+            }
+
+            fetch(`{{ route('ant.api.alunos.busca') }}?q=${termo}&materia_id=${materiaId}`)
+                .then(res => res.json())
+                .then(data => {
+                    lista.innerHTML = '';
+                    if (data.length > 0) {
+                        lista.classList.remove('hidden');
+                        data.forEach(aluno => {
+                            // Não mostra se já estiver na lista
+                            if(integrantes.includes(aluno.ra)) return;
+
+                            const item = document.createElement('div');
+                            item.className = 'p-2 hover:bg-gray-100 cursor-pointer text-sm';
+                            item.innerText = `${aluno.nome} (${aluno.ra})`;
+                            item.onclick = () => adicionarIntegrante(aluno.ra, aluno.nome);
+                            lista.appendChild(item);
+                        });
+                    } else {
+                        lista.classList.add('hidden');
+                    }
+                });
+        }
+
+        function adicionarIntegrante(ra, nome) {
+            const max = document.getElementById('maximo_alunos').value;
+            // +1 conta o usuário logado
+            if (integrantes.length + 1 >= max) {
+                alert('Número máximo de integrantes atingido.');
+                document.getElementById('lista-sugestoes').classList.add('hidden');
+                document.getElementById('busca-aluno').value = '';
+                return;
+            }
+
+            integrantes.push(ra);
+
+            const container = document.getElementById('container-integrantes');
+            const div = document.createElement('div');
+            div.className = 'flex justify-between items-center bg-white p-2 rounded border border-gray-300';
+            div.innerHTML = `
+            <span class="text-sm text-gray-700">${nome} (${ra})</span>
+            <input type="hidden" name="integrantes[]" value="${ra}">
+            <button type="button" onclick="removerIntegrante('${ra}', this)" class="text-red-500 hover:text-red-700 text-xs font-bold uppercase">Remover</button>
+        `;
+            container.appendChild(div);
+
+            // Limpa busca
+            document.getElementById('lista-sugestoes').classList.add('hidden');
+            document.getElementById('busca-aluno').value = '';
+        }
+
+        function removerIntegrante(ra, btn) {
+            integrantes = integrantes.filter(i => i !== ra);
+            btn.parentElement.remove();
+        }
+    </script>
 </x-app-layout>

@@ -8,6 +8,8 @@ use App\Modules\ANT\Models\AntConfiguracao;
 use App\Modules\ANT\Models\AntMateria;
 use App\Modules\ANT\Models\AntTrabalho;
 use App\Modules\ANT\Models\AntAluno;
+use App\Modules\ANT\Models\AntTipoTrabalho;
+use App\Modules\ANT\Models\AntPeso;
 use Illuminate\Support\Facades\DB;
 
 class ProfessorController extends Controller
@@ -93,5 +95,79 @@ class ProfessorController extends Controller
         }
 
         return view('ANT::professores.trabalho', compact('trabalho', 'alunos', 'totalAlunos', 'entregues', 'corrigidos'));
+    }
+
+    // Formulário de Novo Trabalho
+    public function create()
+    {
+        $user = auth()->user();
+        $config = AntConfiguracao::first();
+        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+
+        // 1. Busca as Matérias que o professor leciona neste semestre
+        // Precisamos delas para o Select
+        $materias = AntMateria::whereHas('professores', function($q) use ($user, $semestreAtual) {
+            $q->where('user_id', $user->id)->where('semestre', $semestreAtual);
+        })->get();
+
+        if ($materias->isEmpty()) {
+            return redirect()->route('ant.professor.index')->with('error', 'Você não está vinculado a nenhuma matéria neste semestre.');
+        }
+
+        // 2. Busca Tipos de Trabalho (PDF, Link, ZIP...)
+        $tipos = AntTipoTrabalho::all();
+
+        // 3. Busca os Pesos disponíveis para essas matérias no semestre atual
+        // Ex: P1 da Matéria X, Trabalho da Matéria Y
+        $pesos = AntPeso::whereIn('materia_id', $materias->pluck('id'))
+            ->where('semestre', $semestreAtual)
+            ->with('materia') // Para exibir o nome da matéria no select
+            ->get();
+
+        return view('ANT::professores.create', compact('materias', 'tipos', 'pesos', 'semestreAtual'));
+    }
+
+    // Salvar Novo Trabalho
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nome' => 'required|string|max:255',
+            'materia_id' => 'required|exists:ant_materias,id',
+            'tipo_trabalho_id' => 'required|exists:ant_tipos_trabalho,id',
+            'peso_id' => 'required|exists:ant_pesos,id',
+            'prazo' => 'required|date',
+            'maximo_alunos' => 'required|integer|min:1',
+            'descricao' => 'required|string',
+            'dicas_correcao' => 'nullable|string', // Campo novo da IA
+        ]);
+
+        $config = AntConfiguracao::first();
+        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+
+        // Segurança: Verificar se o professor realmente dá aula dessa matéria
+        $ehProfessor = DB::table('ant_professor_materia')
+            ->where('user_id', auth()->id())
+            ->where('materia_id', $request->materia_id)
+            ->where('semestre', $semestreAtual)
+            ->exists();
+
+        if (!$ehProfessor) {
+            abort(403, 'Você não tem permissão para criar trabalhos nesta disciplina.');
+        }
+
+        // Criação
+        AntTrabalho::create([
+            'semestre' => $semestreAtual,
+            'nome' => $request->nome,
+            'descricao' => $request->descricao,
+            'dicas_correcao' => $request->dicas_correcao,
+            'materia_id' => $request->materia_id,
+            'tipo_trabalho_id' => $request->tipo_trabalho_id,
+            'prazo' => $request->prazo,
+            'maximo_alunos' => $request->maximo_alunos,
+            'peso_id' => $request->peso_id,
+        ]);
+
+        return redirect()->route('ant.professor.index')->with('success', 'Trabalho criado com sucesso!');
     }
 }

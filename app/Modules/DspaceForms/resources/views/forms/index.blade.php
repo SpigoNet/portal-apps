@@ -3,6 +3,7 @@
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Gerenciar Formulários DSpace') }}
+                <span class="text-sm text-gray-500">({{ $currentConfig->name }})</span>
             </h2>
             <div class="flex space-x-2">
                 {{-- Botão para voltar ao Início do Módulo --}}

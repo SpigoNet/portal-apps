@@ -12,62 +12,70 @@ use Illuminate\Validation\Rule;
 
 class DspaceValuePairsListController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // 1. Obtém todos os nomes de vocabulários e listas usados nos formulários.
-        $usedVocabularies = DspaceFormField::whereNotNull('vocabulary')
-            ->distinct()
-            ->pluck('vocabulary')
+        $configId = $request->query('config_id');
+        if (!$configId) {
+            return redirect()->route('dspace-forms.index')->with('error', 'Configuração não especificada.');
+        }
+
+        $currentConfig = DspaceXmlConfiguration::findOrFail($configId);
+        if ($currentConfig->user_id !== auth()->id()) abort(403);
+
+        // 1. Obtém nomes de vocabulários usados APENAS nos formulários DESTA configuração
+        $usedVocabularies = DspaceFormField::whereHas('row.form', function($q) use ($configId) {
+            $q->where('xml_configuration_id', $configId);
+        })
+            ->where(function($q) {
+                $q->whereNotNull('vocabulary')->orWhereNotNull('value_pairs_name');
+            })
+            ->get()
+            ->flatMap(function($field) {
+                return [$field->vocabulary, $field->value_pairs_name];
+            })
+            ->filter()
+            ->unique()
             ->toArray();
 
-        $usedValuePairs = DspaceFormField::whereNotNull('value_pairs_name')
-            ->distinct()
-            ->pluck('value_pairs_name')
-            ->toArray();
+        // 2. Busca todas as listas PERTENCENTES a esta configuração
+        $allLists = DspaceValuePairsList::where('xml_configuration_id', $configId)
+            ->withCount('pairs')
+            ->orderBy('name')
+            ->get();
 
-        $allUsedNames = array_unique(array_merge($usedVocabularies, $usedValuePairs));
+        // 3. Separação
+        $usedLists = $allLists->filter(fn($list) => in_array($list->name, $usedVocabularies));
+        $unusedLists = $allLists->reject(fn($list) => in_array($list->name, $usedVocabularies));
 
-
-        // 2. Busca todas as listas com contagem de pares
-        $allLists = DspaceValuePairsList::withCount('pairs')->orderBy('name')->get();
-
-        // 3. Divide as listas em "Em Uso" e "Fora de Uso"
-        $usedLists = $allLists->filter(function ($list) use ($allUsedNames) {
-            return in_array($list->name, $allUsedNames);
-        });
-
-        $unusedLists = $allLists->reject(function ($list) use ($allUsedNames) {
-            return in_array($list->name, $allUsedNames);
-        });
-
-
-        // 4. Retorna as coleções separadas para a view
         return view('DspaceForms::value-pairs-index', [
             'usedLists' => $usedLists,
             'unusedLists' => $unusedLists,
+            'currentConfig' => $currentConfig, // Passa a config para a View
         ]);
     }
 
-    /**
-     * Adiciona uma nova lista de valores/vocabulário ao banco de dados.
-     */
     public function createList(Request $request)
     {
+        $configId = $request->input('xml_configuration_id');
+
         $validated = $request->validate([
-            // Garante que o nome é único e não é 'riccps'
+            'xml_configuration_id' => 'required|exists:dspace_xml_configurations,id',
             'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('dspace_value_pairs_lists', 'name'),
-                'not_in:riccps'
+                'required', 'string', 'max:255', 'not_in:riccps',
+                // Único por configuração
+                Rule::unique('dspace_value_pairs_lists')->where('xml_configuration_id', $configId)
             ],
             'dc_term' => 'nullable|string|max:255',
         ]);
 
+        // Verifica propriedade da config
+        $config = DspaceXmlConfiguration::findOrFail($configId);
+        if($config->user_id !== auth()->id()) abort(403);
+
         DspaceValuePairsList::create($validated);
 
-        return redirect()->route('dspace-forms.value-pairs.index')->with('success', "Lista '{$validated['name']}' criada com sucesso! Você pode agora adicionar itens.");
+        return redirect()->route('dspace-forms.value-pairs.index', ['config_id' => $configId])
+            ->with('success', "Lista '{$validated['name']}' criada na configuração '{$config->name}'.");
     }
 
     /**
@@ -75,6 +83,7 @@ class DspaceValuePairsListController extends Controller
      */
     public function destroyList(DspaceValuePairsList $list)
     {
+        $configId = $list->xml_configuration_id;
         // 1. Não permite a exclusão da lista 'riccps'
         if ($list->name === 'riccps') {
             return redirect()->route('dspace-forms.value-pairs.index')->with('error', 'A lista "riccps" não pode ser excluída.');
@@ -95,8 +104,7 @@ class DspaceValuePairsListController extends Controller
 
         $list->delete();
 
-        return redirect()->route('dspace-forms.value-pairs.index')->with('success', "Lista '{$list->name}' excluída com sucesso.");
-    }
+        return redirect()->route('dspace-forms.value-pairs.index', ['config_id' => $configId])->with('success', 'Lista excluída.');    }
 
     /**
      * Exibe o formulário para editar os itens de um Vocabulário/Lista de Valores.

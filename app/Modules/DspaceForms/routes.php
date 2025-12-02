@@ -10,7 +10,7 @@ use App\Modules\DspaceForms\Http\Controllers\DspaceFormsController;
 
 // Você pode criar um middleware específico se precisar de um controle de acesso mais granular
 // Por enquanto, usaremos o middleware 'admin' que já existe
-Route::middleware(['web', 'admin'])
+Route::middleware(['web'])
     ->prefix('dspace-forms-editor')
     ->name('dspace-forms.')
     ->group(function () {

@@ -379,7 +379,7 @@ class DspaceFormsController extends Controller
             ->whereIn('name', $usedListNames)
             ->get();
 
-        $xml = new \SimpleXMLElement('<input-forms/>');
+        $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><input-forms/>');
         $formDefs = $xml->addChild('form-definitions');
         foreach ($forms as $form) {
             $formNode = $formDefs->addChild('form');
@@ -393,13 +393,15 @@ class DspaceFormsController extends Controller
                     $fieldNode->addChild('dc-element', $field->dc_element);
                     if ($field->dc_qualifier) $fieldNode->addChild('dc-qualifier', $field->dc_qualifier);
                     $fieldNode->addChild('repeatable', $field->repeatable ? 'true' : 'false');
-                    $fieldNode->addChild('label', htmlspecialchars($field->label));
+                    // Removido htmlspecialchars
+                    $fieldNode->addChild('label', $field->label);
                     $inputType = $fieldNode->addChild('input-type', $field->input_type);
                     if ($field->value_pairs_name) {
                         $inputType->addAttribute('value-pairs-name', $field->value_pairs_name);
                     }
-                    $fieldNode->addChild('hint', htmlspecialchars($field->hint));
-                    if ($field->required) $fieldNode->addChild('required', htmlspecialchars($field->required ?? ''));
+                    $fieldNode->addChild('hint', $field->hint);
+
+                    if ($field->required) $fieldNode->addChild('required', $field->required ?? '');
                     if ($field->vocabulary) {
                         $vocabNode = $fieldNode->addChild('vocabulary', $field->vocabulary);
                         if ($field->vocabulary_closed) {
@@ -442,21 +444,25 @@ class DspaceFormsController extends Controller
     // Os métodos generateVocabularyXmlContent e expandEmptyTags permanecem inalterados
     private function generateVocabularyXmlContent(DspaceValuePairsList $list): string
     {
-        $xml = new \SimpleXMLElement('<node />');
+        // CORREÇÃO AQUI: Adicionar declaração UTF-8
+        $xml = new \SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><node />');
+
         $xml->addAttribute('id', $list->name);
+        // label removido htmlspecialchars se houver
         $xml->addAttribute('label', '');
         $isComposedBy = $xml->addChild('isComposedBy');
 
         foreach ($list->pairs()->orderBy('order')->get() as $pair) {
             $node = $isComposedBy->addChild('node');
-            $id = !empty($pair->stored_value) ? $pair->stored_value : str_replace(' ', '-', strtolower($pair->displayed_value));
-            $node->addAttribute('id', $id);
-            $node->addAttribute('label', htmlspecialchars($pair->displayed_value));
+            $node->addAttribute('id', $pair->id);
+            // Mantenha sem htmlspecialchars aqui também
+            $node->addAttribute('label', $pair->displayed_value);
         }
 
         $dom = new \DOMDocument('1.0', 'UTF-8');
         $dom->preserveWhiteSpace = false;
         $dom->formatOutput = true;
+        // O asXML() agora retornará UTF-8 correto graças ao cabeçalho adicionado acima
         $dom->loadXML($xml->asXML());
 
         $this->expandEmptyTags($dom->documentElement);

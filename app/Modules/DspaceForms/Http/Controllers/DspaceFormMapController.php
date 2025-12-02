@@ -13,38 +13,48 @@ class DspaceFormMapController extends Controller
     /**
      * Exibe a lista de todos os mapeamentos (vínculos).
      */
-    public function index()
+    public function index(Request $request)
     {
-        $maps = DspaceFormMap::orderBy('map_key')->get();
+        $configId = $request->query('config_id');
+        if (!$configId) return redirect()->route('dspace-forms.index');
 
-        // Pega apenas os nomes dos processos de submissão para os dropdowns
-        $submission_processes = SubmissionProcess::orderBy('name')->pluck('name');
+        $currentConfig = DspaceXmlConfiguration::findOrFail($configId);
+        if ($currentConfig->user_id !== auth()->id()) abort(403);
 
-        return view('DspaceForms::form-maps-index', compact('maps', 'submission_processes'));
+        $maps = DspaceFormMap::where('xml_configuration_id', $configId)
+            ->orderBy('map_key')
+            ->get();
+
+        // Processos de submissão também devem ser filtrados pela config, se aplicável,
+        // ou globais se forem padrão. Assumindo que são da config:
+        $submission_processes = SubmissionProcess::where('xml_configuration_id', $configId)
+            ->orderBy('name')
+            ->pluck('name');
+
+        return view('DspaceForms::form-maps-index', compact('maps', 'submission_processes', 'currentConfig'));
     }
 
-    /**
-     * Armazena um novo vínculo no banco de dados.
-     */
     public function store(Request $request)
     {
+        $configId = $request->input('xml_configuration_id');
+
         $validated = $request->validate([
+            'xml_configuration_id' => 'required|exists:dspace_xml_configurations,id',
             'map_type' => 'required|in:handle,entity-type',
+            'submission_name' => 'required|string',
             'map_key' => [
-                'required',
-                'string',
-                'max:255',
-                // Garante que a combinação map_key e map_type seja única
-                Rule::unique('dspace_form_maps')->where(function ($query) use ($request) {
-                    return $query->where('map_type', $request->map_type);
-                }),
+                'required', 'string', 'max:255',
+                // Único por tipo E por configuração
+                Rule::unique('dspace_form_maps')
+                    ->where('map_type', $request->map_type)
+                    ->where('xml_configuration_id', $configId),
             ],
-            'submission_name' => 'required|string|exists:submission_processes,name',
         ]);
 
         DspaceFormMap::create($validated);
 
-        return redirect()->route('dspace-forms.form-maps.index')->with('success', 'Vínculo criado com sucesso.');
+        return redirect()->route('dspace-forms.form-maps.index', ['config_id' => $configId])
+            ->with('success', 'Vínculo criado com sucesso.');
     }
 
     /**

@@ -4,6 +4,7 @@ use App\Modules\DspaceForms\Http\Controllers\DspaceFormController;
 use App\Modules\DspaceForms\Http\Controllers\DspaceFormFieldController;
 use App\Modules\DspaceForms\Http\Controllers\DspaceFormMapController;
 use App\Modules\DspaceForms\Http\Controllers\DspaceFormRowController;
+use App\Modules\Metricas\Http\Middleware\RegistrarAcesso;
 use Illuminate\Support\Facades\Route;
 use App\Modules\DspaceForms\Http\Controllers\DspaceValuePairsListController;
 use App\Modules\DspaceForms\Http\Controllers\DspaceFormsController;
@@ -13,6 +14,7 @@ use App\Modules\DspaceForms\Http\Controllers\DspaceFormsController;
 Route::middleware(['web'])
     ->prefix('dspace-forms-editor')
     ->name('dspace-forms.')
+    ->middleware(RegistrarAcesso::class . ':DspaceForms')
     ->group(function () {
         // Rota principal: Lida com a seleção da configuração (se config_id não estiver presente)
         // OU exibe o dashboard filtrado (se config_id estiver presente).

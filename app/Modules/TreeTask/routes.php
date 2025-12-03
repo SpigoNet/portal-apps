@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Metricas\Http\Middleware\RegistrarAcesso;
 use App\Modules\TreeTask\Http\Controllers\AiCommandController;
 use App\Modules\TreeTask\Http\Controllers\AnexoController;
 use App\Modules\TreeTask\Http\Controllers\CelebrationController;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Artisan;
 Route::prefix('treetask')
     ->name('treetask.')
     ->middleware(['web', 'auth'])
+    ->middleware(RegistrarAcesso::class . ':TreeTask')
     ->group(function () {
 
         // --- Projetos ---

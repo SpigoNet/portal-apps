@@ -1,11 +1,13 @@
 <?php
 
+use App\Modules\Metricas\Http\Middleware\RegistrarAcesso;
 use Illuminate\Support\Facades\Route;
 use App\Modules\EnvioWhatsapp\Http\Controllers\WhatsappController;
 
 Route::middleware(['web'])
     ->prefix('ferramentas/whatsapp')
     ->name('envio-whatsapp.')
+    ->middleware(RegistrarAcesso::class . ':EnvioWhatsapp')
     ->group(function () {
 
         // Passo 1: Upload

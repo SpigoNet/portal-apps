@@ -9,11 +9,15 @@ use App\Modules\ANT\Http\Controllers\PesoController;
 use App\Modules\ANT\Http\Controllers\ProfessorController;
 use App\Modules\ANT\Http\Controllers\ProvaController;
 use App\Modules\ANT\Http\Controllers\TrabalhoController;
+use App\Modules\Metricas\Http\Middleware\RegistrarAcesso;
 use Illuminate\Support\Facades\Route;
 use App\Modules\ANT\Http\Controllers\AntHomeController;
 
 // Grupo Principal com Prefixo 'ant' e Middleware de Autenticação
-Route::prefix('ant')->middleware(['web', 'auth'])->group(function () {
+Route::prefix('ant')
+    ->middleware(['web', 'auth'])
+    ->middleware(RegistrarAcesso::class . ':ANT')
+    ->group(function () {
 
     // Rota Inicial (Dashboard)
     Route::get('/', [AntHomeController::class, 'index'])->name('ant.home');

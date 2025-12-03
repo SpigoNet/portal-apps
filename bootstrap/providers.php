@@ -9,4 +9,6 @@ return [
     App\Modules\ANT\ANTServiceProvider::class,
     App\Modules\EnvioWhatsapp\EnvioWhatsappServiceProvider::class,
     App\Modules\GestorHoras\GestorHorasServiceProvider::class,
+    App\Modules\Metricas\MetricasServiceProvider::class,
+    App\Modules\Financeiro\FinanceiroServiceProvider::class,
 ];

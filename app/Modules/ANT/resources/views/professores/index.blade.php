@@ -65,10 +65,9 @@
                             @endif
 
                             <div class="mt-4 pt-3 border-t border-gray-100 flex justify-end space-x-2">
-                                <a href="#" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Ver Alunos</a>
+                                <a href="{{ route('ant.admin.alunos.index', ['materia_id' => $materia->id, 'semestre' => $semestreAtual]) }}" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Ver Alunos</a>
                                 <span class="text-gray-300">|</span>
-                                <a href="#" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Lançar
-                                    Notas</a>
+                                <a href="{{ route('ant.professor.boletim', $materia->id) }}" class="text-indigo-600 hover:text-indigo-900 text-sm font-bold">Ver Boletim</a>
                             </div>
                         </div>
                     </div>

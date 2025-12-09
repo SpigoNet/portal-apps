@@ -165,6 +165,14 @@
                                     </table>
                                 </div>
                             @endif
+                                {{-- NOVO LINK PARA BOLETIM --}}
+                                <div class="mt-4 pt-3 border-t border-gray-100 flex justify-end">
+                                    <a href="{{ route('ant.aluno.boletim', $materia->id) }}"
+                                       class="text-indigo-600 hover:text-indigo-900 text-sm font-bold flex items-center">
+                                        <span class="material-icons text-sm mr-1">bar_chart</span>
+                                        Ver Notas Detalhadas (Boletim)
+                                    </a>
+                                </div>
                         </div>
                     </div>
                 @endforeach

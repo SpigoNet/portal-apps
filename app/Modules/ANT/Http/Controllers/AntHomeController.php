@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use App\Modules\ANT\Models\AntAluno;
 use App\Modules\ANT\Models\AntConfiguracao;
 use App\Modules\ANT\Models\AntMateria;
+use App\Modules\ANT\Models\AntPeso; // Adicione esta linha
+use App\Modules\ANT\Models\AntTrabalho;
 
 class AntHomeController extends Controller
 {
@@ -107,5 +109,87 @@ class AntHomeController extends Controller
         $aluno->save();
 
         return redirect()->route('ant.home')->with('success', 'RA vinculado com sucesso!');
+    }
+
+    public function boletim($idMateria)
+    {
+        $user = auth()->user();
+        $config = AntConfiguracao::first();
+        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+
+        $aluno = AntAluno::where('user_id', $user->id)->firstOrFail();
+
+        // 1. Busca a Matéria e verifica se o aluno está matriculado nela neste semestre
+        $materia = AntMateria::findOrFail($idMateria);
+
+        $isMatriculado = $aluno->materias()
+            ->where('ant_materias.id', $idMateria)
+            ->wherePivot('semestre', $semestreAtual)
+            ->exists();
+
+        if (!$isMatriculado) {
+            abort(403, 'Você não está matriculado nesta disciplina neste semestre.');
+        }
+
+        // 2. Pesos (Grupos de Notas) definidos para a matéria
+        $pesos = AntPeso::where('materia_id', $idMateria)
+            ->where('semestre', $semestreAtual)
+            ->get();
+
+        $pesosGrupos = $pesos->keyBy('id'); // Indexa por peso_id para acesso rápido
+        $gruposNome = $pesos->pluck('grupo', 'id'); // Nomes dos grupos
+
+        // 3. Trabalhos e Entregas do Aluno
+        $trabalhos = AntTrabalho::where('materia_id', $idMateria)
+            ->where('semestre', $semestreAtual)
+            ->whereNotNull('peso_id')
+            ->with(['entregas' => function($q) use ($aluno) {
+                // Filtra apenas a entrega do aluno logado
+                $q->where('aluno_ra', $aluno->ra)
+                    ->whereNotNull('nota')
+                    ->select('trabalho_id', 'aluno_ra', 'nota');
+            }])
+            ->get();
+
+        // 4. Cálculo da Média Final Ponderada
+        $notasPorGrupo = $gruposNome->mapWithKeys(function ($nome, $pesoId) {
+            return [$pesoId => ['totalNotas' => 0, 'somaNotas' => 0, 'mediaGrupo' => 0, 'notaPonderada' => 0]];
+        })->toArray();
+
+        $notaPonderadaTotal = 0;
+        $pesoTotal = $pesos->sum('valor');
+
+        // A. Coletar Notas dos Trabalhos
+        foreach ($trabalhos as $trabalho) {
+            $pesoId = $trabalho->peso_id;
+            $entrega = $trabalho->entregas->first(); // Como filtramos por RA, deve ser no máximo 1
+
+            if ($entrega && $entrega->nota !== null && isset($notasPorGrupo[$pesoId])) {
+                $notasPorGrupo[$pesoId]['somaNotas'] += $entrega->nota;
+                $notasPorGrupo[$pesoId]['totalNotas']++;
+            }
+        }
+
+        // B. Calcular Média Ponderada
+        foreach ($pesos as $peso) {
+            $pesoId = $peso->id;
+            $valorPeso = $peso->valor;
+            $dadosGrupo = $notasPorGrupo[$pesoId];
+
+            $mediaGrupo = 0;
+            if ($dadosGrupo['totalNotas'] > 0) {
+                $mediaGrupo = $dadosGrupo['somaNotas'] / $dadosGrupo['totalNotas'];
+            }
+
+            $notaPonderada = ($mediaGrupo / 10.0) * $valorPeso;
+
+            $notasPorGrupo[$pesoId]['mediaGrupo'] = $mediaGrupo;
+            $notasPorGrupo[$pesoId]['notaPonderada'] = $notaPonderada;
+            $notaPonderadaTotal += $notaPonderada;
+        }
+
+        $notaFinal = $notaPonderadaTotal;
+
+        return view('ANT::aluno.boletim', compact('materia', 'semestreAtual', 'gruposNome', 'notasPorGrupo', 'notaFinal', 'pesoTotal', 'aluno', 'pesos'));
     }
 }

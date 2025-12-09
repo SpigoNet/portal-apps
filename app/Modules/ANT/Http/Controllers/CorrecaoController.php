@@ -33,6 +33,21 @@ class CorrecaoController extends Controller
             $arquivos = $entrega->arquivos ? [$entrega->arquivos] : [];
         }
 
+        // --- NOVO: Preparar Lista de Arquivos com URL Pública para o Sidebar ---
+        $arquivosComUrl = [];
+        foreach ($arquivos as $arq) {
+            $url = $this->getPublicUrl($arq);
+            $arquivosComUrl[] = [
+                'path' => $arq,
+                'url' => $url,
+                // Usamos basename() para obter o nome do arquivo, e pathinfo para a extensão
+                'nome' => basename($arq),
+                'extensao' => strtolower(pathinfo($arq, PATHINFO_EXTENSION)),
+            ];
+        }
+        // -----------------------------------------------------------------------------
+
+
         // Lógica de visualização (Mantida a correção anterior)
         if (empty($arquivos)) {
             $dadosVisualizacao = [
@@ -61,6 +76,12 @@ class CorrecaoController extends Controller
                 $dadosVisualizacao['tipo'] = 'pdf';
                 $dadosVisualizacao['url'] = $urlPublica;
 
+            } elseif (in_array($extensao, ['mp4', 'webm', 'ogg', 'avi', 'mov'])) {
+                // --- NOVO: Renderizador para Arquivos de Vídeo Locais
+                $dadosVisualizacao['tipo'] = 'video_file';
+                $dadosVisualizacao['url'] = $urlPublica;
+                // ------------------------------------------
+
             } elseif (in_array($extensao, ['txt', 'sql', 'cs', 'js', 'html', 'css', 'php', 'py'])) {
                 $dadosVisualizacao['tipo'] = 'texto';
                 $pathFisico = $this->getPhysicalPath($caminhoArquivo);
@@ -76,21 +97,31 @@ class CorrecaoController extends Controller
                 $publicPath = $this->prepararProjetoWeb($caminhoArquivo, $entrega->id, $fileIndex);
                 if ($publicPath) {
                     $dadosVisualizacao['tipo'] = 'unity';
-                    $dadosVisualizacao['url'] = asset('storage/' . $publicPath . '/index.html');
+                    // USANDO Storage::url()
+                    $dadosVisualizacao['url'] = Storage::url($publicPath . '/index.html');
                 } else {
                     $dadosVisualizacao['tipo'] = 'download';
                     $dadosVisualizacao['url'] = $urlPublica;
                 }
             } elseif ($entrega->trabalho->tipoTrabalho->descricao === 'Link Externo' || str_starts_with($caminhoArquivo, 'http')) {
-                $dadosVisualizacao['tipo'] = 'link';
+
+                // Lógica para Identificar Vídeo (Link Externo)
+                $isVideo = str_contains($caminhoArquivo, 'youtube.com') || str_contains($caminhoArquivo, 'youtu.be') || str_contains($caminhoArquivo, 'vimeo.com');
+
+                if ($isVideo) {
+                    $dadosVisualizacao['tipo'] = 'video';
+                } else {
+                    $dadosVisualizacao['tipo'] = 'link';
+                }
                 $dadosVisualizacao['url'] = $caminhoArquivo;
+
             } else {
                 $dadosVisualizacao['url'] = $urlPublica;
             }
         }
 
-        // Passamos a $listaEntregas para a view
-        return view('ANT::correcao.edit', compact('entrega', 'arquivos', 'fileIndex', 'dadosVisualizacao', 'listaEntregas'));
+        // Passamos a $listaEntregas e o novo $arquivosComUrl para a view
+        return view('ANT::correcao.edit', compact('entrega', 'arquivos', 'fileIndex', 'dadosVisualizacao', 'listaEntregas', 'arquivosComUrl'));
     }
 
     public function update(Request $request, $idEntrega)
@@ -185,6 +216,33 @@ class CorrecaoController extends Controller
     }
 
     /**
+     * Define permissões de leitura/escrita para diretórios (0755) e arquivos (0644)
+     * recursivamente para garantir acesso pelo web server após a extração do ZIP.
+     */
+    private function setRecursivePermissions($path)
+    {
+        if (!is_dir($path)) {
+            return;
+        }
+
+        // Usamos RecursiveIteratorIterator para percorrer todos os subdiretórios e arquivos
+        $items = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($items as $item) {
+            // 0755 para diretórios, 0644 para arquivos (permissões padrão para web)
+            $permission = $item->isDir() ? 0755 : 0644;
+            // @chmod ignora erros se não tiver permissão para mudar
+            @chmod($item->getRealPath(), $permission);
+        }
+
+        // Garante que o diretório raiz da extração também tenha 0755
+        @chmod($path, 0755);
+    }
+
+    /**
      * Extrai ZIP para pasta pública do LARAVEL para rodar no navegador
      */
     private function prepararProjetoWeb($caminhoZip, $entregaId, $fileIndex)
@@ -211,7 +269,85 @@ class CorrecaoController extends Controller
             $zip->extractTo($destination);
             $zip->close();
 
-            // Procura recursivamente por index.html
+            // 1. Definir permissões após extração para evitar 403
+            $this->setRecursivePermissions($destination);
+
+            // --- INÍCIO: Lógica de Descompressão com BrotliHaxe (PHP Puro) ---
+
+            $brotli_library_file = app_path('Modules/ANT/Lib/Brotli/Brotli.php'); // Ajuste o nome do arquivo se necessário
+            $brotli_library_dir = app_path('Modules/ANT/Lib/Brotli/');
+
+            // Verifica se a biblioteca PHP puro existe antes de incluir
+            if (file_exists($brotli_library_file)) {
+
+                // Inclui a biblioteca BrotliHaxe
+                require_once $brotli_library_file;
+
+                // Configuração e descompressão (Assumindo que a classe é 'Brotli' e o método é 'decompressArray')
+                try {
+                    // Mapeia os dicionários para o diretório de inclusão da biblioteca (necessário para o Haxe port)
+                    set_include_path(get_include_path() . PATH_SEPARATOR . $brotli_library_dir);
+
+                    // Instancia o descompressor
+                    $brotliDecompressor = new \Brotli();
+
+                    $files = Storage::disk('public')->allFiles($extractPath);
+
+                    foreach ($files as $file) {
+                        $fullFilePath = Storage::disk('public')->path($file);
+
+                        // Limpeza de .htaccess
+                        if (basename($file) === '.htaccess') {
+                            Storage::disk('public')->delete($file);
+                            continue;
+                        }
+
+                        if (str_ends_with($file, '.br')) {
+                            $targetFilePath = substr($fullFilePath, 0, -3); // Ex: de file.js.br para file.js
+                            $compressedData = file_get_contents($fullFilePath);
+
+                            // A descompressão espera um byte array, mas strings em PHP são byte arrays no fundo
+                            $uncompressedData = $brotliDecompressor->decompress($compressedData);
+
+                            if ($uncompressedData !== false && $uncompressedData !== null) {
+                                file_put_contents($targetFilePath, $uncompressedData);
+                                Storage::disk('public')->delete($file); // Remove o comprimido
+                            } else {
+                                // Se falhar, tentamos o fallback de remoção (Unity tentará o não comprimido)
+                                Storage::disk('public')->delete($file);
+                            }
+                        }
+                        // Limpeza de Gzip
+                        elseif (str_ends_with($file, '.gz')) {
+                            Storage::disk('public')->delete($file);
+                        }
+                    }
+                    // Restaura o include path após o uso
+                    restore_include_path();
+
+                } catch (\Exception $e) {
+                    // Em caso de erro na biblioteca (ex: dicionário faltando), loga o erro e faz fallback
+                    Log::error("BrotliHaxe Decoding Error: " . $e->getMessage());
+                    // Limpa arquivos .br para forçar Unity a tentar a versão descompactada (último recurso)
+                    $files = Storage::disk('public')->allFiles($extractPath);
+                    foreach ($files as $file) {
+                        if (str_ends_with($file, '.br')) {
+                            Storage::disk('public')->delete($file);
+                        }
+                    }
+                }
+            } else {
+                // Se a biblioteca não foi encontrada, faz o fallback de remoção que o cliente tinha antes
+                $files = Storage::disk('public')->allFiles($extractPath);
+                foreach ($files as $file) {
+                    if (str_ends_with($file, '.br') || str_ends_with($file, '.gz')) {
+                        Storage::disk('public')->delete($file);
+                    }
+                }
+            }
+            // --- FIM: Lógica de Descompressão com BrotliHaxe (PHP Puro) ---
+
+            // 3. Procura recursivamente por index.html
             $files = Storage::disk('public')->allFiles($extractPath);
             foreach ($files as $file) {
                 if (basename($file) === 'index.html') {
@@ -224,7 +360,6 @@ class CorrecaoController extends Controller
             return null;
         }
     }
-
     public function iaSugestao(Request $request, $idEntrega)
     {
         $entrega = AntEntrega::with(['trabalho', 'aluno'])->findOrFail($idEntrega);
@@ -310,4 +445,6 @@ EOT;
 
         return response()->json($dados);
     }
+
+
 }

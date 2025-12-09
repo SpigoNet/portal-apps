@@ -63,6 +63,27 @@
                 <p class="text-sm text-gray-700 italic">"{{ $entrega->comentario_aluno ?? 'Sem comentários.' }}"</p>
             </div>
 
+            {{-- NOVO: LISTA DE LINKS DE DOWNLOAD INDIVIDUAL --}}
+            <div class="mb-6">
+                <h4 class="text-xs font-bold text-gray-500 uppercase mb-2 border-t pt-2">Arquivos para Download</h4>
+                @if(empty($arquivosComUrl))
+                    <p class="text-sm text-gray-400 italic">Nenhum arquivo local ou link para download.</p>
+                @else
+                    <ul class="space-y-2">
+                        @foreach($arquivosComUrl as $arquivo)
+                            <li class="flex items-center">
+                                <span class="material-icons text-sm mr-2 text-gray-400">file_present</span>
+                                <a href="{{ $arquivo['url'] }}" target="_blank"
+                                   class="text-sm text-indigo-600 hover:text-indigo-800 truncate"
+                                   title="{{ $arquivo['path'] }}">
+                                    {{ $arquivo['nome'] }} (.{{ $arquivo['extensao'] }})
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+
             <hr class="my-4 border-gray-100">
 
             <div class="mb-4">

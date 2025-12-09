@@ -97,6 +97,110 @@ class ProfessorController extends Controller
         return view('ANT::professores.trabalho', compact('trabalho', 'alunos', 'totalAlunos', 'entregues', 'corrigidos'));
     }
 
+    public function boletim($idMateria)
+    {
+        $user = auth()->user();
+        $config = AntConfiguracao::first();
+        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+
+        $materia = AntMateria::findOrFail($idMateria);
+
+        // Segurança: Verifica se o user é professor desta matéria neste semestre
+        $ehProfessorDestaMateria = DB::table('ant_professor_materia')
+            ->where('user_id', $user->id)
+            ->where('materia_id', $idMateria)
+            ->where('semestre', $semestreAtual)
+            ->exists();
+
+        if (!$ehProfessorDestaMateria) {
+            abort(403, 'Acesso negado a esta disciplina.');
+        }
+
+        // 1. Pesos (Grupos de Notas) definidos para a matéria
+        $pesos = AntPeso::where('materia_id', $idMateria)
+            ->where('semestre', $semestreAtual)
+            ->get();
+
+        $pesosGrupos = $pesos->keyBy('id'); // Indexa por peso_id para acesso rápido
+        $gruposNome = $pesos->pluck('grupo', 'id'); // Nomes dos grupos
+
+        // 2. Trabalhos e Notas vinculadas aos pesos
+        $trabalhos = AntTrabalho::where('materia_id', $idMateria)
+            ->where('semestre', $semestreAtual)
+            ->whereNotNull('peso_id') // Apenas trabalhos que valem nota
+            ->with(['entregas' => function($q) {
+                // Seleciona apenas as entregas que têm nota atribuída
+                $q->whereNotNull('nota')->select('trabalho_id', 'aluno_ra', 'nota');
+            }])
+            ->get();
+
+        // 3. Alunos matriculados
+        $alunos = AntAluno::whereHas('materias', function($q) use ($idMateria, $semestreAtual) {
+            $q->where('ant_materias.id', $idMateria)
+                ->where('ant_aluno_materia.semestre', $semestreAtual);
+        })
+            ->orderBy('nome')
+            ->get();
+
+        // 4. Cálculo da Média Final Ponderada por aluno
+        $dadosBoletim = [];
+        $pesoTotal = $pesos->sum('valor'); // Total teórico (Ex: 10 ou 100)
+
+        foreach ($alunos as $aluno) {
+            $notasPorGrupo = $gruposNome->mapWithKeys(function ($nome, $pesoId) {
+                // Inicializa estrutura para cada grupo de peso
+                return [$pesoId => ['totalNotas' => 0, 'somaNotas' => 0, 'mediaGrupo' => 0, 'notaPonderada' => 0]];
+            })->toArray();
+
+            $alunoRa = $aluno->ra;
+            $notaPonderadaTotal = 0;
+
+            // A. Coletar Notas dos Trabalhos e somar dentro de seus grupos
+            foreach ($trabalhos as $trabalho) {
+                $pesoId = $trabalho->peso_id;
+
+                if (isset($notasPorGrupo[$pesoId])) {
+                    // Busca a entrega do aluno para este trabalho
+                    $entrega = $trabalho->entregas->where('aluno_ra', $alunoRa)->first();
+
+                    if ($entrega && $entrega->nota !== null) {
+                        // Soma todas as notas (0-10) que compõem este grupo
+                        $notasPorGrupo[$pesoId]['somaNotas'] += $entrega->nota;
+                        $notasPorGrupo[$pesoId]['totalNotas']++;
+                    }
+                }
+            }
+
+            // B. Calcular Média Ponderada
+            foreach ($pesos as $peso) {
+                $pesoId = $peso->id;
+                $valorPeso = $peso->valor; // Valor total do grupo (Ex: 10.0)
+                $dadosGrupo = $notasPorGrupo[$pesoId];
+
+                $mediaGrupo = 0;
+                if ($dadosGrupo['totalNotas'] > 0) {
+                    // Média aritmética das notas (0-10) de todos os trabalhos do grupo
+                    $mediaGrupo = $dadosGrupo['somaNotas'] / $dadosGrupo['totalNotas'];
+                }
+
+                // Normaliza e pondera: (Média do Grupo / 10) * Valor do Peso do Grupo
+                $notaPonderada = ($mediaGrupo / 10.0) * $valorPeso;
+
+                $notasPorGrupo[$pesoId]['mediaGrupo'] = $mediaGrupo;
+                $notasPorGrupo[$pesoId]['notaPonderada'] = $notaPonderada;
+                $notaPonderadaTotal += $notaPonderada;
+            }
+
+            $dadosBoletim[] = [
+                'aluno' => $aluno,
+                'ra' => $alunoRa,
+                'notasGrupos' => $notasPorGrupo,
+                'notaFinal' => $notaPonderadaTotal,
+            ];
+        }
+
+        return view('ANT::professores.boletim', compact('materia', 'semestreAtual', 'gruposNome', 'dadosBoletim', 'pesoTotal'));
+    }
     // Formulário de Novo Trabalho
     public function create()
     {

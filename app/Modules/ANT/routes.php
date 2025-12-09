@@ -32,7 +32,7 @@ Route::prefix('ant')
     Route::get('/trabalho/{id}', [TrabalhoController::class, 'show'])->name('ant.trabalhos.show');
     // Rota para enviar o formulário
     Route::post('/trabalho/{id}', [TrabalhoController::class, 'store'])->name('ant.trabalhos.store');
-
+    Route::get('/boletim/{idMateria}', [AntHomeController::class, 'boletim'])->name('ant.aluno.boletim');
     Route::get('/prova/{idTrabalho}/resultado', [ProvaController::class, 'resultado'])->name('ant.prova.resultado');
 
     Route::get('/correcao/{idEntrega}/{fileIndex?}', [CorrecaoController::class, 'edit'])->name('ant.correcao.edit');
@@ -45,6 +45,8 @@ Route::prefix('ant')
         Route::post('/novo-trabalho', [ProfessorController::class, 'store'])->name('ant.professor.store');
         // Lista de Entregas de um Trabalho
         Route::get('/trabalho/{id}', [ProfessorController::class, 'trabalho'])->name('ant.professor.trabalho');
+
+        Route::get('/materia/{idMateria}/boletim', [ProfessorController::class, 'boletim'])->name('ant.professor.boletim');
     });
 
     Route::post('/correcao/{idEntrega}/ia-sugestao', [CorrecaoController::class, 'iaSugestao'])->name('ant.correcao.ia_sugestao');

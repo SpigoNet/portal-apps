@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-ANT::layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             <a href="{{ route('ant.home') }}" class="text-indigo-600 hover:underline">Dashboard</a> &rsaquo;
@@ -146,4 +146,4 @@
         </div>
     </div>
 
-</x-app-layout>
+</x-ANT::layout>

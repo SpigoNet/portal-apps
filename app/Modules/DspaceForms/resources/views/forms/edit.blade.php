@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-DspaceForms::layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
@@ -172,8 +172,8 @@
                                                     {{-- Botão de Edição (Abre o modal) --}}
                                                     {{-- Passamos o objeto do campo como JSON string para o JavaScript --}}
                                                     <x-secondary-button
-                                                        onclick="openFieldModalForEdit({{ $row->id }}, {{ $field->id }}, '{{ $field->toJson() }}')"
-                                                        class="text-xs py-1">
+                                                        onclick="openFieldModalForEdit(this, {{ $row->id }}, {{ $field->id }})"
+                                                        data-field="{{ $field->toJson() }}" class="text-xs py-1">
                                                         <i class="fa-solid fa-pencil"></i> {{ __('Editar') }}
                                                     </x-secondary-button>
 
@@ -220,7 +220,7 @@
 
         </div>
     </div>
-</x-app-layout>
+</x-DspaceForms::layout>
 
 <script>
     // --- FUNÇÕES DE UTILIDADE E GESTÃO DE MODAL ---
@@ -320,8 +320,8 @@
     }
 
     // Abre o modal para EDIÇÃO
-    window.openFieldModalForEdit = function (rowId, fieldId, fieldDataJson) {
-        const fieldData = JSON.parse(fieldDataJson);
+    window.openFieldModalForEdit = function (element, rowId, fieldId) {
+        const fieldData = JSON.parse(element.getAttribute('data-field'));
 
         document.getElementById('field-modal-title').textContent = 'Editar Campo: ' + fieldData.label;
         document.getElementById('field-modal-submit-text').textContent = 'Salvar Campo';

@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-DspaceForms::layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
@@ -31,12 +31,6 @@
                         <option value="duplicate-{{ $stats['config_id'] }}">{{ __('Duplicar Configuração Atual') }}</option>
                     </select>
                 </form>
-
-                <a href="{{ route('dspace-forms.index') }}">
-                    <x-secondary-button>
-                        <i class="fa-solid fa-house mr-2"></i> {{ __('Início') }}
-                    </x-secondary-button>
-                </a>
 
                 {{-- Script para lidar com as ações "Criar" e "Duplicar" --}}
                 <script>
@@ -75,12 +69,6 @@
                         }
                     });
                 </script>
-
-                {{-- Botão de Exportação AGORA COM ID DA CONFIG --}}
-                <a href="{{ route('dspace-forms.export.zip', $stats['config_id'] ?? 0) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                    <i class="fa-solid fa-file-zipper mr-2"></i>
-                    {{ __('Exportar Configurações (.zip)') }}
-                </a>
             </div>
         </div>
     </x-slot>
@@ -150,4 +138,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-DspaceForms::layout>

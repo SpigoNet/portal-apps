@@ -73,7 +73,7 @@
 
         <div class="col-span-2">
             <x-input-label for="hint" :value="__('Hint / Ajuda')" />
-            <x-text-input id="hint" name="hint" type="text" class="mt-1 block w-full" autocomplete="off" />
+            <x-textarea id="hint" name="hint" type="text" class="mt-1 block w-full" autocomplete="off" />
         </div>
 
         <div class="col-span-2">

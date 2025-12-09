@@ -16,6 +16,16 @@ class CorrecaoController extends Controller
     {
         $entrega = AntEntrega::with(['trabalho.tipoTrabalho', 'aluno'])->findOrFail($idEntrega);
 
+        // --- NOVA LÓGICA: Lista para o Dropdown de Navegação ---
+        // Busca todas as entregas deste trabalho para navegar entre alunos
+        // Ordena pelo nome do aluno para facilitar a busca visual
+        $listaEntregas = AntEntrega::where('trabalho_id', $entrega->trabalho_id)
+            ->join('ant_alunos', 'ant_entregas.aluno_ra', '=', 'ant_alunos.ra')
+            ->select('ant_entregas.id', 'ant_entregas.nota', 'ant_alunos.nome', 'ant_alunos.ra')
+            ->orderBy('ant_alunos.nome')
+            ->get();
+        // -------------------------------------------------------
+
         // Decodifica JSON. Se falhar (arquivos antigos mal formatados), tenta usar como string única
         $arquivos = json_decode($entrega->arquivos, true);
         if (!is_array($arquivos)) {
@@ -23,95 +33,118 @@ class CorrecaoController extends Controller
             $arquivos = $entrega->arquivos ? [$entrega->arquivos] : [];
         }
 
+        // Lógica de visualização (Mantida a correção anterior)
         if (empty($arquivos)) {
-            return back()->with('error', 'Esta entrega não possui arquivos.');
-        }
+            $dadosVisualizacao = [
+                'tipo' => 'texto',
+                'conteudo' => "O aluno não anexou nenhum arquivo a esta entrega.\n\nUtilize o painel lateral para atribuir a nota e fornecer o feedback.",
+                'linguagem' => 'txt',
+                'url' => '#'
+            ];
+        } else {
+            $caminhoArquivo = $arquivos[$fileIndex] ?? $arquivos[0];
+            $extensao = strtolower(pathinfo($caminhoArquivo, PATHINFO_EXTENSION));
 
-        $caminhoArquivo = $arquivos[$fileIndex] ?? $arquivos[0];
-        $extensao = strtolower(pathinfo($caminhoArquivo, PATHINFO_EXTENSION));
+            $dadosVisualizacao = [
+                'tipo' => 'download',
+                'conteudo' => null,
+                'url' => null
+            ];
 
-        $dadosVisualizacao = [
-            'tipo' => 'download',
-            'conteudo' => null,
-            'url' => null
-        ];
+            $urlPublica = $this->getPublicUrl($caminhoArquivo);
 
-        // Lógica de URL Pública (Detecta Legado vs Novo)
-        $urlPublica = $this->getPublicUrl($caminhoArquivo);
+            if (in_array($extensao, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                $dadosVisualizacao['tipo'] = 'imagem';
+                $dadosVisualizacao['url'] = $urlPublica;
 
-        if (in_array($extensao, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-            $dadosVisualizacao['tipo'] = 'imagem';
-            $dadosVisualizacao['url'] = $urlPublica;
+            } elseif ($extensao === 'pdf') {
+                $dadosVisualizacao['tipo'] = 'pdf';
+                $dadosVisualizacao['url'] = $urlPublica;
 
-        } elseif ($extensao === 'pdf') {
-            $dadosVisualizacao['tipo'] = 'pdf';
-            $dadosVisualizacao['url'] = $urlPublica;
+            } elseif (in_array($extensao, ['txt', 'sql', 'cs', 'js', 'html', 'css', 'php', 'py'])) {
+                $dadosVisualizacao['tipo'] = 'texto';
+                $pathFisico = $this->getPhysicalPath($caminhoArquivo);
 
-        } elseif (in_array($extensao, ['txt', 'sql', 'cs', 'js', 'html', 'css', 'php', 'py'])) {
-            $dadosVisualizacao['tipo'] = 'texto';
-            // Para ler o conteúdo, precisamos do caminho físico real
-            $pathFisico = $this->getPhysicalPath($caminhoArquivo);
+                if (file_exists($pathFisico)) {
+                    $dadosVisualizacao['conteudo'] = file_get_contents($pathFisico);
+                } else {
+                    $dadosVisualizacao['conteudo'] = "Erro: Arquivo não encontrado no servidor.\nCaminho: " . $pathFisico;
+                }
+                $dadosVisualizacao['linguagem'] = $extensao;
 
-            if (file_exists($pathFisico)) {
-                $dadosVisualizacao['conteudo'] = file_get_contents($pathFisico);
+            } elseif ($extensao === 'zip') {
+                $publicPath = $this->prepararProjetoWeb($caminhoArquivo, $entrega->id, $fileIndex);
+                if ($publicPath) {
+                    $dadosVisualizacao['tipo'] = 'unity';
+                    $dadosVisualizacao['url'] = asset('storage/' . $publicPath . '/index.html');
+                } else {
+                    $dadosVisualizacao['tipo'] = 'download';
+                    $dadosVisualizacao['url'] = $urlPublica;
+                }
+            } elseif ($entrega->trabalho->tipoTrabalho->descricao === 'Link Externo' || str_starts_with($caminhoArquivo, 'http')) {
+                $dadosVisualizacao['tipo'] = 'link';
+                $dadosVisualizacao['url'] = $caminhoArquivo;
             } else {
-                $dadosVisualizacao['conteudo'] = "Erro: Arquivo não encontrado no servidor.\nCaminho: " . $pathFisico;
-            }
-            $dadosVisualizacao['linguagem'] = $extensao;
-
-        } elseif ($extensao === 'zip') {
-            // Se for ZIP legado ou novo, a lógica de extração precisa saber onde buscar
-            $publicPath = $this->prepararProjetoWeb($caminhoArquivo, $entrega->id, $fileIndex);
-
-            if ($publicPath) {
-                $dadosVisualizacao['tipo'] = 'unity'; // Ou genérico web
-                // A URL do iframe deve apontar para o index.html extraído dentro do storage público do Laravel
-                $dadosVisualizacao['url'] = asset('storage/' . $publicPath . '/index.html');
-            } else {
-                // Se falhar extração, vira download normal
-                $dadosVisualizacao['tipo'] = 'download';
                 $dadosVisualizacao['url'] = $urlPublica;
             }
-        } elseif ($entrega->trabalho->tipoTrabalho->descricao === 'Link Externo' || str_starts_with($caminhoArquivo, 'http')) {
-            $dadosVisualizacao['tipo'] = 'link';
-            $dadosVisualizacao['url'] = $caminhoArquivo;
-        } else {
-            // Default Download
-            $dadosVisualizacao['url'] = $urlPublica;
         }
 
-        return view('ANT::correcao.edit', compact('entrega', 'arquivos', 'fileIndex', 'dadosVisualizacao'));
+        // Passamos a $listaEntregas para a view
+        return view('ANT::correcao.edit', compact('entrega', 'arquivos', 'fileIndex', 'dadosVisualizacao', 'listaEntregas'));
     }
 
     public function update(Request $request, $idEntrega)
     {
-        // Validação básica
         $request->validate([
             'nota' => 'nullable|numeric|min:0|max:10',
-            'comentario_professor' => 'nullable|string'
+            'comentario_professor' => 'nullable|string',
+            'action' => 'nullable|string' // Para identificar qual botão foi clicado
         ]);
 
         $entregaOriginal = AntEntrega::findOrFail($idEntrega);
 
-        // Lógica de Replicação para o Grupo:
-        // Buscamos todas as entregas DESSA MATÉRIA/TRABALHO que possuem EXATAMENTE O MESMO ARQUIVO.
-        // Como o upload salvou o mesmo path para todos os membros, isso identifica o grupo com segurança.
-
-        $afetados = AntEntrega::where('trabalho_id', $entregaOriginal->trabalho_id)
-            ->where('arquivos', $entregaOriginal->arquivos) // A chave mágica do grupo
-            ->update([
+        // Lógica de Atualização (com suporte a grupos)
+        if (empty($entregaOriginal->arquivos) || $entregaOriginal->arquivos == '[]') {
+            $entregaOriginal->update([
                 'nota' => $request->nota,
                 'comentario_professor' => $request->comentario_professor
             ]);
+            $afetados = 1;
+        } else {
+            $afetados = AntEntrega::where('trabalho_id', $entregaOriginal->trabalho_id)
+                ->where('arquivos', $entregaOriginal->arquivos)
+                ->update([
+                    'nota' => $request->nota,
+                    'comentario_professor' => $request->comentario_professor
+                ]);
+        }
 
-        // Feedback mais informativo
         $msg = $afetados > 1
             ? "Correção salva e replicada para os {$afetados} integrantes do grupo!"
             : "Correção salva com sucesso.";
 
+        // --- NOVA LÓGICA: Salvar e Ir para o Próximo ---
+        if ($request->action === 'salvar_proximo') {
+            // Busca o próximo aluno deste trabalho que ainda NÃO tem nota
+            // Ordenamos por ID ou Nome para manter consistência, mas o importante é pegar quem falta.
+            $proximaEntrega = AntEntrega::where('trabalho_id', $entregaOriginal->trabalho_id)
+                ->whereNull('nota') // Pega apenas pendentes
+                ->where('id', '!=', $idEntrega) // Garante que não é o atual (redundante pois atual já tem nota agora, mas seguro)
+                ->first();
+
+            if ($proximaEntrega) {
+                return redirect()->route('ant.correcao.edit', $proximaEntrega->id)
+                    ->with('success', $msg . ' Carregando próximo aluno pendente...');
+            } else {
+                // Se não achar ninguém, volta para a lista geral do trabalho
+                return redirect()->route('ant.professor.trabalho', $entregaOriginal->trabalho_id)
+                    ->with('success', $msg . ' Parabéns! Você concluiu todas as correções deste trabalho.');
+            }
+        }
+        // ------------------------------------------------
+
         return back()->with('success', $msg);
     }
-
     /**
      * Retorna a URL acessível pelo navegador
      */

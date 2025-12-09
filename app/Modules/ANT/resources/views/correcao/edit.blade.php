@@ -1,10 +1,12 @@
-<x-app-layout>
+<x-ANT::layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 Corrigindo: {{ $entrega->aluno->nome }}
             </h2>
-            <a href="{{ route('ant.home') }}" class="text-sm text-gray-500 hover:text-gray-900">Voltar</a>
+            <a href="{{ route('ant.professor.trabalho', $entrega->trabalho_id) }}" class="text-sm text-gray-500 hover:text-gray-900 flex items-center">
+                <span class="material-icons text-sm mr-1">arrow_back</span> Voltar para Lista
+            </a>
         </div>
     </x-slot>
 
@@ -25,28 +27,57 @@
             </div>
         </div>
 
-        <div class="w-96 bg-white border-l border-gray-200 shadow-xl overflow-y-auto p-6 z-10">
-            <h3 class="font-bold text-lg mb-1">{{ $entrega->trabalho->nome }}</h3>
-            <p class="text-sm text-gray-500 mb-6">{{ $entrega->trabalho->materia->nome }}</p>
+        <div class="w-96 bg-white border-l border-gray-200 shadow-xl overflow-y-auto p-6 z-10 flex flex-col">
 
-            <div class="mb-6 bg-blue-50 p-4 rounded-lg">
+            <div class="mb-4">
+                <h3 class="font-bold text-lg leading-tight">{{ $entrega->trabalho->nome }}</h3>
+                <p class="text-xs text-gray-500">{{ $entrega->trabalho->materia->nome }}</p>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Navegar entre Alunos</label>
+                <select onchange="if(this.value) window.location.href=this.value"
+                        class="block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    @foreach($listaEntregas as $item)
+                        @php
+                            $isAtual = $item->id == $entrega->id;
+                            $isCorrigido = !is_null($item->nota);
+                            // Ícone visual dentro do option (alguns navegadores suportam emoji)
+                            $statusIcon = $isCorrigido ? '✅' : '📝';
+                        @endphp
+                        <option value="{{ route('ant.correcao.edit', $item->id) }}"
+                                {{ $isAtual ? 'selected' : '' }}
+                                class="{{ $isCorrigido ? 'text-green-600' : 'text-gray-800' }}">
+                            {{ $statusIcon }} {{ Str::limit($item->nome, 25) }} {{ $isCorrigido ? '('.number_format($item->nota, 1).')' : '' }}
+                        </option>
+                    @endforeach
+                </select>
+                <div class="flex justify-between text-xs text-gray-400 mt-1 px-1">
+                    <span>📝 Pendente</span>
+                    <span>✅ Corrigido</span>
+                </div>
+            </div>
+
+            <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
                 <h4 class="text-xs font-bold text-blue-800 uppercase mb-1">Comentário do Aluno</h4>
                 <p class="text-sm text-gray-700 italic">"{{ $entrega->comentario_aluno ?? 'Sem comentários.' }}"</p>
             </div>
 
-            <hr class="my-6">
+            <hr class="my-4 border-gray-100">
+
             <div class="mb-4">
                 <button type="button" id="btn-ia" onclick="solicitarIa()"
-                        class="w-full bg-purple-600 text-white font-bold py-2 px-4 rounded hover:bg-purple-700 transition flex items-center justify-center gap-2">
-                    <span class="material-icons">auto_awesome</span>
+                        class="w-full bg-purple-50 text-purple-700 border border-purple-200 font-bold py-2 px-4 rounded hover:bg-purple-100 transition flex items-center justify-center gap-2 text-sm">
+                    <span class="material-icons text-sm">auto_awesome</span>
                     Sugerir Nota e Feedback (IA)
                 </button>
                 <p id="ia-loading" class="text-xs text-center text-gray-500 mt-2 hidden">
-                    <span class="animate-spin inline-block mr-1">↻</span> Analisando código do aluno...
+                    <span class="animate-spin inline-block mr-1">↻</span> Analisando código...
                 </p>
                 <p id="ia-error" class="text-xs text-center text-red-500 mt-2 hidden"></p>
             </div>
-            <form action="{{ route('ant.correcao.update', $entrega->id) }}" method="POST">
+
+            <form action="{{ route('ant.correcao.update', $entrega->id) }}" method="POST" class="flex-1 flex flex-col">
                 @csrf
 
                 <div class="mb-4">
@@ -56,25 +87,34 @@
                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg font-bold">
                 </div>
 
-                <div class="mb-6">
+                <div class="mb-6 flex-1">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Feedback do Professor</label>
                     <textarea name="comentario_professor" id="input-comentario" rows="6"
-                              class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ $entrega->comentario_professor }}</textarea>
+                              class="w-full h-32 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">{{ $entrega->comentario_professor }}</textarea>
                 </div>
 
-                <button type="submit"
-                        class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded hover:bg-indigo-700 transition">
-                    Salvar Correção
-                </button>
+                <div class="space-y-3 mt-auto">
+                    <button type="submit" name="action" value="salvar"
+                            class="w-full bg-white border border-gray-300 text-gray-700 font-bold py-2 px-4 rounded hover:bg-gray-50 transition shadow-sm">
+                        Salvar (Manter aqui)
+                    </button>
+
+                    <button type="submit" name="action" value="salvar_proximo"
+                            class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded hover:bg-indigo-700 transition shadow flex justify-center items-center gap-2">
+                        <span>Salvar e ir para Próximo</span>
+                        <span class="material-icons text-sm">arrow_forward</span>
+                    </button>
+                </div>
             </form>
 
             @if(session('success'))
-                <div class="mt-4 p-3 bg-green-100 text-green-700 rounded text-sm text-center">
+                <div class="mt-4 p-3 bg-green-100 text-green-700 rounded text-sm text-center border border-green-200">
                     {{ session('success') }}
                 </div>
             @endif
         </div>
     </div>
+
     <script>
         function solicitarIa() {
             const btn = document.getElementById('btn-ia');
@@ -83,7 +123,6 @@
             const inputNota = document.getElementById('input-nota');
             const inputComentario = document.getElementById('input-comentario');
 
-            // Estado de Carregamento
             btn.disabled = true;
             btn.classList.add('opacity-50', 'cursor-not-allowed');
             loading.classList.remove('hidden');
@@ -102,19 +141,14 @@
                     if (data.error) {
                         throw new Error(data.error);
                     }
-
-                    // Preenche os campos com efeito visual
                     inputNota.value = data.nota;
                     inputComentario.value = data.feedback;
-
-                    // Efeito de "Flash" para mostrar que atualizou
                     inputNota.classList.add('bg-green-100');
                     inputComentario.classList.add('bg-green-100');
                     setTimeout(() => {
                         inputNota.classList.remove('bg-green-100');
                         inputComentario.classList.remove('bg-green-100');
                     }, 1000);
-
                 })
                 .catch(error => {
                     console.error(error);
@@ -128,4 +162,4 @@
                 });
         }
     </script>
-</x-app-layout>
+</x-ANT::layout>

@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Modules\Financeiro;
+namespace App\Modules\Mithril;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
-class FinanceiroServiceProvider extends ServiceProvider
+class MithrilServiceProvider extends ServiceProvider
 {
     /**
      * Define o namespace do módulo para as views.
      * @var string
      */
-    protected $namespace = 'Financeiro';
+    protected $namespace = 'Mithril';
 
     public function boot()
     {
-        // Carrega as views do módulo com o namespace 'Financeiro'
-        // Uso: view('Financeiro::nome_da_view')
+        // Carrega as views do módulo com o namespace 'Mithril'
+        // Uso: view('Mithril::nome_da_view')
         $this->loadViewsFrom(__DIR__ . '/resources/views', $this->namespace);
 
         // Carrega as migrações do módulo (se houverem específicas, caso contrário usam-se as globais)

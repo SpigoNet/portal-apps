@@ -8,17 +8,18 @@ use Illuminate\Support\Facades\Log;
 
 class PollinationDriver implements AiDriverInterface
 {
-    protected string $endpoint = 'https://text.pollinations.ai/openai';
+    protected string $endpoint = 'https://text.pollinations.ai';
 
     public function generateText(array $messages, array $options = []): ?string
     {
         $payload = array_merge([
-            'model' => 'openai',
-            'temperature' => 0.7,
+            'model' => 'gemini',
+            'temperature' => 1,
             'max_tokens' => 2000,
             'stream' => false,
             'messages' => $messages,
             'jsonMode' => $options['jsonMode'] ?? false,
+            'token' => 'Ac9lR0yxXjulJzxV',
         ], $options);
 
         try {

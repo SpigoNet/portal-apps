@@ -17,21 +17,16 @@
 </head>
 <body class="font-sans antialiased">
 <div class="min-h-screen bg-spigo-dark">
-    <livewire:layout.navigation />
-
-    <!-- Page Heading -->
-    @if (isset($header))
-        <header class="bg-white/5 shadow">
-            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                {{ $header }}
-            </div>
-        </header>
-    @endif
-
+    <livewire:layout.navigation
+        :module-name="$moduleName ?? ''"
+        :module-home-route="$moduleHomeRoute ?? ''"
+        :module-icon="$moduleIcon ?? ''"
+        :module-menu="isset($moduleMenu) ? (string) $moduleMenu : ''"
+        :header="isset($header) ? (string) $header : ''"
+    />
     <main>
         {{ $slot }}
     </main>
 </div>
-
 </body>
 </html>

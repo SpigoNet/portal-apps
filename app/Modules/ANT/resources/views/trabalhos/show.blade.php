@@ -1,9 +1,7 @@
-<x-app-layout>
+<x-ANT::layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            <a href="{{ route('ant.home') }}" class="text-indigo-600 hover:underline">Dashboard</a> &rsaquo;
-            {{ $trabalho->nome }}
-        </h2>
+        Entrega do trabalho <br>
+        {{ $trabalho->nome }}
     </x-slot>
 
     <div class="py-12">
@@ -227,4 +225,4 @@
             btn.parentElement.remove();
         }
     </script>
-</x-app-layout>
+</x-ANT::layout>

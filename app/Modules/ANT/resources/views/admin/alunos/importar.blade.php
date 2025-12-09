@@ -1,8 +1,6 @@
-<x-app-layout>
+<x-ANT::layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Importar Alunos e Matrículas
-        </h2>
+        Importar Alunos e Matrículas
     </x-slot>
 
     <div class="py-12">
@@ -42,7 +40,9 @@
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="">Selecione...</option>
                                     @foreach($materias as $materia)
-                                        <option value="{{ $materia->id }}">{{ $materia->nome }} ({{ $materia->nome_curto }})</option>
+                                        <option value="{{ $materia->id }}">{{ $materia->nome }}
+                                            ({{ $materia->nome_curto }})
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -51,7 +51,8 @@
                         <hr class="mb-6">
 
                         <div class="mb-6">
-                            <label class="block text-sm font-bold text-gray-700 mb-2">Lista de Alunos (Copie e Cole)</label>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Lista de Alunos (Copie e
+                                Cole)</label>
                             <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded mb-2 text-sm">
                                 <strong>Formato Aceito:</strong> RA e Nome na mesma linha.<br>
                                 Exemplo:<br>
@@ -59,13 +60,16 @@
                                 <code>987654 - Ciclano de Souza</code>
                             </div>
 
-                            <textarea name="lista_alunos" rows="15" required placeholder="Cole aqui a lista da chamada..."
+                            <textarea name="lista_alunos" rows="15" required
+                                      placeholder="Cole aqui a lista da chamada..."
                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 font-mono text-sm"></textarea>
                         </div>
 
                         <div class="flex justify-end">
-                            <a href="{{ route('ant.admin.home') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded mr-2 hover:bg-gray-300">Voltar</a>
-                            <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 font-bold shadow">
+                            <a href="{{ route('ant.admin.home') }}"
+                               class="bg-gray-200 text-gray-700 px-4 py-2 rounded mr-2 hover:bg-gray-300">Voltar</a>
+                            <button type="submit"
+                                    class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 font-bold shadow">
                                 Processar Importação
                             </button>
                         </div>
@@ -75,4 +79,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-ANT::layout>

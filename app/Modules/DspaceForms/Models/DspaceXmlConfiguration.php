@@ -54,4 +54,13 @@ class DspaceXmlConfiguration extends Model
         // Esta relação busca 'dspace_submission_processes'
         return $this->hasMany(SubmissionProcess::class, 'xml_configuration_id');
     }
+
+    /**
+     * Define o relacionamento com os templates de e-mail.
+     */
+    public function emailTemplates()
+    {
+        // Esta relação busca 'dspace_email_templates'
+        return $this->hasMany(DspaceEmailTemplate::class, 'xml_configuration_id');
+    }
 }

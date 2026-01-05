@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\DspaceForms\Http\Controllers\DspaceEmailController;
 use App\Modules\DspaceForms\Http\Controllers\DspaceFormController;
 use App\Modules\DspaceForms\Http\Controllers\DspaceFormFieldController;
 use App\Modules\DspaceForms\Http\Controllers\DspaceFormMapController;
@@ -76,6 +77,12 @@ Route::middleware(['web'])
 
             // Rota para obter dados de configuração para o formulário de campo (manter para o modal)
             Route::get('/field-data', [DspaceFormFieldController::class, 'getFieldData'])->name('field.data');
+        });
+
+        Route::prefix('emails')->controller(DspaceEmailController::class)->name('emails.')->group(function () {
+            Route::get('/', 'index')->name('index'); // Lista todas as templates
+            Route::get('/{template}/edit', 'edit')->name('edit'); // Edita a template
+            Route::put('/{template}', 'update')->name('update'); // Salva a template
         });
 
     });

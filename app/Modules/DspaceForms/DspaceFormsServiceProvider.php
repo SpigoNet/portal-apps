@@ -15,6 +15,10 @@ class DspaceFormsServiceProvider extends ServiceProvider
         Route::middleware('web')
             ->group(__DIR__ . '/routes.php');
 
+        //Carrega as migrations do módulo
+        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
+
+
         // Define o namespace para as views (Ex: view('DspaceForms::index'))
         $this->loadViewsFrom(__DIR__.'/resources/views', 'DspaceForms');
     }

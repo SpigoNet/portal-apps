@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2580ca6b10686a36364dde2c2e62705f",
+    "content-hash": "a931df8a2bbe02c6951b0f2a27e8b9d9",
     "packages": [
         {
             "name": "brick/math",
@@ -6534,6 +6534,60 @@
                 "source": "https://github.com/tijsverkoyen/CssToInlineStyles/tree/v2.3.0"
             },
             "time": "2024-12-21T16:25:41+00:00"
+        },
+        {
+            "name": "vdechenaux/brotli",
+            "version": "1.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/vdechenaux/brotli-php.git",
+                "reference": "545e0ba07dad4a4bbc0548b64e44b0f12858f987"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/vdechenaux/brotli-php/zipball/545e0ba07dad4a4bbc0548b64e44b0f12858f987",
+                "reference": "545e0ba07dad4a4bbc0548b64e44b0f12858f987",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "symfony/process": "^5.4.46|^6.4.14|^7.1.7"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10.0"
+            },
+            "suggest": {
+                "vdechenaux/brotli-bin-amd64": "Brotli binary for Linux amd64",
+                "vdechenaux/brotli-bin-i386": "Brotli binary for Linux i386"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/functions.php"
+                ],
+                "psr-4": {
+                    "VDX\\Brotli\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Vincent Dechenaux",
+                    "email": "vincent.dechenaux@gmail.com"
+                }
+            ],
+            "description": "Add brotli compress/uncompress functions to PHP",
+            "keywords": [
+                "brotli"
+            ],
+            "support": {
+                "issues": "https://github.com/vdechenaux/brotli-php/issues",
+                "source": "https://github.com/vdechenaux/brotli-php/tree/1.3.0"
+            },
+            "time": "2025-11-15T10:31:18+00:00"
         },
         {
             "name": "vlucas/phpdotenv",

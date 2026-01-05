@@ -4,80 +4,70 @@ namespace App\Modules\TreeTask\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\TreeTask\Models\Tarefa;
-use App\Modules\TreeTask\Models\LorePrompt;
-use App\Services\IaService; // <--- Importamos o Service Global
+use App\Services\IaService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class GamificationController extends Controller
 {
     protected IaService $iaService;
 
-    // Injeção de Dependência do Service
     public function __construct(IaService $iaService)
     {
         $this->iaService = $iaService;
     }
 
-    public function motivacao(): JsonResponse
+    public function motivacao(Request $request): JsonResponse
     {
         $userId = auth()->id();
 
-        // 1. Buscar tarefas pendentes
-        $tarefas = Tarefa::where('id_user_responsavel', $userId)
-            ->where('status', '!=', 'Concluído')
-            ->orderBy('prioridade', 'asc')
-            ->take(10) // Limita a 10 para não estourar tokens
-            ->get();
+        // Verifica se o usuário pediu ajuda para uma tarefa específica
+        $taskId = $request->input('task_id');
 
-        if ($tarefas->isEmpty()) {
+        if ($taskId) {
+            $tarefaAtual = Tarefa::find($taskId);
+        } else {
+            // Se não, busca a que está em andamento (Hiperfoco)
+            $tarefaAtual = Tarefa::where('id_user_responsavel', $userId)
+                ->where('status', 'Em Andamento')
+                ->first();
+        }
+
+        if (!$tarefaAtual) {
             return response()->json([
-                'message' => 'Você não tem missões pendentes. O reino está em paz... por enquanto.',
-                'universo' => 'Paz Interior'
+                'message' => 'Nenhuma missão ativa no radar. Selecione uma tarefa para iniciar o protocolo.',
+                'universo' => 'Standby'
             ]);
         }
 
-        // 2. Formatar lista de tarefas para o prompt do USUÁRIO
-        $listaTarefas = $tarefas->map(function($t) {
-            return "- {$t->titulo} (Prioridade: {$t->prioridade})";
-        })->implode("\n");
+        // Prompt Engenharia Reversa: Focado em Alto QI Visual + Baixa Iniciação
+        $systemPrompt = <<<EOT
+ATUAR COMO: Um Estrategista Lógico e Pragmático (Estilo Sci-Fi/Cyberpunk).
+CONTEXTO: O usuário tem inteligência visual alta, mas dificuldade severa de iniciação (TDAH).
+OBJETIVO: Receba a tarefa e quebre-a em 3 passos microscópicos, ridículos de tão fáceis, para vencer a inércia.
+REGRAS:
+1. Nada de papo motivacional abstrato ("Você consegue!").
+2. Use verbos de ação física ou visual ("Abrir", "Escrever", "Desenhar").
+3. Formato: Lista curta. Use emojis técnicos (🛠, 💻, ⚡).
+EOT;
 
-        // 3. Sortear um Universo (Lore) para o prompt do SISTEMA
-        $lore = LorePrompt::where('ativo', true)->inRandomOrder()->first();
+        $userPrompt = "Estou travado na tarefa: '{$tarefaAtual->titulo}'. Descrição: '{$tarefaAtual->descricao}'. O que faço agora?";
 
-        // Fallback caso não tenha lore cadastrada
-        if (!$lore) {
-            $lore = (object) [
-                'universo' => 'Assistente Padrão',
-                'prompt_personagem' => 'Você é um assistente pessoal eficiente e levemente sarcástico.'
-            ];
-        }
-
-        // 4. Montar a estrutura de mensagens para o Service
         $messages = [
-            [
-                'role' => 'system',
-                'content' => "ATUAR COMO: {$lore->prompt_personagem}. " .
-                    "OBJETIVO: Motivar o usuário a completar suas tarefas. " .
-                    "FORMATO: Mensagem curta (máx 300 caracteres). Use emojis."
-            ],
-            [
-                'role' => 'user',
-                'content' => "Aqui estão minhas tarefas pendentes hoje:\n{$listaTarefas}\n\nO que devo fazer?"
-            ]
+            ['role' => 'system', 'content' => $systemPrompt],
+            ['role' => 'user', 'content' => $userPrompt]
         ];
 
-        // 5. Chamar o Service
-        // Podemos passar opções extras se quisermos, ex: ['temperature' => 0.9] para ser mais criativo
-        $textoGerado = $this->iaService->generateText($messages, ['temperature' => 1]);
+        // Temperatura baixa para respostas mais diretas e lógicas
+        $textoGerado = $this->iaService->generateText($messages, ['temperature' => 0.4]);
 
-        // Tratamento de erro caso a API falhe
         if (!$textoGerado) {
-            $textoGerado = "A conexão com o multiverso {$lore->universo} está instável. Mas suas tarefas continuam aqui!";
+            $textoGerado = "Erro de conexão com o núcleo estratégico. Tente reiniciar o passo 1 manualmente.";
         }
 
         return response()->json([
             'message' => $textoGerado,
-            'universo' => $lore->universo
+            'universo' => 'Estrategista Lógico'
         ]);
     }
 }

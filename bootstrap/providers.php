@@ -11,4 +11,5 @@ return [
     App\Modules\GestorHoras\GestorHorasServiceProvider::class,
     App\Modules\Metricas\MetricasServiceProvider::class,
     App\Modules\Mithril\MithrilServiceProvider::class,
+    App\Modules\MundosDeMim\MundosDeMimServiceProvider::class,
 ];

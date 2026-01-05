@@ -1,6 +1,6 @@
-<x-app-layout>
+<x-TreeTask::layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-400 leading-tight">
             {{ __('Comando Mágico IA') }} ✨
         </h2>
     </x-slot>
@@ -55,4 +55,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-TreeTask::layout>

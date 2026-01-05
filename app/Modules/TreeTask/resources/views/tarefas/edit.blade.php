@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-TreeTask::layout>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
     <x-slot name="header">
@@ -155,4 +155,4 @@
             };
         });
     </script>
-</x-app-layout>
+</x-TreeTask::layout>

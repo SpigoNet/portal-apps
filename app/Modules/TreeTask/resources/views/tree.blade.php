@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-TreeTask::layout>
     <x-slot name="header">
         <div class="flex flex-col md:flex-row md:justify-between md:items-center space-y-2 md:space-y-0">
             <div class="flex items-center">
@@ -176,4 +176,4 @@
             </li>
         </ul>
     </div>
-</x-app-layout>
+</x-TreeTask::layout>

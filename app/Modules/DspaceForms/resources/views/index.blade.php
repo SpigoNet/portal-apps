@@ -116,7 +116,6 @@
                     </div>
                 </div>
 
-
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900 dark:text-gray-100">
                         <div class="flex items-center">
@@ -130,6 +129,26 @@
                         <div class="mt-4 text-right">
                             <a href="{{ route('dspace-forms.form-maps.index', ['config_id' => $stats['config_id']]) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold">
                                 {{ __('Gerenciar Vínculos') }} &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- NOVO CARD: Templates de E-mail --}}
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900 dark:text-gray-100">
+                        <div class="flex items-center">
+                            {{-- Use um ícone de envelope --}}
+                            <i class="fa-solid fa-envelope fa-2x text-yellow-500 mr-4"></i>
+                            <div>
+                                <h3 class="text-lg font-semibold">{{ __('Templates de E-mail') }}</h3>
+                                <p class="text-2xl font-bold">{{ $stats['email_templates_count'] ?? 0 }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('templates editáveis') }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-right">
+                            <a href="{{ route('dspace-forms.emails.index', ['config_id' => $stats['config_id']]) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold">
+                                {{ __('Gerenciar Templates') }} &rarr;
                             </a>
                         </div>
                     </div>

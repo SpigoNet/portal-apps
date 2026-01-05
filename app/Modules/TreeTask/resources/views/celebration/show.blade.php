@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-TreeTask::layout>
     <div class="relative min-h-screen bg-gray-900 flex items-center justify-center overflow-hidden">
 
         <canvas id="fireworks-canvas" class="absolute inset-0 z-0 pointer-events-none"></canvas>
@@ -184,4 +184,4 @@
             launchRandomFirework();
         });
     </script>
-</x-app-layout>
+</x-TreeTask::layout>

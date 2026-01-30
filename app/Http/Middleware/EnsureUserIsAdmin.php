@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\PortalAppUser;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
 use App\Models\PortalApp;
@@ -16,11 +18,13 @@ class EnsureUserIsAdmin
             return redirect()->route('login');
         }
 
-        $adminApp = PortalApp::where('start_link', '/admin/apps')->first();
+
+        $linkAppAtual = explode('/',request()->route()->uri)[0];
+        $appAtual = PortalApp::where('start_link', '/' . $linkAppAtual)->first();
 
 
-        if (!$adminApp) {
-            return redirect()->route('dashboard')->with('error', 'O aplicativo de administração não foi encontrado no banco de dados.');
+        if (!$appAtual) {
+            return redirect()->route('welcome')->with('error', 'O aplicativo atual não foi encontrado.');
         }
 
         // --- LÓGICA CORRIGIDA ---
@@ -28,14 +32,16 @@ class EnsureUserIsAdmin
         // esta abordagem faz uma pergunta direta e eficiente ao banco de dados:
         // "Na relação 'portalApps' deste usuário, existe um registro com o ID do app de admin?"
         // Isso evita problemas de comparação de objetos e é mais performático.
-        $userIsAdmin = Auth::user()->portalApps()->where('portal_app_id', $adminApp->id)->exists();
-
-        // **DEBUG**: Se ainda precisar, descomente a linha abaixo para ver o resultado (true ou false).
-        // dd($userIsAdmin);
+        $userIsAdmin = PortalAppUser::query()
+            ->where('portal_app_id', $appAtual->id)
+            ->where('user_id', Auth::id())
+            ->where('role', 'admin')
+            ->exists();
 
         if (!$userIsAdmin) {
-            return redirect()->route('dashboard')->with('error', 'Acesso não autorizado a esta área.');
+            return redirect()->route('welcome')->with('error', 'Acesso não autorizado a esta área.');
         }
+        view()->share('isAppAdmin', $userIsAdmin);
 
         return $next($request);
     }

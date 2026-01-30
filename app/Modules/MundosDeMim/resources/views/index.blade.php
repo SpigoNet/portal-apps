@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-MundosDeMim::layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Mundos de Mim - Painel de Controle') }}
@@ -11,18 +11,20 @@
             <div class="bg-indigo-600 rounded-lg shadow-xl p-6 mb-8 text-white">
                 <h3 class="text-2xl font-bold">Bem-vindo ao seu estúdio de criação</h3>
                 <p class="mt-2 text-indigo-100">
-                    Aqui você define como a Inteligência Artificial enxerga você e seus entes queridos para criar obras de arte diárias.
+                    Aqui você define como a Inteligência Artificial enxerga você e seus entes queridos para criar obras
+                    de arte diárias.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 <a href="{{ route('mundos-de-mim.perfil.index') }}" class="group block">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow duration-200 h-full border-l-4 {{ $stats['biometria_ok'] ? 'border-green-500' : 'border-orange-500' }}">
+                    <div
+                        class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow duration-200 h-full border-l-4 {{ $stats['biometria_ok'] ? 'border-green-500' : 'border-orange-500' }}">
                         <div class="p-6">
                             <div class="flex items-center justify-between mb-4">
                                 <h4 class="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
-                                    Minha Biometria
+                                    Meu Perfil
                                 </h4>
                                 <span class="text-2xl">👤</span>
                             </div>
@@ -45,7 +47,8 @@
                 </a>
 
                 <a href="{{ route('mundos-de-mim.pessoas.index') }}" class="group block">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow duration-200 h-full border-l-4 border-purple-500">
+                    <div
+                        class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow duration-200 h-full border-l-4 border-purple-500">
                         <div class="p-6">
                             <div class="flex items-center justify-between mb-4">
                                 <h4 class="text-lg font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
@@ -64,7 +67,8 @@
                 </a>
 
                 <a href="{{ route('mundos-de-mim.galeria.index') }}" class="group block">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow duration-200 h-full border-l-4 border-blue-500">
+                    <div
+                        class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow duration-200 h-full border-l-4 border-blue-500">
                         <div class="p-6">
                             <div class="flex items-center justify-between mb-4">
                                 <h4 class="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
@@ -83,7 +87,8 @@
                 </a>
 
                 <a href="{{ route('mundos-de-mim.estilos.index') }}" class="group block">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow duration-200 h-full border-l-4 border-pink-500">
+                    <div
+                        class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow duration-200 h-full border-l-4 border-pink-500">
                         <div class="p-6">
                             <div class="flex items-center justify-between mb-4">
                                 <h4 class="text-lg font-bold text-gray-900 group-hover:text-pink-600 transition-colors">
@@ -95,7 +100,8 @@
                                 Explore os universos disponíveis e veja o calendário sazonal.
                             </p>
                             @if($stats['temas_sazonais'] > 0)
-                                <div class="text-xs text-yellow-800 bg-yellow-100 p-2 rounded inline-block font-bold animate-pulse">
+                                <div
+                                    class="text-xs text-yellow-800 bg-yellow-100 p-2 rounded inline-block font-bold animate-pulse">
                                     ★ {{ $stats['temas_sazonais'] }} evento(s) ativo(s) hoje!
                                 </div>
                             @else
@@ -115,4 +121,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-MundosDeMim::layout>

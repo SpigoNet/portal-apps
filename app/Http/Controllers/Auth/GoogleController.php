@@ -30,7 +30,7 @@ class GoogleController extends Controller
 
             Auth::login($user, true); // O 'true' cria a sessão "lembrar de mim"
 
-            return redirect('/dashboard');
+            return redirect('/');
 
         } catch (Exception $e) {
             // Pode adicionar um log aqui

@@ -1,15 +1,9 @@
-@props(['contextMenu' => null])
-
-<x-app-layout>
-    <x-slot name="moduleName">Forms DSpace</x-slot>
-    <x-slot name="moduleHomeRoute">dspace-forms.index</x-slot>
-    <x-slot name="moduleIcon">
+<x-app-layout
+    :module-id="2"
+    :module-menu="view('DspaceForms::components.menu-main')"
+>
         📚
-    </x-slot>
-
     <x-slot name="moduleMenu">
-
-        @include('DspaceForms::components.menu-main')
 
         @if(!empty($contextMenu))
             <div class="border-t border-gray-100 dark:border-gray-600 my-1"></div>

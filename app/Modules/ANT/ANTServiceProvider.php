@@ -2,6 +2,8 @@
 
 namespace App\Modules\ANT;
 
+use App\Models\PortalAppUser;
+use Illuminate\Auth\Access\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -24,6 +26,13 @@ class ANTServiceProvider extends ServiceProvider
         Route::middleware('web')
             ->namespace($this->namespace)
             ->group(__DIR__ . '/routes.php');
+
+        \Illuminate\Support\Facades\Gate::define('admin-do-app', function ($user) {
+            return PortalAppUser::where('user_id', $user->id)
+                ->where('portal_app_id', 4)
+                ->where('role', 'admin')
+                ->exists();
+        });
     }
 
     public function register()

@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-Admin::layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Editar Aplicativo: ') . $app->title }}
@@ -18,4 +18,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-Admin::layout>

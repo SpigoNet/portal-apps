@@ -4,20 +4,18 @@ use App\Livewire\Actions\Logout;
 use Livewire\Volt\Component;
 use App\Models\PortalApp;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 new class extends Component {
     public Collection $shortcutApps;
 
-    // --- NOVAS PROPRIEDADES ---
+    // --- PROPRIEDADES DO MÓDULO ---
+    public ?int $moduleId = null; // ID recebido do Layout
     public string $moduleName = '';
     public string $moduleHomeRoute = '';
-
-    // Defina explicitamente como string e inicie vazia
     public string $moduleMenu = '';
-    // --------------------------
     public string $moduleIcon = '';
     public string $header = '';
-
 
     public function mount()
     {
@@ -25,187 +23,239 @@ new class extends Component {
 
         if (auth()->check()) {
             $user = auth()->user();
-            $this->shortcutApps = PortalApp::where('visibility', 'public')
+
+            // Carrega todos os apps que o usuário tem acesso (Públicos + Privados + Específicos)
+            $this->shortcutApps = PortalApp::query()
+                ->where('visibility', 'public')
                 ->orWhere('visibility', 'private')
                 ->orWhereHas('users', fn($q) => $q->where('user_id', $user->id))
                 ->orderBy('title')
                 ->get();
+
+            // Lógica Inteligente: Se recebermos o ID, preenchemos os dados automaticamente
+
+            if ($this->moduleId) {
+                // Busca na coleção em memória (sem nova query no banco)
+                $currentApp = $this->shortcutApps->firstWhere('id', $this->moduleId);
+
+                if ($currentApp) {
+                    $this->moduleName = $currentApp->title;
+                    $this->moduleIcon = $currentApp->icon;
+                    $this->moduleHomeRoute = $currentApp->start_link;
+                }
+            }
         }
     }
 
     public function logout(Logout $logout): void
     {
         $logout();
-        $this->redirect('/', navigate: true);
+        $this->redirect(route('welcome'), navigate: true);
+    }
+
+    // Helper simples para resolver o link (Rota Laravel ou URL Direta)
+    public function resolveHomeLink() {
+        if (empty($this->moduleHomeRoute)) return '#';
+
+        // Se começar com / ou http, é uma URL direta (padrão do banco)
+        if (Str::startsWith($this->moduleHomeRoute, ['/', 'http'])) {
+            return url($this->moduleHomeRoute);
+        }
+
+        // Caso contrário, tenta resolver como rota nomeada (legado)
+        try {
+            return route($this->moduleHomeRoute);
+        } catch (\Exception $e) {
+            return '#';
+        }
     }
 }; ?>
-<nav x-data="{ open: false }" class="bg-spigo-dark/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-50">
+
+<nav x-data="{ open: false }" class="bg-spigo-dark border-b border-white/10 sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
 
-            <div class="flex items-center">
+            {{-- LADO ESQUERDO: Logo + Contexto da Aplicação Atual --}}
+            <div class="flex items-center gap-4">
+
+                {{-- 1. Logo Principal --}}
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('welcome') }}" wire:navigate title="Portal Spigo">
-                        <img src="//spigo.net/manual/Spigo.Net_Marcadagua 2_Colorido.png" alt="Spigo.Net Logo"
-                             class="block h-9 w-auto hover:opacity-80 transition">
+                    <a href="{{ route('welcome') }}" wire:navigate title="Portal Spigo" class="transition hover:opacity-80">
+                        <img src="//spigo.net/manual/Spigo.Net_Marcadagua 2_Colorido.png" alt="Spigo" class="h-8 w-auto block"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                        <span class="hidden text-xl font-bold text-white tracking-tight">SPIGO<span class="text-spigo-lime">.NET</span></span>
                     </a>
                 </div>
 
+                {{-- 2. Área do Módulo Específico --}}
                 @if($moduleName)
-                    <div class="hidden sm:flex items-center ml-4 pl-4 border-l border-white/20 h-8 space-x-3">
+                    <div class="hidden md:flex items-center h-8 border-l border-white/20 pl-4 space-x-4">
 
-                        <a href="{{ route($moduleHomeRoute) }}"
-                           class="flex items-center gap-2 text-gray-300 hover:text-white transition group"
-                           title="Início do Módulo {{ $moduleName }}">
-                            <div class="p-1.5 rounded-md bg-white/5 group-hover:bg-spigo-lime/20 transition">
-                                @if($moduleIcon)
-                                    <div style="font-size: 24px">
-                                        {!! $moduleIcon !!}
+                        {{-- Nome/Link do Módulo --}}
+                        <a href="{{ $this->resolveHomeLink() }}" class="flex items-center gap-2 group">
+                            @if($moduleIcon)
+                                    <div class="w-8 h-8 flex items-center justify-center">
+                                        {{-- Verifica se é HTML (ex: <i class..>) ou Caminho de Imagem --}}
+                                        @if(str_contains($moduleIcon, '<'))
+                                            {!! $moduleIcon !!}
+                                        @else
+                                            <img src="{{ asset($moduleIcon) }}" alt="{{ $moduleName }}" class="w-full h-full object-contain group-hover:scale-110 transition-transform">
+                                        @endif
                                     </div>
                                 @else
-                                    <svg class="w-4 h-4 text-spigo-lime" fill="none" stroke="currentColor"
-                                         viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                                    </svg>
+                                    <i class="fa-solid fa-layer-group text-lg"></i>
                                 @endif
-                            </div>
-                            <span class="font-bold tracking-wide text-sm">{{ $moduleName }}</span>
+
+                            <span class="font-bold text-gray-200 group-hover:text-white tracking-wide text-sm uppercase">
+                                {{ $moduleName }}
+                            </span>
                         </a>
 
+                        {{-- Menu Específico da Aplicação --}}
                         @if($moduleMenu)
-                            <x-dropdown align="left" width="48">
-                                <x-slot name="trigger">
-                                    <button
-                                        class="flex items-center text-sm font-medium text-gray-400 hover:text-white bg-transparent focus:outline-none transition duration-150 ease-in-out px-2 py-1 rounded hover:bg-white/5">
-                                        <div>Menu</div>
-                                        <div class="ms-1">
-                                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
-                                                 viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                      clip-rule="evenodd"/>
-                                            </svg>
-                                        </div>
-                                    </button>
-                                </x-slot>
-
-                                <x-slot name="content">
-                                    <div class="py-1">
-                                        {!! $moduleMenu !!}
-                                    </div>
-                                </x-slot>
-                            </x-dropdown>
-                        @endif
-
-                        @if($header)
-                            <span class="font-bold tracking-wide text-sl text-white">
-                                {!! $header !!}
-                            </span>
+                            <div class="flex items-center gap-1 bg-white/5 rounded-lg px-2 py-1">
+                                {!! $moduleMenu !!}
+                            </div>
                         @endif
                     </div>
-
                 @endif
             </div>
 
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            {{-- LADO DIREITO: App Switcher + Perfil --}}
+            <div class="hidden sm:flex sm:items-center sm:ms-6 gap-3">
+
                 @auth
-                    <x-dropdown align="right" width="60">
+                    {{-- 3. APP SWITCHER (Grid com Imagens) --}}
+                    <x-dropdown align="right" width="80">
                         <x-slot name="trigger">
-                            <button
-                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-300 bg-transparent hover:text-white focus:outline-none transition ease-in-out duration-150">
-                                <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
-                                     x-on:profile-updated.window="name = $event.detail.name"></div>
-                                <div class="ms-1">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
-                                         viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                              clip-rule="evenodd"/>
-                                    </svg>
+                            <button class="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition focus:outline-none focus:ring-2 focus:ring-spigo-lime/50" title="Meus Aplicativos">
+                                <i class="fa-solid fa-grip text-xl"></i>
+                            </button>
+                        </x-slot>
+
+                        <x-slot name="content">
+                            <div class="p-4 w-[320px]">
+                                <div class="text-xs font-bold text-gray-500 uppercase mb-3 px-1">Navegação Rápida</div>
+
+                                @if($shortcutApps->isNotEmpty())
+                                    <div class="grid grid-cols-3 gap-2">
+                                        @foreach($shortcutApps as $app)
+                                            <a href="{{ url($app->start_link) }}" class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition group text-center h-24">
+                                                <div class="h-8 w-8 mb-2 flex items-center justify-center">
+                                                    <img src="{{ asset($app->icon) }}" alt="{{ $app->title }}"
+                                                         class="w-full h-full object-contain group-hover:scale-110 transition-transform"
+                                                         onerror="this.src='{{ asset('images/default-app-icon.png') }}'; this.onerror=null;">
+                                                </div>
+                                                <span class="text-xs font-medium text-gray-700 dark:text-gray-300 leading-tight line-clamp-2">
+                                                    {{ $app->title }}
+                                                </span>
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                    <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-center">
+                                        <a href="{{ route('welcome') }}" class="text-xs text-spigo-blue hover:text-spigo-lime transition">
+                                            Ver todos os aplicativos
+                                        </a>
+                                    </div>
+                                @else
+                                    <p class="text-sm text-gray-500 text-center py-4">Nenhum app disponível.</p>
+                                @endif
+                            </div>
+                        </x-slot>
+                    </x-dropdown>
+
+                    {{-- 4. Dropdown de Perfil --}}
+                    <x-dropdown align="right" width="48">
+                        <x-slot name="trigger">
+                            <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-300 bg-transparent hover:text-white focus:outline-none transition ease-in-out duration-150 gap-2">
+                                <div class="text-right hidden lg:block">
+                                    <div class="text-xs text-gray-400">Logado como</div>
+                                    <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name" class="font-bold text-white"></div>
+                                </div>
+                                <div class="h-8 w-8 rounded-full bg-spigo-lime/20 flex items-center justify-center text-spigo-lime border border-spigo-lime/50">
+                                    {{ substr(auth()->user()->name, 0, 1) }}
                                 </div>
                             </button>
                         </x-slot>
 
                         <x-slot name="content">
-                            <div class="block px-4 py-2 text-xs text-gray-400">{{ __('Minha Conta') }}</div>
-                            <x-dropdown-link :href="route('profile')"
-                                             wire:navigate>{{ __('Profile') }}</x-dropdown-link>
+                            <div class="block px-4 py-2 text-xs text-gray-400">
+                                {{ __('Gerenciar Conta') }}
+                            </div>
 
-                            @if($shortcutApps->isNotEmpty())
-                                <div class="border-t border-gray-200 dark:border-gray-600"></div>
-                                <div class="block px-4 py-2 text-xs text-gray-400">{{ __('Meus Aplicativos') }}</div>
-                                <div class="max-h-64 overflow-y-auto">
-                                    @foreach($shortcutApps as $app)
-                                        <x-dropdown-link :href="url($app->start_link)">
-                                            <div class="flex items-center">
-                                                <span
-                                                    class="{{ $app->icon }} w-4 mr-2 text-center text-spigo-lime">{{ $app->icon ?? '⚠️' }}</span>
-                                                <span class="truncate">{{ $app->title }}</span>
-                                            </div>
-                                        </x-dropdown-link>
-                                    @endforeach
-                                </div>
-                            @endif
+                            <x-dropdown-link :href="route('profile')" wire:navigate>
+                                <i class="fa-regular fa-user mr-2"></i> {{ __('Meu Perfil') }}
+                            </x-dropdown-link>
 
                             <div class="border-t border-gray-200 dark:border-gray-600"></div>
+
                             <button wire:click="logout" class="w-full text-start">
-                                <x-dropdown-link>{{ __('Log Out') }}</x-dropdown-link>
+                                <x-dropdown-link>
+                                    <i class="fa-solid fa-arrow-right-from-bracket mr-2 text-red-400"></i> {{ __('Sair') }}
+                                </x-dropdown-link>
                             </button>
                         </x-slot>
                     </x-dropdown>
                 @else
-                    <div class="space-x-4">
-                        <a href="{{ route('login') }}" class="text-sm text-gray-300 hover:text-white transition"
-                           wire:navigate>Log in</a>
-                    </div>
+                    <a href="{{ route('login') }}" class="text-sm text-gray-300 hover:text-white transition" wire:navigate>Entrar</a>
                 @endauth
             </div>
 
+            {{-- Botão Mobile --}}
             <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open"
-                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 focus:outline-none focus:bg-white/10 focus:text-white transition duration-150 ease-in-out">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 focus:outline-none transition">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex"
-                              stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M4 6h16M4 12h16M4 18h16"/>
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
-                              stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
         </div>
     </div>
 
+    {{-- Menu Mobile --}}
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-spigo-dark border-t border-gray-700">
-
-        @if($moduleName && $moduleMenu)
-            <div class="pt-2 pb-2 space-y-1 bg-white/5 border-b border-gray-600">
-                <div
-                    class="px-4 py-2 text-xs text-spigo-lime uppercase font-bold tracking-wider flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M4 6h16M4 12h16M4 18h7"></path>
-                    </svg>
+        @if($moduleName)
+            <div class="bg-white/5 p-4 border-b border-gray-700">
+                <div class="text-spigo-lime font-bold uppercase text-xs mb-2">Você está em:</div>
+                <div class="text-white font-bold text-lg mb-2 flex items-center gap-2">
+                    @if($moduleIcon)
+                        @if(str_contains($moduleIcon, '<'))
+                            {!! $moduleIcon !!}
+                        @else
+                            <img src="{{ asset($moduleIcon) }}" alt="{{ $moduleName }}" class="w-6 h-6 object-contain">
+                        @endif
+                    @endif
                     {{ $moduleName }}
                 </div>
-                <div class="px-2">
-                    {!! $moduleMenu !!}
-                </div>
+                @if($moduleMenu)
+                    <div class="flex flex-wrap gap-2">
+                        {!! $moduleMenu !!}
+                    </div>
+                @endif
             </div>
         @endif
 
         @auth
-            <div class="pt-4 pb-1">
+            <div class="pt-4 pb-1 border-t border-gray-700">
                 <div class="px-4">
                     <div class="font-medium text-base text-gray-200">{{ auth()->user()->name }}</div>
                     <div class="font-medium text-sm text-gray-400">{{ auth()->user()->email }}</div>
                 </div>
+
                 <div class="mt-3 space-y-1">
-                    <x-responsive-nav-link :href="route('profile')"
-                                           wire:navigate>{{ __('Profile') }}</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('welcome')" :active="request()->routeIs('welcome')">
+                        {{ __('Dashboard / Apps') }}
+                    </x-responsive-nav-link>
+
+                    <x-responsive-nav-link :href="route('profile')" wire:navigate>
+                        {{ __('Meu Perfil') }}
+                    </x-responsive-nav-link>
+
                     <button wire:click="logout" class="w-full text-start">
-                        <x-responsive-nav-link>{{ __('Log Out') }}</x-responsive-nav-link>
+                        <x-responsive-nav-link>
+                            {{ __('Sair') }}
+                        </x-responsive-nav-link>
                     </button>
                 </div>
             </div>

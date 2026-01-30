@@ -54,6 +54,7 @@ class User extends Authenticatable
         return $this->belongsToMany(\App\Models\PortalApp::class, 'portal_app_user');
     }
 
+
     public function clienteGestorHoras()
     {
         return $this->belongsTo(Cliente::class, 'gh_cliente_id');

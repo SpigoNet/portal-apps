@@ -12,13 +12,12 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        // Inicia a query para buscar os aplicativos visíveis
+        // Query base para apps visíveis
         $visibleAppsQuery = PortalApp::query();
 
-        // Apps públicos são visíveis para todos
+        // Regra de visibilidade
         $visibleAppsQuery->where('visibility', 'public');
 
-        // Se o usuário estiver logado, adiciona os privados e os específicos dele
         if ($user) {
             $visibleAppsQuery->orWhere('visibility', 'private');
             $visibleAppsQuery->orWhereHas('users', function ($q) use ($user) {
@@ -26,19 +25,20 @@ class DashboardController extends Controller
             });
         }
 
-        // Obtém a coleção de apps visíveis
         $apps = $visibleAppsQuery->get();
 
-        // Busca apenas os pacotes que contêm algum dos apps visíveis
+        // Carrega pacotes que tenham apps visíveis
         $packages = Package::whereHas('portalApps', function ($q) use ($apps) {
             $q->whereIn('id', $apps->pluck('id'));
-        })->orderBy('name')->get();
+        })
+            ->orderBy('id', 'asc') // Ou 'name', conforme preferir
+            ->get();
 
-        // Anexa a cada pacote a lista de seus apps que são visíveis
+        // Vincula os apps ao pacote na memória para a View
         foreach ($packages as $package) {
             $package->visible_apps = $apps->where('package_id', $package->id);
         }
 
-        return view('dashboard', ['packages' => $packages]);
+        return view('welcome', ['packages' => $packages]);
     }
 }

@@ -1,4 +1,7 @@
-<x-app-layout>
+<x-app-layout
+    :module-id="5"
+    :module-menu="view('EnvioWhatsapp::components.menu-main')"
+>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Passo 2: Configuração') }}

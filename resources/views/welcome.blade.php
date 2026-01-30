@@ -1,76 +1,171 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Portal Spigo.Net</title>
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="antialiased font-sans bg-spigo-dark text-white/80">
-<div class="relative min-h-screen flex flex-col">
+<x-app-layout>
+    {{-- Removemos o header padrão para criar um customizado abaixo --}}
 
-    <livewire:layout.navigation />
+    <div class="py-10 min-h-screen bg-spigo-dark relative overflow-hidden">
 
-    <main class="flex-grow">
-        <div class="max-w-7xl mx-auto py-12 px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h1 class="text-4xl lg:text-5xl font-bold text-spigo-lime tracking-tight">
+        {{-- Elementos de fundo decorativos (Glow) --}}
+        <div class="absolute top-0 left-0 w-full h-96 bg-spigo-violet/10 blur-3xl -z-10 rounded-full pointer-events-none transform -translate-y-1/2"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {{-- 1. Cabeçalho Adaptativo --}}
+            <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
+                <div>
                     @auth
-                        Meus Aplicativos
+                        <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">
+                            Olá, <span class="text-spigo-lime">{{ Auth::user()->name }}</span>
+                        </h1>
+                        <p class="text-gray-400 mt-2 text-lg">
+                            Bem-vindo ao seu Portal de Operações.
+                        </p>
                     @else
-                        Aplicações de Acesso Público
+                        <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">
+                            Portal <span class="text-spigo-lime">Spigo.Net</span>
+                        </h1>
+                        <p class="text-gray-400 mt-2 text-lg">
+                            Acesse as ferramentas e aplicativos disponíveis.
+                        </p>
                     @endauth
-                </h1>
-                <p class="mt-4 text-lg text-spigo-violet max-w-2xl mx-auto">
-                    @auth
-                        Acesse suas ferramentas e aplicativos disponíveis.
-                    @else
-                        Explore as ferramentas disponíveis para todos os visitantes. Para mais aplicações, faça login.
-                    @endauth
-                </p>
+                </div>
+
+                {{-- 2. Barra de Busca (Vanilla JS) --}}
+                <div class="w-full md:w-1/3 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-search text-gray-500"></i>
+                    </div>
+                    <input type="text"
+                           id="appSearch"
+                           class="block w-full pl-10 pr-3 py-3 border border-gray-700 rounded-xl leading-5 bg-white/5 text-gray-300 placeholder-gray-500 focus:outline-none focus:bg-white/10 focus:border-spigo-lime focus:ring-1 focus:ring-spigo-lime sm:text-sm transition duration-150 ease-in-out"
+                           placeholder="Buscar aplicativo..."
+                           autocomplete="off">
+                </div>
             </div>
 
-            <div class="space-y-12">
+            {{-- Feedback de Mensagens --}}
+            @if (session('error'))
+                <div class="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-lg mb-8 flex items-center gap-3">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <div>{{ session('error') }}</div>
+                </div>
+            @endif
+            @if (session('success'))
+                <div class="bg-green-500/10 border border-green-500/50 text-green-400 p-4 rounded-lg mb-8 flex items-center gap-3">
+                    <i class="fa-solid fa-check-circle"></i>
+                    <div>{{ session('success') }}</div>
+                </div>
+            @endif
+
+            {{-- 3. Grid de Aplicativos --}}
+            <div class="space-y-12" id="packagesContainer">
                 @forelse ($packages as $package)
-                    <div>
-                        <div class="mb-4">
-                            <h3 class="text-2xl font-bold tracking-tight text-white">{{ $package->name }}</h3>
-                            @if($package->description)
-                                <p class="font-normal text-spigo-violet mt-1">{{ $package->description }}</p>
-                            @endif
+                    <div class="package-section" data-package-name="{{ strtolower($package->name) }}">
+                        {{-- Título do Pacote --}}
+                        <div class="flex items-center gap-3 mb-5 border-b border-gray-700 pb-2">
+                            <div class="w-1 h-6 bg-spigo-lime rounded-full"></div>
+                            <h3 class="text-xl font-bold text-white tracking-wide uppercase text-opacity-90">
+                                {{ $package->name }}
+                            </h3>
                         </div>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                            {{-- Nota: Usamos visible_apps que foi populado no Controller --}}
+
+                        {{-- Grid de Cards --}}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             @foreach ($package->visible_apps as $app)
-                                <a href="{{ url($app->start_link) }}" class="group block p-6 text-center bg-white/5 rounded-lg shadow-lg hover:bg-white/10 transition-all duration-300 transform hover:-translate-y-1">
-                                    <span class="fa-3x mb-4 text-spigo-lime transition-transform group-hover:scale-110">
-                                        {{ $app->icon ?? '⚠️' }}
-                                    </span>
-                                    <h5 class="font-bold tracking-tight text-white text-md">
-                                        {{ $app->title }}
-                                    </h5>
-                                    <p class="text-xs text-spigo-violet mt-1">{{ $app->description }}</p>
+                                <a href="{{ url($app->start_link) }}"
+                                   class="app-card group relative flex flex-col p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:border-spigo-lime/50 hover:shadow-lg hover:shadow-spigo-lime/10 transition-all duration-300 ease-out transform hover:-translate-y-1"
+                                   data-app-name="{{ strtolower($app->title) }}"
+                                   data-app-desc="{{ strtolower($app->description) }}">
+
+                                    {{-- Ícone IMAGEM --}}
+                                    <div class="flex items-center justify-between mb-4">
+                                            {{-- Ícone com fallback --}}
+                                            <img src="{{ asset($app->icon) }}"
+                                                 alt="{{ $app->title }}"
+                                                 class="w-12 h-12 object-contain transition-transform duration-300 group-hover:scale-110"
+                                                 onerror="this.src='{{ asset('images/default-app-icon.png') }}'; this.onerror=null;">
+                                        <i class="fa-solid fa-arrow-right text-gray-600 group-hover:text-white transition-colors text-sm opacity-0 group-hover:opacity-100 transform translate-x-[-10px] group-hover:translate-x-0 duration-300"></i>
+                                    </div>
+
+                                    {{-- Textos --}}
+                                    <div>
+                                        <h4 class="text-lg font-bold text-gray-100 group-hover:text-white mb-1">
+                                            {{ $app->title }}
+                                        </h4>
+                                        <p class="text-sm text-gray-400 line-clamp-2 group-hover:text-gray-300">
+                                            {{ $app->description }}
+                                        </p>
+                                    </div>
                                 </a>
                             @endforeach
                         </div>
                     </div>
                 @empty
-                    <div class="bg-white/5 overflow-hidden shadow-sm sm:rounded-lg">
-                        <div class="p-10 text-center text-spigo-violet">
-                            <p>Nenhum aplicativo disponível no momento.</p>
-                        </div>
+                    <div class="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-gray-700">
+                        <i class="fa-regular fa-folder-open text-4xl text-gray-600 mb-4"></i>
+                        <p class="text-gray-400 text-lg">Nenhum aplicativo disponível no momento.</p>
+                        @auth
+                            <p class="text-gray-600 text-sm mt-2">Entre em contato com o administrador.</p>
+                        @else
+                            <p class="text-gray-600 text-sm mt-2">Faça login para ver seus aplicativos.</p>
+                            <a href="{{ route('login') }}" class="mt-4 inline-block text-spigo-lime hover:underline">Ir para Login &rarr;</a>
+                        @endauth
                     </div>
                 @endforelse
-            </div>
-        </div>
-    </main>
 
-    <footer class="py-8 text-center text-sm text-white/50">
-        Spigo.Net &copy; {{ date('Y') }}
-    </footer>
-</div>
-</body>
-</html>
+                {{-- Mensagem de "Nenhum resultado" para a busca --}}
+                <div id="noResults" class="hidden text-center py-12">
+                    <p class="text-gray-500 text-lg">Nenhum aplicativo encontrado para sua busca.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {{-- 4. Script Vanilla JS para Filtro --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('appSearch');
+            const appCards = document.querySelectorAll('.app-card');
+            const packageSections = document.querySelectorAll('.package-section');
+            const noResults = document.getElementById('noResults');
+
+            if(searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const term = e.target.value.toLowerCase();
+                    let hasVisibleApps = false;
+
+                    // Filtra cards individuais
+                    appCards.forEach(card => {
+                        const title = card.getAttribute('data-app-name');
+                        const desc = card.getAttribute('data-app-desc');
+
+                        if (title.includes(term) || desc.includes(term)) {
+                            card.style.display = 'flex'; // Restaura display flex
+                            hasVisibleApps = true;
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+
+                    // Esconde seções vazias
+                    packageSections.forEach(section => {
+                        const totalCards = section.querySelectorAll('.app-card');
+                        const hiddenCards = section.querySelectorAll('.app-card[style="display: none;"]');
+
+                        if (hiddenCards.length === totalCards.length) {
+                            section.style.display = 'none';
+                        } else {
+                            section.style.display = 'block';
+                        }
+                    });
+
+                    // Mensagem de Sem Resultados
+                    if (!hasVisibleApps && term.length > 0) {
+                        noResults.classList.remove('hidden');
+                    } else {
+                        noResults.classList.add('hidden');
+                    }
+                });
+            }
+        });
+    </script>
+</x-app-layout>

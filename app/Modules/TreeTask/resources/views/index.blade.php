@@ -6,12 +6,16 @@
             </h2>
         </div>
     </x-slot>
+
+    {{-- Menu de Contexto (Botões do Topo) --}}
     <x-slot name="contextMenu">
+        <x-dropdown-link :href="route('treetask.focus.index')">
+            Foco (Modo Zen 🧘)
+        </x-dropdown-link>
         <x-dropdown-link :href="route('treetask.create')">
             + Novo Projeto
         </x-dropdown-link>
     </x-slot>
-
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 

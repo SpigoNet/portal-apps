@@ -1,0 +1,46 @@
+name: Deploy Laravel Project
+
+on:
+  push:
+    branches: [ main ] # Executa ao dar push na branch main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 1. Instalar dependências e Compilar (PHP e JS)
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, bcmath, gd, zip
+
+    - name: Install Composer Dependencies
+      run: composer install --no-dev --optimize-autoloader
+
+    - name: Install NPM Dependencies & Build
+      run: |
+        npm install
+        npm run build
+
+    # 2. Zipar a estrutura
+    - name: Create Deployment Zip
+      run: zip -r deploy.zip . -x ".git/*" "node_modules/*" "tests/*"
+
+    # 3. Upload via SSH (SCP) - Mais seguro que FTP
+    - name: Upload to Server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        source: "deploy.zip"
+        target: "/caminho/do/seu/servidor"
+
+    # 4. Acessar URL para descompactar
+    - name: Trigger Unzip via URL
+      run: curl -s https://seu-dominio.com/unzip-script.php?token=${{ secrets.DEPLOY_TOKEN }}

@@ -57,7 +57,7 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./ # Envia o conteúdo da pasta atual
-        server-dir: /public_html/ # Ou o caminho da sua pasta no servido
+        server-dir: /apps/ # Ou o caminho da sua pasta no servido
         exclude: |
           **
           !deploy.zip

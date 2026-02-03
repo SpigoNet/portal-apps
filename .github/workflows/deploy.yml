@@ -27,6 +27,9 @@ jobs:
         npm install
         npm run build
 
+    - name: Generate Deploy Timestamp
+      run: echo $(TZ='America/Sao_Paulo' date +'%d/%m/%Y %H:%M:%S') > storage/app/deploy_time.txt
+
     - name: Create Clean Deployment Zip
       run: |
         zip -r deploy.zip . \
@@ -35,7 +38,8 @@ jobs:
         -x ".env" \
         -x "public/hot/*" \
         -x "node_modules/*" \
-        -x "storage/*" \
+        -x "storage/framework/*" \
+        -x "storage/logs/*" \
         -x "tests/*" \
         -x ".editorconfig" \
         -x ".gitignore" \

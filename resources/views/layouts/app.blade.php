@@ -1,7 +1,8 @@
 @props(['moduleName' => '', 'appId' => null])
 
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,7 +10,7 @@
 
     <!-- PWA Manifest Dinâmico -->
     @if($attributes->get('module-id'))
-        @php($app = (new \App\Services\ModuleService($attributes->get('module-id')))->getCurrentApp())
+    @php($app = (new \App\Services\ModuleService($attributes->get('module-id')))->getCurrentApp())
         <title>{{ config('app.name', 'Spigo Apps') }} {{ $app['title'] ? '- ' . $app['title'] : '' }}</title>
         <link rel="manifest" href="{{ route('pwa.manifest', ['id' => $attributes->get('module-id')]) }}">
         <meta name="theme-color" content="#ccf381"> {{-- Cor padrão Lime --}}
@@ -19,7 +20,7 @@
         <link rel="icon" type="image/png" sizes="16x16" href="{{ $app['icon'] ?? '' }}">
 
     @else
-        <title>{{ config('app.name', 'Spigo Apps') }}</title>
+    <title>{{ config('app.name', 'Spigo Apps') }}</title>
     @endif
 
     <!-- Fonts -->
@@ -31,22 +32,29 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased">
-<div class="min-h-screen bg-spigo-dark">
-    {{-- Componente de Navegação --}}
-    <livewire:layout.navigation
-        :module-id="$attributes->get('module-id') ?? null"
-        :module-name="$moduleName"
-        :module-home-route="$attributes->get('module-home-route') ?? ''"
-        :module-icon="$attributes->get('module-icon') ?? ''"
-        :module-menu="$attributes->get('module-menu') ?? ''"
-        :header="$attributes->get('header') ?? ''"
-    />
 
-    {{-- Conteúdo Principal --}}
-    <main>
-        {{ $slot }}
-    </main>
-</div>
+<body class="font-sans antialiased">
+    <div class="min-h-screen bg-spigo-dark">
+        {{-- Componente de Navegação --}}
+        <livewire:layout.navigation :module-id="$attributes->get('module-id') ?? null" :module-name="$moduleName"
+            :module-home-route="$attributes->get('module-home-route') ?? ''"
+            :module-icon="$attributes->get('module-icon') ?? ''" :module-menu="$attributes->get('module-menu') ?? ''"
+            :header="$attributes->get('header') ?? ''" />
+
+        {{-- Conteúdo Principal --}}
+        <main>
+            {{ $slot }}
+        </main>
+    </div>
+    <footer class="text-center py-4">
+        <p>Último deploy:
+            @if(file_exists(storage_path('app/deploy_time.txt')))
+                {{ file_get_contents(storage_path('app/deploy_time.txt')) }}
+            @else
+                Data desconhecida
+            @endif
+        </p>
+    </footer>
 </body>
+
 </html>

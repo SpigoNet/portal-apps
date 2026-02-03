@@ -19,13 +19,8 @@ jobs:
         php-version: '8.2'
         extensions: mbstring, bcmath, gd, zip
 
-    - name: Create SQLite Database
-      run: |
-        mkdir -p database
-        touch database/database.sqlite
-
     - name: Install Composer Dependencies
-      run: composer install --no-dev --optimize-autoloader
+      run: composer install --no-dev --optimize-autoloader --no-scripts
 
     - name: Install NPM Dependencies & Build
       run: |

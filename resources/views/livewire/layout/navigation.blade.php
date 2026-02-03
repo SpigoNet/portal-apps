@@ -54,8 +54,10 @@ new class extends Component {
     }
 
     // Helper simples para resolver o link (Rota Laravel ou URL Direta)
-    public function resolveHomeLink() {
-        if (empty($this->moduleHomeRoute)) return '#';
+    public function resolveHomeLink()
+    {
+        if (empty($this->moduleHomeRoute))
+            return '#';
 
         // Se começar com / ou http, é uma URL direta (padrão do banco)
         if (Str::startsWith($this->moduleHomeRoute, ['/', 'http'])) {
@@ -71,7 +73,8 @@ new class extends Component {
     }
 }; ?>
 
-<nav x-data="{ open: false }" class="bg-spigo-dark border-b border-white/10 sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
+<nav x-data="{ open: false }"
+    class="bg-spigo-dark border-b border-white/10 sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
 
@@ -80,10 +83,13 @@ new class extends Component {
 
                 {{-- 1. Logo Principal --}}
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('welcome') }}" wire:navigate title="Portal Spigo" class="transition hover:opacity-80">
-                        <img src="//spigo.net/manual/Spigo.Net_Marcadagua 2_Colorido.png" alt="Spigo" class="h-8 w-auto block"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                        <span class="hidden text-xl font-bold text-white tracking-tight">SPIGO<span class="text-spigo-lime">.NET</span></span>
+                    <a href="{{ route('welcome') }}" wire:navigate title="Portal Spigo"
+                        class="transition hover:opacity-80">
+                        <img src="//spigo.net/manual/Spigo.Net_Marcadagua 2_Colorido.png" alt="Spigo"
+                            class="h-8 w-auto block"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                        <span class="hidden text-xl font-bold text-white tracking-tight">SPIGO<span
+                                class="text-spigo-lime">.NET</span></span>
                     </a>
                 </div>
 
@@ -94,17 +100,18 @@ new class extends Component {
                         {{-- Nome/Link do Módulo --}}
                         <a href="{{ $this->resolveHomeLink() }}" class="flex items-center gap-2 group">
                             @if($moduleIcon)
-                                    <div class="w-8 h-8 flex items-center justify-center">
-                                        {{-- Verifica se é HTML (ex: <i class..>) ou Caminho de Imagem --}}
+                                <div class="w-8 h-8 flex items-center justify-center">
+                                    {{-- Verifica se é HTML (ex: <i class..>) ou Caminho de Imagem --}}
                                         @if(str_contains($moduleIcon, '<'))
                                             {!! $moduleIcon !!}
                                         @else
-                                            <img src="{{ asset($moduleIcon) }}" alt="{{ $moduleName }}" class="w-full h-full object-contain group-hover:scale-110 transition-transform">
+                                            <img src="{{ asset($moduleIcon) }}" alt="{{ $moduleName }}"
+                                                class="w-full h-full object-contain group-hover:scale-110 transition-transform">
                                         @endif
-                                    </div>
-                                @else
-                                    <i class="fa-solid fa-layer-group text-lg"></i>
-                                @endif
+                                </div>
+                            @else
+                                <i class="fa-solid fa-layer-group text-lg"></i>
+                            @endif
 
                             <span class="font-bold text-gray-200 group-hover:text-white tracking-wide text-sm uppercase">
                                 {{ $moduleName }}
@@ -128,7 +135,9 @@ new class extends Component {
                     {{-- 3. APP SWITCHER (Grid com Imagens) --}}
                     <x-dropdown align="right" width="80">
                         <x-slot name="trigger">
-                            <button class="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition focus:outline-none focus:ring-2 focus:ring-spigo-lime/50" title="Meus Aplicativos">
+                            <button
+                                class="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition focus:outline-none focus:ring-2 focus:ring-spigo-lime/50"
+                                title="Meus Aplicativos">
                                 <i class="fa-solid fa-grip text-xl"></i>
                             </button>
                         </x-slot>
@@ -140,20 +149,23 @@ new class extends Component {
                                 @if($shortcutApps->isNotEmpty())
                                     <div class="grid grid-cols-3 gap-2">
                                         @foreach($shortcutApps as $app)
-                                            <a href="{{ url($app->start_link) }}" class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition group text-center h-24">
+                                            <a href="{{ url($app->start_link) }}"
+                                                class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition group text-center h-24">
                                                 <div class="h-8 w-8 mb-2 flex items-center justify-center">
                                                     <img src="{{ asset($app->icon) }}" alt="{{ $app->title }}"
-                                                         class="w-full h-full object-contain group-hover:scale-110 transition-transform"
-                                                         onerror="this.src='{{ asset('images/default-app-icon.png') }}'; this.onerror=null;">
+                                                        class="w-full h-full object-contain group-hover:scale-110 transition-transform"
+                                                        onerror="this.src='{{ asset('images/default-app-icon.png') }}'; this.onerror=null;">
                                                 </div>
-                                                <span class="text-xs font-medium text-gray-700 dark:text-gray-300 leading-tight line-clamp-2">
+                                                <span
+                                                    class="text-xs font-medium text-gray-700 dark:text-gray-300 leading-tight line-clamp-2">
                                                     {{ $app->title }}
                                                 </span>
                                             </a>
                                         @endforeach
                                     </div>
                                     <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-center">
-                                        <a href="{{ route('welcome') }}" class="text-xs text-spigo-blue hover:text-spigo-lime transition">
+                                        <a href="{{ route('welcome') }}"
+                                            class="text-xs text-spigo-blue hover:text-spigo-lime transition">
                                             Ver todos os aplicativos
                                         </a>
                                     </div>
@@ -167,12 +179,16 @@ new class extends Component {
                     {{-- 4. Dropdown de Perfil --}}
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
-                            <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-300 bg-transparent hover:text-white focus:outline-none transition ease-in-out duration-150 gap-2">
+                            <button
+                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-300 bg-transparent hover:text-white focus:outline-none transition ease-in-out duration-150 gap-2">
                                 <div class="text-right hidden lg:block">
                                     <div class="text-xs text-gray-400">Logado como</div>
-                                    <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name" class="font-bold text-white"></div>
+                                    <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
+                                        x-on:profile-updated.window="name = $event.detail.name"
+                                        class="font-bold text-white"></div>
                                 </div>
-                                <div class="h-8 w-8 rounded-full bg-spigo-lime/20 flex items-center justify-center text-spigo-lime border border-spigo-lime/50">
+                                <div
+                                    class="h-8 w-8 rounded-full bg-spigo-lime/20 flex items-center justify-center text-spigo-lime border border-spigo-lime/50">
                                     {{ substr(auth()->user()->name, 0, 1) }}
                                 </div>
                             </button>
@@ -197,16 +213,25 @@ new class extends Component {
                         </x-slot>
                     </x-dropdown>
                 @else
-                    <a href="{{ route('login') }}" class="text-sm text-gray-300 hover:text-white transition" wire:navigate>Entrar</a>
+                    <a href="{{ route('login') }}" class="text-sm text-gray-300 hover:text-white transition"
+                        wire:navigate>Entrar</a>
+                    @if (Route::has('register'))
+                        <a href="{{ route('register') }}" class="text-sm text-gray-300 hover:text-white transition"
+                            wire:navigate>Cadastrar</a>
+                    @endif
                 @endauth
             </div>
 
             {{-- Botão Mobile --}}
             <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 focus:outline-none transition">
+                <button @click="open = ! open"
+                    class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 focus:outline-none transition">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex"
+                            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>

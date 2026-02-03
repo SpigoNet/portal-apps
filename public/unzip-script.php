@@ -1,6 +1,6 @@
 <?php
 // Configurações de segurança
-$token_esperado = 'SEU_TOKEN_AQUI'; // O mesmo que você colocar no GitHub Secrets
+$token_esperado = 'S0yTn7VRDbiCUZPYdWoo'; // O mesmo que você colocar no GitHub Secrets
 $token_recebido = $_GET['token'] ?? '';
 
 if ($token_recebido !== $token_esperado) {

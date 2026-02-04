@@ -12,7 +12,9 @@ class GoogleController extends Controller
 {
     public function redirect()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->with(['prompt' => 'select_account'])
+            ->redirect();
     }
 
     public function callback()
@@ -21,10 +23,10 @@ class GoogleController extends Controller
             $googleUser = Socialite::driver('google')->user();
 
             $user = User::updateOrCreate([
-                'google_id' => $googleUser->id,
-            ], [
-                'name' => $googleUser->name,
                 'email' => $googleUser->email,
+            ], [
+                'google_id' => $googleUser->id,
+                'name' => $googleUser->name,
                 'avatar' => $googleUser->avatar,
             ]);
 
@@ -33,8 +35,10 @@ class GoogleController extends Controller
             return redirect('/');
 
         } catch (Exception $e) {
-            // Pode adicionar um log aqui
-            return redirect('/login')->with('error', 'Algo deu errado com o login do Google.');
+            \Log::error('Erro no Login do Google: ' . $e->getMessage(), [
+                'exception' => $e
+            ]);
+            return redirect('/login')->with('error', 'Algo deu errado com o login do Google: ' . $e->getMessage());
         }
     }
 }

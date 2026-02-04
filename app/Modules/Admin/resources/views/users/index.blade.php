@@ -19,10 +19,13 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    class="px-6 py-3 border-b text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                    Foto</th>
+                                <th
+                                    class="px-6 py-3 border-b text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                                     Nome</th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    class="px-6 py-3 border-b text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                                     Email</th>
                                 <th
                                     class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -31,9 +34,18 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($users as $user)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $user->name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $user->email }}</td>
+                                <tr class="hover:bg-white/5 transition">
+                    <td class="px-6 py-4 border-b">
+                        @if($user->avatar)
+                            <img src="{{ $user->avatar }}" alt="{{ $user->name }}" class="h-8 w-8 rounded-full object-cover border border-spigo-lime/20">
+                        @else
+                            <div class="h-8 w-8 rounded-full bg-spigo-lime/20 flex items-center justify-center text-spigo-lime font-bold text-xs uppercase">
+                                {{ substr($user->name, 0, 1) }}
+                            </div>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4 border-b text-white font-medium">{{ $user->name }}</td>
+                    <td class="px-6 py-4 border-b text-gray-300">{{ $user->email }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <a href="{{ route('admin.users.edit', $user) }}"
                                             class="text-indigo-600 hover:text-indigo-900 mr-4">Editar</a>

@@ -31,6 +31,18 @@
                             @error('email') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                         </div>
 
+                        <!-- Avatar URL -->
+                        <div class="mb-4">
+                            <label for="avatar" class="block text-sm font-medium text-gray-700">Avatar URL</label>
+                            <input type="text" name="avatar" id="avatar" value="{{ old('avatar', $user->avatar) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            @error('avatar') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
+                            @if($user->avatar)
+                                <img src="{{ $user->avatar }}" alt="Avatar Preview"
+                                    class="mt-2 h-12 w-12 rounded-full border">
+                            @endif
+                        </div>
+
                         <!-- Senha (Opcional) -->
                         <div class="mb-4">
                             <label for="password" class="block text-sm font-medium text-gray-700">Nova Senha (deixe em

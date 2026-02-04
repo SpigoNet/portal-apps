@@ -25,7 +25,7 @@ new #[Layout('layouts.guest')] class extends Component {
 
 <div>
     <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <x-auth-session-status class="mb-4" />
 
     <form wire:submit="login">
         <!-- Email Address -->
@@ -60,15 +60,14 @@ new #[Layout('layouts.guest')] class extends Component {
 
         <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-400 hover:text-spigo-lime rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-spigo-lime"
+                <a class="underline text-sm text-gray-400 hover:text-spigo-lime rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-spigo-lime focus:ring-offset-spigo-dark"
                     href="{{ route('password.request') }}" wire:navigate>
-                    {{ __('Forgot your password?') }}
+                    {{ __('Esqueceu sua senha?') }}
                 </a>
             @endif
 
-            <x-primary-button
-                class="ms-3 bg-spigo-blue hover:bg-spigo-blue/80 focus:bg-spigo-blue/90 active:bg-spigo-blue/95 focus:ring-spigo-lime">
-                {{ __('Log in') }}
+            <x-primary-button class="ms-3">
+                {{ __('Entrar') }}
             </x-primary-button>
         </div>
     </form>
@@ -80,11 +79,12 @@ new #[Layout('layouts.guest')] class extends Component {
     </div>
 
 
-    <!-- Login com o google -->
-    <div class="flex items-center justify-center">
+    <!-- Login com Social -->
+    <div class="flex flex-col gap-3">
+        <!-- Google -->
         <a href="{{ route('google.redirect') }}"
             class="w-full inline-flex items-center justify-center px-4 py-2 bg-white/90 border border-transparent rounded-md font-semibold text-xs text-spigo-dark uppercase tracking-widest hover:bg-white focus:bg-white active:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-spigo-lime focus:ring-offset-2 focus:ring-offset-spigo-dark transition ease-in-out duration-150">
-            <i class="fa-brands fa-google mr-2"></i>
+            <i class="fa-brands fa-google mr-2 text-base"></i>
             {{ __('Login com o Google') }}
         </a>
     </div>

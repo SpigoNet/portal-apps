@@ -187,10 +187,15 @@ new class extends Component {
                                         x-on:profile-updated.window="name = $event.detail.name"
                                         class="font-bold text-white"></div>
                                 </div>
-                                <div
-                                    class="h-8 w-8 rounded-full bg-spigo-lime/20 flex items-center justify-center text-spigo-lime border border-spigo-lime/50">
-                                    {{ substr(auth()->user()->name, 0, 1) }}
-                                </div>
+                                @if(auth()->user()->avatar)
+                                    <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}"
+                                        class="h-8 w-8 rounded-full border border-spigo-lime/50 object-cover">
+                                @else
+                                    <div
+                                        class="h-8 w-8 rounded-full bg-spigo-lime/20 flex items-center justify-center text-spigo-lime border border-spigo-lime/50 group-hover:bg-spigo-lime group-hover:text-spigo-dark transition">
+                                        {{ substr(auth()->user()->name, 0, 1) }}
+                                    </div>
+                                @endif
                             </button>
                         </x-slot>
 
@@ -263,9 +268,18 @@ new class extends Component {
 
         @auth
             <div class="pt-4 pb-1 border-t border-gray-700">
-                <div class="px-4">
-                    <div class="font-medium text-base text-gray-200">{{ auth()->user()->name }}</div>
-                    <div class="font-medium text-sm text-gray-400">{{ auth()->user()->email }}</div>
+                <div class="px-4 flex items-center gap-3">
+                    @if(auth()->user()->avatar)
+                        <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}" class="h-10 w-10 rounded-full border border-spigo-lime/50 object-cover">
+                    @else
+                        <div class="h-10 w-10 rounded-full bg-spigo-lime/20 flex items-center justify-center text-spigo-lime border border-spigo-lime/50">
+                            {{ substr(auth()->user()->name, 0, 1) }}
+                        </div>
+                    @endif
+                    <div>
+                        <div class="font-medium text-base text-gray-200">{{ auth()->user()->name }}</div>
+                        <div class="font-medium text-sm text-gray-400">{{ auth()->user()->email }}</div>
+                    </div>
                 </div>
 
                 <div class="mt-3 space-y-1">

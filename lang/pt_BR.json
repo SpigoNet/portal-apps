@@ -1,0 +1,20 @@
+{
+    "Email": "E-mail",
+    "Password": "Senha",
+    "Confirm Password": "Confirmar Senha",
+    "Name": "Nome",
+    "Remember me": "Lembrar de mim",
+    "Forgot your password?": "Esqueceu sua senha?",
+    "Log in": "Entrar",
+    "Register": "Cadastrar",
+    "Already registered?": "Já é cadastrado?",
+    "Reset Password": "Redefinir Senha",
+    "Email Password Reset Link": "Enviar Link de Redefinição",
+    "These credentials do not match our records.": "Essas credenciais não correspondem aos nossos registros.",
+    "Throttle": "Muitas tentativas de login. Tente novamente em :seconds segundos.",
+    "password": "A senha está incorreta.",
+    "Password reset link sent.": "O link de redefinição de senha foi enviado.",
+    "Your password has been reset.": "Sua senha foi redefinida.",
+    "This password reset token is invalid.": "Este token de redefinição de senha é inválido.",
+    "User": "Não encontramos um usuário com esse endereço de e-mail."
+}

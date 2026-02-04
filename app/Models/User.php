@@ -22,8 +22,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'whatsapp_phone',  // Novo
-        'whatsapp_apikey', // Novo
+        'google_id',  // Adicionado
+        'microsoft_id', // Adicionado
+        'avatar',     // Adicionado
+        'whatsapp_phone',
+        'whatsapp_apikey',
     ];
 
     /**

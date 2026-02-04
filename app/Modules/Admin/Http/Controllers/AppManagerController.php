@@ -18,7 +18,20 @@ class AppManagerController extends Controller
     public function create()
     {
         $users = User::orderBy('name')->get();
-        return view('Admin::apps.create', compact('users'));
+        $icons = $this->getAvailableIcons();
+        return view('Admin::apps.create', compact('users', 'icons'));
+    }
+
+    private function getAvailableIcons()
+    {
+        $path = public_path('images/apps');
+        if (!file_exists($path))
+            return [];
+
+        $files = scandir($path);
+        return array_filter($files, function ($file) {
+            return in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), ['png', 'jpg', 'jpeg', 'svg']);
+        });
     }
 
     public function store(Request $request)
@@ -44,7 +57,8 @@ class AppManagerController extends Controller
     public function edit(PortalApp $app)
     {
         $users = User::orderBy('name')->get();
-        return view('Admin::apps.edit', compact('app', 'users'));
+        $icons = $this->getAvailableIcons();
+        return view('Admin::apps.edit', compact('app', 'users', 'icons'));
     }
 
     public function update(Request $request, PortalApp $app)

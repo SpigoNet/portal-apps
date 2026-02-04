@@ -2,24 +2,17 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Gerenciar Aplicativos') }}
+                {{ __('Gerenciar Pacotes') }}
             </h2>
-            <div class="flex space-x-4"> {{-- Added a flex container for the buttons --}}
-                <a href="{{ route('admin.apps.create') }}"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Novo Aplicativo
-                </a>
-                <a href="{{ route('admin.icon-generator') }}"
-                    class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
-                    Gerador de Ícones
-                </a>
-            </div>
+            <a href="{{ route('admin.packages.create') }}"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Novo Pacote
+            </a>
         </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Mensagem de sucesso -->
             @if(session('success'))
                 <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
                     <p>{{ session('success') }}</p>
@@ -31,31 +24,39 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col"
+                                <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Título</th>
-                                <th scope="col"
+                                    Nome</th>
+                                <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Visibilidade</th>
-                                <th scope="col" class="relative px-6 py-3"><span class="sr-only">Ações</span></th>
+                                    Descrição</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Cor de Fundo</th>
+                                <th
+                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Ações</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse ($apps as $app)
+                            @forelse ($packages as $package)
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {{ $app->title }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $app->visibility }}
+                                        {{ $package->name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ Str::limit($package->description, 50) }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                            style="background-color: {{ $package->bg_color }}; color: {{ $package->bg_color == '#FFFFFF' ? '#000' : '#fff' }}">
+                                            {{ $package->bg_color }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <a href="{{ route('admin.apps.users.index', $app) }}"
-                                            class="text-blue-600 hover:text-blue-900 mr-4">Usuários</a>
-                                        <a href="{{ route('admin.apps.edit', $app) }}"
+                                        <a href="{{ route('admin.packages.edit', $package) }}"
                                             class="text-indigo-600 hover:text-indigo-900 mr-4">Editar</a>
-                                        <form action="{{ route('admin.apps.destroy', $app) }}" method="POST"
+                                        <form action="{{ route('admin.packages.destroy', $package) }}" method="POST"
                                             class="inline-block"
-                                            onsubmit="return confirm('Tem certeza que deseja excluir este aplicativo?');">
+                                            onsubmit="return confirm('Tem certeza que deseja excluir este pacote?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:text-red-900">Excluir</button>
@@ -64,8 +65,8 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                                        Nenhum aplicativo cadastrado.</td>
+                                    <td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                        Nenhum pacote cadastrado.</td>
                                 </tr>
                             @endforelse
                         </tbody>

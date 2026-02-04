@@ -59,4 +59,10 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Cliente::class, 'gh_cliente_id');
     }
+
+    public function streamings()
+    {
+        return $this->hasMany(\App\Modules\StreamingManager\Models\Streaming::class);
+    }
 }
+

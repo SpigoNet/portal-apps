@@ -11,4 +11,10 @@ class Package extends Model
         return $this->hasMany(\App\Models\PortalApp::class);
     }
 
+    protected $fillable = [
+        'name',
+        'description',
+        'bg_color'
+    ];
+
 }

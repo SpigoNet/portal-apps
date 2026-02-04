@@ -30,7 +30,7 @@ class PortalApp extends Model
 
     public function users()
     {
-        return $this->belongsToMany(\App\Models\User::class, 'portal_app_user');
+        return $this->belongsToMany(\App\Models\User::class, 'portal_app_user')->withPivot('role');
     }
 
     /**

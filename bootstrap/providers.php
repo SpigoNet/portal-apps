@@ -12,4 +12,6 @@ return [
     App\Modules\Metricas\MetricasServiceProvider::class,
     App\Modules\Mithril\MithrilServiceProvider::class,
     App\Modules\MundosDeMim\MundosDeMimServiceProvider::class,
+    App\Modules\StreamingManager\StreamingManagerServiceProvider::class,
 ];
+

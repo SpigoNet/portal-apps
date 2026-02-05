@@ -46,8 +46,7 @@ class BolaoController extends Controller
 
     public function storeGuess(Request $request)
     {
-        storeGuess(Request $request)
-    {
+        
         $request->validate([
             'meeting_id' => 'required|exists:bolao_meetings,id',
             'name' => [

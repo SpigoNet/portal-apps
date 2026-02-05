@@ -28,7 +28,8 @@ class BolaoController extends Controller
 
         $meeting = BolaoMeeting::create([
             'name' => $request->name,
-            'status' => 'open'
+            'status' => 'open',
+            'user_id' => auth()->id()
         ]);
 
         return redirect()->route('bolao.index');
@@ -60,6 +61,11 @@ class BolaoController extends Controller
     public function end($id)
     {
         $meeting = BolaoMeeting::findOrFail($id);
+
+        if ($meeting->user_id && $meeting->user_id !== auth()->id()) {
+            abort(403, 'Apenas o criador da reunião pode encerrá-la.');
+        }
+
         $now = now();
         $meeting->update([
             'status' => 'closed',

@@ -13,5 +13,6 @@ return [
     App\Modules\Mithril\MithrilServiceProvider::class,
     App\Modules\MundosDeMim\MundosDeMimServiceProvider::class,
     App\Modules\StreamingManager\StreamingManagerServiceProvider::class,
+    App\Modules\BolaoReuniao\BolaoReuniaoServiceProvider::class,
 ];
 

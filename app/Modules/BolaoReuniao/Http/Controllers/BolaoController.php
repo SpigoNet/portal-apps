@@ -7,6 +7,7 @@ use App\Models\BolaoMeeting;
 use App\Models\BolaoGuess;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Validation\Rule;
 
 class BolaoController extends Controller
 {

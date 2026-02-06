@@ -7,6 +7,7 @@ use App\Models\BolaoMeeting;
 use App\Models\BolaoGuess;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Validation\Rule;
 
 class BolaoController extends Controller
 {
@@ -46,9 +47,18 @@ class BolaoController extends Controller
 
     public function storeGuess(Request $request)
     {
+        
         $request->validate([
             'meeting_id' => 'required|exists:bolao_meetings,id',
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                // garante que o mesmo nome não seja repetido dentro da mesma reunião
+                Rule::unique('bolao_guesses')->where(function ($query) use ($request) {
+                    return $query->where('meeting_id', $request->meeting_id);
+                }),
+            ],
             'guess' => 'required'
         ]);
 

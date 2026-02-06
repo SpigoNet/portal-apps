@@ -11,9 +11,33 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
+    public function landing()
+    {
+        // Se já estiver logado, redireciona para o dashboard interno
+        if (Auth::check()) {
+            return redirect()->route('mundos-de-mim.index');
+        }
+
+        // Galeria Curada Dinâmica: Escaneia o diretório de imagens
+        $imagePath = public_path('images/mundos-de-mim');
+        $images = [];
+
+        if (is_dir($imagePath)) {
+            $files = scandir($imagePath);
+            foreach ($files as $file) {
+                if (in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'webp'])) {
+                    $images[] = '/images/mundos-de-mim/' . $file;
+                }
+            }
+        }
+
+        return view('MundosDeMim::landing', compact('images'));
+    }
+
     public function index()
     {
         $userId = Auth::id();
+        $user = Auth::user();
 
         // Dados existentes
         $hasBiometrics = UserAttribute::where('user_id', $userId)->exists();
@@ -34,7 +58,9 @@ class DashboardController extends Controller
             'total_pessoas' => $relatedCount,
             'pessoas_ativas' => $activeRelated,
             'total_artes' => $artCount,      // <--- Novo
-            'temas_sazonais' => $activeSeasonal // <--- Novo
+            'temas_sazonais' => $activeSeasonal, // <--- Novo
+            'plano' => $user->subscription_plan,
+            'creditos' => $user->credits
         ];
 
         return view('MundosDeMim::index', compact('stats'));

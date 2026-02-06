@@ -49,7 +49,15 @@ new class extends Component {
 
     public function logout(Logout $logout): void
     {
+        $origin = Session::get('module_origin');
+
         $logout();
+
+        if ($origin === 'mundos-de-mim') {
+            $this->redirect(route('mundos-de-mim.landing'), navigate: true);
+            return;
+        }
+
         $this->redirect(route('welcome'), navigate: true);
     }
 
@@ -270,9 +278,11 @@ new class extends Component {
             <div class="pt-4 pb-1 border-t border-gray-700">
                 <div class="px-4 flex items-center gap-3">
                     @if(auth()->user()->avatar)
-                        <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}" class="h-10 w-10 rounded-full border border-spigo-lime/50 object-cover">
+                        <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}"
+                            class="h-10 w-10 rounded-full border border-spigo-lime/50 object-cover">
                     @else
-                        <div class="h-10 w-10 rounded-full bg-spigo-lime/20 flex items-center justify-center text-spigo-lime border border-spigo-lime/50">
+                        <div
+                            class="h-10 w-10 rounded-full bg-spigo-lime/20 flex items-center justify-center text-spigo-lime border border-spigo-lime/50">
                             {{ substr(auth()->user()->name, 0, 1) }}
                         </div>
                     @endif

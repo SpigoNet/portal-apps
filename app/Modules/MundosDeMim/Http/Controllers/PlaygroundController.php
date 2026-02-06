@@ -127,30 +127,40 @@ class PlaygroundController extends Controller
             } else {
                 // --- LÓGICA POLLINATIONS (Imagem) ---
 
-                $driver = new PollinationDriver(); // Chave é opcional/hardcoded na classe
+                // Verifica créditos se não for admin
+                if ($user->credits <= 0 && !auth()->user()->can('admin-do-app')) {
+                    return back()->with('error', 'Você não possui créditos suficientes para gerar imagens sob demanda. Os créditos são renovados semanalmente.');
+                }
+
+                $driver = new PollinationDriver();
 
                 $options = [];
                 if ($photoPath) {
                     $options['reference_image_path'] = $photoPath;
                 }
 
-                // Chama método específico de imagem
                 $imageUrl = $driver->generateImage($request->input('prompt'), $options);
 
                 if ($imageUrl) {
-                    // Formata retorno como Imagem
+                    // Deduz crédito
+                    $user->decrement('credits');
+
                     $htmlResult = "
-                        <div class='text-center space-y-4'>
-                            <h3 class='font-bold text-lg text-indigo-700'>Imagem Gerada pelo Pollinations:</h3>
-                            <a href='{$imageUrl}' target='_blank'>
-                                <img src='{$imageUrl}' class='rounded shadow-lg mx-auto max-w-full border-4 border-white' style='max-height: 500px;'>
-                            </a>
-                            <p class='text-xs text-gray-500'>Caminho: {$imageUrl}</p>
-                            <a href='{$imageUrl}' download class='inline-block bg-indigo-600 text-white px-4 py-2 rounded text-sm'>Baixar Imagem</a>
-                        </div>
-                    ";
+                            <div class='text-center space-y-4'>
+                                <div class='bg-green-50 text-green-700 text-xs py-1 px-3 rounded-full inline-block mb-2'>-1 Crédito Adquirido</div>
+                                <h3 class='font-bold text-lg text-indigo-700'>Imagem Gerada:</h3>
+                                <a href='{$imageUrl}' target='_blank'>
+                                    <img src='{$imageUrl}' class='rounded shadow-xl mx-auto max-w-full border-4 border-white' style='max-height: 500px;'>
+                                </a>
+                                <div class='flex justify-center gap-2 mt-4'>
+                                    <a href='{$imageUrl}' download class='bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2'>
+                                        <i class='fa-solid fa-download'></i> Baixar
+                                    </a>
+                                </div>
+                            </div>
+                        ";
                 } else {
-                    return back()->with('error', 'O Pollinations não retornou uma imagem válida. Verifique os logs.');
+                    return back()->with('error', 'O Pollinations não retornou uma imagem válida.');
                 }
             }
 

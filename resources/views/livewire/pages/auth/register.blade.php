@@ -31,6 +31,12 @@ new #[Layout('layouts.guest')] class extends Component {
 
         Auth::login($user);
 
+        $origin = Session::get('module_origin');
+        if ($origin === 'mundos-de-mim') {
+            $this->redirect(route('mundos-de-mim.index'), navigate: true);
+            return;
+        }
+
         $this->redirect(route('welcome', absolute: false), navigate: true);
     }
 }; ?>

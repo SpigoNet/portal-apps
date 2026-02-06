@@ -37,6 +37,9 @@
             <x-dropdown-link :href="route('mundos-de-mim.admin.importador.index')">
                 Importador
             </x-dropdown-link>
+            <x-dropdown-link :href="route('mundos-de-mim.admin.gallery.index')">
+                Galeria Pública
+            </x-dropdown-link>
         </x-slot>
     </x-dropdown>
 

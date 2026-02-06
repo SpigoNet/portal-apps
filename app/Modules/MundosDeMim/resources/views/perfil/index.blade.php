@@ -50,6 +50,17 @@
                                     @error('photo')
                                     <span class="text-red-500 text-xs">{{ $message }}</span>
                                     @enderror
+
+                                    @if(isset($attributes->photo_path))
+                                        <div class="mt-4">
+                                            <button type="button" id="btn-analyze-ia"
+                                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                                <span id="analyze-spinner" class="hidden mr-2 animate-spin">🌀</span>
+                                                ✨ Analisar Foto com IA
+                                            </button>
+                                            <p class="text-[10px] text-gray-400 mt-1">* A IA sugerirá cor dos olhos, cabelo e tipo físico.</p>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -102,4 +113,47 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('btn-analyze-ia')?.addEventListener('click', async function() {
+            const btn = this;
+            const spinner = document.getElementById('analyze-spinner');
+            
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+
+            try {
+                const response = await fetch("{{ route('mundos-de-mim.perfil.analyze') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert('Erro: ' + data.error);
+                } else {
+                    if (data.body_type) document.getElementById('body_type').value = data.body_type;
+                    if (data.eye_color) document.getElementById('eye_color').value = data.eye_color;
+                    if (data.hair_type) document.getElementById('hair_type').value = data.hair_type;
+                    
+                    // Highlight fields
+                    ['body_type', 'eye_color', 'hair_type'].forEach(id => {
+                        const el = document.getElementById(id);
+                        el.classList.add('bg-green-50', 'border-green-500');
+                        setTimeout(() => el.classList.remove('bg-green-50', 'border-green-500'), 2000);
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erro na comunicação com o servidor.');
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+            }
+        });
+    </script>
 </x-MundosDeMim::layout>

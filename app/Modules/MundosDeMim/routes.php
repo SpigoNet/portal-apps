@@ -14,10 +14,11 @@ Route::prefix('mundos-de-mim')
 
         // Rota Principal (Dashboard do Módulo)
         Route::get('/', [DashboardController::class, 'index'])->name('index'); // <--- Nova Rota
-
+    
         // Rotas de Biometria
         Route::get('/meu-perfil', [PerfilBiometricoController::class, 'index'])->name('perfil.index');
         Route::post('/meu-perfil', [PerfilBiometricoController::class, 'update'])->name('perfil.update');
+        Route::post('/meu-perfil/analisar', [PerfilBiometricoController::class, 'analyze'])->name('perfil.analyze');
 
         // Rotas de Pessoas
         Route::get('/pessoas', [PessoasRelacionadasController::class, 'index'])->name('pessoas.index');
@@ -34,11 +35,12 @@ Route::prefix('mundos-de-mim')
 
         Route::get('/playground', [PlaygroundController::class, 'index'])->name('playground.index');
         Route::post('/playground', [PlaygroundController::class, 'generate'])->name('playground.generate');
+        Route::post('/playground/refinar', [PlaygroundController::class, 'refine'])->name('playground.refine');
 
     });
 
 Route::middleware(['web', 'auth', 'admin'])
-->prefix('mundos-de-mim/admin')
+    ->prefix('mundos-de-mim/admin')
     ->name('mundos-de-mim.admin.')
     ->group(function () {
 

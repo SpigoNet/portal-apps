@@ -30,7 +30,12 @@ class GoogleController extends Controller
                 'avatar' => $googleUser->avatar,
             ]);
 
-            Auth::login($user, true); // O 'true' cria a sessão "lembrar de mim"
+            Auth::login($user, true);
+
+            $origin = session('module_origin');
+            if ($origin === 'mundos-de-mim') {
+                return redirect()->route('mundos-de-mim.index');
+            }
 
             return redirect('/');
 

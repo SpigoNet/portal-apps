@@ -18,15 +18,20 @@ class MundosDeMimServiceProvider extends ServiceProvider
     public function boot()
     {
         // Carrega as views do módulo com o namespace 'MundosDeMim'
-        $this->loadViewsFrom(__DIR__.'/resources/views', $this->namespace);
+        $this->loadViewsFrom(__DIR__ . '/resources/views', $this->namespace);
 
         // Carrega as migrações do módulo
-        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
 
-        // Carrega as
+        // Registra comandos de console
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                Console\Commands\RechargeCredits::class,
+            ]);
+        }
 
         // Carrega as rotas web com middleware padrão
-        Route::middleware(['web', 'auth'])
+        Route::middleware(['web'])
             ->group(__DIR__ . '/routes.php');
 
         Gate::define('admin-do-app', function ($user) {

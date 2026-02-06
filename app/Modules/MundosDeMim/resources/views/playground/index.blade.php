@@ -71,8 +71,25 @@
                             </div>
 
                             <div class="col-span-2">
-                                <label for="prompt" class="block text-sm font-bold text-gray-700 mb-2">3. Prompt
-                                    (Comando)</label>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label for="prompt" class="block text-sm font-bold text-gray-700">3. Prompt
+                                        (Comando)</label>
+
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 rounded-full text-indigo-700 text-xs font-bold border border-indigo-100">
+                                            <i class="fa-solid fa-coins"></i> {{ auth()->user()->credits }} Créditos
+                                        </div>
+
+                                        <button type="button" id="btn-magic-wand"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full text-white text-xs font-bold hover:shadow-md transition">
+                                            <span id="magic-spinner" class="hidden animate-spin">🌀</span>
+                                            <i id="magic-icon" class="fa-solid fa-wand-magic-sparkles"></i>
+                                            Refinar (Varinha Mágica)
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <textarea name="prompt" id="prompt" rows="5"
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                     placeholder="Ex para Gemini: O que você vê nesta foto?&#10;Ex para Pollinations: Cyberpunk portrait of a hero..."

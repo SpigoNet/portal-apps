@@ -9,7 +9,7 @@
         <x-dropdown-link :href="route('ant.pesos.create')">
             Configurar Pesos
         </x-dropdown-link>
-        <x-dropdown-link :href="route('ant.professor.create') ">
+        <x-dropdown-link :href="route('ant.professor.create')">
             + Novo Trabalho / Prova
         </x-dropdown-link>
     </x-slot>
@@ -43,12 +43,10 @@
                                 <ul class="space-y-2">
                                     @foreach($materia->trabalhos as $trabalho)
                                         <li class="flex justify-between items-center text-sm p-2 hover:bg-gray-50 rounded">
-                                            <span class="truncate w-1/2"
-                                                  title="{{ $trabalho->nome }}">{{ $trabalho->nome }}</span>
+                                            <span class="truncate w-1/2" title="{{ $trabalho->nome }}">{{ $trabalho->nome }}</span>
 
                                             @if($trabalho->pendentes_count > 0)
-                                                <span
-                                                    class="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs font-bold">
+                                                <span class="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs font-bold">
                                                     {{ $trabalho->pendentes_count }} p/ corrigir
                                                 </span>
                                             @else
@@ -58,16 +56,18 @@
                                             @endif
 
                                             <a href="{{ route('ant.professor.trabalho', $trabalho->id) }}"
-                                               class="text-indigo-600 hover:text-indigo-900 font-bold ml-2">Gerenciar</a>
+                                                class="text-indigo-600 hover:text-indigo-900 font-bold ml-2">Gerenciar</a>
                                         </li>
                                     @endforeach
                                 </ul>
                             @endif
 
                             <div class="mt-4 pt-3 border-t border-gray-100 flex justify-end space-x-2">
-                                <a href="{{ route('ant.admin.alunos.index', ['materia_id' => $materia->id, 'semestre' => $semestreAtual]) }}" class="text-gray-600 hover:text-gray-900 text-sm font-medium">Ver Alunos</a>
+                                <a href="{{ route('ant.admin.alunos.index', ['materia_id' => $materia->id, 'semestre' => $semestreAtual]) }}"
+                                    class="text-gray-600 hover:text-gray-900 text-sm font-medium">Ver Alunos</a>
                                 <span class="text-gray-300">|</span>
-                                <a href="{{ route('ant.professor.boletim', $materia->id) }}" class="text-indigo-600 hover:text-indigo-900 text-sm font-bold">Ver Boletim</a>
+                                <a href="{{ route('ant.professor.boletim', $materia->id) }}"
+                                    class="text-indigo-600 hover:text-indigo-900 text-sm font-bold">Ver Boletim</a>
                             </div>
                         </div>
                     </div>
@@ -77,7 +77,8 @@
             @if($materiasProfessor->isEmpty())
                 <div class="bg-yellow-50 p-4 rounded-md border border-yellow-200">
                     <p class="text-yellow-700">Você não está vinculado a nenhuma matéria no semestre
-                        <strong>{{ $semestreAtual }}</strong>.</p>
+                        <strong>{{ $semestreAtual }}</strong>.
+                    </p>
                 </div>
             @endif
 

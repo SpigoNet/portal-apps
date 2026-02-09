@@ -19,11 +19,18 @@ class PesoController extends Controller
         $user = auth()->user();
         $config = AntConfiguracao::first();
         $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $isAdmin = $config ? $config->isAdmin($user->email) : false;
 
-        // 1. Busca Matérias do Professor no Semestre Atual
-        $materias = AntMateria::whereHas('professores', function($q) use ($user, $semestreAtual) {
-            $q->where('user_id', $user->id)->where('semestre', $semestreAtual);
-        })->get();
+        // 1. Busca Matérias
+        if ($isAdmin) {
+            // Admin vê todas as matérias
+            $materias = AntMateria::orderBy('nome')->get();
+        } else {
+            // Professor vê apenas as suas
+            $materias = AntMateria::whereHas('professores', function ($q) use ($user, $semestreAtual) {
+                $q->where('user_id', $user->id)->where('semestre', $semestreAtual);
+            })->get();
+        }
 
         if ($materias->isEmpty()) {
             return redirect()->route('ant.professor.index')
@@ -54,16 +61,19 @@ class PesoController extends Controller
 
         $config = AntConfiguracao::first();
         $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $isAdmin = $config ? $config->isAdmin(auth()->user()->email) : false;
 
-        // Segurança: Verifica se é professor da matéria
-        $ehProfessor = DB::table('ant_professor_materia')
-            ->where('user_id', auth()->id())
-            ->where('materia_id', $request->materia_id)
-            ->where('semestre', $semestreAtual)
-            ->exists();
+        if (!$isAdmin) {
+            // Segurança: Verifica se é professor da matéria
+            $ehProfessor = DB::table('ant_professor_materia')
+                ->where('user_id', auth()->id())
+                ->where('materia_id', $request->materia_id)
+                ->where('semestre', $semestreAtual)
+                ->exists();
 
-        if (!$ehProfessor) {
-            abort(403, 'Acesso negado a esta disciplina.');
+            if (!$ehProfessor) {
+                abort(403, 'Acesso negado a esta disciplina.');
+            }
         }
 
         // Evitar duplicidade de nome na mesma matéria/semestre

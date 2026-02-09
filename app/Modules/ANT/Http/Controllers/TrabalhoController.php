@@ -111,11 +111,39 @@ class TrabalhoController extends Controller
                 }
 
                 // Salva no diretório do LÍDER (para organização)
+                $targetPath = "ant/entregas/{$trabalho->semestre}/{$trabalho->materia->nome_curto}/{$trabalho->id}/{$alunoLider->ra}";
+                $fileName = $arquivo->getClientOriginalName();
+
+                \Log::info('SFTP Upload Attempt', [
+                    'target_path' => $targetPath,
+                    'file_name' => $fileName,
+                    'full_path' => $targetPath . '/' . $fileName
+                ]);
+
+                // Cria a estrutura de diretórios no SFTP se não existir
+                try {
+                    if (!\Storage::disk('sftp')->exists($targetPath)) {
+                        \Storage::disk('sftp')->makeDirectory($targetPath);
+                        \Log::info('SFTP Directory Created', ['path' => $targetPath]);
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('SFTP Directory Creation Failed', [
+                        'path' => $targetPath,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+
                 $path = $arquivo->storeAs(
-                    "ant/entregas/{$trabalho->semestre}/{$trabalho->materia->nome_curto}/{$trabalho->id}/{$alunoLider->ra}",
-                    $arquivo->getClientOriginalName(),
+                    $targetPath,
+                    $fileName,
                     'sftp' // Alterado para SFTP
                 );
+
+                \Log::info('SFTP Upload Result', [
+                    'returned_path' => $path,
+                    'exists' => \Storage::disk('sftp')->exists($path)
+                ]);
+
                 $caminhos[] = $path;
             }
         }

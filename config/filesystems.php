@@ -65,7 +65,7 @@ return [
             'host' => env('SFTP_HOST'),
             'username' => env('SFTP_USERNAME'),
             'password' => env('SFTP_PASSWORD'),
-            'port' => env('SFTP_PORT', 2222), // Porta personalizada
+            'port' => (int) env('SFTP_PORT', 2222), // Porta personalizada
             'root' => '', // Root directory on the SFTP server
             // 'privateKey' => env('SFTP_PRIVATE_KEY'),
             // 'passphrase' => env('SFTP_PASSPHRASE'),

@@ -67,5 +67,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(\App\Modules\StreamingManager\Models\Streaming::class);
     }
+
+    public function isProfessor(): bool
+    {
+        $config = \App\Modules\ANT\Models\AntConfiguracao::first();
+        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+
+        return \Illuminate\Support\Facades\DB::table('ant_professor_materia')
+            ->where('user_id', $this->id)
+            ->where('semestre', $semestreAtual)
+            ->exists();
+    }
 }
 

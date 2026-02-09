@@ -1,18 +1,52 @@
 <x-ANT::layout>
     <x-slot name="header">
-        Olá, Prof. {{ explode(' ', $user->name)[0] }}!
-        <br>
-        {{ __('Painel do Professor') }} - <span class="text-indigo-600">{{ $semestreAtual }}</span>
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    {{ __('Painel do Professor') }} <span class="text-sm font-normal text-gray-500">|
+                        {{ $semestreAtual }}</span>
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">Olá, Prof. {{ explode(' ', $user->name)[0] }}!</p>
+            </div>
+        </div>
     </x-slot>
 
-    <x-slot name="contextMenu">
-        <x-dropdown-link :href="route('ant.pesos.create')">
-            Configurar Pesos
-        </x-dropdown-link>
-        <x-dropdown-link :href="route('ant.professor.create')">
-            + Novo Trabalho / Prova
-        </x-dropdown-link>
-    </x-slot>
+    {{-- Quick Actions Section --}}
+    <div class="py-6 bg-gray-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <h3 class="text-lg font-bold text-gray-700 mb-4 px-2">Ações Rápidas</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a href="{{ route('ant.professor.create') }}"
+                    class="flex items-center p-3 bg-white rounded-lg shadow-sm hover:shadow border border-indigo-100 group transition-all">
+                    <div class="p-2 bg-indigo-50 rounded-full group-hover:bg-indigo-100 text-indigo-600 mr-3">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-bold text-gray-700 group-hover:text-indigo-700">Novo
+                            Trabalho</span>
+                        <span class="block text-xs text-gray-500">Criar avaliação</span>
+                    </div>
+                </a>
+
+                <a href="{{ route('ant.pesos.create') }}"
+                    class="flex items-center p-3 bg-white rounded-lg shadow-sm hover:shadow border border-indigo-100 group transition-all">
+                    <div class="p-2 bg-purple-50 rounded-full group-hover:bg-purple-100 text-purple-600 mr-3">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-bold text-gray-700 group-hover:text-purple-700">Configurar
+                            Pesos</span>
+                        <span class="block text-xs text-gray-500">Divisão de notas</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">

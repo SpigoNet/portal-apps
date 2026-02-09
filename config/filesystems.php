@@ -41,7 +41,7 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
@@ -58,6 +58,20 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
             'report' => false,
+        ],
+
+        'sftp' => [
+            'driver' => 'sftp',
+            'host' => env('SFTP_HOST'),
+            'username' => env('SFTP_USERNAME'),
+            'password' => env('SFTP_PASSWORD'),
+            'port' => env('SFTP_PORT', 2222), // Porta personalizada
+            'root' => '', // Root directory on the SFTP server
+            // 'privateKey' => env('SFTP_PRIVATE_KEY'),
+            // 'passphrase' => env('SFTP_PASSPHRASE'),
+            'visibility' => 'public', // Set to public to allow CDN
+            // 'directory_permission' => 0755,
+            'timeout' => 30,
         ],
 
     ],

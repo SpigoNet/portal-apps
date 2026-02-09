@@ -22,10 +22,14 @@ class TrabalhoController extends Controller
         $aluno = AntAluno::where('user_id', $user->id)->firstOrFail();
 
         // Busca o trabalho e carrega a entrega ESPECÍFICA deste aluno (usando RA)
-        $trabalho = AntTrabalho::with(['materia', 'tipoTrabalho', 'entregas' => function($q) use ($aluno) {
-            // CORREÇÃO: Filtra pela coluna 'aluno_ra' em vez de 'aluno_id'
-            $q->where('aluno_ra', $aluno->ra);
-        }])->findOrFail($id);
+        $trabalho = AntTrabalho::with([
+            'materia',
+            'tipoTrabalho',
+            'entregas' => function ($q) use ($aluno) {
+                // CORREÇÃO: Filtra pela coluna 'aluno_ra' em vez de 'aluno_id'
+                $q->where('aluno_ra', $aluno->ra);
+            }
+        ])->findOrFail($id);
 
         // Verificação de Segurança: O aluno pertence à matéria?
         // O relacionamento materias() no model AntAluno já usa o RA, então isso funciona direto
@@ -74,7 +78,7 @@ class TrabalhoController extends Controller
                 // Validação de Segurança: O colega existe e é da matéria?
                 // Isso impede que injetem RA de outra pessoa aleatória
                 $existeNaMateria = AntAluno::where('ra', $raColega)
-                    ->whereHas('materias', function($q) use ($trabalho) {
+                    ->whereHas('materias', function ($q) use ($trabalho) {
                         $q->where('ant_materias.id', $trabalho->materia_id);
                     })->exists();
 
@@ -109,7 +113,7 @@ class TrabalhoController extends Controller
                 $path = $arquivo->storeAs(
                     "ant/entregas/{$trabalho->semestre}/{$trabalho->materia->nome_curto}/{$trabalho->id}/{$alunoLider->ra}",
                     $arquivo->getClientOriginalName(),
-                    'local' // Ou 'public' se configurou assim
+                    'sftp' // Alterado para SFTP
                 );
                 $caminhos[] = $path;
             }
@@ -127,7 +131,7 @@ class TrabalhoController extends Controller
             AntEntrega::updateOrCreate(
                 [
                     'trabalho_id' => $trabalho->id,
-                    'aluno_ra'    => $ra
+                    'aluno_ra' => $ra
                 ],
                 [
                     'arquivos' => $jsonArquivos, // Mesmo caminho para todos
@@ -155,11 +159,11 @@ class TrabalhoController extends Controller
         // 1. Tenham nome ou RA parecido com o termo
         // 2. Estejam matriculados NA MESMA MATÉRIA que o trabalho exige
         // 3. NÃO sejam o próprio aluno logado
-        $alunos = AntAluno::where(function($q) use ($termo) {
+        $alunos = AntAluno::where(function ($q) use ($termo) {
             $q->where('nome', 'like', "%{$termo}%")
                 ->orWhere('ra', 'like', "%{$termo}%");
         })
-            ->whereHas('materias', function($q) use ($materiaId) {
+            ->whereHas('materias', function ($q) use ($materiaId) {
                 $q->where('ant_materias.id', $materiaId);
             })
             ->where('id', '!=', $alunoLogado->id)

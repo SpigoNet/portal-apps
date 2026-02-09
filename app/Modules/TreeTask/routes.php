@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use App\Modules\TreeTask\Http\Controllers\ProjetoController;
 use App\Modules\TreeTask\Http\Controllers\FaseController;
 use App\Modules\TreeTask\Http\Controllers\TarefaController;
+use App\Modules\TreeTask\Http\Controllers\GoodMorningController;
 use Illuminate\Support\Facades\Artisan;
 
 Route::prefix('treetask')
@@ -23,6 +24,7 @@ Route::prefix('treetask')
         Route::get('/', [ProjetoController::class, 'index'])->name('index');
         Route::get('/criar', [ProjetoController::class, 'create'])->name('create');
         Route::post('/', [ProjetoController::class, 'store'])->name('store');
+        Route::get('/bom-dia', [GoodMorningController::class, 'index'])->name('good_morning');
         Route::get('/projeto/{id}', [ProjetoController::class, 'show'])->name('show');
 
         // --- Fases ---
@@ -48,7 +50,7 @@ Route::prefix('treetask')
         // --- Gamification / IA (Add this block) ---
         Route::get('/gamificacao/motivacao', [GamificationController::class, 'motivacao'])
             ->name('gamification.motivacao'); // <--- This fixes the error
-
+    
         // Rotas de Ordenação (AJAX POST)
         Route::post('/reorder/fases', [OrderController::class, 'reorderFases'])->name('reorder.fases');
         Route::post('/reorder/tarefas', [OrderController::class, 'reorderTarefas'])->name('reorder.tarefas');

@@ -49,14 +49,30 @@ class AdminProfessorController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'tipo_vinculo' => 'required|in:existente,novo',
             'materia_id' => 'required|exists:ant_materias,id',
             'semestre' => 'required|string|max:6', // Ex: 2025-2
+            // Validação condicional
+            'user_id' => 'required_if:tipo_vinculo,existente|nullable|exists:users,id',
+            'new_name' => 'required_if:tipo_vinculo,novo|nullable|string|max:255',
+            'new_email' => 'required_if:tipo_vinculo,novo|nullable|email|unique:users,email',
+            'new_password' => 'required_if:tipo_vinculo,novo|nullable|string|min:6',
         ]);
+
+        if ($request->tipo_vinculo === 'novo') {
+            $user = User::create([
+                'name' => $request->new_name,
+                'email' => $request->new_email,
+                'password' => bcrypt($request->new_password),
+            ]);
+            $userId = $user->id;
+        } else {
+            $userId = $request->user_id;
+        }
 
         // Evita duplicidade (O mesmo professor na mesma matéria no mesmo semestre)
         $existe = DB::table('ant_professor_materia')
-            ->where('user_id', $request->user_id)
+            ->where('user_id', $userId)
             ->where('materia_id', $request->materia_id)
             ->where('semestre', $request->semestre)
             ->exists();
@@ -68,7 +84,7 @@ class AdminProfessorController extends Controller
         // Cria o vínculo
         // Usamos o DB direto pois não criamos um Model específico para a tabela Pivot
         DB::table('ant_professor_materia')->insert([
-            'user_id' => $request->user_id,
+            'user_id' => $userId,
             'materia_id' => $request->materia_id,
             'semestre' => $request->semestre,
             'created_at' => now(),

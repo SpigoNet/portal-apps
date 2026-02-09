@@ -24,7 +24,7 @@ class AntHomeController extends Controller
         $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
 
         if (is_null($user)) {
-            return redirect()->route('ant.');
+            return redirect()->route('register');
         }
         // Verifica se é Admin usando o método do Model ou fallback vazio
         $isAdmin = $config ? $config->isAdmin($user->email) : false;

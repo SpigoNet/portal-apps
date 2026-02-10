@@ -22,6 +22,9 @@ Todo novo desenvolvimento deve aderir estritamente aos seguintes princípios:
 Um novo módulo (ex: app/Modules/NovoModulo) deve seguir esta estrutura de diretórios:
 
 app/Modules/NovoModulo/  
+├── database
+│   └── migrations/  
+│       └── 0000_00_00_000000_ExemploMigration.php  
 ├── Http/  
 │   └── Controllers/  
 │       └── ExemploController.php  
@@ -43,6 +46,8 @@ Vamos usar como exemplo a criação de um módulo chamado GestorTarefas.
 Crie a seguinte estrutura:
 
 app/Modules/GestorTarefas/  
+├── database
+│   └── migrations/  
 ├── Http/  
 │   └── Controllers/  
 ├── Models/  
@@ -75,6 +80,9 @@ class GestorTarefasServiceProvider extends ServiceProvider
         // Carrega as views do módulo com um namespace
         // Ex: view('GestorTarefas::index')
         $this->loadViewsFrom(__DIR__.'/resources/views', $this->namespace);
+        
+        // Carrega as migrações do módulo
+        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
 
         // Carrega o arquivo de rotas do módulo
         Route::middleware('web')

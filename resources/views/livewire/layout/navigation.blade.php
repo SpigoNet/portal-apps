@@ -294,18 +294,52 @@ new class extends Component {
 
                 <div class="mt-3 space-y-1">
                     <x-responsive-nav-link :href="route('welcome')" :active="request()->routeIs('welcome')">
-                        {{ __('Dashboard / Apps') }}
+                        <i class="fa-solid fa-house mr-2"></i> {{ __('Dashboard / Apps') }}
                     </x-responsive-nav-link>
 
                     <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                        {{ __('Meu Perfil') }}
+                        <i class="fa-regular fa-user mr-2"></i> {{ __('Meu Perfil') }}
                     </x-responsive-nav-link>
 
                     <button wire:click="logout" class="w-full text-start">
                         <x-responsive-nav-link>
-                            {{ __('Sair') }}
+                            <i class="fa-solid fa-arrow-right-from-bracket mr-2 text-red-400"></i> {{ __('Sair') }}
                         </x-responsive-nav-link>
                     </button>
+                </div>
+            </div>
+
+            {{-- Mobile App Switcher --}}
+            @if($shortcutApps->isNotEmpty())
+                <div class="pt-4 pb-4 border-t border-gray-700">
+                    <div class="px-4 text-xs font-bold text-gray-500 uppercase mb-3">Meus Aplicativos</div>
+                    <div class="grid grid-cols-3 gap-2 px-2">
+                        @foreach($shortcutApps as $app)
+                            <a href="{{ url($app->start_link) }}"
+                                class="flex flex-col items-center justify-center p-2 rounded-xl hover:bg-white/5 transition text-center h-20">
+                                <div class="h-6 w-6 mb-1 flex items-center justify-center">
+                                    <img src="{{ asset($app->icon) }}" alt="{{ $app->title }}" class="w-full h-full object-contain"
+                                        onerror="this.src='{{ asset('images/default-app-icon.png') }}'; this.onerror=null;">
+                                </div>
+                                <span class="text-[10px] font-medium text-gray-400 leading-tight line-clamp-2">
+                                    {{ $app->title }}
+                                </span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+        @else
+            <div class="pt-4 pb-1 border-t border-gray-700">
+                <div class="mt-3 space-y-1">
+                    <x-responsive-nav-link :href="route('login')" wire:navigate>
+                        <i class="fa-solid fa-right-to-bracket mr-2"></i> {{ __('Entrar') }}
+                    </x-responsive-nav-link>
+                    @if (Route::has('register'))
+                        <x-responsive-nav-link :href="route('register')" wire:navigate>
+                            <i class="fa-solid fa-user-plus mr-2"></i> {{ __('Cadastrar') }}
+                        </x-responsive-nav-link>
+                    @endif
                 </div>
             </div>
         @endauth

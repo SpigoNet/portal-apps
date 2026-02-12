@@ -10,56 +10,55 @@ use Illuminate\Validation\Rule;
 
 class DspaceFormMapController extends Controller
 {
-    /**
-     * Exibe a lista de todos os mapeamentos (vínculos).
-     */
+    use DspaceConfigSession;
+
     public function index(Request $request)
     {
-        $configId = $request->query('config_id');
-        if (!$configId) return redirect()->route('dspace-forms.index');
+        $config = $this->requireConfig($request);
+        if ($config instanceof \Illuminate\Http\RedirectResponse) {
+            return $config;
+        }
 
-        $currentConfig = DspaceXmlConfiguration::findOrFail($configId);
-        if ($currentConfig->user_id !== auth()->id()) abort(403);
-
-        $maps = DspaceFormMap::where('xml_configuration_id', $configId)
+        $maps = DspaceFormMap::where('xml_configuration_id', $config->id)
             ->orderBy('map_key')
             ->get();
 
-        // Processos de submissão também devem ser filtrados pela config, se aplicável,
-        // ou globais se forem padrão. Assumindo que são da config:
-        $submission_processes = SubmissionProcess::where('xml_configuration_id', $configId)
+        $submission_processes = SubmissionProcess::where('xml_configuration_id', $config->id)
             ->orderBy('name')
             ->pluck('name');
 
-        return view('DspaceForms::form-maps-index', compact('maps', 'submission_processes', 'currentConfig'));
+        return view('DspaceForms::form-maps-index', compact('maps', 'submission_processes', 'config'));
     }
 
     public function store(Request $request)
     {
-        $configId = $request->input('xml_configuration_id');
+        $config = $this->requireConfig($request);
+        if ($config instanceof \Illuminate\Http\RedirectResponse) {
+            return $config;
+        }
 
         $validated = $request->validate([
-            'xml_configuration_id' => 'required|exists:dspace_xml_configurations,id',
             'map_type' => 'required|in:handle,entity-type',
             'submission_name' => 'required|string',
             'map_key' => [
                 'required', 'string', 'max:255',
-                // Único por tipo E por configuração
                 Rule::unique('dspace_form_maps')
                     ->where('map_type', $request->map_type)
-                    ->where('xml_configuration_id', $configId),
+                    ->where('xml_configuration_id', $config->id),
             ],
         ]);
 
-        DspaceFormMap::create($validated);
+        DspaceFormMap::create([
+            'map_type' => $validated['map_type'],
+            'map_key' => $validated['map_key'],
+            'submission_name' => $validated['submission_name'],
+            'xml_configuration_id' => $config->id,
+        ]);
 
-        return redirect()->route('dspace-forms.form-maps.index', ['config_id' => $configId])
+        return redirect()->route('dspace-forms.form-maps.index')
             ->with('success', 'Vínculo criado com sucesso.');
     }
 
-    /**
-     * Atualiza um vínculo existente.
-     */
     public function update(Request $request, DspaceFormMap $map)
     {
         $validated = $request->validate([
@@ -68,7 +67,6 @@ class DspaceFormMapController extends Controller
                 'required',
                 'string',
                 'max:255',
-                // Garante que a combinação seja única, ignorando o registro atual
                 Rule::unique('dspace_form_maps')->where(function ($query) use ($request) {
                     return $query->where('map_type', $request->map_type);
                 })->ignore($map->id),
@@ -81,12 +79,10 @@ class DspaceFormMapController extends Controller
         return redirect()->route('dspace-forms.form-maps.index')->with('success', 'Vínculo atualizado com sucesso.');
     }
 
-    /**
-     * Remove um vínculo.
-     */
     public function destroy(DspaceFormMap $map)
     {
         $map->delete();
+
         return redirect()->route('dspace-forms.form-maps.index')->with('success', 'Vínculo excluído com sucesso.');
     }
 }

@@ -5,87 +5,92 @@ namespace App\Modules\DspaceForms\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\DspaceForms\Models\DspaceEmailTemplate;
 use App\Modules\DspaceForms\Models\DspaceForm;
-use App\Modules\DspaceForms\Models\DspaceFormField;
 use App\Modules\DspaceForms\Models\DspaceFormMap;
-use App\Modules\DspaceForms\Models\DspaceFormRow;
+// NOVO: Para duplicação
 
 // NOVO: Para duplicação
-use App\Modules\DspaceForms\Models\DspaceValuePair;
-
-// NOVO: Para duplicação
-use App\Modules\DspaceForms\Models\DspaceRelationField;
 
 // NOVO: Para duplicação
 use App\Modules\DspaceForms\Models\DspaceValuePairsList;
 use App\Modules\DspaceForms\Models\DspaceXmlConfiguration;
-
 // NOVO
 use App\Modules\DspaceForms\Models\SubmissionProcess;
 use App\Modules\DspaceForms\Models\SubmissionStep;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
-
-// NOVO
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
+// NOVO
+use Illuminate\Support\Facades\Storage;
 // NOVO
 use ZipArchive;
 
-
 class DspaceFormsController extends Controller
 {
+    use DspaceConfigSession;
+
     /**
-     * Tela principal (Dashboard do Módulo) - Agora lida com seleção ou dashboard da config.
+     * Tela principal (Dashboard do Módulo)
      */
     public function index(Request $request)
     {
-        $configId = $request->get('config_id');
+        $configId = $this->getConfigId($request);
         $allConfigurations = DspaceXmlConfiguration::where('user_id', Auth::id())
             ->orderBy('name')
             ->get();
 
-        // Se houver configurações disponíveis, mas nenhuma selecionada, redireciona para a seleção.
-        if (!$configId && $allConfigurations->isNotEmpty() && $allConfigurations->count() > 1) {
-            return view('DspaceForms::selection', compact('allConfigurations')); // Usa a view de seleção se houver várias
+        if ($configId) {
+            $config = DspaceXmlConfiguration::find($configId);
+
+            if (! $config || $config->user_id !== Auth::id()) {
+                $configId = null;
+                $this->clearConfigId($request);
+            }
         }
 
-        // Tenta usar a primeira configuração se não houver ID, mas houver apenas uma, ou se houver a configuração Padrão
-        if (!$configId && $allConfigurations->isNotEmpty()) {
+        if (! $configId && $allConfigurations->count() > 1) {
+            return view('DspaceForms::selection', compact('allConfigurations'));
+        }
+
+        if (! $configId && $allConfigurations->isNotEmpty()) {
             $configId = $allConfigurations->first()->id;
+            $this->setConfigId($request, $configId);
         }
 
-        // Se uma configuração foi selecionada, mostra o dashboard filtrado por ela.
         if ($configId) {
             $config = DspaceXmlConfiguration::findOrFail($configId);
 
-            // Garante que o usuário tem acesso a essa configuração
-            if ($config->user_id !== Auth::id()) {
-                abort(403, 'Acesso não autorizado à configuração.');
-            }
-
-            // Lógica do Dashboard Original, AGORA FILTRADA
             $stats = [
                 'config_id' => $config->id,
                 'config_name' => $config->name,
-                // Manter a contagem de Formulários
                 'forms_count' => DspaceForm::where('xml_configuration_id', $configId)->count(),
-                // Manter a contagem de Vocabulários (inclui listas de valor)
                 'vocabularies_count' => DspaceValuePairsList::where('xml_configuration_id', $configId)->count(),
-                // Adicionar a contagem de Vínculos (Mapeamentos)
                 'maps_count' => DspaceFormMap::where('xml_configuration_id', $configId)->count(),
-                // Contagem de Templates de E-mail
                 'email_templates_count' => DspaceEmailTemplate::where('xml_configuration_id', $configId)->count(),
             ];
 
-            //$this->seedDefaultEmailTemplates($config->id);
-
-            // Passa os stats, a configuração atual e TODAS as configs para a view de dashboard.
             return view('DspaceForms::index', compact('stats', 'allConfigurations', 'config'));
         }
 
-        // Se não houver configurações e nenhuma selecionada, mostra a tela de seleção vazia ou criação.
         return view('DspaceForms::selection', compact('allConfigurations'));
+    }
+
+    public function selectConfig(Request $request, int $configId)
+    {
+        $config = DspaceXmlConfiguration::findOrFail($configId);
+
+        if ($config->user_id !== Auth::id()) {
+            abort(403, 'Acesso não autorizado.');
+        }
+
+        $this->setConfigId($request, $configId);
+
+        return redirect()->route('dspace-forms.index');
+    }
+
+    public function clearConfig(Request $request)
+    {
+        $this->clearConfigId($request);
+
+        return redirect()->route('dspace-forms.index');
     }
 
     private function seedDefaultEmailTemplates(int $configId): void
@@ -142,7 +147,6 @@ class DspaceFormsController extends Controller
                 $description = trim($descMatches[1]);
             }
 
-
             DspaceEmailTemplate::create([
                 'xml_configuration_id' => $configId,
                 'name' => $name,
@@ -167,18 +171,19 @@ class DspaceFormsController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            // Garante que o nome seja único para o usuário logado
-            'name' => 'required|string|max:255|unique:dspace_xml_configurations,name,NULL,id,user_id,' . Auth::id(),
+            'name' => 'required|string|max:255|unique:dspace_xml_configurations,name,NULL,id,user_id,'.Auth::id(),
             'description' => 'nullable|string',
         ], [
             'name.unique' => 'Você já possui uma configuração com este nome.',
         ]);
 
-        DspaceXmlConfiguration::create([
+        $config = DspaceXmlConfiguration::create([
             'user_id' => Auth::id(),
             'name' => $request->name,
             'description' => $request->description,
         ]);
+
+        $this->setConfigId($request, $config->id);
 
         return redirect()->route('dspace-forms.index')
             ->with('success', 'Configuração criada com sucesso.');
@@ -189,7 +194,7 @@ class DspaceFormsController extends Controller
     /**
      * Duplica uma configuração existente e todos os seus dados dependentes.
      */
-    public function duplicate(DspaceXmlConfiguration $configuration)
+    public function duplicate(Request $request, DspaceXmlConfiguration $configuration)
     {
         if ($configuration->user_id !== Auth::id()) {
             return back()->with('error', 'Acesso não autorizado para duplicar esta configuração.');
@@ -197,7 +202,7 @@ class DspaceFormsController extends Controller
 
         // 1. Cria a nova configuração (Clone)
         $newConfig = $configuration->replicate();
-        $newConfig->name = $configuration->name . ' (Cópia ' . now()->format('YmdHis') . ')';
+        $newConfig->name = $configuration->name.' (Cópia '.now()->format('YmdHis').')';
         $newConfig->created_at = now();
         $newConfig->updated_at = now();
         $newConfig->save();
@@ -279,6 +284,8 @@ class DspaceFormsController extends Controller
             $newTemplate->save();
         });
 
+        $this->setConfigId($request, $newId);
+
         return redirect()->route('dspace-forms.index')
             ->with('success', "Configuração '{$configuration->name}' duplicada para '{$newConfig->name}'.");
     }
@@ -286,19 +293,20 @@ class DspaceFormsController extends Controller
     /**
      * Gera e exporta um arquivo ZIP com todas as configurações.
      */
-    public function exportAllAsZip(Request $request, $configId)
+    public function exportAllAsZip(Request $request)
     {
-        // Garante que o ID da configuração seja válido e pertença ao usuário logado
-        $config = DspaceXmlConfiguration::findOrFail($configId);
-        if ($config->user_id !== Auth::id()) {
-            abort(403, 'Acesso não autorizado.');
+        $config = $this->requireConfig($request);
+        if ($config instanceof \Illuminate\Http\RedirectResponse) {
+            return $config;
         }
 
-        $zip = new ZipArchive();
-        $zipFileName = 'dspace_config_' . $config->name . '_' . date('Y-m-d_His') . '.zip';
-        $zipPath = storage_path('app/' . $zipFileName);
+        $configId = $config->id;
 
-        if ($zip->open($zipPath, ZipArchive::CREATE) !== TRUE) {
+        $zip = new ZipArchive;
+        $zipFileName = 'dspace_config_'.$config->name.'_'.date('Y-m-d_His').'.zip';
+        $zipPath = storage_path('app/'.$zipFileName);
+
+        if ($zip->open($zipPath, ZipArchive::CREATE) !== true) {
             return back()->with('error', 'Não foi possível criar o arquivo ZIP.');
         }
 
@@ -338,14 +346,13 @@ class DspaceFormsController extends Controller
             ? Storage::disk('local')->get('dspace_templates/vocabulary.xsd')
             : '';
 
-
         foreach ($vocabularies as $vocabulary) {
             $vocabularyXmlContent = $this->generateVocabularyXmlContent($vocabulary);
-            $zip->addFromString('controlled-vocabularies/' . $vocabulary->name . '.xml', $vocabularyXmlContent);
+            $zip->addFromString('controlled-vocabularies/'.$vocabulary->name.'.xml', $vocabularyXmlContent);
 
             // Adiciona um arquivo XSD separado para cada vocabulário
             if ($xsdContent) {
-                $zip->addFromString('controlled-vocabularies/' . $vocabulary->name . '.xsd', $xsdContent);
+                $zip->addFromString('controlled-vocabularies/'.$vocabulary->name.'.xsd', $xsdContent);
             }
         }
         $zip->addEmptyDir('emails');
@@ -354,7 +361,7 @@ class DspaceFormsController extends Controller
 
         foreach ($emailTemplates as $template) {
             // Usa o nome da template (e.g., 'register', 'request_item.author') como nome do arquivo.
-            $zip->addFromString('emails/' . $template->name, $template->content);
+            $zip->addFromString('emails/'.$template->name, $template->content);
         }
 
         $zip->close();
@@ -394,6 +401,7 @@ class DspaceFormsController extends Controller
             $text = str_replace(["\r", "\n", "\t"], ' ', $text);
             // 2. Remove múltiplos espaços em branco, deixando apenas um
             $text = preg_replace('/\s+/', ' ', $text);
+
             // 3. Remove espaços no início e fim
             return trim($text);
         };
@@ -414,7 +422,9 @@ class DspaceFormsController extends Controller
                     // Adiciona os elementos do field...
                     $fieldNode->addChild('dc-schema', $cleanXmlText($field->dc_schema));
                     $fieldNode->addChild('dc-element', $cleanXmlText($field->dc_element));
-                    if ($field->dc_qualifier) $fieldNode->addChild('dc-qualifier', $cleanXmlText($field->dc_qualifier));
+                    if ($field->dc_qualifier) {
+                        $fieldNode->addChild('dc-qualifier', $cleanXmlText($field->dc_qualifier));
+                    }
                     $fieldNode->addChild('repeatable', $field->repeatable ? 'true' : 'false');
                     // APLICAR LIMPEZA AQUI
                     $fieldNode->addChild('label', $cleanXmlText($field->label));
@@ -426,7 +436,9 @@ class DspaceFormsController extends Controller
                     $fieldNode->addChild('hint', $cleanXmlText($field->hint));
 
                     // APLICAR LIMPEZA AQUI
-                    if ($field->required) $fieldNode->addChild('required', $cleanXmlText($field->required) ?? '');
+                    if ($field->required) {
+                        $fieldNode->addChild('required', $cleanXmlText($field->required) ?? '');
+                    }
                     if ($field->vocabulary) {
                         $vocabNode = $fieldNode->addChild('vocabulary', $cleanXmlText($field->vocabulary));
                         if ($field->vocabulary_closed) {
@@ -467,7 +479,7 @@ class DspaceFormsController extends Controller
         // Expandir tags vazias
         $this->expandEmptyTags($dom->documentElement);
 
-        $implementation = new \DOMImplementation();
+        $implementation = new \DOMImplementation;
         $dtd = $implementation->createDocumentType('input-forms', '', 'submission-forms.dtd');
         $dom->insertBefore($dtd, $dom->documentElement);
 
@@ -540,7 +552,7 @@ class DspaceFormsController extends Controller
                     $scopeNode->addAttribute('visibilityOutside', 'read-only');
                     break;
 
-                // Caso padrão para formulários dinâmicos (ex: artigopageone, tccpagetwo, etc.)
+                    // Caso padrão para formulários dinâmicos (ex: artigopageone, tccpagetwo, etc.)
                 default:
                     $stepDefNode->addAttribute('mandatory', 'true');
 
@@ -568,7 +580,6 @@ class DspaceFormsController extends Controller
             }
         }
 
-
         $dom = new \DOMDocument('1.0', 'UTF-8');
         $dom->preserveWhiteSpace = false;
         $dom->formatOutput = true;
@@ -577,7 +588,7 @@ class DspaceFormsController extends Controller
         // Expandir tags vazias
         $this->expandEmptyTags($dom->documentElement);
 
-        $implementation = new \DOMImplementation();
+        $implementation = new \DOMImplementation;
         $dtd = $implementation->createDocumentType('item-submission', '', 'item-submission.dtd');
         $dom->insertBefore($dtd, $dom->documentElement);
 

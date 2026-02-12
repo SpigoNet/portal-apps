@@ -2,13 +2,35 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "check-db",
+            "type": "shell",
+            "command": "docker start mysql-5.7.23",
+            "presentation": {
+                "reveal": "silent"
+            }
+        },
+        {
             "label": "npm-dev",
             "type": "shell",
             "command": "npm run dev",
+            "dependsOn": [
+                "check-db"
+            ],
             "isBackground": true,
-            "problemMatcher": [
-                "$gcc"
-            ]
+            "problemMatcher": {
+                "owner": "custom",
+                "pattern": {
+                    "regexp": "^([^\\s].*)\\s\\((\\d+,\\d+)\\):\\s*(.*)$",
+                    "file": 1,
+                    "location": 2,
+                    "message": 3
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*",
+                    "endsPattern": ".*(Local:|Done in|compiled successfully).*"
+                }
+            }
         }
     ]
 }

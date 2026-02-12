@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+    /* Ajuste para Tabelas Responsivas no Mobile */
+    @media (max-width: 768px) {
+        table {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Garante que o container da tabela não quebre o layout */
+        .overflow-hidden {
+            overflow-x: auto !important;
+        }
+    }
+}

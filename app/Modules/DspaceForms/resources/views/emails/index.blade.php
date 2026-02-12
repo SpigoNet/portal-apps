@@ -3,7 +3,7 @@
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Gerenciar Templates de E-mail DSpace') }}
-                <span class="text-sm text-gray-500">({{ $currentConfig->name }})</span>
+                <span class="text-sm text-gray-500">({{ $config->name }})</span>
             </h2>
             <a href="{{ route('dspace-forms.index') }}">
                 <x-secondary-button>

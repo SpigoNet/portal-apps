@@ -28,36 +28,28 @@
                         </div>
                     @endif
 
-                    <div class="mt-6">
-                        @if ($allConfigurations->isEmpty())
-                            <p class="text-center text-gray-500">{{ __('Nenhuma configuração encontrada. Crie uma para começar.') }}</p>
-                        @else
-                            <div class="space-y-4">
-                                @foreach ($allConfigurations as $config)
-                                    <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md flex justify-between items-center">
+                    @if($allConfigurations->isEmpty())
+                        <p class="text-gray-500 dark:text-gray-400">Nenhuma configuração encontrada. Crie uma nova configuração para começar.</p>
+                    @else
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            @foreach($allConfigurations as $config)
+                                <div class="border dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                    <div class="flex justify-between items-start">
                                         <div>
-                                            <p class="text-lg font-bold">{{ $config->name }}</p>
-                                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $config->description ?? 'Nenhuma descrição fornecida.' }}</p>
+                                            <h4 class="font-semibold text-lg">{{ $config->name }}</h4>
+                                            @if($config->description)
+                                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $config->description }}</p>
+                                            @endif
                                         </div>
-                                        <div class="flex space-x-3">
-                                            {{-- Botão Gerenciar (Selecionar) -> Redireciona para o dashboard filtrado --}}
-                                            <a href="{{ route('dspace-forms.index', ['config_id' => $config->id]) }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 font-semibold text-sm">
-                                                {{ __('Gerenciar') }}
-                                            </a>
-
-                                            {{-- Botão Duplicar (via POST form) --}}
-                                            <form action="{{ route('dspace-forms.configurations.duplicate', $config) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja duplicar a configuração \'{{ $config->name }}\'?')">
-                                                @csrf
-                                                <button type="submit" class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-900 font-semibold text-sm">
-                                                    {{ __('Duplicar') }}
-                                                </button>
-                                            </form>
-                                        </div>
+                                        <a href="{{ route('dspace-forms.select-config', $config->id) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 font-semibold">
+                                            Selecionar
+                                        </a>
                                     </div>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
                 </div>
             </div>
         </div>

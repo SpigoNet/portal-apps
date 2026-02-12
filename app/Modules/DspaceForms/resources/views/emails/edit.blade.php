@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Editando Template: ') . $template->name }}
             </h2>
-            <a href="{{ route('dspace-forms.emails.index', ['config_id' => $template->xml_configuration_id]) }}">
+            <a href="{{ route('dspace-forms.emails.index') }}">
                 <x-secondary-button>
                     <i class="fa-solid fa-arrow-left mr-2"></i> {{ __('Voltar para Templates') }}
                 </x-secondary-button>

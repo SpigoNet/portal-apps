@@ -28,7 +28,7 @@
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <form method="POST" action="{{ route('dspace-forms.forms.store') }}">
                         @csrf
-                        <input type="hidden" name="xml_configuration_id" value="{{ $currentConfig->id }}">
+                        <input type="hidden" name="xml_configuration_id" value="{{ $config->id }}">
 
                         {{-- Passa uma instância vazia para a parcial --}}
                         @include('DspaceForms::forms._form', ['form' => new \App\Modules\DspaceForms\Models\DspaceForm()])

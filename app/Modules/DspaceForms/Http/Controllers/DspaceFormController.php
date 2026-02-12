@@ -11,92 +11,67 @@ use Illuminate\Validation\Rule;
 
 class DspaceFormController extends Controller
 {
-    /**
-     * Display a listing of the resource (DspaceForms).
-     * Agora filtra pelo XML Configuration atual.
-     */
+    use DspaceConfigSession;
+
     public function index(Request $request)
     {
-        $configId = $request->query('config_id');
-
-        if (!$configId) {
-            return redirect()->route('dspace-forms.index')
-                ->with('error', 'Selecione uma configuração para visualizar os formulários.');
+        $config = $this->requireConfig($request);
+        if ($config instanceof \Illuminate\Http\RedirectResponse) {
+            return $config;
         }
 
-        $currentConfig = DspaceXmlConfiguration::findOrFail($configId);
-
-        // Verifica permissão (se necessário)
-        if ($currentConfig->user_id !== auth()->id()) {
-            abort(403);
-        }
-
-        $forms = DspaceForm::where('xml_configuration_id', $configId)
+        $forms = DspaceForm::where('xml_configuration_id', $config->id)
             ->orderBy('name')
             ->get();
 
-        return view('DspaceForms::forms.index', compact('forms', 'currentConfig'));
+        return view('DspaceForms::forms.index', compact('forms', 'config'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(Request $request)
     {
-        $configId = $request->query('config_id');
-        if (!$configId) {
-            return redirect()->route('dspace-forms.index');
+        $config = $this->requireConfig($request);
+        if ($config instanceof \Illuminate\Http\RedirectResponse) {
+            return $config;
         }
 
-        $currentConfig = DspaceXmlConfiguration::findOrFail($configId);
-
-        return view('DspaceForms::forms.create', compact('currentConfig'));
+        return view('DspaceForms::forms.create', compact('config'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $configId = $request->input('xml_configuration_id');
-
-        // Garante que a configuração existe e pertence ao usuário
-        $config = DspaceXmlConfiguration::where('id', $configId)->where('user_id', auth()->id())->firstOrFail();
+        $config = $this->requireConfig($request);
+        if ($config instanceof \Illuminate\Http\RedirectResponse) {
+            return $config;
+        }
 
         $validated = $request->validate([
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                // Nome único APENAS dentro desta configuração
-                Rule::unique('dspace_forms')->where(function ($query) use ($configId) {
-                    return $query->where('xml_configuration_id', $configId);
+                Rule::unique('dspace_forms')->where(function ($query) use ($config) {
+                    return $query->where('xml_configuration_id', $config->id);
                 }),
             ],
-            'xml_configuration_id' => 'required|exists:dspace_xml_configurations,id',
         ]);
 
-        DspaceForm::create($validated);
+        DspaceForm::create([
+            'name' => $validated['name'],
+            'xml_configuration_id' => $config->id,
+        ]);
 
-        return Redirect::route('dspace-forms.forms.index', ['config_id' => $configId])
-            ->with('success', 'Formulário criado com sucesso na configuração: ' . $config->name);
+        return Redirect::route('dspace-forms.forms.index')
+            ->with('success', 'Formulário criado com sucesso na configuração: '.$config->name);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(DspaceForm $form)
     {
         $form->load('rows.fields', 'rows.relationFields');
-        // Recupera a config para manter o contexto nos links de "Voltar"
-        $currentConfig = DspaceXmlConfiguration::find($form->xml_configuration_id);
+        $config = DspaceXmlConfiguration::find($form->xml_configuration_id);
 
-        return view('DspaceForms::forms.edit', compact('form', 'currentConfig'));
+        return view('DspaceForms::forms.edit', compact('form', 'config'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, DspaceForm $form)
     {
         $validated = $request->validate([
@@ -104,7 +79,6 @@ class DspaceFormController extends Controller
                 'required',
                 'string',
                 'max:255',
-                // Único na configuração, ignorando o próprio ID
                 Rule::unique('dspace_forms')
                     ->where('xml_configuration_id', $form->xml_configuration_id)
                     ->ignore($form->id),
@@ -113,15 +87,15 @@ class DspaceFormController extends Controller
 
         $form->update($validated);
 
-        return Redirect::route('dspace-forms.forms.index', ['config_id' => $form->xml_configuration_id])
+        return Redirect::route('dspace-forms.forms.index')
             ->with('success', 'Formulário atualizado com sucesso.');
     }
 
     public function destroy(DspaceForm $form)
     {
-        $configId = $form->xml_configuration_id;
         $form->delete();
-        return Redirect::route('dspace-forms.forms.index', ['config_id' => $configId])
+
+        return Redirect::route('dspace-forms.forms.index')
             ->with('success', 'Formulário excluído com sucesso.');
     }
 }

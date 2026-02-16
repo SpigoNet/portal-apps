@@ -6,12 +6,18 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use Livewire\Volt\Component;
 
-new class extends Component {
+new class extends Component
+{
     public string $name = '';
+
     public string $email = '';
+
     // Novos campos
     public string $whatsapp_phone = '';
+
     public string $whatsapp_apikey = '';
+
+    public string $apiToken = '';
 
     public function mount(): void
     {
@@ -20,6 +26,7 @@ new class extends Component {
         $this->email = $user->email;
         $this->whatsapp_phone = $user->whatsapp_phone ?? '';
         $this->whatsapp_apikey = $user->whatsapp_apikey ?? '';
+        $this->apiToken = md5($user->email.$user->password);
     }
 
     public function updateProfileInformation(): void
@@ -44,8 +51,8 @@ new class extends Component {
         $this->dispatch('profile-updated', name: $user->name);
 
         // Opcional: Enviar msg de teste ao salvar se tiver preenchido
-        if ($user->wasChanged('whatsapp_apikey') && !empty($user->whatsapp_apikey)) {
-            send_whatsapp_user($user, "Configuração de WhatsApp salva com sucesso no Portal Spigo!");
+        if ($user->wasChanged('whatsapp_apikey') && ! empty($user->whatsapp_apikey)) {
+            send_whatsapp_user($user, 'Configuração de WhatsApp salva com sucesso no Portal Spigo!');
         }
     }
 
@@ -54,6 +61,7 @@ new class extends Component {
         $user = Auth::user();
         if ($user->hasVerifiedEmail()) {
             $this->redirectIntended(default: route('welcome', absolute: false));
+
             return;
         }
         $user->sendEmailVerificationNotification();
@@ -147,4 +155,53 @@ new class extends Component {
             </x-action-message>
         </div>
     </form>
+
+    <div class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+            <i class="fas fa-code text-indigo-500 mr-2"></i> Acesso à API
+        </h3>
+
+        <div class="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 mb-6 text-sm text-amber-700 dark:text-amber-300">
+            <p class="font-bold mb-2">Use estas credenciais para acessar a API do TreeTask:</p>
+            <p class="mb-2">Envie os headers <code class="bg-amber-100 dark:bg-amber-800 px-1 py-0.5 rounded">X-User-ID</code> e <code class="bg-amber-100 dark:bg-amber-800 px-1 py-0.5 rounded">X-Token</code> em todas as requisições.</p>
+            <p class="text-xs opacity-75">O token é gerado a partir do MD5 do seu email + hash da senha. Se você alterar sua senha, o token mudará.</p>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <x-input-label for="user_id" :value="__('Seu ID de Usuário')" />
+                <div class="mt-1 flex rounded-md shadow-sm">
+                    <x-text-input id="user_id" type="text" class="block w-full bg-gray-100 dark:bg-gray-700" readonly :value="auth()->user()->id" />
+                    <button type="button" onclick="navigator.clipboard.writeText('{{ auth()->user()->id }}')" class="ml-2 inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none">
+                        <i class="fas fa-copy mr-1"></i> Copiar
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <x-input-label for="api_token" :value="__('Seu Token de API')" />
+                <div class="mt-1 flex rounded-md shadow-sm">
+                    <x-text-input id="api_token" type="text" class="block w-full bg-gray-100 dark:bg-gray-700 font-mono text-xs" readonly :value="$apiToken" />
+                    <button type="button" onclick="navigator.clipboard.writeText('{{ $apiToken }}')" class="ml-2 inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none">
+                        <i class="fas fa-copy mr-1"></i> Copiar
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mt-4">
+                <p class="text-xs text-gray-600 dark:text-gray-400 font-mono mb-2">Exemplo de requisição:</p>
+                <code class="text-xs text-gray-800 dark:text-gray-200 block whitespace-pre-wrap">curl -X GET \
+  -H "X-User-ID: {{ auth()->user()->id }}" \
+  -H "X-Token: {{ $apiToken }}" \
+  {{ url('/treetask/api/v1/projetos') }}</code>
+            </div>
+
+            <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p class="text-sm text-blue-700 dark:text-blue-300">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    <strong>Documentação:</strong> O arquivo <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">API_DOCUMENTATION.md</code> está disponível no módulo TreeTask para referência de integração.
+                </p>
+            </div>
+        </div>
+    </div>
 </section>

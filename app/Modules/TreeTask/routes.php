@@ -63,10 +63,10 @@ Route::prefix('treetask/api/v1')
         });
     });
 
-Route::prefix('treetask')
-    ->name('treetask.')
-    ->middleware(['web', 'auth'])
+Route::middleware(['web', 'auth'])
     ->middleware(RegistrarAcesso::class.':TreeTask')
+    ->prefix('treetask')
+    ->name('treetask.')
     ->group(function () {
 
         // --- Projetos ---

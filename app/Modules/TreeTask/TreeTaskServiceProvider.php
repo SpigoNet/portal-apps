@@ -14,9 +14,8 @@ class TreeTaskServiceProvider extends ServiceProvider
         // Carrega views com o namespace 'TreeTask::'
         $this->loadViewsFrom(__DIR__.'/resources/views', $this->namespace);
 
-        // Carrega rotas
-        Route::middleware(['web', 'auth'])
-            ->group(__DIR__ . '/routes.php');
+        // Carrega rotas da API (sem middleware web/auth)
+        Route::group([], __DIR__.'/routes.php');
     }
 
     public function register()

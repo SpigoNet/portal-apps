@@ -596,8 +596,9 @@ class ApiController extends Controller
 
         $data = $tarefas->map(function ($tarefa) {
             $formatted = $this->formatTarefa($tarefa);
-            $formatted['horas_parada'] = $tarefa->updated_at->diffInHours(now());
-            $formatted['ultima_atualizacao'] = $tarefa->updated_at->toISOString();
+            $updatedAt = is_string($tarefa->updated_at) ? \Carbon\Carbon::parse($tarefa->updated_at) : $tarefa->updated_at;
+            $formatted['horas_parada'] = $updatedAt->diffInHours(now());
+            $formatted['ultima_atualizacao'] = $updatedAt->toISOString();
 
             return $formatted;
         });
@@ -665,6 +666,15 @@ class ApiController extends Controller
         $statusInfo = $statusMap[$tarefa->status] ?? ['desconhecido', 0];
         $prioridadeValor = $prioridadeMap[$tarefa->prioridade] ?? 0;
 
+        // Helper para converter data para ISO string de forma segura
+        $toISOString = function ($date) {
+            if (is_string($date)) {
+                return \Carbon\Carbon::parse($date)->toISOString();
+            }
+
+            return $date ? $date->toISOString() : null;
+        };
+
         $data = [
             'id_tarefa' => $tarefa->id_tarefa,
             'titulo' => $tarefa->titulo,
@@ -674,9 +684,9 @@ class ApiController extends Controller
             'status_ordem' => $statusInfo[1],
             'prioridade' => $tarefa->prioridade,
             'prioridade_codigo' => $prioridadeValor,
-            'data_vencimento' => $tarefa->data_vencimento ? $tarefa->data_vencimento->toISOString() : null,
-            'data_criacao' => $tarefa->created_at->toISOString(),
-            'data_atualizacao' => $tarefa->updated_at->toISOString(),
+            'data_vencimento' => $tarefa->data_vencimento ? $toISOString($tarefa->data_vencimento) : null,
+            'data_criacao' => $toISOString($tarefa->created_at),
+            'data_atualizacao' => $toISOString($tarefa->updated_at),
             'estimativa_tempo' => $tarefa->estimativa_tempo,
             'ordem' => $tarefa->ordem,
         ];

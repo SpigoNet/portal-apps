@@ -17,12 +17,13 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 // ==================== API V1 (Token Auth) ====================
+
+// Health Check (público - sem middleware)
+Route::get('/treetask/api/v1/health', [ApiController::class, 'health'])->name('treetask.api.health');
+
 Route::prefix('treetask/api/v1')
     ->name('treetask.api.')
     ->group(function () {
-        // Health Check (público)
-        Route::get('/health', [ApiController::class, 'health'])->name('health');
-
         // Rotas protegidas por TokenAuth
         Route::middleware(TokenAuth::class)->group(function () {
             // Projetos

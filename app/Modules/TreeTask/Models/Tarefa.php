@@ -2,13 +2,13 @@
 
 namespace App\Modules\TreeTask\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
-use App\Modules\TreeTask\Models\Anexo;
+use Illuminate\Database\Eloquent\Model;
 
 class Tarefa extends Model
 {
     protected $table = 'treetask_tarefas';
+
     protected $primaryKey = 'id_tarefa';
 
     protected $fillable = [
@@ -19,8 +19,17 @@ class Tarefa extends Model
         'id_user_responsavel',
         'prioridade',
         'data_vencimento',
-        'estimativa_tempo'
+        'estimativa_tempo',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'data_vencimento' => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     public function fase()
     {
@@ -31,6 +40,7 @@ class Tarefa extends Model
     {
         return $this->belongsTo(User::class, 'id_user_responsavel', 'id');
     }
+
     public function anexos()
     {
         return $this->belongsToMany(
@@ -40,5 +50,4 @@ class Tarefa extends Model
             'id_anexo'
         );
     }
-
 }

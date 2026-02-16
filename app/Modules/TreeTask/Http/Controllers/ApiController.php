@@ -433,4 +433,299 @@ class ApiController extends Controller
 
         return Storage::download($anexo->path_arquivo, $anexo->nome_arquivo);
     }
+
+    // ==================== ENDPOINTS ESPECIAIS PARA INTEGRAÇÃO ====================
+
+    /**
+     * Health Check - Verifica se a API está funcionando
+     */
+    public function health()
+    {
+        try {
+            // Testa conexão com banco
+            \DB::connection()->getPdo();
+
+            return response()->json([
+                'status' => 'ok',
+                'database' => 'connected',
+                'timestamp' => now()->toISOString(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'database' => 'disconnected',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Listar tarefas com filtros avançados (Dashboard)
+     * GET /api/tarefas?filtro=pendentes&limit=5
+     */
+    public function tarefasList(Request $request)
+    {
+        $query = Tarefa::query()
+            ->with(['fase.projeto', 'responsavel']);
+
+        // Filtros de status
+        if ($request->has('status')) {
+            $status = $request->input('status');
+            if ($status === 'nao_concluidas') {
+                $query->where('status', '!=', 'Concluído');
+            } elseif (is_array($status)) {
+                $query->whereIn('status', $status);
+            } else {
+                $query->where('status', $status);
+            }
+        }
+
+        // Filtro de prioridade
+        if ($request->has('prioridade')) {
+            $query->where('prioridade', $request->input('prioridade'));
+        }
+
+        // Filtro de projeto
+        if ($request->has('projeto_id')) {
+            $query->whereHas('fase', function ($q) use ($request) {
+                $q->where('id_projeto', $request->input('projeto_id'));
+            });
+        }
+
+        // Filtro de responsável
+        if ($request->has('responsavel_id')) {
+            $query->where('id_user_responsavel', $request->input('responsavel_id'));
+        }
+
+        // Filtro de data de vencimento
+        if ($request->has('vencimento_ate')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('data_vencimento', '<=', $request->input('vencimento_ate'))
+                    ->orWhereNull('data_vencimento');
+            });
+        }
+
+        // Ordenação padrão: prioridade DESC, data_vencimento ASC
+        $query->orderByRaw("CASE prioridade 
+            WHEN 'Urgente' THEN 4 
+            WHEN 'Alta' THEN 3 
+            WHEN 'Média' THEN 2 
+            WHEN 'Baixa' THEN 1 
+            ELSE 0 
+        END DESC")
+            ->orderByRaw('ISNULL(data_vencimento), data_vencimento ASC');
+
+        // Paginação ou limite
+        $limit = $request->input('limit', 50);
+        $tarefas = $query->limit($limit)->get();
+
+        // Formata resposta
+        $data = $tarefas->map(function ($tarefa) {
+            return $this->formatTarefa($tarefa);
+        });
+
+        return response()->json([
+            'tarefas' => $data,
+            'meta' => [
+                'total' => $data->count(),
+                'filtro_aplicado' => $request->input('status', 'todos'),
+            ],
+        ]);
+    }
+
+    /**
+     * Top 3 tarefas para relatório da manhã
+     * GET /api/tarefas/relatorio?dias=7&limit=3
+     */
+    public function tarefasRelatorio(Request $request)
+    {
+        $dias = $request->input('dias', 7);
+        $limit = $request->input('limit', 3);
+        $dataLimite = now()->addDays($dias);
+
+        $query = Tarefa::query()
+            ->with(['fase.projeto', 'responsavel'])
+            ->where('status', '!=', 'Concluído')
+            ->where(function ($q) use ($dataLimite) {
+                $q->where('data_vencimento', '<=', $dataLimite)
+                    ->orWhereNull('data_vencimento');
+            });
+
+        // Ordenação: prioridade DESC, data_vencimento ASC, ordem ASC
+        $query->orderByRaw("CASE prioridade 
+            WHEN 'Urgente' THEN 4 
+            WHEN 'Alta' THEN 3 
+            WHEN 'Média' THEN 2 
+            WHEN 'Baixa' THEN 1 
+            ELSE 0 
+        END DESC")
+            ->orderByRaw('ISNULL(data_vencimento), data_vencimento ASC')
+            ->orderBy('ordem', 'ASC');
+
+        $tarefas = $query->limit($limit)->get();
+
+        $data = $tarefas->map(function ($tarefa) {
+            return $this->formatTarefa($tarefa);
+        });
+
+        return response()->json([
+            'tarefas' => $data,
+            'meta' => [
+                'total' => $data->count(),
+                'periodo_dias' => $dias,
+                'data_limite' => $dataLimite->toDateString(),
+            ],
+        ]);
+    }
+
+    /**
+     * Identificar tarefas paradas (sem progresso há X horas)
+     * GET /api/tarefas/paradas?horas=24
+     */
+    public function tarefasParadas(Request $request)
+    {
+        $horas = $request->input('horas', 24);
+        $dataLimite = now()->subHours($horas);
+
+        $tarefas = Tarefa::query()
+            ->with(['fase.projeto', 'responsavel'])
+            ->where('status', 'Em Andamento')
+            ->where('updated_at', '<', $dataLimite)
+            ->orderBy('updated_at', 'ASC')
+            ->get();
+
+        $data = $tarefas->map(function ($tarefa) {
+            $formatted = $this->formatTarefa($tarefa);
+            $formatted['horas_parada'] = $tarefa->updated_at->diffInHours(now());
+            $formatted['ultima_atualizacao'] = $tarefa->updated_at->toISOString();
+
+            return $formatted;
+        });
+
+        return response()->json([
+            'tarefas' => $data,
+            'meta' => [
+                'total' => $data->count(),
+                'horas_limite' => $horas,
+                'data_corte' => $dataLimite->toISOString(),
+            ],
+        ]);
+    }
+
+    /**
+     * Obter tarefa completa com todos os relacionamentos
+     * GET /api/tarefas/{id}/completa?include=projeto,fase,responsavel
+     */
+    public function tarefasCompleta(Request $request, $id)
+    {
+        $includes = $request->input('include', 'projeto,fase,responsavel');
+        $includeArray = explode(',', $includes);
+
+        $query = Tarefa::query();
+
+        // Carrega relacionamentos solicitados
+        if (in_array('projeto', $includeArray) || in_array('fase', $includeArray)) {
+            $query->with(['fase.projeto']);
+        }
+        if (in_array('responsavel', $includeArray)) {
+            $query->with('responsavel');
+        }
+        if (in_array('anexos', $includeArray)) {
+            $query->with('anexos');
+        }
+
+        $tarefa = $query->findOrFail($id);
+
+        return response()->json([
+            'success' => true,
+            'data' => $this->formatTarefa($tarefa, true),
+        ]);
+    }
+
+    /**
+     * Formata tarefa para resposta padronizada
+     */
+    private function formatTarefa($tarefa, $completo = false)
+    {
+        $statusMap = [
+            'A Fazer' => ['pendente', 1],
+            'Planejamento' => ['pendente', 2],
+            'Em Andamento' => ['andamento', 3],
+            'Aguardando resposta' => ['andamento', 4],
+            'Concluído' => ['concluida', 5],
+        ];
+
+        $prioridadeMap = [
+            'Urgente' => 4,
+            'Alta' => 3,
+            'Média' => 2,
+            'Baixa' => 1,
+        ];
+
+        $statusInfo = $statusMap[$tarefa->status] ?? ['desconhecido', 0];
+        $prioridadeValor = $prioridadeMap[$tarefa->prioridade] ?? 0;
+
+        $data = [
+            'id_tarefa' => $tarefa->id_tarefa,
+            'titulo' => $tarefa->titulo,
+            'descricao' => $tarefa->descricao,
+            'status' => $tarefa->status,
+            'status_codigo' => $statusInfo[0],
+            'status_ordem' => $statusInfo[1],
+            'prioridade' => $tarefa->prioridade,
+            'prioridade_codigo' => $prioridadeValor,
+            'data_vencimento' => $tarefa->data_vencimento ? $tarefa->data_vencimento->toISOString() : null,
+            'data_criacao' => $tarefa->created_at->toISOString(),
+            'data_atualizacao' => $tarefa->updated_at->toISOString(),
+            'estimativa_tempo' => $tarefa->estimativa_tempo,
+            'ordem' => $tarefa->ordem,
+        ];
+
+        if ($completo) {
+            $data['id_fase'] = $tarefa->id_fase;
+            $data['fase'] = $tarefa->fase ? [
+                'id_fase' => $tarefa->fase->id_fase,
+                'nome' => $tarefa->fase->nome,
+                'ordem' => $tarefa->fase->ordem,
+            ] : null;
+
+            $data['projeto'] = $tarefa->fase && $tarefa->fase->projeto ? [
+                'id_projeto' => $tarefa->fase->projeto->id_projeto,
+                'nome' => $tarefa->fase->projeto->nome,
+                'status' => $tarefa->fase->projeto->status,
+            ] : null;
+
+            $data['responsavel'] = $tarefa->responsavel ? [
+                'id_user' => $tarefa->responsavel->id,
+                'nome' => $tarefa->responsavel->name,
+            ] : null;
+
+            if (isset($tarefa->anexos)) {
+                $data['anexos'] = $tarefa->anexos->map(function ($anexo) {
+                    return [
+                        'id_anexo' => $anexo->id_anexo,
+                        'nome_arquivo' => $anexo->nome_arquivo,
+                        'mime_type' => $anexo->mime_type,
+                    ];
+                });
+            }
+        } else {
+            $data['fase'] = $tarefa->fase ? [
+                'id_fase' => $tarefa->fase->id_fase,
+                'nome' => $tarefa->fase->nome,
+            ] : null;
+
+            $data['projeto'] = $tarefa->fase && $tarefa->fase->projeto ? [
+                'id_projeto' => $tarefa->fase->projeto->id_projeto,
+                'nome' => $tarefa->fase->projeto->nome,
+            ] : null;
+
+            $data['responsavel'] = $tarefa->responsavel ? [
+                'id_user' => $tarefa->responsavel->id,
+                'nome' => $tarefa->responsavel->name,
+            ] : null;
+        }
+
+        return $data;
+    }
 }

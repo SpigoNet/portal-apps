@@ -1,9 +1,6 @@
-<x-app-layout
-    :module-id="3"
-    :module-menu="$contextMenu ?? ''"
->
+<x-app-layout :module-id="3" module-name="TreeTask" module-home-route="treetask.index" :module-menu="$contextMenu ?? ''">
     {{-- Repassa o header se ele existir --}}
-    @if(isset($header))
+    @if (isset($header))
         <x-slot name="header">
             {{ $header }}
         </x-slot>

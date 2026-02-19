@@ -25,22 +25,24 @@ new class extends Component {
             $user = auth()->user();
 
             // Carrega todos os apps que o usuário tem acesso (Públicos + Privados + Específicos)
-            $this->shortcutApps = PortalApp::query()
-                ->where('visibility', 'public')
-                ->orWhere('visibility', 'private')
-                ->orWhereHas('users', fn($q) => $q->where('user_id', $user->id))
-                ->orderBy('title')
-                ->get();
+            $this->shortcutApps = PortalApp::query()->where('visibility', 'public')->orWhere('visibility', 'private')->orWhereHas('users', fn($q) => $q->where('user_id', $user->id))->orderBy('title')->get();
+        }
 
-            // Lógica Inteligente: Se recebermos o ID, preenchemos os dados automaticamente
+        // Lógica Inteligente para o Módulo Atual:
+        // Se recebermos o ID, o preenchimento automático ocorre independente da lista de atalhos,
+        // garantindo que o cabeçalho identifique o app mesmo que ele não esteja nos atalhos do usuário.
+        if ($this->moduleId) {
+            $currentApp = PortalApp::find($this->moduleId);
 
-            if ($this->moduleId) {
-                // Busca na coleção em memória (sem nova query no banco)
-                $currentApp = $this->shortcutApps->firstWhere('id', $this->moduleId);
-
-                if ($currentApp) {
+            if ($currentApp) {
+                // Só preenche se ainda não tiver sido passado via prop explicitamente (priorizando a prop se existir)
+                if (empty($this->moduleName)) {
                     $this->moduleName = $currentApp->title;
+                }
+                if (empty($this->moduleIcon)) {
                     $this->moduleIcon = $currentApp->icon;
+                }
+                if (empty($this->moduleHomeRoute)) {
                     $this->moduleHomeRoute = $currentApp->start_link;
                 }
             }
@@ -64,8 +66,9 @@ new class extends Component {
     // Helper simples para resolver o link (Rota Laravel ou URL Direta)
     public function resolveHomeLink()
     {
-        if (empty($this->moduleHomeRoute))
+        if (empty($this->moduleHomeRoute)) {
             return '#';
+        }
 
         // Se começar com / ou http, é uma URL direta (padrão do banco)
         if (Str::startsWith($this->moduleHomeRoute, ['/', 'http'])) {
@@ -102,32 +105,33 @@ new class extends Component {
                 </div>
 
                 {{-- 2. Área do Módulo Específico --}}
-                @if($moduleName)
+                @if ($moduleName)
                     <div class="hidden md:flex items-center h-8 border-l border-white/20 pl-4 space-x-4">
 
                         {{-- Nome/Link do Módulo --}}
                         <a href="{{ $this->resolveHomeLink() }}" class="flex items-center gap-2 group">
-                            @if($moduleIcon)
+                            @if ($moduleIcon)
                                 <div class="w-8 h-8 flex items-center justify-center">
                                     {{-- Verifica se é HTML (ex: <i class..>) ou Caminho de Imagem --}}
-                                        @if(str_contains($moduleIcon, '<'))
-                                            {!! $moduleIcon !!}
-                                        @else
-                                            <img src="{{ asset($moduleIcon) }}" alt="{{ $moduleName }}"
-                                                class="w-full h-full object-contain group-hover:scale-110 transition-transform">
-                                        @endif
+                                    @if (str_contains($moduleIcon, '<'))
+                                        {!! $moduleIcon !!}
+                                    @else
+                                        <img src="{{ asset($moduleIcon) }}" alt="{{ $moduleName }}"
+                                            class="w-full h-full object-contain group-hover:scale-110 transition-transform">
+                                    @endif
                                 </div>
                             @else
                                 <i class="fa-solid fa-layer-group text-lg"></i>
                             @endif
 
-                            <span class="font-bold text-gray-200 group-hover:text-white tracking-wide text-sm uppercase">
+                            <span
+                                class="font-bold text-gray-200 group-hover:text-white tracking-wide text-sm uppercase">
                                 {{ $moduleName }}
                             </span>
                         </a>
 
                         {{-- Menu Específico da Aplicação --}}
-                        @if($moduleMenu)
+                        @if ($moduleMenu)
                             <div class="flex items-center gap-1 bg-white/5 rounded-lg px-2 py-1">
                                 {!! $moduleMenu !!}
                             </div>
@@ -154,9 +158,9 @@ new class extends Component {
                             <div class="p-4 w-[320px]">
                                 <div class="text-xs font-bold text-gray-500 uppercase mb-3 px-1">Navegação Rápida</div>
 
-                                @if($shortcutApps->isNotEmpty())
+                                @if ($shortcutApps->isNotEmpty())
                                     <div class="grid grid-cols-3 gap-2">
-                                        @foreach($shortcutApps as $app)
+                                        @foreach ($shortcutApps as $app)
                                             <a href="{{ url($app->start_link) }}"
                                                 class="flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition group text-center h-24">
                                                 <div class="h-8 w-8 mb-2 flex items-center justify-center">
@@ -195,7 +199,7 @@ new class extends Component {
                                         x-on:profile-updated.window="name = $event.detail.name"
                                         class="font-bold text-white"></div>
                                 </div>
-                                @if(auth()->user()->avatar)
+                                @if (auth()->user()->avatar)
                                     <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}"
                                         class="h-8 w-8 rounded-full border border-spigo-lime/50 object-cover">
                                 @else
@@ -220,7 +224,8 @@ new class extends Component {
 
                             <button wire:click="logout" class="w-full text-start">
                                 <x-dropdown-link>
-                                    <i class="fa-solid fa-arrow-right-from-bracket mr-2 text-red-400"></i> {{ __('Sair') }}
+                                    <i class="fa-solid fa-arrow-right-from-bracket mr-2 text-red-400"></i>
+                                    {{ __('Sair') }}
                                 </x-dropdown-link>
                             </button>
                         </x-slot>
@@ -240,10 +245,10 @@ new class extends Component {
                 <button @click="open = ! open"
                     class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 focus:outline-none transition">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex"
+                        <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
                             stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
+                        <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round"
                             stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
@@ -252,21 +257,22 @@ new class extends Component {
     </div>
 
     {{-- Menu Mobile --}}
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-spigo-dark border-t border-gray-700">
-        @if($moduleName)
+    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden bg-spigo-dark border-t border-gray-700">
+        @if ($moduleName)
             <div class="bg-white/5 p-4 border-b border-gray-700">
                 <div class="text-spigo-lime font-bold uppercase text-xs mb-2">Você está em:</div>
                 <div class="text-white font-bold text-lg mb-2 flex items-center gap-2">
-                    @if($moduleIcon)
-                        @if(str_contains($moduleIcon, '<'))
+                    @if ($moduleIcon)
+                        @if (str_contains($moduleIcon, '<'))
                             {!! $moduleIcon !!}
                         @else
-                            <img src="{{ asset($moduleIcon) }}" alt="{{ $moduleName }}" class="w-6 h-6 object-contain">
+                            <img src="{{ asset($moduleIcon) }}" alt="{{ $moduleName }}"
+                                class="w-6 h-6 object-contain">
                         @endif
                     @endif
                     {{ $moduleName }}
                 </div>
-                @if($moduleMenu)
+                @if ($moduleMenu)
                     <div class="flex flex-wrap gap-2">
                         {!! $moduleMenu !!}
                     </div>
@@ -277,7 +283,7 @@ new class extends Component {
         @auth
             <div class="pt-4 pb-1 border-t border-gray-700">
                 <div class="px-4 flex items-center gap-3">
-                    @if(auth()->user()->avatar)
+                    @if (auth()->user()->avatar)
                         <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}"
                             class="h-10 w-10 rounded-full border border-spigo-lime/50 object-cover">
                     @else
@@ -310,15 +316,16 @@ new class extends Component {
             </div>
 
             {{-- Mobile App Switcher --}}
-            @if($shortcutApps->isNotEmpty())
+            @if ($shortcutApps->isNotEmpty())
                 <div class="pt-4 pb-4 border-t border-gray-700">
                     <div class="px-4 text-xs font-bold text-gray-500 uppercase mb-3">Meus Aplicativos</div>
                     <div class="grid grid-cols-3 gap-2 px-2">
-                        @foreach($shortcutApps as $app)
+                        @foreach ($shortcutApps as $app)
                             <a href="{{ url($app->start_link) }}"
                                 class="flex flex-col items-center justify-center p-2 rounded-xl hover:bg-white/5 transition text-center h-20">
                                 <div class="h-6 w-6 mb-1 flex items-center justify-center">
-                                    <img src="{{ asset($app->icon) }}" alt="{{ $app->title }}" class="w-full h-full object-contain"
+                                    <img src="{{ asset($app->icon) }}" alt="{{ $app->title }}"
+                                        class="w-full h-full object-contain"
                                         onerror="this.src='{{ asset('images/default-app-icon.png') }}'; this.onerror=null;">
                                 </div>
                                 <span class="text-[10px] font-medium text-gray-400 leading-tight line-clamp-2">

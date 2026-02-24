@@ -24,6 +24,10 @@ new #[Layout('layouts.guest')] class extends Component {
             $this->redirect(route('mundos-de-mim.index'), navigate: true);
             return;
         }
+        if ($origin === 'ant') {
+            $this->redirect(route('ant.home'), navigate: true);
+            return;
+        }
 
         $this->redirectIntended(default: route('welcome', absolute: false), navigate: true);
     }

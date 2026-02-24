@@ -36,6 +36,9 @@ class GoogleController extends Controller
             if ($origin === 'mundos-de-mim') {
                 return redirect()->route('mundos-de-mim.index');
             }
+            if ($origin === 'ant') {
+                return redirect()->route('ant.home');
+            }
 
             return redirect('/');
 

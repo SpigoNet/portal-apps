@@ -3,7 +3,7 @@
 
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Publicar Material
+            Editar Material
         </h2>
         <p class="text-sm text-gray-500 mt-1">{{ $materia->nome }} — {{ $semestreAtual }}</p>
     </x-slot>
@@ -22,9 +22,10 @@
                     </div>
                 @endif
 
-                <form id="material-form" method="POST" action="{{ route('ant.materiais.store', $materia->id) }}"
+                <form id="material-form" method="POST" action="{{ route('ant.materiais.update', $material->id) }}"
                     enctype="multipart/form-data">
                     @csrf
+                    @method('POST')
 
                     <input type="hidden" name="descricao" id="descricao-input">
 
@@ -35,7 +36,7 @@
                                 Data da Aula
                             </label>
                             <input type="date" id="data_aula" name="data_aula"
-                                value="{{ old('data_aula', date('Y-m-d')) }}"
+                                value="{{ old('data_aula', $material->data_aula->format('Y-m-d')) }}"
                                 required
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
@@ -45,8 +46,7 @@
                                 Título
                             </label>
                             <input type="text" id="titulo" name="titulo"
-                                value="{{ old('titulo') }}"
-                                placeholder="Ex: Slides Aula 3 — Arrays e Listas"
+                                value="{{ old('titulo', $material->titulo) }}"
                                 required
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>
@@ -57,16 +57,36 @@
                                 <span class="text-gray-400 text-xs font-normal">(opcional)</span>
                             </label>
                             <div id="editor-container" style="min-height: 200px;">
-                                {!! old('descricao') !!}
+                                {!! old('descricao', $material->descricao) !!}
                             </div>
                         </div>
 
+                        @if($arquivosExistentes)
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Anexos Existentes
+                                </label>
+                                <div class="space-y-2">
+                                    @foreach($arquivosExistentes as $caminho)
+                                        <div class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
+                                            <span class="text-sm text-gray-700 truncate">{{ basename($caminho) }}</span>
+                                            <label class="flex items-center gap-1 ml-3 text-xs text-red-600 cursor-pointer flex-shrink-0">
+                                                <input type="checkbox" name="remover_arquivos[]" value="{{ $caminho }}"
+                                                    class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                                                Remover
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
                         <div>
-                            <label for="arquivos" class="block text-sm font-medium text-gray-700">
-                                Arquivos Anexos
+                            <label for="novos_arquivos" class="block text-sm font-medium text-gray-700">
+                                Adicionar Novos Arquivos
                                 <span class="text-gray-400 text-xs font-normal">(opcional)</span>
                             </label>
-                            <input type="file" id="arquivos" name="arquivos[]"
+                            <input type="file" id="novos_arquivos" name="novos_arquivos[]"
                                 multiple
                                 class="mt-1 block w-full text-sm text-gray-500
                                     file:mr-4 file:py-2 file:px-4
@@ -76,7 +96,6 @@
                                     hover:file:bg-indigo-100">
                             <p class="mt-1 text-xs text-gray-400">
                                 PDF, PPTX, DOCX, ZIP, imagens e outros formatos. Máximo de 50 MB por arquivo.
-                                Você pode selecionar múltiplos arquivos.
                             </p>
                         </div>
 
@@ -86,17 +105,32 @@
                                 <span class="text-gray-400 text-xs font-normal">(opcional)</span>
                             </label>
                             <div id="videos-container" class="space-y-2">
-                                <div class="flex gap-2 items-center video-row">
-                                    <input type="url" name="videos[]"
-                                        placeholder="https://www.youtube.com/watch?v=..."
-                                        class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
-                                    <button type="button" onclick="removerVideo(this)"
-                                        class="text-red-400 hover:text-red-600 transition p-1" title="Remover">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
+                                @forelse($videosExistentes as $videoUrl)
+                                    <div class="flex gap-2 items-center video-row">
+                                        <input type="url" name="videos[]"
+                                            value="{{ $videoUrl }}"
+                                            placeholder="https://www.youtube.com/watch?v=..."
+                                            class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                        <button type="button" onclick="removerVideo(this)"
+                                            class="text-red-400 hover:text-red-600 transition p-1" title="Remover">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                @empty
+                                    <div class="flex gap-2 items-center video-row">
+                                        <input type="url" name="videos[]"
+                                            placeholder="https://www.youtube.com/watch?v=..."
+                                            class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                        <button type="button" onclick="removerVideo(this)"
+                                            class="text-red-400 hover:text-red-600 transition p-1" title="Remover">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                @endforelse
                             </div>
                             <button type="button" onclick="adicionarVideo()"
                                 class="mt-2 text-sm text-indigo-600 hover:text-indigo-800 font-medium">
@@ -113,7 +147,7 @@
                         </a>
                         <button type="submit"
                             class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 shadow-sm text-sm font-medium transition">
-                            Publicar Material
+                            Salvar Alterações
                         </button>
                     </div>
 

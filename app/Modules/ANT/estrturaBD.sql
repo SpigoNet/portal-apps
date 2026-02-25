@@ -275,6 +275,7 @@ create table spigo594_apps.ant_materiais
     titulo     varchar(255)    not null,
     descricao  text            null,
     arquivos   text            null comment 'JSON com caminhos dos arquivos no SFTP',
+    videos     text            null comment 'JSON com URLs de vídeos do YouTube',
     created_at timestamp       null,
     updated_at timestamp       null,
     constraint ant_materiais_materia_id_foreign

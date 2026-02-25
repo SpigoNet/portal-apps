@@ -5,6 +5,7 @@ use App\Modules\ANT\Http\Controllers\AdminMateriaController;
 use App\Modules\ANT\Http\Controllers\AdminProfessorController;
 use App\Modules\ANT\Http\Controllers\AntAdminController;
 use App\Modules\ANT\Http\Controllers\CorrecaoController;
+use App\Modules\ANT\Http\Controllers\MaterialController;
 use App\Modules\ANT\Http\Controllers\PesoController;
 use App\Modules\ANT\Http\Controllers\ProfessorController;
 use App\Modules\ANT\Http\Controllers\ProvaController;
@@ -38,6 +39,9 @@ Route::prefix('ant')
         Route::get('/correcao/{idEntrega}/{fileIndex?}', [CorrecaoController::class, 'edit'])->name('ant.correcao.edit');
         Route::post('/correcao/{idEntrega}', [CorrecaoController::class, 'update'])->name('ant.correcao.update');
 
+        // Materiais de Aula (acessível por alunos matriculados e professores)
+        Route::get('/materia/{idMateria}/materiais', [MaterialController::class, 'index'])->name('ant.materiais.index');
+
         Route::prefix('professor')->group(function () {
             // Dashboard
             Route::get('/', [ProfessorController::class, 'index'])->name('ant.professor.index');
@@ -54,6 +58,11 @@ Route::prefix('ant')
             Route::delete('/pesos/{id}', [PesoController::class, 'destroy'])->name('ant.pesos.destroy');
 
             Route::post('/correcao/{idEntrega}/ia-sugestao', [CorrecaoController::class, 'iaSugestao'])->name('ant.correcao.ia_sugestao');
+
+            // Upload de materiais de aula (professor)
+            Route::get('/materia/{idMateria}/materiais/novo', [MaterialController::class, 'create'])->name('ant.materiais.create');
+            Route::post('/materia/{idMateria}/materiais', [MaterialController::class, 'store'])->name('ant.materiais.store');
+            Route::delete('/material/{id}', [MaterialController::class, 'destroy'])->name('ant.materiais.destroy');
         });
 
 

@@ -199,7 +199,15 @@
                                 </div>
                             @endif
                             {{-- NOVO LINK PARA BOLETIM --}}
-                            <div class="mt-4 pt-3 border-t border-gray-100 flex justify-end">
+                            <div class="mt-4 pt-3 border-t border-gray-100 flex justify-end gap-4">
+                                <a href="{{ route('ant.materiais.index', $materia->id) }}"
+                                    class="text-indigo-600 hover:text-indigo-900 text-sm font-medium flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                    </svg>
+                                    Materiais de Aula
+                                </a>
                                 <a href="{{ route('ant.aluno.boletim', $materia->id) }}"
                                     class="text-indigo-600 hover:text-indigo-900 text-sm font-bold flex items-center">
                                     <span class="material-icons text-sm mr-1">bar_chart</span>

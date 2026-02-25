@@ -16,7 +16,7 @@ return new class extends Migration
             $table->date('data_aula')->comment('Data da aula para agrupamento');
             $table->string('titulo', 255);
             $table->text('descricao')->nullable();
-            $table->text('arquivos')->comment('JSON com caminhos dos arquivos no SFTP');
+            $table->text('arquivos')->nullable()->comment('JSON com caminhos dos arquivos no SFTP');
             $table->timestamps();
         });
     }

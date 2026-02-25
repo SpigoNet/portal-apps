@@ -20,7 +20,7 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-4">
 
             @if(session('success'))
                 <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded">
@@ -44,18 +44,32 @@
                 </div>
             @else
                 @foreach($materiaisAgrupados as $dataAula => $itens)
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-l-4 border-indigo-500">
-                        <div class="bg-gray-50 px-6 py-3 border-b border-gray-200 flex items-center">
-                            <svg class="w-4 h-4 text-indigo-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <span class="font-bold text-gray-700">
-                                Aula de {{ \Carbon\Carbon::parse($dataAula)->translatedFormat('l, d \d\e F \d\e Y') }}
-                            </span>
-                        </div>
+                    <div x-data="{ aberto: false }" class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-l-4 border-indigo-500">
 
-                        <div class="divide-y divide-gray-100">
+                        {{-- Cabeçalho clicável com a data da aula --}}
+                        <button type="button" @click="aberto = !aberto"
+                            class="w-full bg-gray-50 px-6 py-3 border-b border-gray-200 flex items-center justify-between text-left hover:bg-gray-100 transition">
+                            <div class="flex items-center">
+                                <svg class="w-4 h-4 text-indigo-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span class="font-bold text-gray-700">
+                                    Aula de {{ \Carbon\Carbon::parse($dataAula)->translatedFormat('l, d \d\e F \d\e Y') }}
+                                </span>
+                                <span class="ml-3 text-xs text-gray-400 bg-white border border-gray-200 rounded-full px-2 py-0.5">
+                                    {{ $itens->count() }} {{ $itens->count() == 1 ? 'material' : 'materiais' }}
+                                </span>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-200"
+                                :class="{ 'rotate-180': aberto }"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        {{-- Conteúdo expansível --}}
+                        <div x-show="aberto" x-transition class="divide-y divide-gray-100">
                             @foreach($itens as $material)
                                 @php
                                     $arquivos = json_decode($material->arquivos, true) ?? [];
@@ -153,9 +167,31 @@
                                     </div>
                                 </div>
                             @endforeach
+
+                            @if($ehProfessor)
+                                <div class="px-6 py-3 bg-gray-50 flex justify-end">
+                                    <a href="{{ route('ant.materiais.create', ['idMateria' => $materia->id, 'data_aula' => $dataAula]) }}"
+                                        class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-900 font-medium">
+                                        <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        Adicionar material para esta data
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 @endforeach
+
+                @if($ehProfessor)
+                    <a href="{{ route('ant.materiais.create', $materia->id) }}"
+                        class="flex items-center justify-center gap-3 bg-white overflow-hidden shadow-sm sm:rounded-lg border-2 border-dashed border-indigo-200 hover:border-indigo-400 p-6 transition group">
+                        <svg class="w-6 h-6 text-indigo-300 group-hover:text-indigo-500 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span class="text-indigo-500 group-hover:text-indigo-700 font-medium transition">Inserir nova data de aula com materiais</span>
+                    </a>
+                @endif
             @endif
 
             <div class="text-center pt-2">

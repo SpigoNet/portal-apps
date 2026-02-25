@@ -100,6 +100,9 @@
                                 <a href="{{ route('ant.admin.alunos.index', ['materia_id' => $materia->id, 'semestre' => $semestreAtual]) }}"
                                     class="text-gray-600 hover:text-gray-900 text-sm font-medium">Ver Alunos</a>
                                 <span class="text-gray-300">|</span>
+                                <a href="{{ route('ant.materiais.index', $materia->id) }}"
+                                    class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Materiais</a>
+                                <span class="text-gray-300">|</span>
                                 <a href="{{ route('ant.professor.boletim', $materia->id) }}"
                                     class="text-indigo-600 hover:text-indigo-900 text-sm font-bold">Ver Boletim</a>
                             </div>

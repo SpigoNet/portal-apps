@@ -26,6 +26,15 @@ class SetModuleContext
             }
         }
 
+        // Se a URL começar com ant, salvamos na sessão
+        if ($request->is('ant*')) {
+            Session::put('module_origin', 'ant');
+
+            if ($request->method() === 'GET') {
+                Session::put('module_last_url', $request->fullUrl());
+            }
+        }
+
         return $next($request);
     }
 }

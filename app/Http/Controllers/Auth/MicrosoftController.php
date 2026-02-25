@@ -33,6 +33,14 @@ class MicrosoftController extends Controller
 
             Auth::login($user, true);
 
+            $origin = session('module_origin');
+            if ($origin === 'mundos-de-mim') {
+                return redirect()->route('mundos-de-mim.index');
+            }
+            if ($origin === 'ant') {
+                return redirect()->route('ant.home');
+            }
+
             return redirect('/');
 
         } catch (Exception $e) {

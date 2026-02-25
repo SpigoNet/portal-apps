@@ -1,4 +1,6 @@
 <x-ANT::layout>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             Publicar Material
@@ -20,9 +22,11 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('ant.materiais.store', $materia->id) }}"
+                <form id="material-form" method="POST" action="{{ route('ant.materiais.store', $materia->id) }}"
                     enctype="multipart/form-data">
                     @csrf
+
+                    <input type="hidden" name="descricao" id="descricao-input">
 
                     <div class="space-y-5">
 
@@ -48,21 +52,22 @@
                         </div>
 
                         <div>
-                            <label for="descricao" class="block text-sm font-medium text-gray-700">
-                                Descrição
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Conteúdo
                                 <span class="text-gray-400 text-xs font-normal">(opcional)</span>
                             </label>
-                            <textarea id="descricao" name="descricao" rows="3"
-                                placeholder="Breve descrição do conteúdo deste material..."
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('descricao') }}</textarea>
+                            <div id="editor-container" style="min-height: 200px;">
+                                {!! old('descricao') !!}
+                            </div>
                         </div>
 
                         <div>
                             <label for="arquivos" class="block text-sm font-medium text-gray-700">
-                                Arquivos
+                                Arquivos Anexos
+                                <span class="text-gray-400 text-xs font-normal">(opcional)</span>
                             </label>
                             <input type="file" id="arquivos" name="arquivos[]"
-                                multiple required
+                                multiple
                                 class="mt-1 block w-full text-sm text-gray-500
                                     file:mr-4 file:py-2 file:px-4
                                     file:rounded-md file:border-0
@@ -92,4 +97,35 @@
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var quill = new Quill('#editor-container', {
+                theme: 'snow',
+                placeholder: 'Descreva o conteúdo da aula, adicione links, formatação...',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote', 'code-block'],
+                        [{ 'header': [1, 2, 3, false] }],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        [{ 'color': [] }, { 'background': [] }],
+                        ['link'],
+                        ['clean']
+                    ]
+                }
+            });
+
+            var form = document.getElementById('material-form');
+            form.addEventListener('submit', function () {
+                var input = document.getElementById('descricao-input');
+                if (quill.root.innerHTML === '<p><br></p>') {
+                    input.value = '';
+                } else {
+                    input.value = quill.root.innerHTML;
+                }
+            });
+        });
+    </script>
 </x-ANT::layout>

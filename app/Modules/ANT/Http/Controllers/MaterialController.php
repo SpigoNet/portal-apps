@@ -106,33 +106,36 @@ class MaterialController extends Controller
             'titulo'    => 'required|string|max:255',
             'descricao' => 'nullable|string',
             'data_aula' => 'required|date',
-            'arquivos'  => 'required|array|min:1',
+            'arquivos'  => 'nullable|array',
             'arquivos.*' => 'required|file|max:51200',
         ]);
 
         $caminhos = [];
-        $targetPath = "ant/materiais/{$semestreAtual}/{$materia->nome_curto}/{$request->data_aula}";
 
-        try {
-            if (!Storage::disk('sftp')->exists($targetPath)) {
-                Storage::disk('sftp')->makeDirectory($targetPath);
+        if ($request->hasFile('arquivos')) {
+            $targetPath = "ant/materiais/{$semestreAtual}/{$materia->nome_curto}/{$request->data_aula}";
+
+            try {
+                if (!Storage::disk('sftp')->exists($targetPath)) {
+                    Storage::disk('sftp')->makeDirectory($targetPath);
+                }
+            } catch (\Exception $e) {
+                \Log::error('SFTP Material Directory Creation Failed', [
+                    'path'  => $targetPath,
+                    'error' => $e->getMessage(),
+                ]);
             }
-        } catch (\Exception $e) {
-            \Log::error('SFTP Material Directory Creation Failed', [
-                'path'  => $targetPath,
-                'error' => $e->getMessage(),
-            ]);
-        }
 
-        foreach ($request->file('arquivos') as $arquivo) {
-            $fileName = $arquivo->getClientOriginalName();
-            $path = $arquivo->storeAs($targetPath, $fileName, 'sftp');
-            $caminhos[] = $path;
+            foreach ($request->file('arquivos') as $arquivo) {
+                $fileName = $arquivo->getClientOriginalName();
+                $path = $arquivo->storeAs($targetPath, $fileName, 'sftp');
+                $caminhos[] = $path;
 
-            \Log::info('SFTP Material Upload', [
-                'path'   => $path,
-                'exists' => Storage::disk('sftp')->exists($path),
-            ]);
+                \Log::info('SFTP Material Upload', [
+                    'path'   => $path,
+                    'exists' => Storage::disk('sftp')->exists($path),
+                ]);
+            }
         }
 
         AntMaterial::create([
@@ -142,7 +145,7 @@ class MaterialController extends Controller
             'data_aula'  => $request->data_aula,
             'titulo'     => $request->titulo,
             'descricao'  => $request->descricao,
-            'arquivos'   => json_encode($caminhos),
+            'arquivos'   => !empty($caminhos) ? json_encode($caminhos) : null,
         ]);
 
         return redirect()->route('ant.materiais.index', $idMateria)

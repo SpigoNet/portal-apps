@@ -16,6 +16,7 @@ class AntMaterial extends Model
         'titulo',
         'descricao',
         'arquivos',
+        'videos',
     ];
 
     protected $casts = [

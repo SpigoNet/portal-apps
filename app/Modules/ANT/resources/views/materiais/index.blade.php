@@ -59,6 +59,7 @@
                             @foreach($itens as $material)
                                 @php
                                     $arquivos = json_decode($material->arquivos, true) ?? [];
+                                    $videos = json_decode($material->videos, true) ?? [];
                                 @endphp
                                 <div class="px-6 py-4">
                                     <div class="flex justify-between items-start gap-4">
@@ -85,22 +86,64 @@
                                                 @endforeach
                                             </div>
                                             @endif
+
+                                            @if($videos)
+                                            <div class="mt-4 space-y-3">
+                                                @foreach($videos as $videoUrl)
+                                                    @php
+                                                        $embedId = null;
+                                                        if (preg_match('/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_\-]{11})/', $videoUrl, $m)) {
+                                                            $embedId = $m[1];
+                                                        }
+                                                    @endphp
+                                                    @if($embedId)
+                                                        <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden" style="position:relative;padding-top:56.25%;">
+                                                            <iframe
+                                                                src="https://www.youtube.com/embed/{{ $embedId }}"
+                                                                style="position:absolute;top:0;left:0;width:100%;height:100%;"
+                                                                frameborder="0"
+                                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                                allowfullscreen
+                                                                loading="lazy">
+                                                            </iframe>
+                                                        </div>
+                                                    @else
+                                                        <a href="{{ $videoUrl }}" target="_blank"
+                                                            class="inline-flex items-center text-sm text-red-600 hover:text-red-800">
+                                                            <svg class="w-4 h-4 mr-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                                                <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                                            </svg>
+                                                            {{ $videoUrl }}
+                                                        </a>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                            @endif
                                         </div>
 
                                         @if($ehProfessor)
-                                            <form method="POST" action="{{ route('ant.materiais.destroy', $material->id) }}"
-                                                class="flex-shrink-0"
-                                                onsubmit="return confirm('Remover este material e seus arquivos?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" title="Remover material"
-                                                    class="text-red-400 hover:text-red-600 transition p-1">
+                                            <div class="flex-shrink-0 flex gap-1">
+                                                <a href="{{ route('ant.materiais.edit', $material->id) }}"
+                                                    title="Editar material"
+                                                    class="text-indigo-400 hover:text-indigo-600 transition p-1">
                                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                     </svg>
-                                                </button>
-                                            </form>
+                                                </a>
+                                                <form method="POST" action="{{ route('ant.materiais.destroy', $material->id) }}"
+                                                    onsubmit="return confirm('Remover este material e seus arquivos?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" title="Remover material"
+                                                        class="text-red-400 hover:text-red-600 transition p-1">
+                                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         @endif
                                     </div>
 

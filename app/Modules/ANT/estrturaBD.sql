@@ -264,3 +264,25 @@ create table spigo594_apps.ant_prova_respostas
 )
     collate = utf8mb4_unicode_ci;
 
+create table spigo594_apps.ant_materiais
+(
+    id         bigint unsigned auto_increment
+        primary key,
+    materia_id bigint unsigned not null,
+    user_id    bigint unsigned not null,
+    semestre   varchar(6)      not null,
+    data_aula  date            not null comment 'Data da aula para agrupamento',
+    titulo     varchar(255)    not null,
+    descricao  text            null,
+    arquivos   text            null comment 'JSON com caminhos dos arquivos no SFTP',
+    created_at timestamp       null,
+    updated_at timestamp       null,
+    constraint ant_materiais_materia_id_foreign
+        foreign key (materia_id) references spigo594_apps.ant_materias (id)
+            on delete cascade,
+    constraint ant_materiais_user_id_foreign
+        foreign key (user_id) references spigo594_apps.users (id)
+            on delete cascade
+)
+    collate = utf8mb4_unicode_ci;
+

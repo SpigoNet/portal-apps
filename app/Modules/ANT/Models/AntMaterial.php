@@ -18,6 +18,10 @@ class AntMaterial extends Model
         'arquivos',
     ];
 
+    protected $casts = [
+        'data_aula' => 'date',
+    ];
+
     public function materia()
     {
         return $this->belongsTo(AntMateria::class, 'materia_id');

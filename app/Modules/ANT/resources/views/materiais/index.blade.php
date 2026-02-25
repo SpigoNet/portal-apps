@@ -65,9 +65,12 @@
                                         <div class="flex-1 min-w-0">
                                             <h4 class="font-semibold text-gray-800">{{ $material->titulo }}</h4>
                                             @if($material->descricao)
-                                                <p class="text-sm text-gray-500 mt-1">{{ $material->descricao }}</p>
+                                                <div class="prose prose-sm max-w-none mt-1 text-gray-600">
+                                                    {!! $material->descricao !!}
+                                                </div>
                                             @endif
 
+                                            @if($arquivos)
                                             <div class="mt-3 flex flex-wrap gap-2">
                                                 @foreach($arquivos as $caminho)
                                                     <a href="{{ \Illuminate\Support\Facades\Storage::url($caminho) }}"
@@ -81,6 +84,7 @@
                                                     </a>
                                                 @endforeach
                                             </div>
+                                            @endif
                                         </div>
 
                                         @if($ehProfessor)

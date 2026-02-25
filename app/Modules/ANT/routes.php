@@ -62,6 +62,8 @@ Route::prefix('ant')
             // Upload de materiais de aula (professor)
             Route::get('/materia/{idMateria}/materiais/novo', [MaterialController::class, 'create'])->name('ant.materiais.create');
             Route::post('/materia/{idMateria}/materiais', [MaterialController::class, 'store'])->name('ant.materiais.store');
+            Route::get('/material/{id}/editar', [MaterialController::class, 'edit'])->name('ant.materiais.edit');
+            Route::post('/material/{id}', [MaterialController::class, 'update'])->name('ant.materiais.update');
             Route::delete('/material/{id}', [MaterialController::class, 'destroy'])->name('ant.materiais.destroy');
         });
 

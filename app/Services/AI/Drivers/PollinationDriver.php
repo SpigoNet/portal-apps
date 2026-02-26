@@ -11,10 +11,31 @@ use Illuminate\Support\Str;
 class PollinationDriver implements AiDriverInterface
 {
     protected string $textEndpoint = 'https://gen.pollinations.ai/v1/chat/completions';
+
     protected string $imageBaseUrl = 'https://gen.pollinations.ai/image/';
 
-    // Adicionei token no header, então aqui fica só para referência se precisar
     protected string $apiKey = 'sk_0gOTqpBGMd0eLlsk1GGBBvLSGF2tVt7g';
+
+    protected string $model = 'nanobanana';
+
+    public function __construct(?string $model = null)
+    {
+        if ($model) {
+            $this->model = $model;
+        }
+    }
+
+    public function setModel(string $model): self
+    {
+        $this->model = $model;
+
+        return $this;
+    }
+
+    public function getModel(): string
+    {
+        return $this->model;
+    }
 
     public function generateText(array $messages, array $options = []): ?string
     {
@@ -32,16 +53,18 @@ class PollinationDriver implements AiDriverInterface
         try {
             $response = Http::withOptions(['verify' => false, 'timeout' => 60])
                 ->withHeaders(['Content-Type' => 'application/json',
-                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Authorization' => 'Bearer '.$this->apiKey,
                     'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', // Simula navegador
                     'Referer' => 'https://pollinations.ai/'])
                 ->post($this->textEndpoint, $payload);
 
-            Log::debug("Pollination Text Response: " . $response->body());
+            Log::debug('Pollination Text Response: '.$response->body());
             if ($response->successful()) {
                 $data = $response->json();
+
                 return $data['choices'][0]['message']['content'] ?? $response->body();
             }
+
             return null;
         } catch (\Exception $e) {
             return null;
@@ -54,7 +77,7 @@ class PollinationDriver implements AiDriverInterface
     public function generateImage(string $prompt, array $options = []): ?string
     {
         $queryParams = [
-            'model' => 'nanobanana',
+            'model' => $this->model,
             'width' => 1024,
             'height' => 1024,
             'seed' => $options['seed'] ?? random_int(1, 999999),
@@ -64,7 +87,7 @@ class PollinationDriver implements AiDriverInterface
         ];
 
         // 1. Processamento da Imagem de Referência (com TinyURL)
-        if (!empty($options['reference_image_path'])) {
+        if (! empty($options['reference_image_path'])) {
             $path = $options['reference_image_path'];
             $originalUrl = Storage::disk('public')->url($path);
 
@@ -73,7 +96,7 @@ class PollinationDriver implements AiDriverInterface
             $originalUrl = preg_replace('#(?<!:)/+#', '/', $originalUrl);
 
             // Encurta a URL para evitar bloqueio do Cloudflare
-            if (!Str::contains($originalUrl, ['localhost', '127.0.0.1'])) {
+            if (! Str::contains($originalUrl, ['localhost', '127.0.0.1'])) {
                 $queryParams['image'] = $originalUrl;
             }
         }
@@ -91,9 +114,9 @@ class PollinationDriver implements AiDriverInterface
 
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Authorization' => 'Bearer '.$this->apiKey,
                 'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', // Simula navegador
-                'Referer' => 'https://pollinations.ai/'
+                'Referer' => 'https://pollinations.ai/',
             ])->timeout(90)->get($requestUrl);
 
             if ($response->successful()) {
@@ -101,21 +124,24 @@ class PollinationDriver implements AiDriverInterface
 
                 // Validação de conteúdo
                 if (strlen($imageContent) < 1000 || str_starts_with($imageContent, '<')) {
-                    Log::error("Pollination: Retorno inválido (HTML).");
+                    Log::error('Pollination: Retorno inválido (HTML).');
+
                     return null;
                 }
 
-                $filename = 'generations/pollinations_' . Str::uuid() . '.jpg';
+                $filename = 'generations/pollinations_'.Str::uuid().'.jpg';
                 Storage::disk('public')->put($filename, $imageContent);
 
                 return Storage::disk('public')->url($filename);
             }
 
-            Log::error("Pollination Failed: " . $response->status() . " URL: " . $requestUrl);
+            Log::error('Pollination Failed: '.$response->status().' URL: '.$requestUrl);
+
             return null;
 
         } catch (\Exception $e) {
-            Log::error("Pollination Exception: " . $e->getMessage());
+            Log::error('Pollination Exception: '.$e->getMessage());
+
             return null;
         }
     }

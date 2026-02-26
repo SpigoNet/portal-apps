@@ -1,12 +1,12 @@
 <?php
 
+use App\Modules\MundosDeMim\Http\Controllers\DashboardController;
 use App\Modules\MundosDeMim\Http\Controllers\EstilosController;
 use App\Modules\MundosDeMim\Http\Controllers\GaleriaController;
+use App\Modules\MundosDeMim\Http\Controllers\PerfilBiometricoController;
+use App\Modules\MundosDeMim\Http\Controllers\PessoasRelacionadasController; // <--- Importar
 use App\Modules\MundosDeMim\Http\Controllers\PlaygroundController;
 use Illuminate\Support\Facades\Route;
-use App\Modules\MundosDeMim\Http\Controllers\DashboardController; // <--- Importar
-use App\Modules\MundosDeMim\Http\Controllers\PerfilBiometricoController;
-use App\Modules\MundosDeMim\Http\Controllers\PessoasRelacionadasController;
 
 Route::prefix('mundos-de-mim')
     ->name('mundos-de-mim.')
@@ -84,5 +84,21 @@ Route::middleware(['web', 'auth', 'admin'])
             Route::get('/', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminGalleryController::class, 'index'])->name('index');
             Route::post('/copy', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminGalleryController::class, 'copyToPublic'])->name('copy');
             Route::delete('/delete', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminGalleryController::class, 'deleteFromPublic'])->name('delete');
+        });
+
+        // Gerenciador de Provedores de IA
+        Route::prefix('provedores-ia')->name('ai-providers.')->group(function () {
+            Route::get('/', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminAiProviderController::class, 'index'])->name('index');
+            Route::get('/novo', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminAiProviderController::class, 'create'])->name('create');
+            Route::post('/', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminAiProviderController::class, 'store'])->name('store');
+            Route::get('/{id}/editar', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminAiProviderController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminAiProviderController::class, 'update'])->name('update');
+            Route::delete('/{id}', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminAiProviderController::class, 'destroy'])->name('destroy');
+            Route::post('/{id}/padrao', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminAiProviderController::class, 'setDefault'])->name('set-default');
+            Route::post('/seed', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminAiProviderController::class, 'seed'])->name('seed');
+            Route::get('/usuarios', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminAiProviderController::class, 'userSettings'])->name('user-settings');
+            Route::post('/usuarios', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminAiProviderController::class, 'updateUserSettings'])->name('update-user-settings');
+            Route::post('/global', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminAiProviderController::class, 'updateGlobalDefault'])->name('update-global-default');
+            Route::post('/sync-pollination', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminAiProviderController::class, 'syncPollination'])->name('sync-pollination');
         });
     });

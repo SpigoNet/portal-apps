@@ -57,7 +57,6 @@ class User extends Authenticatable
         return $this->belongsToMany(\App\Models\PortalApp::class, 'portal_app_user');
     }
 
-
     public function clienteGestorHoras()
     {
         return $this->belongsTo(Cliente::class, 'gh_cliente_id');
@@ -68,10 +67,20 @@ class User extends Authenticatable
         return $this->hasMany(\App\Modules\StreamingManager\Models\Streaming::class);
     }
 
+    public function mundosDeMimAiSetting()
+    {
+        return $this->hasOne(\App\Modules\MundosDeMim\Models\UserAiSetting::class);
+    }
+
+    public function mundosDeMimDefaultAiProvider()
+    {
+        return $this->belongsTo(\App\Modules\MundosDeMim\Models\AIProvider::class, 'mundos_de_mim_default_ai_provider_id');
+    }
+
     public function isProfessor(): bool
     {
         $config = \App\Modules\ANT\Models\AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $semestreAtual = $config->semestre_atual ?? date('Y').'-'.(date('m') > 6 ? '2' : '1');
 
         return \Illuminate\Support\Facades\DB::table('ant_professor_materia')
             ->where('user_id', $this->id)
@@ -79,4 +88,3 @@ class User extends Authenticatable
             ->exists();
     }
 }
-

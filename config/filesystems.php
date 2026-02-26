@@ -17,19 +17,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | File Server URL
-    |--------------------------------------------------------------------------
-    |
-    | The public base URL for files stored on the auxiliary file server.
-    | This is used to generate download links for files uploaded by teachers
-    | and students.
-    |
-    */
-
-    'files_url' => env('FILES_URL', 'https://files.spigo.net'),
-
-    /*
-    |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------
     |

@@ -191,7 +191,7 @@ class CorrecaoController extends Controller
         }
 
         // 2. Arquivos Novos (Servidor de arquivos externo)
-        return config('filesystems.files_url') . '/' . $path;
+        return config('app.cdn_url') . '/' . $path;
     }
 
     private function getPhysicalPath($path)

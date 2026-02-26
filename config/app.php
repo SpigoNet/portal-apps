@@ -125,4 +125,6 @@ return [
 
     'POLLINATION_API_KEY' => env('POLLINATION_API_KEY', ''),
 
+    'cdn_url' => env('CDN_URL', 'https://files.spigo.net'),
+
 ];

@@ -10,10 +10,10 @@ if ($token_recebido !== $token_esperado) {
 
     // Executamos o migrate e o clear-cache para garantir que as novas rotas/configs subam
     // O 2>&1 no final serve para capturar erros de log se algo falhar
-    $output = shell_exec('php artisan migrate --force 2>&1');
-    $cacheOutput = shell_exec('php artisan optimize 2>&1');
-    $configClearOutput = shell_exec('php artisan config:clear 2>&1');
-    
+    $output = shell_exec('php ../artisan migrate --force 2>&1');
+    $cacheOutput = shell_exec('php ../artisan optimize 2>&1');
+    $configClearOutput = shell_exec('php ../artisan config:clear 2>&1');
+
 
     echo "### Deploy Finalizado com Sucesso! ###\n";
     echo "--- Migrations ---\n" . $output;

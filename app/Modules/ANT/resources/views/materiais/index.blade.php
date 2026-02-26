@@ -88,7 +88,7 @@
                                             @if($arquivos)
                                             <div class="mt-3 flex flex-wrap gap-2">
                                                 @foreach($arquivos as $caminho)
-                                                    <a href="{{ \Illuminate\Support\Facades\Storage::url($caminho) }}"
+                                                    <a href="{{ config('filesystems.files_url') }}/{{ $caminho }}"
                                                         target="_blank"
                                                         class="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-700 text-xs font-medium rounded-full border border-indigo-200 hover:bg-indigo-100 transition">
                                                         <svg class="w-3.5 h-3.5 mr-1.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">

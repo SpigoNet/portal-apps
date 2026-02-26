@@ -190,9 +190,8 @@ class CorrecaoController extends Controller
             return 'https://spigo.net/trabalhos' . $path;
         }
 
-        // 2. Arquivos Novos (Laravel Storage Link)
-        // Assume que estão em storage/app/public ou similar e linkados
-        return Storage::url($path);
+        // 2. Arquivos Novos (Servidor de arquivos externo)
+        return config('filesystems.files_url') . '/' . $path;
     }
 
     private function getPhysicalPath($path)

@@ -87,7 +87,7 @@
                                             @if(filter_var($arq, FILTER_VALIDATE_URL))
                                                 <a href="{{ $arq }}" target="_blank" class="text-blue-600 underline">{{ $arq }}</a>
                                             @else
-                                                <a href="{{ env('CDN_URL') }}/{{ $arq }}" target="_blank" class="text-blue-600 underline hover:text-blue-800">
+                                                <a href="{{ config('app.cdn_url') }}/{{ $arq }}" target="_blank" class="text-blue-600 underline hover:text-blue-800">
                                                     {{ basename($arq) }}
                                                 </a>
                                             @endif

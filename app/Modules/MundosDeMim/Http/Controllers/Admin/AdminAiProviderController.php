@@ -63,6 +63,10 @@ class AdminAiProviderController extends Controller
 
         $validated['is_active'] = $request->has('is_active');
 
+        if (is_null($validated['api_key'] ?? null)) {
+            unset($validated['api_key']);
+        }
+
         $provider->update($validated);
 
         return redirect()->route('mundos-de-mim.admin.ai-providers.index')

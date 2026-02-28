@@ -3,6 +3,7 @@
 use App\Livewire\Actions\Logout;
 use Livewire\Volt\Component;
 use App\Models\PortalApp;
+use App\Support\ModuleContextRedirect;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
@@ -51,16 +52,11 @@ new class extends Component {
 
     public function logout(Logout $logout): void
     {
-        $origin = Session::get('module_origin');
+        $redirectTo = ModuleContextRedirect::logoutFallback();
 
         $logout();
 
-        if ($origin === 'mundos-de-mim') {
-            $this->redirect(route('mundos-de-mim.landing'), navigate: true);
-            return;
-        }
-
-        $this->redirect(route('welcome'), navigate: true);
+        $this->redirect($redirectTo, navigate: true);
     }
 
     // Helper simples para resolver o link (Rota Laravel ou URL Direta)

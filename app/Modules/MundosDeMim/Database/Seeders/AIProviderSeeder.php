@@ -2,6 +2,7 @@
 
 namespace App\Modules\MundosDeMim\Database\Seeders;
 
+use App\Modules\MundosDeMim\Models\AiGatewayProvider;
 use App\Modules\MundosDeMim\Models\AIProvider;
 use Illuminate\Database\Seeder;
 
@@ -9,6 +10,16 @@ class AIProviderSeeder extends Seeder
 {
     public function run(): void
     {
+        $pollinationProvider = AiGatewayProvider::updateOrCreate(
+            ['driver' => 'pollination'],
+            [
+                'name' => 'Pollination',
+                'base_url' => 'https://gen.pollinations.ai',
+                'sync_url' => 'https://gen.pollinations.ai/image/models',
+                'is_active' => true,
+            ]
+        );
+
         $providers = [
             [
                 'name' => 'NanoBanana',
@@ -167,6 +178,7 @@ class AIProviderSeeder extends Seeder
         ];
 
         foreach ($providers as $provider) {
+            $provider['provider_id'] = $pollinationProvider->id;
             AIProvider::updateOrCreate(
                 ['model' => $provider['model']],
                 $provider

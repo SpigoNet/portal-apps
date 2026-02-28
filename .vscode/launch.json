@@ -2,20 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Listen for Xdebug",
-            "type": "php",
-            "request": "launch",
-            "port": 9003
-        },
-        {
-            "name": "Launch Chrome",
-            "request": "launch",
-            "type": "chrome",
-            "url": "http://localhost:8000",
-            "webRoot": "${workspaceFolder}"
-        },
-        {
-            "name": "Artisan Serve",
+            "name": "Start Portal",
             "type": "php",
             "request": "launch",
             "program": "${workspaceFolder}/artisan",
@@ -23,12 +10,7 @@
                 "serve"
             ],
             "preLaunchTask": "npm-dev",
-            "port": 9003,
-            "serverReadyAction": {
-                "pattern": "started on http://([0-9.]+):([0-9]+)",
-                "uriFormat": "http://localhost:%s",
-                "action": "openExternally"
-            }
+            "cwd": "${workspaceFolder}"
         }
     ]
 }

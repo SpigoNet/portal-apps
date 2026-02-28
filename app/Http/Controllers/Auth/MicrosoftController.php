@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\ModuleContextRedirect;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use Exception;
@@ -33,15 +34,7 @@ class MicrosoftController extends Controller
 
             Auth::login($user, true);
 
-            $origin = session('module_origin');
-            if ($origin === 'mundos-de-mim') {
-                return redirect()->route('mundos-de-mim.index');
-            }
-            if ($origin === 'ant') {
-                return redirect()->route('ant.home');
-            }
-
-            return redirect('/');
+            return redirect(ModuleContextRedirect::loginFallback());
 
         } catch (Exception $e) {
             \Log::error('Erro no Login da Microsoft: ' . $e->getMessage(), [

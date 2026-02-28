@@ -3,13 +3,16 @@
 namespace App\Modules\MundosDeMim\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AIProvider extends Model
 {
     protected $table = 'mundos_de_mim_ai_providers';
 
     protected $fillable = [
+        'provider_id',
         'name',
         'driver',
         'model',
@@ -33,9 +36,44 @@ class AIProvider extends Model
         'pricing' => 'array',
     ];
 
+    protected function pricing(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                $pricing = json_decode($value, true);
+                if (! $pricing) {
+                    return null;
+                }
+                foreach ($pricing as $key => $val) {
+                    if (is_numeric($val)) {
+                        $pricing[$key] = (string) $val;
+                    }
+                }
+
+                return $pricing;
+            },
+            set: function ($value) {
+                if (is_array($value)) {
+                    foreach ($value as $key => $val) {
+                        if (is_numeric($val)) {
+                            $value[$key] = (string) $val;
+                        }
+                    }
+                }
+
+                return json_encode($value);
+            }
+        );
+    }
+
     public function users(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(User::class, 'mundos_de_mim_default_ai_provider_id');
+    }
+
+    public function gatewayProvider(): BelongsTo
+    {
+        return $this->belongsTo(AiGatewayProvider::class, 'provider_id');
     }
 
     public function userSettings(): \Illuminate\Database\Eloquent\Relations\HasMany

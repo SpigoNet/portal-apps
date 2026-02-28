@@ -63,7 +63,7 @@ class AdminAiProviderController extends Controller
 
         $validated['is_active'] = $request->has('is_active');
 
-        if (is_null($validated['api_key'] ?? null)) {
+        if (empty($validated['api_key'])) {
             unset($validated['api_key']);
         }
 

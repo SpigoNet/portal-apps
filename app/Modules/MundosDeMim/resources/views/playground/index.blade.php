@@ -53,20 +53,24 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                             <div class="col-span-1">
-                                <label for="driver" class="block text-sm font-bold text-gray-700 mb-2">2. Escolha a
-                                    IA</label>
-                                <select name="driver" id="driver"
+                                <label for="ai_provider_id" class="block text-sm font-bold text-gray-700 mb-2">2. Provedor
+                                    / Modelo</label>
+                                <select name="ai_provider_id" id="ai_provider_id"
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="gemini" {{ old('driver') == 'gemini' ? 'selected' : '' }}>
-                                        Gemini 2.0 (Texto/Análise)
-                                    </option>
-                                    <option value="pollination" {{ old('driver') == 'pollination' ? 'selected' : '' }}>
-                                        Pollinations (Gerar Imagem)
-                                    </option>
+                                    @foreach($providers as $provider)
+                                        <option value="{{ $provider->id }}"
+                                            {{ (string) old('ai_provider_id', optional($selectedProvider)->id) === (string) $provider->id ? 'selected' : '' }}>
+                                            {{ $provider->name }} ({{ $provider->driver }} / {{ $provider->model }})
+                                        </option>
+                                    @endforeach
                                 </select>
+                                @if($providers->isEmpty())
+                                    <p class="text-xs text-red-500 mt-2 font-semibold">
+                                        Nenhum provedor ativo encontrado. Configure em Admin → Provedores de IA.
+                                    </p>
+                                @endif
                                 <p class="text-xs text-gray-500 mt-2">
-                                    <strong>Gemini:</strong> Descreve ou conversa.<br>
-                                    <strong>Pollinations:</strong> Cria novas imagens.
+                                    Selecione um modelo (filho) de um provedor (pai) cadastrado no Admin.
                                 </p>
                             </div>
 
@@ -92,7 +96,7 @@
 
                                 <textarea name="prompt" id="prompt" rows="5"
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    placeholder="Ex para Gemini: O que você vê nesta foto?&#10;Ex para Pollinations: Cyberpunk portrait of a hero..."
+                                    placeholder="Ex: Cyberpunk portrait of a hero, cinematic lighting, ultra detailed"
                                     required>{{ old('prompt') ?? "Source my Image, keep face 99.9% Orginal, The focus of the 8K is on the face and hairstyle at 100%, as a reference for the uploaded image, a super-clear cinematic portrait photo, wearing the full white kit of the iranian national team, decorated with the club's logo and the sponsor's 'Emirates Fly Better' in black, with the Champions League logo on the sleeve. The movement and atmosphere: A showy move where he balances a football on his right finger; the atmosphere is festive and cheerful, expressing skill and confidence.  
 The location and resolution: A bright green grass in the background suggests being on the pitch; the image is technically modified with very high clarity and saturated colors, highlighting the details of the ball and the shirt.
 The image size is 9/16." }}</textarea>
@@ -101,6 +105,7 @@ The image size is 9/16." }}</textarea>
 
                         <div class="flex justify-end pt-4 border-t">
                             <button type="submit"
+                                {{ $providers->isEmpty() ? 'disabled' : '' }}
                                 class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded shadow-lg transition-all transform hover:scale-105">
                                 Executar Teste 🚀
                             </button>
@@ -148,7 +153,10 @@ The image size is 9/16." }}</textarea>
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    body: JSON.stringify({ prompt: promptArea.value })
+                    body: JSON.stringify({
+                        prompt: promptArea.value,
+                        ai_provider_id: document.getElementById('ai_provider_id')?.value || null
+                    })
                 });
 
                 const data = await response.json();

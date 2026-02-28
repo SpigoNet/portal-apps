@@ -7,9 +7,9 @@ use App\Modules\MundosDeMim\Models\AIProvider;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class SyncPollinationModelsService
+class SyncAirForceModelsService
 {
-    protected string $apiUrl = 'https://gen.pollinations.ai/image/models';
+    protected string $apiUrl = 'https://api.airforce/v1/models';
 
     public function __construct(private ?AiGatewayProvider $provider = null)
     {
@@ -24,7 +24,7 @@ class SyncPollinationModelsService
         ];
 
         try {
-            $provider = $this->provider ?? AiGatewayProvider::where('driver', 'pollination')->first();
+            $provider = $this->provider ?? AiGatewayProvider::where('driver', 'airforce')->first();
             $apiUrl = $provider?->sync_url ?: $this->apiUrl;
 
             $response = Http::timeout(30)->get($apiUrl);
@@ -36,14 +36,15 @@ class SyncPollinationModelsService
                 ];
             }
 
-            $models = $response->json();
+            $data = $response->json();
+            $models = $data['data'] ?? [];
 
             foreach ($models as $modelData) {
                 try {
                     $this->syncModel($modelData, $results, $provider);
                 } catch (\Exception $e) {
-                    $results['errors'][] = "Error syncing model {$modelData['name']}: {$e->getMessage()}";
-                    Log::error("Error syncing model {$modelData['name']}", ['error' => $e->getMessage()]);
+                    $results['errors'][] = "Error syncing model {$modelData['id']}: {$e->getMessage()}";
+                    Log::error("Error syncing model {$modelData['id']}", ['error' => $e->getMessage()]);
                 }
             }
 
@@ -54,7 +55,7 @@ class SyncPollinationModelsService
             ];
 
         } catch (\Exception $e) {
-            Log::error('SyncPollinationModelsService Error', ['error' => $e->getMessage()]);
+            Log::error('SyncAirForceModelsService Error', ['error' => $e->getMessage()]);
 
             return [
                 'success' => false,
@@ -65,35 +66,44 @@ class SyncPollinationModelsService
 
     protected function syncModel(array $modelData, array &$results, ?AiGatewayProvider $provider): void
     {
-        $modelName = $modelData['name'];
-        $driver = $provider?->driver ?: 'pollination';
+        $modelId = $modelData['id'];
 
-        $supportsImage = in_array('image', $modelData['input_modalities'] ?? []);
-        $supportsVideo = in_array('video', $modelData['output_modalities'] ?? []);
+        $supportsImages = $modelData['supports_images'] ?? false;
 
-        $isPaid = $modelData['paid_only'] ?? false;
+        if (! $supportsImages) {
+            return;
+        }
 
-        $existingProvider = AIProvider::query()
-            ->where('model', $modelName)
+        $driver = $provider?->driver ?: 'airforce';
+
+        $supportsImageInput = $supportsImages;
+        $supportsVideoOutput = false;
+
+        $isFree = ($modelData['pricepermilliontokens'] ?? 0) == 0
+            || str_ends_with($modelId, ':free')
+            || ($modelData['multiplier'] ?? null) == 0;
+
+        $existingProvider = AIProvider::where('model', $modelId)
             ->where('driver', $driver)
             ->first();
 
-        $pricing = $modelData['pricing'] ?? null;
-        if ($pricing) {
-            $pricing = $this->normalizePricing($pricing);
-        }
+        $pricing = [
+            'currency' => 'airforce',
+            'pricePerMillionTokens' => (string) ($modelData['pricepermilliontokens'] ?? 0),
+            'multiplier' => isset($modelData['multiplier']) ? (string) $modelData['multiplier'] : '1',
+        ];
 
         $data = [
             'provider_id' => $provider?->id,
-            'name' => $this->formatName($modelName),
+            'name' => $this->formatName($modelId),
             'driver' => $driver,
-            'model' => $modelName,
-            'description' => $modelData['description'] ?? null,
-            'supports_image_input' => $supportsImage,
-            'supports_video_output' => $supportsVideo,
+            'model' => $modelId,
+            'description' => "Model: {$modelId} | Owner: {$modelData['owned_by']} | Status: {$modelData['status']}",
+            'supports_image_input' => $supportsImageInput,
+            'supports_video_output' => $supportsVideoOutput,
             'is_active' => true,
             'pricing' => $pricing,
-            'paid_only' => $isPaid,
+            'paid_only' => ! $isFree,
             'sort_order' => $existingProvider?->sort_order ?? $this->getNextSortOrder($driver),
         ];
 
@@ -106,38 +116,11 @@ class SyncPollinationModelsService
         }
     }
 
-    protected function normalizePricing(array $pricing): array
-    {
-        foreach ($pricing as $key => $value) {
-            if (is_numeric($value)) {
-                $pricing[$key] = $this->formatNumber((float) $value);
-            }
-        }
-
-        return $pricing;
-    }
-
-    protected function formatNumber(float $value): string
-    {
-        if ($value == 0) {
-            return '0';
-        }
-
-        $absValue = abs($value);
-
-        if ($absValue >= 0.0001) {
-            return rtrim(rtrim(number_format($value, 10, '.', ''), '0'), '.');
-        }
-
-        $formatted = sprintf('%.10f', $value);
-        $formatted = rtrim($formatted, '0');
-
-        return rtrim($formatted, '.');
-    }
-
     protected function formatName(string $modelName): string
     {
-        return ucfirst(str_replace(['-', '_'], ' ', $modelName));
+        $name = str_replace(['-', '_', ':free'], [' ', ' ', ''], $modelName);
+
+        return ucwords($name);
     }
 
     protected function getNextSortOrder(string $driver): int

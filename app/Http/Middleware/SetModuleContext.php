@@ -16,25 +16,37 @@ class SetModuleContext
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Se a URL começar com mundos-de-mim, salvamos na sessão
-        if ($request->is('mundos-de-mim*')) {
-            Session::put('module_origin', 'mundos-de-mim');
+        $firstSegment = $request->segment(1);
 
-            // Também salvamos a URL exata para o 'intended' customizado se necessário
-            if ($request->method() === 'GET' && !$request->routeIs('mundos-de-mim.landing')) {
-                Session::put('module_last_url', $request->fullUrl());
-            }
-        }
+        if ($this->isModuleSegment($firstSegment)) {
+            Session::put('module_origin', $firstSegment);
+            Session::put('module_home_url', url('/' . $firstSegment));
 
-        // Se a URL começar com ant, salvamos na sessão
-        if ($request->is('ant*')) {
-            Session::put('module_origin', 'ant');
-
-            if ($request->method() === 'GET') {
+            if ($request->isMethod('GET')) {
                 Session::put('module_last_url', $request->fullUrl());
             }
         }
 
         return $next($request);
+    }
+
+    private function isModuleSegment(?string $segment): bool
+    {
+        if (!is_string($segment) || trim($segment) === '') {
+            return false;
+        }
+
+        return !in_array($segment, [
+            'login',
+            'register',
+            'forgot-password',
+            'reset-password',
+            'verify-email',
+            'confirm-password',
+            'profile',
+            'storage',
+            'build',
+            'up',
+        ], true);
     }
 }

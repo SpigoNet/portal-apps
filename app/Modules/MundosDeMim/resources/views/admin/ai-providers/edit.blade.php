@@ -24,6 +24,12 @@
                         </div>
 
                         <div>
+                            <label class="block text-sm font-medium text-gray-700">API Key</label>
+                            <input type="text" name="api_key" value="{{ old('api_key', $provider->api_key) }}" placeholder="{{ $provider->api_key ? '•••••••• configurada' : 'sk-...' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <p class="mt-1 text-sm text-gray-500">Deixe em branco para manter sem chave.</p>
+                        </div>
+
+                        <div>
                             <label class="block text-sm font-medium text-gray-700">Model</label>
                             <input type="text" name="model" value="{{ old('model', $provider->model) }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                         </div>

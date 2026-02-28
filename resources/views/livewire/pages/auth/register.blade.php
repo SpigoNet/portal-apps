@@ -1,9 +1,11 @@
 <?php
 
 use App\Models\User;
+use App\Support\ModuleContextRedirect;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
@@ -30,14 +32,9 @@ new #[Layout('layouts.guest')] class extends Component {
         event(new Registered($user = User::create($validated)));
 
         Auth::login($user);
+        Session::regenerate();
 
-        $origin = Session::get('module_origin');
-        if ($origin === 'mundos-de-mim') {
-            $this->redirect(route('mundos-de-mim.index'), navigate: true);
-            return;
-        }
-
-        $this->redirect(route('welcome', absolute: false), navigate: true);
+        $this->redirect(ModuleContextRedirect::loginFallback(), navigate: true);
     }
 }; ?>
 

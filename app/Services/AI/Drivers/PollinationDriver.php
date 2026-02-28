@@ -14,14 +14,22 @@ class PollinationDriver implements AiDriverInterface
 
     protected string $imageBaseUrl = 'https://gen.pollinations.ai/image/';
 
-    protected string $apiKey = 'sk_0gOTqpBGMd0eLlsk1GGBBvLSGF2tVt7g';
+    protected ?string $apiKey = null;
 
     protected string $model = 'nanobanana';
 
-    public function __construct(?string $model = null)
+    public function __construct(?string $model = null, ?string $apiKey = null, ?string $baseUrl = null)
     {
         if ($model) {
             $this->model = $model;
+        }
+
+        $this->apiKey = $apiKey ?: env('POLLINATIONS_API_KEY');
+
+        if ($baseUrl) {
+            $normalizedBase = rtrim($baseUrl, '/');
+            $this->textEndpoint = $normalizedBase.'/v1/chat/completions';
+            $this->imageBaseUrl = $normalizedBase.'/image/';
         }
     }
 
@@ -40,22 +48,34 @@ class PollinationDriver implements AiDriverInterface
     public function generateText(array $messages, array $options = []): ?string
     {
         // ... (Mantém a implementação de texto do Gemini/OpenAI inalterada)
+        $textModel = $options['model'] ?? 'gemini';
+
         $payload = array_merge([
-            'model' => 'gemini',
+            'model' => $textModel,
             'temperature' => 1,
             'max_tokens' => 2000,
             'stream' => false,
             'messages' => $messages,
             'jsonMode' => $options['jsonMode'] ?? false,
-            'token' => $this->apiKey,
         ], $options);
 
+        if (! empty($this->apiKey)) {
+            $payload['token'] = $this->apiKey;
+        }
+
         try {
+            $headers = [
+                'Content-Type' => 'application/json',
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                'Referer' => 'https://pollinations.ai/',
+            ];
+
+            if (! empty($this->apiKey)) {
+                $headers['Authorization'] = 'Bearer '.$this->apiKey;
+            }
+
             $response = Http::withOptions(['verify' => false, 'timeout' => 60])
-                ->withHeaders(['Content-Type' => 'application/json',
-                    'Authorization' => 'Bearer '.$this->apiKey,
-                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', // Simula navegador
-                    'Referer' => 'https://pollinations.ai/'])
+                ->withHeaders($headers)
                 ->post($this->textEndpoint, $payload);
 
             Log::debug('Pollination Text Response: '.$response->body());
@@ -86,6 +106,10 @@ class PollinationDriver implements AiDriverInterface
             'enhance' => 'true',
         ];
 
+        if (! empty($this->apiKey)) {
+            $queryParams['token'] = $this->apiKey;
+        }
+
         // 1. Processamento da Imagem de Referência (com TinyURL)
         if (! empty($options['reference_image_path'])) {
             $path = $options['reference_image_path'];
@@ -113,11 +137,17 @@ class PollinationDriver implements AiDriverInterface
         $requestUrl = "{$this->imageBaseUrl}{$encodedPrompt}?{$queryString}";
 
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer '.$this->apiKey,
-                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', // Simula navegador
+            $headers = [
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
                 'Referer' => 'https://pollinations.ai/',
-            ])->timeout(90)->get($requestUrl);
+            ];
+
+            if (! empty($this->apiKey)) {
+                $headers['Authorization'] = 'Bearer '.$this->apiKey;
+                $headers['X-API-Key'] = $this->apiKey;
+            }
+
+            $response = Http::withHeaders($headers)->timeout(90)->get($requestUrl);
 
             if ($response->successful()) {
                 $imageContent = $response->body();
@@ -135,7 +165,7 @@ class PollinationDriver implements AiDriverInterface
                 return Storage::disk('public')->url($filename);
             }
 
-            Log::error('Pollination Failed: '.$response->status().' URL: '.$requestUrl);
+            Log::error('Pollination Failed: '.$response->status().' URL: '.$requestUrl.' HasToken: '.(! empty($this->apiKey) ? 'yes' : 'no'));
 
             return null;
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Actions\Logout;
+use App\Support\ModuleContextRedirect;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Layout;
@@ -28,9 +29,11 @@ new #[Layout('layouts.guest')] class extends Component {
      */
     public function logout(Logout $logout): void
     {
+        $redirectTo = ModuleContextRedirect::logoutFallback();
+
         $logout();
 
-        $this->redirect('/', navigate: true);
+        $this->redirect($redirectTo, navigate: true);
     }
 }; ?>
 

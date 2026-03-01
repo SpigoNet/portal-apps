@@ -3,6 +3,7 @@
 namespace App\Modules\MundosDeMim\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Modules\MundosDeMim\Models\AIProvider;
 use App\Modules\MundosDeMim\Models\UserAttribute;
 use App\Modules\MundosDeMim\Services\AiProviderService;
@@ -16,15 +17,20 @@ class PlaygroundController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
-        $attributes = UserAttribute::where('user_id', $user->id)->first();
+        $currentUser = Auth::user();
+        $selectedUserId = session('playground_user_id', $currentUser->id);
+        $targetUser = User::findOrFail($selectedUserId);
+
+        $attributes = UserAttribute::where('user_id', $targetUser->id)->first();
         $aiProviderService = new AiProviderService;
         $providers = $aiProviderService->getActiveModels()->where('supports_image_input', true)->values();
-        $selectedProvider = $aiProviderService->getProviderForUser($user);
+        $selectedProvider = $aiProviderService->getProviderForUser($targetUser);
 
         $hasPhoto = $attributes && ! empty($attributes->photo_path) && Storage::disk('public')->exists($attributes->photo_path);
 
-        return view('MundosDeMim::playground.index', compact('attributes', 'hasPhoto', 'providers', 'selectedProvider'));
+        $allUsers = $currentUser->can('admin-do-app') ? User::orderBy('name')->get() : collect();
+
+        return view('MundosDeMim::playground.index', compact('attributes', 'hasPhoto', 'providers', 'selectedProvider', 'targetUser', 'allUsers', 'currentUser'));
     }
 
     public function refine(Request $request)
@@ -35,7 +41,7 @@ class PlaygroundController extends Controller
         ]);
 
         try {
-            $user = Auth::user();
+            $user = $this->getTargetUser();
             $attributes = UserAttribute::where('user_id', $user->id)->first();
             $provider = $this->resolveModel($user, $request->input('ai_provider_id'));
             $driverName = $provider?->gatewayProvider?->driver ?? $provider?->driver;
@@ -98,7 +104,8 @@ class PlaygroundController extends Controller
             'ai_provider_id' => 'nullable|exists:mundos_de_mim_ai_providers,id',
         ]);
 
-        $user = Auth::user();
+        $currentUser = Auth::user();
+        $user = $this->getTargetUser();
         $attributes = UserAttribute::where('user_id', $user->id)->first();
         $provider = $this->resolveModel($user, $request->input('ai_provider_id'));
         $driverName = $provider?->gatewayProvider?->driver ?? $provider?->driver;
@@ -118,16 +125,26 @@ class PlaygroundController extends Controller
             }
 
             // Verifica créditos se não for admin
-            if ($user->credits <= 0 && ! auth()->user()->can('admin-do-app')) {
+            if ($user->credits <= 0 && ! $currentUser->can('admin-do-app')) {
                 return back()->with('error', 'Você não possui créditos suficientes para gerar imagens sob demanda. Os créditos são renovados semanalmente.')->withInput();
             }
 
             $driver = $this->createDriver($driverName, $provider->model, $apiKey, $baseUrl);
 
             $options = [];
-            if ($photoPath) {
+            // AirForce não suporta imagem de referência
+            if ($photoPath && $driverName === 'pollination') {
                 $options['reference_image_path'] = $photoPath;
             }
+
+            \Illuminate\Support\Facades\Log::debug('Playground generate', [
+                'driver' => $driverName,
+                'model' => $provider->model,
+                'hasApiKey' => ! empty($apiKey),
+                'baseUrl' => $baseUrl,
+                'hasPhoto' => ! empty($photoPath),
+                'options' => $options,
+            ]);
 
             $imageUrl = $driver->generateImage($request->input('prompt'), $options);
 
@@ -179,5 +196,32 @@ class PlaygroundController extends Controller
             'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
             default => new PollinationDriver($model, $apiKey, $baseUrl),
         };
+    }
+
+    public function selectUser(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        if (! auth()->user()->can('admin-do-app')) {
+            abort(403);
+        }
+
+        session(['playground_user_id' => $request->user_id]);
+
+        return redirect()->route('mundos-de-mim.playground.index');
+    }
+
+    private function getTargetUser(): \App\Models\User
+    {
+        $currentUser = Auth::user();
+        $selectedUserId = session('playground_user_id', $currentUser->id);
+
+        if ($currentUser->can('admin-do-app') && $selectedUserId !== $currentUser->id) {
+            return User::findOrFail($selectedUserId);
+        }
+
+        return $currentUser;
     }
 }

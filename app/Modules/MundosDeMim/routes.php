@@ -42,6 +42,7 @@ Route::prefix('mundos-de-mim')
             Route::get('/playground', [PlaygroundController::class, 'index'])->name('playground.index');
             Route::post('/playground', [PlaygroundController::class, 'generate'])->name('playground.generate');
             Route::post('/playground/refinar', [PlaygroundController::class, 'refine'])->name('playground.refine');
+            Route::post('/playground/select-user', [PlaygroundController::class, 'selectUser'])->name('playground.select-user');
         });
 
     });

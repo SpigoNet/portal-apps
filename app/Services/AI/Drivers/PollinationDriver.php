@@ -181,15 +181,15 @@ class PollinationDriver implements AiDriverInterface
      */
     protected function cleanPrompt(string $prompt): string
     {
-        // 1. Substitui quebras de linha por espaço
-        $prompt = str_replace(["\r\n", "\r", "\n"], ' ', $prompt);
-
-        // 2. Substitui barras (/) e contra-barras (\) por espaço
+        // 1. Substitui barras (/) e contra-barras (\) por espaço
         // Barras no path da URL confundem o servidor
         $prompt = str_replace(['/', '\\'], ' ', $prompt);
 
-        // 3. Remove caracteres de controle invisíveis
+        // 2. Remove caracteres de controle invisíveis
         $prompt = preg_replace('/[\x00-\x1F\x7F]/', '', $prompt);
+
+        // 3. Converte qualquer espaço em branco (inclui enter/tab) para underscore
+        $prompt = preg_replace('/\s+/u', '_', trim($prompt));
 
         // 4. Limita tamanho (opcional, mas seguro para GET request)
         return Str::limit($prompt, 1500, '');

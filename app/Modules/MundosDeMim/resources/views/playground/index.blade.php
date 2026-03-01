@@ -8,6 +8,25 @@
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
 
+            @if($currentUser->can('admin-do-app') && $allUsers->isNotEmpty())
+                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6">
+                    <form action="{{ route('mundos-de-mim.playground.select-user') }}" method="POST" class="flex items-center gap-4">
+                        @csrf
+                        <label class="text-sm font-bold text-indigo-700">Testar como usuário:</label>
+                        <select name="user_id" onchange="this.form.submit()" class="rounded-md border-gray-300 text-sm">
+                            @foreach($allUsers as $u)
+                                <option value="{{ $u->id }}" {{ $u->id === $targetUser->id ? 'selected' : '' }}>
+                                    {{ $u->name }} ({{ $u->email }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="text-xs text-indigo-600">
+                            <i class="fa-solid fa-coins"></i> {{ $targetUser->credits }} créditos
+                        </span>
+                    </form>
+                </div>
+            @endif
+
             @if(session('error'))
                 <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow-sm">
                     <strong>Erro:</strong> {{ session('error') }}
@@ -82,7 +101,7 @@
                                     <div class="flex items-center gap-3">
                                         <div
                                             class="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 rounded-full text-indigo-700 text-xs font-bold border border-indigo-100">
-                                            <i class="fa-solid fa-coins"></i> {{ auth()->user()->credits }} Créditos
+                                            <i class="fa-solid fa-coins"></i> {{ $targetUser->credits }} Créditos
                                         </div>
 
                                         <button type="button" id="btn-magic-wand"

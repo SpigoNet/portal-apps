@@ -5,6 +5,8 @@ namespace App\Services\AI\Drivers;
 use App\Services\AI\AiDriverInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AirForceDriver implements AiDriverInterface
 {
@@ -103,8 +105,13 @@ class AirForceDriver implements AiDriverInterface
         try {
             $headers = [
                 'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer '.$this->apiKey,
             ];
+
+            if (! empty($this->apiKey)) {
+                $headers['Authorization'] = 'Bearer '.$this->apiKey;
+            }
+
+            Log::debug('AirForce Image Request', ['payload' => $payload, 'endpoint' => $this->imageEndpoint]);
 
             $response = Http::withHeaders($headers)
                 ->timeout(90)
@@ -115,15 +122,28 @@ class AirForceDriver implements AiDriverInterface
             if ($response->successful()) {
                 $data = $response->json();
 
+                // Formato: { "data": [{ "url": "..." }] }
                 if (! empty($data['data'][0]['url'])) {
                     return $data['data'][0]['url'];
                 }
 
+                // Formato alternativo: { "url": "..." }
                 if (! empty($data['url'])) {
                     return $data['url'];
                 }
 
-                Log::error('AirForce Image: URL not found in response');
+                // Formato: { "data": [{ "b64_json": "..." }] }
+                if (! empty($data['data'][0]['b64_json'])) {
+                    $imageData = base64_decode($data['data'][0]['b64_json']);
+                    if ($imageData) {
+                        $filename = 'generations/airforce_'.Str::uuid().'.png';
+                        Storage::disk('public')->put($filename, $imageData);
+
+                        return Storage::disk('public')->url($filename);
+                    }
+                }
+
+                Log::error('AirForce Image: URL not found in response', ['data' => $data]);
 
                 return null;
             }

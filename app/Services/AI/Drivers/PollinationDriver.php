@@ -191,6 +191,11 @@ class PollinationDriver implements AiDriverInterface
         // Remove aspas simples
         $prompt = str_replace("'", '', $prompt);
 
+        // Substitui porcentagem por texto para evitar problemas na URL
+        $prompt = str_replace('%', 'percent', $prompt);
+        
+        $prompt = str_replace('.', '___', $prompt);
+
         // 3. Converte qualquer espaço em branco (inclui enter/tab) para underscore
         $prompt = preg_replace('/\s+/u', '_', trim($prompt));
 

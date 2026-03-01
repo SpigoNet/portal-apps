@@ -188,6 +188,9 @@ class PollinationDriver implements AiDriverInterface
         // 2. Remove caracteres de controle invisíveis
         $prompt = preg_replace('/[\x00-\x1F\x7F]/', '', $prompt);
 
+        // Remove aspas simples
+        $prompt = str_replace("'", '', $prompt);
+
         // 3. Converte qualquer espaço em branco (inclui enter/tab) para underscore
         $prompt = preg_replace('/\s+/u', '_', trim($prompt));
 

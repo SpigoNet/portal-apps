@@ -132,8 +132,7 @@ class PlaygroundController extends Controller
             $driver = $this->createDriver($driverName, $provider->model, $apiKey, $baseUrl);
 
             $options = [];
-            // AirForce não suporta imagem de referência
-            if ($photoPath && $driverName === 'pollination') {
+            if ($photoPath) {
                 $options['reference_image_path'] = $photoPath;
             }
 

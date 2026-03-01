@@ -107,7 +107,7 @@ class PollinationDriver implements AiDriverInterface
         ];
 
         if (! empty($this->apiKey)) {
-            $queryParams['token'] = $this->apiKey;
+            $queryParams['key'] = $this->apiKey;
         }
 
         // 1. Processamento da Imagem de Referência (com TinyURL)

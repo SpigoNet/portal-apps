@@ -3,6 +3,17 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Editar Provedor de IA</h2>
     </x-slot>
 
+    <!-- Exibe mensagens de erro, se houver -->
+    @if ($errors->any())
+        <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+            <ul class="list-disc list-inside">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif  
+
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white shadow-sm sm:rounded-lg p-6">

@@ -29,11 +29,11 @@ class AdminAiProviderController extends Controller
             'driver' => 'required|string|max:100|unique:mundos_de_mim_providers,driver',
             'base_url' => 'nullable|url',
             'sync_url' => 'nullable|url',
-            'api_key' => 'nullable|string|max:2000',
-            'is_active' => 'boolean',
+            'api_key' => 'nullable|string',
+            'is_active' => 'sometimes|accepted',
         ]);
 
-        $validated['is_active'] = $request->has('is_active');
+        $validated['is_active'] = $request->boolean('is_active');
 
         AiGatewayProvider::create($validated);
 
@@ -57,15 +57,11 @@ class AdminAiProviderController extends Controller
             'driver' => 'required|string|max:100|unique:mundos_de_mim_providers,driver,'.$provider->id,
             'base_url' => 'nullable|url',
             'sync_url' => 'nullable|url',
-            'api_key' => 'nullable|string|max:2000',
-            'is_active' => 'boolean',
+            'api_key' => 'nullable|string',
+            'is_active' => 'sometimes|accepted',
         ]);
 
-        $validated['is_active'] = $request->has('is_active');
-
-        if (empty($validated['api_key'])) {
-            unset($validated['api_key']);
-        }
+        $validated['is_active'] = $request->boolean('is_active');
 
         $provider->update($validated);
 

@@ -28,7 +28,16 @@ class PlaygroundController extends Controller
 
         $hasPhoto = $attributes && ! empty($attributes->photo_path) && Storage::disk('public')->exists($attributes->photo_path);
 
-        $allUsers = $currentUser->can('admin-do-app') ? User::orderBy('name')->get() : collect();
+        if ($currentUser->can('admin-do-app')) {
+            $allUsers = User::select('users.*')
+                ->join('mundos_de_mim_user_attributes', 'users.id', '=', 'mundos_de_mim_user_attributes.user_id')
+                ->whereNotNull('mundos_de_mim_user_attributes.photo_path')
+                ->where('mundos_de_mim_user_attributes.photo_path', '!=', '')
+                ->orderBy('users.name')
+                ->get();
+        } else {
+            $allUsers = collect();
+        }
 
         return view('MundosDeMim::playground.index', compact('attributes', 'hasPhoto', 'providers', 'selectedProvider', 'targetUser', 'allUsers', 'currentUser'));
     }

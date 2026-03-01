@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\MundosDeMim\Models\AIProvider;
 use App\Modules\MundosDeMim\Models\UserAttribute;
 use App\Modules\MundosDeMim\Services\AiProviderService;
+use App\Services\AI\Drivers\AirForceDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -41,11 +42,11 @@ class PlaygroundController extends Controller
             $apiKey = $provider?->gatewayProvider?->api_key ?? $provider?->api_key;
             $baseUrl = $provider?->gatewayProvider?->base_url;
 
-            if (! $provider || $driverName !== 'pollination') {
+            if (! $provider || ! in_array($driverName, ['pollination', 'airforce'])) {
                 return response()->json(['error' => 'Provedor selecionado não suporta refinamento no Playground.'], 422);
             }
 
-            $driver = new PollinationDriver($provider->model, $apiKey, $baseUrl);
+            $driver = $this->createDriver($driverName, $provider->model, $apiKey, $baseUrl);
 
             // Monta contexto biográfico
             $bio = '';
@@ -112,7 +113,7 @@ class PlaygroundController extends Controller
         $photoPath = ($attributes && ! empty($attributes->photo_path)) ? $attributes->photo_path : null;
 
         try {
-            if ($driverName !== 'pollination') {
+            if ($driverName !== 'pollination' && $driverName !== 'airforce') {
                 return back()->with('error', "O driver '{$driverName}' ainda não é suportado no Playground.")->withInput();
             }
 
@@ -121,7 +122,7 @@ class PlaygroundController extends Controller
                 return back()->with('error', 'Você não possui créditos suficientes para gerar imagens sob demanda. Os créditos são renovados semanalmente.')->withInput();
             }
 
-            $driver = new PollinationDriver($provider->model, $apiKey, $baseUrl);
+            $driver = $this->createDriver($driverName, $provider->model, $apiKey, $baseUrl);
 
             $options = [];
             if ($photoPath) {
@@ -170,5 +171,13 @@ class PlaygroundController extends Controller
         }
 
         return $service->getModelForUserEntity($user);
+    }
+
+    private function createDriver(string $driverName, ?string $model, ?string $apiKey, ?string $baseUrl)
+    {
+        return match ($driverName) {
+            'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
+            default => new PollinationDriver($model, $apiKey, $baseUrl),
+        };
     }
 }

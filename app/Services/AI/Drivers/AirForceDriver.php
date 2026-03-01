@@ -90,7 +90,7 @@ class AirForceDriver implements AiDriverInterface
     public function generateImage(string $prompt, array $options = []): ?string
     {
         $payload = array_merge([
-            'model' => $options['model'] ?? 'nano-banana-pro',
+            'model' => $options['model'] ?? 'nano-banana-2',
             'prompt' => $prompt,
             'n' => $options['n'] ?? 1,
             'size' => $options['size'] ?? '1024x1024',
@@ -100,7 +100,22 @@ class AirForceDriver implements AiDriverInterface
             'resolution' => $options['resolution'] ?? '1k',
         ], $options);
 
-        unset($payload['aspect_ratio'], $payload['seed'], $payload['reference_image_path']);
+        unset($payload['aspect_ratio'], $payload['seed']);
+
+        // Suporte a imagem de referência para AirForce
+        if (! empty($options['reference_image_path'])) {
+            $imageUrl = $this->getPublicImageUrl($options['reference_image_path']);
+            if ($imageUrl) {
+                $payload['image_urls'] = [$imageUrl];
+            }
+        }
+
+        // Suporte a múltiplas imagens via image_urls direto
+        if (! empty($options['image_urls']) && is_array($options['image_urls'])) {
+            $payload['image_urls'] = array_merge($payload['image_urls'] ?? [], $options['image_urls']);
+        }
+
+        unset($payload['reference_image_path']);
 
         try {
             $headers = [
@@ -156,5 +171,18 @@ class AirForceDriver implements AiDriverInterface
 
             return null;
         }
+    }
+
+    private function getPublicImageUrl(string $path): ?string
+    {
+        if (Str::startsWith($path, ['http://', 'https://'])) {
+            return $path;
+        }
+
+        $url = Storage::disk('public')->url($path);
+        $url = str_replace('http://', 'https://', $url);
+        $url = preg_replace('#(?<!:)/+#', '/', $url);
+
+        return $url;
     }
 }

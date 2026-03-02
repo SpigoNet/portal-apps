@@ -45,6 +45,12 @@
                         </div>
 
                         <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sync URL (para buscar modelos)</label>
+                            <input type="url" name="sync_url" value="{{ old('sync_url') }}" placeholder="https://api.exemplo.com/models" class="w-full rounded border-gray-300">
+                            <p class="text-xs text-gray-500 mt-1">URL para sincronizar lista de modelos disponíveis</p>
+                        </div>
+
+                        <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
                             <input type="password" name="api_key" value="{{ old('api_key') }}" class="w-full rounded border-gray-300">
                             <p class="text-xs text-gray-500 mt-1">Deixe em branco para manter a chave atual</p>

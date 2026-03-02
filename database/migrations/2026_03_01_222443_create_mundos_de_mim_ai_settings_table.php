@@ -15,11 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('setting_key')->unique();
             $table->string('name');
-            $table->foreignId('ai_provider_id')->constrained('ai_providers')->onDelete('set null');
+            $table->unsignedBigInteger('ai_provider_id')->nullable();
             $table->timestamps();
         });
 
-        // Seed inicial
         $settings = [
             ['setting_key' => 'image_to_image', 'name' => 'Imagem → Imagem'],
             ['setting_key' => 'text_to_image', 'name' => 'Texto → Imagem'],

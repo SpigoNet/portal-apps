@@ -80,4 +80,28 @@ class AiProviderController extends Controller
 
         return back()->with('success', 'Provedor excluído com sucesso.');
     }
+
+    public function sync(string $id)
+    {
+        $provider = AiProvider::findOrFail($id);
+
+        if (! $provider->sync_url) {
+            return back()->with('error', 'Sync URL não configurada para este provedor.');
+        }
+
+        $serviceClass = match ($provider->driver) {
+            'pollination' => \App\Modules\MundosDeMim\Services\SyncPollinationModelsService::class,
+            'airforce' => \App\Modules\MundosDeMim\Services\SyncAirForceModelsService::class,
+            default => null,
+        };
+
+        if (! $serviceClass) {
+            return back()->with('error', 'Driver não suportado para sync: '.$provider->driver);
+        }
+
+        $service = new $serviceClass($provider);
+        $result = $service->sync();
+
+        return back()->with($result['success'] ? 'success' : 'error', $result['message']);
+    }
 }

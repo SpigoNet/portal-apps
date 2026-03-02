@@ -32,4 +32,5 @@ require __DIR__.'/auth.php';
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('ai-providers', AiProviderController::class);
+    Route::resource('ai-models', AiModelController::class);
 });

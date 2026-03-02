@@ -1,0 +1,55 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Editar Modelo de IA</h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <form action="{{ route('admin.ai-models.update', $model->id) }}" method="POST">
+                        @csrf @method('PUT')
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                            <input type="text" name="name" value="{{ old('name', $model->name) }}" class="w-full rounded border-gray-300" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Driver/Model</label>
+                            <input type="text" name="model" value="{{ old('model', $model->driver) }}" class="w-full rounded border-gray-300" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Provedor</label>
+                            <select name="provider_id" class="w-full rounded border-gray-300" required>
+                                @foreach($providers as $provider)
+                                    <option value="{{ $provider->id }}" {{ $model->provider_id == $provider->id ? 'selected' : '' }}>
+                                        {{ $provider->name }} ({{ $provider->driver }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                            <textarea name="description" rows="3" class="w-full rounded border-gray-300">{{ old('description', $model->description) }}</textarea>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="is_active" value="1" {{ old('is_active', $model->is_active) ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600">
+                                <span class="ml-2 text-sm text-gray-700">Ativo</span>
+                            </label>
+                        </div>
+
+                        <div class="flex justify-end gap-3">
+                            <a href="{{ route('admin.ai-models.index') }}" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancelar</a>
+                            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>

@@ -11,6 +11,8 @@ class AiProvider extends Model
         'driver',
         'input_type',
         'output_type',
+        'description',
+        'provider_id',
         'base_url',
         'api_key',
         'is_active',

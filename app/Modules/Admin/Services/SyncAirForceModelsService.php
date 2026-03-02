@@ -2,8 +2,8 @@
 
 namespace App\Modules\Admin\Services;
 
+use App\Models\AiModel;
 use App\Models\AiProvider;
-use App\Modules\MundosDeMim\Models\AIProvider as AiModel;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -93,7 +93,7 @@ class SyncAirForceModelsService
         ];
 
         $data = [
-            'provider_id' => null,
+            'provider_id' => $this->provider?->id,
             'name' => $this->formatName($modelId),
             'driver' => $driver,
             'model' => $modelId,

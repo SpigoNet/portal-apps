@@ -29,7 +29,7 @@ class ModuleContextRedirect
         return route('welcome', absolute: false);
     }
 
-    private static function isValidModuleUrl(?string $url): bool
+    public static function isValidModuleUrl(?string $url): bool
     {
         if (!is_string($url) || trim($url) === '') {
             return false;
@@ -61,6 +61,7 @@ class ModuleContextRedirect
             'storage',
             'build',
             'up',
+            'livewire',
         ];
     }
 }

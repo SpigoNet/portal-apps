@@ -3,8 +3,8 @@
 namespace App\Modules\MundosDeMim\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AiGatewayProvider;
 use App\Models\User;
-use App\Modules\MundosDeMim\Models\AiGatewayProvider;
 use App\Modules\MundosDeMim\Models\AIProvider;
 use App\Modules\MundosDeMim\Models\UserAiSetting;
 use Illuminate\Http\Request;

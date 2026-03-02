@@ -2,7 +2,7 @@
 
 namespace App\Modules\MundosDeMim\Database\Seeders;
 
-use App\Modules\MundosDeMim\Models\AiGatewayProvider;
+use App\Models\AiGatewayProvider;
 use App\Modules\MundosDeMim\Models\AIProvider;
 use Illuminate\Database\Seeder;
 

@@ -1,23 +1,23 @@
 <x-Admin::layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Gerenciar Aplicativos') }}
-            </h2>
-            <div class="flex space-x-4"> {{-- Added a flex container for the buttons --}}
-                <a href="{{ route('admin.apps.create') }}"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Novo Aplicativo
-                </a>
-                <a href="{{ route('admin.icon-generator') }}"
-                    class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
-                    Gerador de Ícones
-                </a>
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    {{ __('Gerenciar Aplicativos') }}
+                </h2>
+                <div class="flex space-x-4"> {{-- Added a flex container for the buttons --}}
+                    <a href="{{ route('admin.apps.create') }}"
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Novo Aplicativo
+                    </a>
+                    <a href="{{ route('admin.icon-generator') }}"
+                        class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+                        Gerador de Ícones
+                    </a>
+                </div>
             </div>
         </div>
-    </x-slot>
 
-    <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Mensagem de sucesso -->
             @if(session('success'))

@@ -9,6 +9,7 @@ use App\Modules\MundosDeMim\Models\Prompt;
 use App\Modules\MundosDeMim\Models\UserAttribute;
 use App\Modules\MundosDeMim\Services\AiProviderService;
 use App\Services\AI\Drivers\AirForceDriver;
+use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -81,9 +82,9 @@ class PlaygroundController extends Controller
                 }
             }
 
-            $systemPrompt = 'Você é um mestre de Prompt Engineering para modelos de imagem como Midjourney e Stable Diffusion. 
+            $systemPrompt = 'Você é um mestre de Prompt Engineering para modelos de imagem como Midjourney e Stable Diffusion.
             Sua tarefa é pegar uma ideia simples do usuário e transformá-la em um prompt visual rico, cinematográfico e detalhado, em INGLÊS.
-            
+
             REGRAS:
             1. Use a descrição física do usuário se fornecida para manter a consistência.
             2. Adicione detalhes de iluminação, estilo artístico (ex: 8k, unreal engine 5, cinematic lighting).
@@ -225,6 +226,7 @@ class PlaygroundController extends Controller
     {
         return match ($driverName) {
             'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
+            'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
             default => new PollinationDriver($model, $apiKey, $baseUrl),
         };
     }

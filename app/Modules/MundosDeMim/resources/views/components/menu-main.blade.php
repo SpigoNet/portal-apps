@@ -19,6 +19,9 @@
         <x-dropdown-link :href="route('mundos-de-mim.estilos.index')">
             Meus Mundos
         </x-dropdown-link>
+        <x-dropdown-link :href="route('mundos-de-mim.config.index')">
+            Configurações de IA
+        </x-dropdown-link>
     </x-slot>
 </x-dropdown>
 @can('admin-do-app')

@@ -4,7 +4,7 @@ use App\Modules\MundosDeMim\Http\Controllers\DashboardController;
 use App\Modules\MundosDeMim\Http\Controllers\EstilosController;
 use App\Modules\MundosDeMim\Http\Controllers\GaleriaController;
 use App\Modules\MundosDeMim\Http\Controllers\PerfilBiometricoController;
-use App\Modules\MundosDeMim\Http\Controllers\PessoasRelacionadasController; // <--- Importar
+use App\Modules\MundosDeMim\Http\Controllers\PessoasRelacionadasController;
 use App\Modules\MundosDeMim\Http\Controllers\PlaygroundController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +25,10 @@ Route::prefix('mundos-de-mim')
             Route::get('/meu-perfil', [PerfilBiometricoController::class, 'index'])->name('perfil.index');
             Route::post('/meu-perfil', [PerfilBiometricoController::class, 'update'])->name('perfil.update');
             Route::post('/meu-perfil/analisar', [PerfilBiometricoController::class, 'analyze'])->name('perfil.analyze');
+
+            // Rotas de Configuração de IA
+            Route::get('/config', [ConfigController::class, 'index'])->name('config.index');
+            Route::post('/config', [ConfigController::class, 'update'])->name('config.update');
 
             // Rotas de Pessoas
             Route::get('/pessoas', [PessoasRelacionadasController::class, 'index'])->name('pessoas.index');

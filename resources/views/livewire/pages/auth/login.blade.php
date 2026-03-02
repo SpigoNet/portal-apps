@@ -18,6 +18,10 @@ new #[Layout('layouts.guest')] class extends Component {
 
         $this->form->authenticate();
 
+        if (!ModuleContextRedirect::isValidModuleUrl(session('url.intended'))) {
+            Session::forget('url.intended');
+        }
+
         Session::regenerate();
 
         $this->redirectIntended(default: ModuleContextRedirect::loginFallback(), navigate: true);

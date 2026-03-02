@@ -46,12 +46,6 @@
             <x-dropdown-link :href="route('mundos-de-mim.admin.gallery.index')">
                 Galeria Pública
             </x-dropdown-link>
-            <x-dropdown-link :href="route('mundos-de-mim.admin.ai-providers.index')">
-                Provedores de IA (Pai)
-            </x-dropdown-link>
-            <x-dropdown-link :href="route('mundos-de-mim.admin.ai-models.index')">
-                Modelos de IA (Filho)
-            </x-dropdown-link>
         </x-slot>
     </x-dropdown>
 

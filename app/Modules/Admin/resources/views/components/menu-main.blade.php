@@ -12,16 +12,13 @@
 
 <x-dropdown align="left" width="48">
     <x-slot name="trigger">
-        <x-nav-link :active="request()->routeIs('admin.ai-providers.*') || request()->routeIs('admin.ai-models.*')" class="cursor-pointer">
+        <x-nav-link :active="request()->routeIs('admin.ai.*')" class="cursor-pointer">
             {{ __('IA') }}
         </x-nav-link>
     </x-slot>
     <x-slot name="content">
-        <x-dropdown-link :href="route('admin.ai-providers.index')">
+        <x-dropdown-link :href="route('admin.ai.provedores.index')">
             Provedores
-        </x-dropdown-link>
-        <x-dropdown-link :href="route('admin.ai-models.index')">
-            Modelos
         </x-dropdown-link>
     </x-slot>
 </x-dropdown>

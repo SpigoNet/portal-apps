@@ -1,11 +1,16 @@
 <x-Admin::layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Novo Usuário') }}
-        </h2>
-    </x-slot>
-
     <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    {{ __('Novo Usuário') }}
+                </h2>
+                <a href="{{ route('admin.users.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                    Voltar
+                </a>
+            </div>
+        </div>
+
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">

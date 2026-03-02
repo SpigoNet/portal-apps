@@ -2,6 +2,8 @@
 
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Modules\Admin\Http\Controllers\AppManagerController;
+use App\Modules\Admin\Http\Controllers\AIProvedorController;
+use App\Modules\Admin\Http\Controllers\AIModeloController;
 use Illuminate\Support\Facades\Route;
 
 // O grupo de rotas é protegido pelo nosso middleware, que verifica
@@ -27,5 +29,18 @@ Route::middleware([EnsureUserIsAdmin::class])->prefix('admin')->name('admin.')->
 
     // Gerenciamento de Pacotes
     Route::resource('packages', App\Modules\Admin\Http\Controllers\PackageManagerController::class);
+
+    // Gestão de IA
+    Route::prefix('ai')->name('ai.')->group(function () {
+        Route::resource('provedores', AIProvedorController::class)->parameters([
+            'provedores' => 'provedor'
+        ]);
+        Route::post('/provedores/{provedor}/sync', [AIProvedorController::class, 'sync'])->name('provedores.sync');
+
+        // Gerenciamento de Modelos
+        Route::get('/provedores/{provedor}/modelos', [AIModeloController::class, 'index'])->name('modelos.index');
+        Route::post('/modelos/{modelo}/toggle', [AIModeloController::class, 'toggle'])->name('modelos.toggle');
+        Route::post('/modelos/{modelo}/set-default', [AIModeloController::class, 'setDefault'])->name('modelos.set-default');
+    });
 });
 

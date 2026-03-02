@@ -2,7 +2,7 @@
 
 namespace App\Modules\MundosDeMim\Services;
 
-use App\Modules\MundosDeMim\Models\AiGatewayProvider;
+use App\Models\AiGatewayProvider;
 use App\Modules\MundosDeMim\Models\AIProvider;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;

@@ -1,11 +1,9 @@
 <?php
 
-use App\Http\Controllers\Admin\AiProviderController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\MicrosoftController;
 use App\Http\Controllers\ManifestController;
 use App\Http\Controllers\WelcomeController;
-use App\Modules\Admin\Http\Controllers\AiModelController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
@@ -32,7 +30,4 @@ Route::get('/google/callback', [GoogleController::class, 'callback'])->name('goo
 require __DIR__.'/auth.php';
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('ai-providers', AiProviderController::class);
-    Route::post('ai-providers/{id}/sync', [AiProviderController::class, 'sync'])->name('ai-providers.sync');
-    Route::resource('ai-models', AiModelController::class);
 });

@@ -5,6 +5,7 @@ namespace App\Modules\MundosDeMim\Services;
 use App\Modules\MundosDeMim\Models\AIProvider;
 use App\Modules\MundosDeMim\Models\UserAttribute;
 use App\Services\AI\Drivers\AirForceDriver;
+use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -126,6 +127,7 @@ class DailyPhotoService
     {
         return match ($this->driver) {
             'airforce' => new AirForceDriver($this->model, $this->apiKey, $this->baseUrl),
+            'kdjingpai' => new KdjingpaiDriver($this->model, $this->apiKey, $this->baseUrl),
             default => new PollinationDriver($this->model, $this->apiKey, $this->baseUrl),
         };
     }

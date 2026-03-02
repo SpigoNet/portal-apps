@@ -3,7 +3,7 @@
 namespace App\Modules\MundosDeMim\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Modules\MundosDeMim\Models\AiGatewayProvider;
+use App\Models\AiGatewayProvider;
 use App\Modules\MundosDeMim\Services\SyncAirForceModelsService;
 use App\Modules\MundosDeMim\Services\SyncPollinationModelsService;
 use Illuminate\Http\Request;

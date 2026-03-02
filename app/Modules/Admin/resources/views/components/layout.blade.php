@@ -1,9 +1,3 @@
 <x-app-layout :module-id="1" :module-menu="view('Admin::components.menu-main')">
-    @if(isset($header))
-        <x-slot name="header">
-            {{ $header }}
-        </x-slot>
-    @endif
-
     {{ $slot }}
 </x-app-layout>

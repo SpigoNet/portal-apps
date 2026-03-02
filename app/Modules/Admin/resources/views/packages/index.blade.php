@@ -1,17 +1,17 @@
 <x-Admin::layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Gerenciar Pacotes') }}
-            </h2>
-            <a href="{{ route('admin.packages.create') }}"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Novo Pacote
-            </a>
-        </div>
-    </x-slot>
-
     <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    {{ __('Gerenciar Pacotes') }}
+                </h2>
+                <a href="{{ route('admin.packages.create') }}"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Novo Pacote
+                </a>
+            </div>
+        </div>
+
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @if(session('success'))
                 <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">

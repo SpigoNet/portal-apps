@@ -2,6 +2,7 @@
 
 namespace App\Modules\MundosDeMim\Models;
 
+use App\Models\AiGatewayProvider;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;

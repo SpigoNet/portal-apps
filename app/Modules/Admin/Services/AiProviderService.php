@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Modules\MundosDeMim\Services;
+namespace App\Modules\Admin\Services;
 
 use App\Models\User;
-use App\Modules\MundosDeMim\Models\AiGatewayProvider;
-use App\Modules\MundosDeMim\Models\AIProvider;
+use App\Models\AiGatewayProvider;
+use App\Models\AIProvider;
 use App\Modules\MundosDeMim\Models\UserAiSetting;
 
 class AiProviderService

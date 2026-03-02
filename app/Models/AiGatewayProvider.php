@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Modules\MundosDeMim\Models;
+namespace App\Models;
 
+use App\Modules\MundosDeMim\Models\AIProvider;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AiGatewayProvider extends Model
 {
-    protected $table = 'mundos_de_mim_providers';
+    protected $table = 'ai_providers';
 
     protected $fillable = [
         'name',

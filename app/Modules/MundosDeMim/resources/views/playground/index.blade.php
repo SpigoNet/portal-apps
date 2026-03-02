@@ -71,26 +71,51 @@
                         @csrf
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                            <div class="col-span-1">
-                                <label for="ai_provider_id" class="block text-sm font-bold text-gray-700 mb-2">2. Provedor
-                                    / Modelo</label>
-                                <select name="ai_provider_id" id="ai_provider_id"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    @foreach($providers as $provider)
-                                        <option value="{{ $provider->id }}"
-                                            {{ (string) old('ai_provider_id', optional($selectedProvider)->id) === (string) $provider->id ? 'selected' : '' }}>
-                                            {{ $provider->name }} ({{ $provider->driver }} / {{ $provider->model }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @if($providers->isEmpty())
-                                    <p class="text-xs text-red-500 mt-2 font-semibold">
-                                        Nenhum provedor ativo encontrado. Configure em Admin → Provedores de IA.
-                                    </p>
+                            <div class="col-span-1 space-y-4">
+                                <div>
+                                    <label for="ai_provider_id" class="block text-sm font-bold text-gray-700 mb-2">2. Provedor / Modelo</label>
+                                    <select name="ai_provider_id" id="ai_provider_id"
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        @foreach($providers as $provider)
+                                            <option value="{{ $provider->id }}"
+                                                {{ (string) old('ai_provider_id', optional($selectedProvider)->id) === (string) $provider->id ? 'selected' : '' }}>
+                                                {{ $provider->name }} ({{ $provider->driver }} / {{ $provider->model }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @if($providers->isEmpty())
+                                        <p class="text-xs text-red-500 mt-2 font-semibold">
+                                            Nenhum provedor ativo encontrado.
+                                        </p>
+                                    @endif
+                                </div>
+
+                                @if($prompts->isNotEmpty())
+                                <div>
+                                    <label for="prompt_id" class="block text-sm font-bold text-gray-700 mb-2">Ou use um Prompt Cadastrado</label>
+                                    <select name="prompt_id" id="prompt_id" onchange="loadPrompt(this.value)"
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                        <option value="">-- Selecione --</option>
+                                        @foreach($prompts as $prompt)
+                                            <option value="{{ $prompt->id }}" data-prompt="{{ $prompt->prompt_text }}">
+                                                {{ $prompt->theme->name ?? 'Sem tema' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
                                 @endif
-                                <p class="text-xs text-gray-500 mt-2">
-                                    Selecione um modelo (filho) de um provedor (pai) cadastrado no Admin.
-                                </p>
+
+                                @if($currentUser->can('admin-do-app'))
+                                <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-200">
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="checkbox" name="send_to_user" value="1" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                        <span class="ml-2 text-sm text-indigo-700 font-medium">
+                                            <i class="fa-solid fa-paper-plane"></i> Enviar para o usuário
+                                        </span>
+                                    </label>
+                                    <p class="text-xs text-indigo-600 mt-1">Envia a imagem gerada por email para o usuário selecionado</p>
+                                </div>
+                                @endif
                             </div>
 
                             <div class="col-span-2">
@@ -150,6 +175,18 @@ The image size is 9/16." }}</textarea>
     </div>
 
     <script>
+        function loadPrompt(promptId) {
+            if (!promptId) return;
+            
+            const select = document.getElementById('prompt_id');
+            const option = select.options[select.selectedIndex];
+            const promptText = option.getAttribute('data-prompt');
+            
+            if (promptText) {
+                document.getElementById('prompt').value = promptText;
+            }
+        }
+
         document.getElementById('btn-magic-wand')?.addEventListener('click', async function () {
             const promptArea = document.getElementById('prompt');
             const btn = this;

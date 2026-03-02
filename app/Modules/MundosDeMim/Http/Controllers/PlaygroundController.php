@@ -5,6 +5,7 @@ namespace App\Modules\MundosDeMim\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\MundosDeMim\Models\AIProvider;
+use App\Modules\MundosDeMim\Models\Prompt;
 use App\Modules\MundosDeMim\Models\UserAttribute;
 use App\Modules\MundosDeMim\Services\AiProviderService;
 use App\Services\AI\Drivers\AirForceDriver;
@@ -39,7 +40,9 @@ class PlaygroundController extends Controller
             $allUsers = collect();
         }
 
-        return view('MundosDeMim::playground.index', compact('attributes', 'hasPhoto', 'providers', 'selectedProvider', 'targetUser', 'allUsers', 'currentUser'));
+        $prompts = Prompt::with('theme')->orderBy('theme_id')->get();
+
+        return view('MundosDeMim::playground.index', compact('attributes', 'hasPhoto', 'providers', 'selectedProvider', 'targetUser', 'allUsers', 'currentUser', 'prompts'));
     }
 
     public function refine(Request $request)
@@ -110,7 +113,9 @@ class PlaygroundController extends Controller
         // Validação básica
         $request->validate([
             'prompt' => 'required|string|min:3|max:2000',
+            'prompt_id' => 'nullable|exists:mundos_de_mim_prompts,id',
             'ai_provider_id' => 'nullable|exists:mundos_de_mim_ai_providers,id',
+            'send_to_user' => 'nullable|boolean',
         ]);
 
         $currentUser = Auth::user();
@@ -145,6 +150,15 @@ class PlaygroundController extends Controller
                 $options['reference_image_path'] = $photoPath;
             }
 
+            // Se um prompt_id for selecionado, usar o texto do prompt
+            $promptText = $request->input('prompt');
+            if ($request->filled('prompt_id')) {
+                $savedPrompt = Prompt::find($request->prompt_id);
+                if ($savedPrompt) {
+                    $promptText = $savedPrompt->prompt_text;
+                }
+            }
+
             \Illuminate\Support\Facades\Log::debug('Playground generate', [
                 'driver' => $driverName,
                 'model' => $provider->model,
@@ -152,9 +166,12 @@ class PlaygroundController extends Controller
                 'baseUrl' => $baseUrl,
                 'hasPhoto' => ! empty($photoPath),
                 'options' => $options,
+                'promptText' => $promptText,
             ]);
 
-            $imageUrl = $driver->generateImage($request->input('prompt'), $options);
+            $imageUrl = $driver->generateImage($promptText, $options);
+
+            $sendToUser = $request->boolean('send_to_user');
 
             if ($imageUrl) {
                 // Deduz crédito
@@ -176,6 +193,12 @@ class PlaygroundController extends Controller
                             </div>
                         </div>
                     ";
+
+                // Enviar para o usuário se solicitado
+                if ($sendToUser) {
+                    $this->sendToUser($user, $imageUrl);
+                    $htmlResult = str_replace('</div>', "<div class='mt-4 bg-green-100 text-green-700 text-xs py-2 px-3 rounded'>✉️ Imagem enviada para o usuário!</div></div>", $htmlResult);
+                }
             } else {
                 return back()->with('error', 'O provedor selecionado não retornou uma imagem válida.')->withInput();
             }
@@ -231,5 +254,31 @@ class PlaygroundController extends Controller
         }
 
         return $currentUser;
+    }
+
+    private function sendToUser(User $user, string $imageUrl): bool
+    {
+        try {
+            Mail::send([], [], function ($message) use ($user, $imageUrl) {
+                $message->to($user->email, $user->name)
+                    ->subject('🌟 Sua Nova Imagem Gerada!')
+                    ->html("
+                        <h1>Olá, {$user->name}!</h1>
+                        <p>Uma nova imagem foi gerada para você!</p>
+                        <p><a href='{$imageUrl}' target='_blank'><img src='{$imageUrl}' style='max-width: 100%; border-radius: 10px;'/></a></p>
+                        <p><a href='{$imageUrl}' target='_blank'>Clique aqui para ver a imagem em tamanho maior</a></p>
+                        <br>
+                        <p>Atenciosamente,<br>Equipe Mundos de Mim</p>
+                    ");
+            });
+
+            \Illuminate\Support\Facades\Log::info("Playground: Imagem enviada para {$user->email}");
+
+            return true;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Playground: Erro ao enviar email: '.$e->getMessage());
+
+            return false;
+        }
     }
 }

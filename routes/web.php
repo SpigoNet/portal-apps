@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\MicrosoftController;
 use App\Http\Controllers\ManifestController;
 use App\Http\Controllers\WelcomeController;
+use App\Modules\Admin\Http\Controllers\AiModelController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');

@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('provider_id')->nullable()->constrained('ai_providers')->nullOnDelete();
             $table->string('name');
             $table->string('driver');
-            $table->string('model')->unique();
+            $table->string('model');
             $table->text('description')->nullable();
             $table->boolean('supports_image_input')->default(false);
             $table->boolean('supports_video_output')->default(false);
@@ -23,6 +23,7 @@ return new class extends Migration
             $table->json('pricing')->nullable();
             $table->boolean('paid_only')->default(false);
             $table->timestamps();
+            $table->unique(['model', 'provider_id']);
         });
     }
 

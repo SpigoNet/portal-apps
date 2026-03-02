@@ -7,10 +7,8 @@ use App\Models\AiProvider;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class SyncAirForceModelsService
+class SyncGenericModelsService
 {
-    protected string $apiUrl = 'https://api.airforce/v1/models';
-
     public function __construct(private ?AiProvider $provider = null)
     {
     }
@@ -24,7 +22,14 @@ class SyncAirForceModelsService
         ];
 
         try {
-            $apiUrl = $this->provider?->sync_url ?: $this->apiUrl;
+            $apiUrl = $this->provider?->sync_url;
+
+            if (! $apiUrl) {
+                return [
+                    'success' => false,
+                    'message' => 'Sync URL não configurada para este provedor.',
+                ];
+            }
 
             $response = Http::timeout(30)->get($apiUrl);
 
@@ -54,7 +59,7 @@ class SyncAirForceModelsService
             ];
 
         } catch (\Exception $e) {
-            Log::error('SyncAirForceModelsService Error', ['error' => $e->getMessage()]);
+            Log::error('SyncGenericModelsService Error', ['error' => $e->getMessage()]);
 
             return [
                 'success' => false,
@@ -66,44 +71,21 @@ class SyncAirForceModelsService
     protected function syncModel(array $modelData, array &$results): void
     {
         $modelId = $modelData['id'];
-
-        $supportsImages = $modelData['supports_images'] ?? false;
-
-        if (! $supportsImages) {
-            return;
-        }
-
-        $driver = $this->provider?->driver ?: 'airforce';
-
-        $supportsImageInput = $supportsImages;
-        $supportsVideoOutput = false;
-
-        $isFree = ($modelData['pricepermilliontokens'] ?? 0) == 0
-            || str_ends_with($modelId, ':free')
-            || ($modelData['multiplier'] ?? null) == 0;
+        $driver = $this->provider?->driver ?: 'generic';
 
         $existingModel = AiModel::where('model', $modelId)
             ->where('provider_id', $this->provider?->id)
             ->first();
-
-        $pricing = [
-            'currency' => 'airforce',
-            'pricePerMillionTokens' => (string) ($modelData['pricepermilliontokens'] ?? 0),
-            'multiplier' => isset($modelData['multiplier']) ? (string) $modelData['multiplier'] : '1',
-        ];
 
         $data = [
             'provider_id' => $this->provider?->id,
             'name' => $this->formatName($modelId),
             'driver' => $driver,
             'model' => $modelId,
-            'description' => "Model: {$modelId} | Owner: {$modelData['owned_by']} | Status: {$modelData['status']}",
-            'supports_image_input' => $supportsImageInput,
-            'supports_video_output' => $supportsVideoOutput,
+            'supports_image_input' => false,
+            'supports_video_output' => false,
             'is_active' => true,
-            'pricing' => $pricing,
-            'paid_only' => ! $isFree,
-            'sort_order' => $existingModel?->sort_order ?? $this->getNextSortOrder($driver),
+            'sort_order' => $existingModel?->sort_order ?? $this->getNextSortOrder(),
         ];
 
         if ($existingModel) {
@@ -115,14 +97,14 @@ class SyncAirForceModelsService
         }
     }
 
-    protected function formatName(string $modelName): string
+    protected function formatName(string $modelId): string
     {
-        $name = str_replace(['-', '_', ':free'], [' ', ' ', ''], $modelName);
+        $name = str_replace(['-', '_'], ' ', $modelId);
 
         return ucwords($name);
     }
 
-    protected function getNextSortOrder(string $driver): int
+    protected function getNextSortOrder(): int
     {
         return AiModel::max('sort_order') + 1;
     }

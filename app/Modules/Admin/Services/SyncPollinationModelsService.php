@@ -74,7 +74,7 @@ class SyncPollinationModelsService
 
         $existingModel = AiModel::query()
             ->where('model', $modelName)
-            ->where('driver', $driver)
+            ->where('provider_id', $this->provider?->id)
             ->first();
 
         $pricing = $modelData['pricing'] ?? null;

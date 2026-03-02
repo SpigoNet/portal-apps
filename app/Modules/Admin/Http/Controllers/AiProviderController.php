@@ -24,7 +24,7 @@ class AiProviderController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'driver' => 'required|string|max:100|unique:ai_providers,driver',
+            'driver' => 'required|string|max:100',
             'input_type' => 'required|in:text,image',
             'output_type' => 'required|in:text,image,audio,video',
             'base_url' => 'nullable|url',
@@ -54,7 +54,7 @@ class AiProviderController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'driver' => 'required|string|max:100|unique:ai_providers,driver,'.$provider->id,
+            'driver' => 'required|string|max:100',
             'input_type' => 'required|in:text,image',
             'output_type' => 'required|in:text,image,audio,video',
             'base_url' => 'nullable|url',
@@ -91,11 +91,17 @@ class AiProviderController extends Controller
             return back()->with('error', 'Sync URL não configurada para este provedor.');
         }
 
-        $serviceClass = match ($provider->driver) {
-            'pollination' => \App\Modules\Admin\Services\SyncPollinationModelsService::class,
-            'airforce' => \App\Modules\Admin\Services\SyncAirForceModelsService::class,
-            default => null,
-        };
+        $serviceClass = null;
+
+        if ($provider->input_type === 'text' && $provider->output_type === 'text') {
+            $serviceClass = \App\Modules\Admin\Services\SyncGenericModelsService::class;
+        } else {
+            $serviceClass = match ($provider->driver) {
+                'pollination' => \App\Modules\Admin\Services\SyncPollinationModelsService::class,
+                'airforce' => \App\Modules\Admin\Services\SyncAirForceModelsService::class,
+                default => null,
+            };
+        }
 
         if (! $serviceClass) {
             return back()->with('error', 'Driver não suportado para sync: '.$provider->driver);

@@ -51,7 +51,7 @@ class AiModelController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'model' => 'required|string|max:255|unique:ai_models,model',
+            'model' => 'required|string|max:255',
             'provider_id' => 'required|exists:ai_providers,id',
             'description' => 'nullable|string',
             'supports_image_input' => 'boolean',
@@ -92,7 +92,7 @@ class AiModelController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'model' => 'required|string|max:255|unique:ai_models,model,'.$id,
+            'model' => 'required|string|max:255',
             'provider_id' => 'required|exists:ai_providers,id',
             'description' => 'nullable|string',
             'supports_image_input' => 'boolean',
@@ -137,11 +137,17 @@ class AiModelController extends Controller
             return back()->with('error', 'Sync URL não configurada para este provedor.');
         }
 
-        $serviceClass = match ($provider->driver) {
-            'pollination' => \App\Modules\Admin\Services\SyncPollinationModelsService::class,
-            'airforce' => \App\Modules\Admin\Services\SyncAirForceModelsService::class,
-            default => null,
-        };
+        $serviceClass = null;
+
+        if ($provider->input_type === 'text' && $provider->output_type === 'text') {
+            $serviceClass = \App\Modules\Admin\Services\SyncGenericModelsService::class;
+        } else {
+            $serviceClass = match ($provider->driver) {
+                'pollination' => \App\Modules\Admin\Services\SyncPollinationModelsService::class,
+                'airforce' => \App\Modules\Admin\Services\SyncAirForceModelsService::class,
+                default => null,
+            };
+        }
 
         if (! $serviceClass) {
             return back()->with('error', 'Driver não suportado para sync: '.$provider->driver);

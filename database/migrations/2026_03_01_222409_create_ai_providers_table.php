@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('ai_providers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('driver')->unique();
+            $table->string('driver');
             $table->enum('input_type', ['text', 'image'])->default('image');
             $table->enum('output_type', ['text', 'image', 'audio', 'video'])->default('image');
             $table->string('base_url')->nullable();

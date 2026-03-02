@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\MundosDeMim\Http\Controllers\ConfigController;
 use App\Modules\MundosDeMim\Http\Controllers\DashboardController;
 use App\Modules\MundosDeMim\Http\Controllers\EstilosController;
 use App\Modules\MundosDeMim\Http\Controllers\GaleriaController;

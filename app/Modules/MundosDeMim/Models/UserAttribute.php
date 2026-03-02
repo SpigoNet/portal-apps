@@ -2,8 +2,8 @@
 
 namespace App\Modules\MundosDeMim\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 class UserAttribute extends Model
 {
@@ -12,11 +12,12 @@ class UserAttribute extends Model
     protected $fillable = [
         'user_id',
         'photo_path',
-        'height',     // float [cite: 26]
-        'weight',     // float [cite: 27]
-        'body_type',  // string [cite: 28]
-        'eye_color',  // string [cite: 29]
-        'hair_type',  // string [cite: 29]
+        'notification_preference',
+        'height',     // float
+        'weight',     // float
+        'body_type',  // string
+        'eye_color',  // string
+        'hair_type',  // string
     ];
 
     public function user()

@@ -28,6 +28,7 @@ class AiProviderController extends Controller
             'input_type' => 'required|in:text,image',
             'output_type' => 'required|in:text,image,audio,video',
             'base_url' => 'nullable|url',
+            'sync_url' => 'nullable|url',
             'api_key' => 'nullable|string',
             'is_active' => 'sometimes|accepted',
         ]);
@@ -57,6 +58,7 @@ class AiProviderController extends Controller
             'input_type' => 'required|in:text,image',
             'output_type' => 'required|in:text,image,audio,video',
             'base_url' => 'nullable|url',
+            'sync_url' => 'nullable|url',
             'api_key' => 'nullable|string',
             'is_active' => 'sometimes|accepted',
         ]);

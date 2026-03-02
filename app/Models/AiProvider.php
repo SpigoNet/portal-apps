@@ -14,6 +14,7 @@ class AiProvider extends Model
         'description',
         'provider_id',
         'base_url',
+        'sync_url',
         'api_key',
         'is_active',
     ];

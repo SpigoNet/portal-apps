@@ -52,6 +52,14 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 text-right">
+                                        @if($provider->sync_url)
+                                            <form action="{{ route('admin.ai-providers.sync', $provider->id) }}" method="POST" class="inline mr-3">
+                                                @csrf
+                                                <button type="submit" class="text-blue-600 hover:text-blue-900" onclick="this.disabled=true;this.form.submit();">
+                                                    <i class="fa-solid fa-sync"></i> Sync
+                                                </button>
+                                            </form>
+                                        @endif
                                         <a href="{{ route('admin.ai-providers.edit', $provider->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Editar</a>
                                         <form action="{{ route('admin.ai-providers.destroy', $provider->id) }}" method="POST" class="inline">
                                             @csrf @method('DELETE')

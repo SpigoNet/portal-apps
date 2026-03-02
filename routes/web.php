@@ -32,5 +32,6 @@ require __DIR__.'/auth.php';
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('ai-providers', AiProviderController::class);
+    Route::post('ai-providers/{id}/sync', [AiProviderController::class, 'sync'])->name('ai-providers.sync');
     Route::resource('ai-models', AiModelController::class);
 });

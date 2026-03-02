@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AiProviderController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\MicrosoftController;
 use App\Http\Controllers\ManifestController;

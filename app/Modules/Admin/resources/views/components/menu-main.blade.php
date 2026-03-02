@@ -10,6 +10,25 @@
     {{ __('Pacotes') }}
 </x-nav-link>
 
+<x-dropdown align="left" width="48">
+    <x-slot name="trigger">
+        <x-nav-link :active="request()->routeIs('admin.ai-providers.*')" class="cursor-pointer">
+            {{ __('IA & AI') }}
+        </x-nav-link>
+    </x-slot>
+    <x-slot name="content">
+        <x-dropdown-link :href="route('admin.ai-providers.index')">
+            Provedores de IA
+        </x-dropdown-link>
+        <x-dropdown-link :href="route('mundos-de-mim.admin.ai-providers.index')">
+            Mundos de Mim - Provedores
+        </x-dropdown-link>
+        <x-dropdown-link :href="route('mundos-de-mim.admin.ai-models.index')">
+            Mundos de Mim - Modelos
+        </x-dropdown-link>
+    </x-slot>
+</x-dropdown>
+
 <x-nav-link :href="route('admin.icon-generator')" :active="request()->routeIs('admin.icon-generator')">
     {{ __('Gerador de Ícones') }}
 </x-nav-link>

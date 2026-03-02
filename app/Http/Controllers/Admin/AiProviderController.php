@@ -90,8 +90,8 @@ class AiProviderController extends Controller
         }
 
         $serviceClass = match ($provider->driver) {
-            'pollination' => \App\Modules\MundosDeMim\Services\SyncPollinationModelsService::class,
-            'airforce' => \App\Modules\MundosDeMim\Services\SyncAirForceModelsService::class,
+            'pollination' => \App\Modules\Admin\Services\SyncPollinationModelsService::class,
+            'airforce' => \App\Modules\Admin\Services\SyncAirForceModelsService::class,
             default => null,
         };
 

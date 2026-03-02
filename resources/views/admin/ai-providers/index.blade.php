@@ -52,6 +52,9 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 text-right">
+                                        <a href="{{ route('admin.ai-models.index', ['provider_id' => $provider->id]) }}" class="text-green-600 hover:text-green-900 mr-3">
+                                            <i class="fa-solid fa-cubes"></i> Modelos
+                                        </a>
                                         @if($provider->sync_url)
                                             <form action="{{ route('admin.ai-providers.sync', $provider->id) }}" method="POST" class="inline mr-3">
                                                 @csrf

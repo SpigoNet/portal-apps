@@ -65,6 +65,47 @@
                             </div>
                         </div>
 
+                        <div class="mb-8 border-b pb-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Receber Foto do Dia</h3>
+                            <p class="text-xs text-gray-500 mb-4">Escolha por onde deseja receber sua foto gerada pela IA diariamente.</p>
+                            
+                            <div class="space-y-3">
+                                <label class="flex items-center">
+                                    <input type="radio" name="notification_preference" value="none" 
+                                        {{ old('notification_preference', $attributes->notification_preference ?? 'none') === 'none' ? 'checked' : '' }}
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                    <span class="ml-2 text-sm text-gray-700">Não receber</span>
+                                </label>
+                                
+                                <label class="flex items-center">
+                                    <input type="radio" name="notification_preference" value="email" 
+                                        {{ old('notification_preference', $attributes->notification_preference ?? 'none') === 'email' ? 'checked' : '' }}
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                    <span class="ml-2 text-sm text-gray-700">
+                                        <i class="fa-solid fa-envelope"></i> E-mail
+                                    </span>
+                                </label>
+                                
+                                <label class="flex items-center">
+                                    <input type="radio" name="notification_preference" value="telegram" 
+                                        {{ old('notification_preference', $attributes->notification_preference ?? 'none') === 'telegram' ? 'checked' : '' }}
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                    <span class="ml-2 text-sm text-gray-700">
+                                        <i class="fa-brands fa-telegram"></i> Telegram
+                                    </span>
+                                </label>
+                                
+                                <label class="flex items-center opacity-50 cursor-not-allowed" title="Em breve">
+                                    <input type="radio" name="notification_preference" value="whatsapp" disabled
+                                        {{ old('notification_preference', $attributes->notification_preference ?? 'none') === 'whatsapp' ? 'checked' : '' }}
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                    <span class="ml-2 text-sm text-gray-700">
+                                        <i class="fa-brands fa-whatsapp"></i> WhatsApp (em breve)
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Detalhes Biométricos</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>

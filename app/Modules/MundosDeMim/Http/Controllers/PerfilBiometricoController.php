@@ -3,19 +3,20 @@
 namespace App\Modules\MundosDeMim\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\MundosDeMim\Models\UserAttribute;
 use App\Modules\ANT\Models\AntConfiguracao;
+use App\Modules\MundosDeMim\Models\UserAttribute;
 use App\Services\AI\Drivers\GeminiDriver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class PerfilBiometricoController extends Controller
 {
     public function index()
     {
         $attributes = UserAttribute::where('user_id', Auth::id())->first();
+
         return view('MundosDeMim::perfil.index', compact('attributes'));
     }
 
@@ -24,14 +25,14 @@ class PerfilBiometricoController extends Controller
         try {
             $attributes = UserAttribute::where('user_id', Auth::id())->first();
 
-            if (!$attributes || !$attributes->photo_path || !Storage::disk('public')->exists($attributes->photo_path)) {
+            if (! $attributes || ! $attributes->photo_path || ! Storage::disk('public')->exists($attributes->photo_path)) {
                 return response()->json(['error' => 'Foto de referência não encontrada. Por favor, faça upload de uma foto primeiro.'], 400);
             }
 
             $config = AntConfiguracao::first();
             $apiKey = $config->ia_key ?? env('GEMINI_API_KEY');
 
-            if (!$apiKey) {
+            if (! $apiKey) {
                 return response()->json(['error' => 'Chave API do Gemini não configurada.'], 500);
             }
 
@@ -42,8 +43,8 @@ class PerfilBiometricoController extends Controller
                 [
                     'role' => 'user',
                     'content' => 'Analise meu perfil físico baseado nesta foto.',
-                    'image' => $attributes->photo_path
-                ]
+                    'image' => $attributes->photo_path,
+                ],
             ];
 
             $result = $driver->generateText($messages, ['jsonMode' => true]);
@@ -52,16 +53,18 @@ class PerfilBiometricoController extends Controller
             $cleanResult = preg_replace('/```json|```/', '', $result);
             $json = json_decode(trim($cleanResult), true);
 
-            if (!$json) {
-                Log::error('MundosDeMim: Falha ao decodificar JSON da IA: ' . $result);
+            if (! $json) {
+                Log::error('MundosDeMim: Falha ao decodificar JSON da IA: '.$result);
+
                 return response()->json(['error' => 'A IA não retornou um formato válido. Tente novamente.'], 500);
             }
 
             return response()->json($json);
 
         } catch (\Exception $e) {
-            Log::error('MundosDeMim Error: ' . $e->getMessage());
-            return response()->json(['error' => 'Erro ao processar análise: ' . $e->getMessage()], 500);
+            Log::error('MundosDeMim Error: '.$e->getMessage());
+
+            return response()->json(['error' => 'Erro ao processar análise: '.$e->getMessage()], 500);
         }
     }
 
@@ -75,6 +78,7 @@ class PerfilBiometricoController extends Controller
             'body_type' => 'required|string|max:50',
             'eye_color' => 'required|string|max:50',
             'hair_type' => 'required|string|max:50',
+            'notification_preference' => 'nullable|in:none,whatsapp,telegram,email',
         ]);
 
         // 2. Busca ou inicia o objeto
@@ -98,6 +102,7 @@ class PerfilBiometricoController extends Controller
         $attributes->body_type = $validated['body_type'];
         $attributes->eye_color = $validated['eye_color'];
         $attributes->hair_type = $validated['hair_type'];
+        $attributes->notification_preference = $validated['notification_preference'] ?? 'none';
 
         $attributes->save();
 

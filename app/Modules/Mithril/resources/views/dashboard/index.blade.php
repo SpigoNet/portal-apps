@@ -1,117 +1,207 @@
 <x-Mithril::layout>
     <x-slot name="header">
-        {{ __('Lançamentos') }}
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
+            <div class="flex items-center gap-4">
+                <div class="p-3 mithril-theme-button rounded-full text-white shadow-lg border border-white/20">
+                    <i class="fa-solid fa-gem text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="elf-title text-2xl mithril-theme-accent">
+                        Mithril Dashboard
+                    </h2>
+                    <p class="text-[10px] text-slate-400 font-medium uppercase tracking-[0.3em]">Tesouraria de Valfenda
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('mithril.pre-transacoes.create') }}" class="btn-elf text-white">
+                    <i class="fa-solid fa-plus mr-2"></i>
+                    Novo Lançamento
+                </a>
+            </div>
+        </div>
     </x-slot>
 
-    <x-slot name="contextMenu">
-        <x-dropdown-link :href="route('mithril.pre-transacoes.create')" class="text-blue-500">
-            + Nova Transação
-        </x-dropdown-link>
-        <x-dropdown-link href="#">
-            Exportar PDF
-        </x-dropdown-link>
-    </x-slot>
+    <div class="space-y-12">
+        {{-- Resumo Geral --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            @php
+                $totalRealHoje = collect($dadosContas)->sum('real_hoje');
+                $totalPrevistoFimMes = collect($dadosContas)->sum('previsto_fim_mes');
+                $totalCartoes = collect($dadosCartoes)->sum('total_pagar');
+                $liquidez = $totalPrevistoFimMes - abs($totalCartoes);
+            @endphp
 
-
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-
-            <div>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 px-2 border-l-4 border-blue-500">
-                    Resumo das Contas
+            <div
+                class="mithril-theme-surface p-6 rounded-2xl border border-white/5 relative overflow-hidden group transition-all hover:scale-[1.02]">
+                <div class="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fa-solid fa-coins text-8xl"></i>
+                </div>
+                <p class="elf-title text-[10px] text-slate-400 mb-1">Saldo Real Hoje</p>
+                <h3 class="text-3xl font-black {{ $totalRealHoje >= 0 ? 'text-emerald-400' : 'text-rose-400' }}">
+                    R$ {{ number_format($totalRealHoje, 2, ',', '.') }}
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    @forelse($dadosContas as $conta)
-                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                            <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-                                <h4 class="font-bold text-lg text-gray-800 dark:text-gray-200">{{ $conta['nome'] }}</h4>
+                <div class="mt-4 h-0.5 w-full bg-emerald-500/10 rounded-full overflow-hidden">
+                    <div class="h-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" style="width: 70%"></div>
+                </div>
+            </div>
+
+            <div
+                class="mithril-theme-surface p-6 rounded-2xl border border-white/5 relative overflow-hidden group transition-all hover:scale-[1.02]">
+                <div class="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fa-solid fa-chart-line text-8xl"></i>
+                </div>
+                <p class="elf-title text-[10px] text-slate-400 mb-1">Projeção Fim do Mês</p>
+                <h3 class="text-3xl font-black {{ $totalPrevistoFimMes >= 0 ? 'text-sky-300' : 'text-rose-400' }}">
+                    R$ {{ number_format($totalPrevistoFimMes, 2, ',', '.') }}
+                </h3>
+                <div class="mt-4 h-0.5 w-full bg-sky-500/10 rounded-full overflow-hidden">
+                    <div class="h-full bg-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.5)]" style="width: 85%"></div>
+                </div>
+            </div>
+
+            <div
+                class="mithril-theme-surface p-6 rounded-2xl border border-white/5 relative overflow-hidden group transition-all hover:scale-[1.02]">
+                <div class="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fa-solid fa-credit-card text-8xl"></i>
+                </div>
+                <p class="elf-title text-[10px] text-slate-400 mb-1">Total em Cartões</p>
+                <h3 class="text-3xl font-black text-rose-400">
+                    R$ {{ number_format(abs($totalCartoes), 2, ',', '.') }}
+                </h3>
+                <div class="mt-4 h-0.5 w-full bg-rose-500/10 rounded-full overflow-hidden">
+                    <div class="h-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]" style="width: 40%"></div>
+                </div>
+            </div>
+
+            <div
+                class="mithril-theme-surface p-6 rounded-2xl border border-white/5 relative overflow-hidden group transition-all hover:scale-[1.02]">
+                <div class="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fa-solid fa-shield-halved text-8xl"></i>
+                </div>
+                <p class="elf-title text-[10px] text-slate-400 mb-1">Liquidez Projetada</p>
+                <h3 class="text-3xl font-black {{ $liquidez >= 0 ? 'text-amber-300' : 'text-rose-400' }}">
+                    R$ {{ number_format($liquidez, 2, ',', '.') }}
+                </h3>
+                <div class="mt-4 h-0.5 w-full bg-amber-500/10 rounded-full overflow-hidden">
+                    <div class="h-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.5)]" style="width: 60%"></div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Contas --}}
+        <div>
+            <div class="flex items-center gap-4 mb-8">
+                <h3 class="elf-title text-xl mithril-theme-accent">
+                    Cofres e Bolsas
+                </h3>
+                <div class="flex-1 h-px bg-gradient-to-right from-white/10 to-transparent"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                @forelse($dadosContas as $conta)
+                    <div
+                        class="mithril-theme-surface overflow-hidden rounded-3xl border border-white/5 hover:border-white/20 transition-all group">
+                        <div class="p-6 bg-white/5 flex justify-between items-center border-b border-white/5">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-10 h-10 rounded-xl mithril-theme-button flex items-center justify-center shadow-lg border border-white/10">
+                                    <i class="fa-solid fa-building-columns text-white"></i>
+                                </div>
+                                <h4 class="elf-title text-sm text-white">{{ $conta['nome'] }}</h4>
                             </div>
-                            <div class="p-4 space-y-2 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">Saldo Inicial:</span>
-                                    <span class="{{ $conta['saldo_inicial'] >= 0 ? 'text-green-600' : 'text-red-600' }} font-semibold">
-                                        R$ {{ number_format($conta['saldo_inicial'], 2, ',', '.') }}
-                                    </span>
-                                </div>
-                                <div class="flex justify-between border-t pt-2">
-                                    <span class="font-bold text-gray-700 dark:text-gray-300">Real (Hoje):</span>
-                                    <span class="{{ $conta['real_hoje'] >= 0 ? 'text-green-600' : 'text-red-600' }} font-bold text-base">
-                                        R$ {{ number_format($conta['real_hoje'], 2, ',', '.') }}
-                                    </span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">Previsto (Hoje):</span>
-                                    <span class="{{ $conta['previsto_hoje'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                            <a href="{{ route('mithril.lancamentos.index', ['conta_id' => $conta['id']]) }}"
+                                class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 transition backdrop-blur-md">
+                                <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400"></i>
+                            </a>
+                        </div>
+                        <div class="p-6 space-y-6">
+                            <div class="flex justify-between items-end">
+                                <span class="elf-title text-[9px] text-slate-500">Saldo Atual</span>
+                                <span
+                                    class="{{ $conta['real_hoje'] >= 0 ? 'text-emerald-400' : 'text-rose-400' }} font-black text-2xl tracking-tighter">
+                                    R$ {{ number_format($conta['real_hoje'], 2, ',', '.') }}
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 pt-6 border-t border-white/5">
+                                <div>
+                                    <p class="elf-title text-[8px] text-slate-500 mb-1">Previsto Hoje</p>
+                                    <p
+                                        class="font-bold text-sm {{ $conta['previsto_hoje'] >= 0 ? 'text-slate-200' : 'text-rose-400' }}">
                                         R$ {{ number_format($conta['previsto_hoje'], 2, ',', '.') }}
-                                    </span>
+                                    </p>
                                 </div>
-                                <div class="flex justify-between border-t pt-2">
-                                    <span class="text-gray-500">Real (Fim Mês):</span>
-                                    <span class="{{ $conta['real_fim_mes'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        R$ {{ number_format($conta['real_fim_mes'], 2, ',', '.') }}
-                                    </span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">Previsto (Fim Mês):</span>
-                                    <span class="{{ $conta['previsto_fim_mes'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                <div class="text-right">
+                                    <p class="elf-title text-[8px] text-slate-500 mb-1">Fim do Mês</p>
+                                    <p
+                                        class="font-bold text-sm {{ $conta['previsto_fim_mes'] >= 0 ? 'text-slate-200' : 'text-rose-400' }}">
                                         R$ {{ number_format($conta['previsto_fim_mes'], 2, ',', '.') }}
-                                    </span>
+                                    </p>
                                 </div>
                             </div>
                         </div>
-                    @empty
-                        <div class="col-span-full p-4 bg-white dark:bg-gray-800 rounded shadow text-center text-gray-500">
-                            Nenhuma conta normal cadastrada.
-                        </div>
-                    @endforelse
-                </div>
+                    </div>
+                @empty
+                    <div
+                        class="col-span-full p-12 mithril-theme-surface rounded-3xl text-center border-2 border-dashed border-white/5">
+                        <i class="fa-solid fa-folder-open text-4xl text-slate-700 mb-4 block"></i>
+                        <p class="text-slate-500 italic">Nenhum cofre encontrado em suas terras.</p>
+                    </div>
+                @endforelse
             </div>
+        </div>
 
-            <div>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 px-2 border-l-4 border-purple-500">
-                    Resumo dos Cartões
+        {{-- Cartões --}}
+        <div>
+            <div class="flex items-center gap-4 mb-8">
+                <h3 class="elf-title text-xl text-rose-400">
+                    Créditos de Ferro
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    @forelse($dadosCartoes as $cartao)
-                        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border-t-4 border-purple-500">
-                            <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 flex justify-between items-center">
-                                <h4 class="font-bold text-lg text-gray-800 dark:text-gray-200">{{ $cartao['nome'] }}</h4>
-                                <span class="text-xs font-semibold px-2 py-1 bg-purple-100 text-purple-800 rounded">Crédito</span>
-                            </div>
-                            <div class="p-4 space-y-2 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">Saldo Anterior:</span>
-                                    <span class="text-red-600 font-semibold">
-                                        R$ {{ number_format(abs($cartao['saldo_anterior']), 2, ',', '.') }}
-                                    </span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">Fatura Aberta:</span>
-                                    <span class="text-red-600 font-semibold">
-                                        R$ {{ number_format(abs($cartao['fatura_aberta']), 2, ',', '.') }}
-                                    </span>
-                                </div>
-                                <div class="flex justify-between border-t pt-2 mt-2">
-                                    <span class="font-bold text-gray-700 dark:text-gray-300">Total a Pagar:</span>
-                                    <span class="text-red-600 font-bold text-base">
-                                        R$ {{ number_format(abs($cartao['total_pagar']), 2, ',', '.') }}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="bg-gray-50 dark:bg-gray-700 p-3 text-right">
-                                <a href="{{ route('mithril.faturas.show', $cartao['id']) }}" class="text-purple-600 hover:text-purple-900 font-medium text-sm">
-                                    Ver Fatura &rarr;
-                                </a>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-span-full p-4 bg-white dark:bg-gray-800 rounded shadow text-center text-gray-500">
-                            Nenhum cartão de crédito cadastrado.
-                        </div>
-                    @endforelse
-                </div>
+                <div class="flex-1 h-px bg-gradient-to-right from-rose-500/20 to-transparent"></div>
             </div>
 
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                @forelse($dadosCartoes as $cartao)
+                    <div
+                        class="mithril-theme-surface overflow-hidden rounded-3xl border border-rose-500/10 hover:border-rose-500/30 transition-all relative group">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
+                            <i class="fa-solid fa-bolt text-rose-500 text-4xl"></i>
+                        </div>
+                        <div class="p-6 bg-rose-500/5 flex justify-between items-center border-b border-white/5">
+                            <h4 class="elf-title text-sm text-white">{{ $cartao['nome'] }}</h4>
+                            <span
+                                class="elf-title text-[8px] px-3 py-1 bg-rose-500/20 text-rose-400 rounded-full">Dívida</span>
+                        </div>
+                        <div class="p-6 space-y-6">
+                            <div class="flex justify-between items-center">
+                                <span class="elf-title text-[9px] text-slate-500">Fatura Aberta</span>
+                                <span class="text-rose-400 font-black text-2xl tracking-tighter">
+                                    R$ {{ number_format(abs($cartao['fatura_aberta']), 2, ',', '.') }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center pt-6 border-t border-white/5">
+                                <span class="elf-title text-[9px] text-slate-400">Total Devido</span>
+                                <span class="text-rose-500 font-black text-lg">
+                                    R$ {{ number_format(abs($cartao['total_pagar']), 2, ',', '.') }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-black/30 text-center">
+                            <a href="{{ route('mithril.faturas.show', $cartao['id']) }}"
+                                class="elf-title text-[9px] text-rose-400 hover:text-rose-300 flex items-center justify-center gap-2 transition-all">
+                                Consultar Pergaminho
+                                <i class="fa-solid fa-chevron-right text-[8px]"></i>
+                            </a>
+                        </div>
+                    </div>
+                @empty
+                    <div
+                        class="col-span-full p-12 mithril-theme-surface rounded-3xl text-center border-2 border-dashed border-white/5">
+                        <p class="text-slate-500 italic">Nenhuma dívida de ferro registrada.</p>
+                    </div>
+                @endforelse
+            </div>
         </div>
     </div>
 </x-mithril::layout>

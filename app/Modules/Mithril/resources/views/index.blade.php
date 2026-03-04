@@ -1,31 +1,6 @@
-<x-app-layout>
-        <x-slot name="moduleName">Mithril</x-slot>
-        <x-slot name="moduleHomeRoute">mithril.index</x-slot>
-
-        <x-slot name="moduleMenu">
-            <x-dropdown-link :href="route('mithril.index')">
-                Dashboard
-            </x-dropdown-link>
-            <x-dropdown-link :href="route('mithril.lancamentos.index')">
-                Lançamentos
-            </x-dropdown-link>
-            <x-dropdown-link :href="route('mithril.pre-transacoes.index')">
-                Assinaturas
-            </x-dropdown-link>
-            <x-dropdown-link :href="route('mithril.fechamentos.index')">
-                Fechar Mês
-            </x-dropdown-link>
-            <div class="border-t border-gray-100 dark:border-gray-600"></div>
-            <x-dropdown-link :href="route('mithril.pre-transacoes.create')" class="text-blue-500">
-                + Nova Transação
-            </x-dropdown-link>
-        </x-slot>
-        <x-slot name="header">
-        </x-slot>
-
-
+<x-Mithril::layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             Lançamentos de {{ ucfirst($dataTitulo) }}
         </h2>
     </x-slot>
@@ -50,7 +25,7 @@
                     <form method="GET" action="{{ route('mithril.lancamentos.index') }}" class="mb-6 flex gap-4 items-end">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Mês</label>
-                            <select name="mes" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            <select name="mes" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-medium transition-colors">
                                 @for($i = 1; $i <= 12; $i++)
                                     <option value="{{ $i }}" {{ $mes == $i ? 'selected' : '' }}>
                                         {{ str_pad($i, 2, '0', STR_PAD_LEFT) }}
@@ -60,11 +35,11 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Ano</label>
-                            <input type="number" name="ano" value="{{ $ano }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            <input type="number" name="ano" value="{{ $ano }}" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-medium transition-colors">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Conta</label>
-                            <select name="conta_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            <select name="conta_id" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-medium transition-colors">
                                 <option value="">Todas as Contas</option>
                                 @foreach($contas as $conta)
                                     <option value="{{ $conta->id }}" {{ $contaId == $conta->id ? 'selected' : '' }}>
@@ -135,4 +110,4 @@
             </a>
         </div>
     </div>
-</x-app-layout>
+</x-Mithril::layout>

@@ -128,4 +128,11 @@ class DashboardController extends Controller
 
         return view('Mithril::dashboard.index', compact('dadosContas', 'dadosCartoes'));
     }
+
+    public function setTheme(\Illuminate\Http\Request $request)
+    {
+        $theme = $request->get('theme', 'mithril');
+        session(['mithril_theme' => $theme]);
+        return back();
+    }
 }

@@ -15,6 +15,7 @@ Route::prefix('mithril')
 
         // Dashboard
         Route::get('/', [DashboardController::class, 'index'])->name('index');
+        Route::get('/set-theme', [DashboardController::class, 'setTheme'])->name('set-theme');
 
         // Placeholders para as próximas rotas (evita erro na View)
         Route::get('/lancamentos', [\App\Modules\Mithril\Http\Controllers\LancamentoController::class, 'index'])->name('lancamentos.index');

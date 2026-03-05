@@ -1,8 +1,9 @@
-<div class="flex items-center gap-1">
+<div class="flex items-center gap-1 whitespace-nowrap">
     {{-- Grupo 1: Resumo --}}
     <x-dropdown align="left" width="56">
         <x-slot name="trigger">
-            <button class="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black text-gray-400 hover:text-white uppercase tracking-widest bg-white/5 hover:bg-white/10 rounded-md transition-all border border-transparent hover:border-white/10 group">
+            <button
+                class="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black text-gray-400 hover:text-white uppercase tracking-widest bg-white/5 hover:bg-white/10 rounded-md transition-all border border-transparent hover:border-white/10 group">
                 <i class="fa-solid fa-chart-pie text-spigo-lime group-hover:scale-110 transition-transform"></i>
                 <span>Resumo</span>
                 <i class="fa-solid fa-chevron-down text-[8px] opacity-40"></i>
@@ -21,8 +22,10 @@
     {{-- Grupo 2: Operações --}}
     <x-dropdown align="left" width="56">
         <x-slot name="trigger">
-            <button class="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black text-gray-400 hover:text-white uppercase tracking-widest bg-white/5 hover:bg-white/10 rounded-md transition-all border border-transparent hover:border-white/10 group">
-                <i class="fa-solid fa-money-bill-transfer text-spigo-lime group-hover:scale-110 transition-transform"></i>
+            <button
+                class="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black text-gray-400 hover:text-white uppercase tracking-widest bg-white/5 hover:bg-white/10 rounded-md transition-all border border-transparent hover:border-white/10 group">
+                <i
+                    class="fa-solid fa-money-bill-transfer text-spigo-lime group-hover:scale-110 transition-transform"></i>
                 <span>Operações</span>
                 <i class="fa-solid fa-chevron-down text-[8px] opacity-40"></i>
             </button>
@@ -61,14 +64,16 @@
     {{-- Grupo 3: Configurações --}}
     <x-dropdown align="left" width="56">
         <x-slot name="trigger">
-            <button class="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black text-gray-400 hover:text-white uppercase tracking-widest bg-white/5 hover:bg-white/10 rounded-md transition-all border border-transparent hover:border-white/10 group">
+            <button
+                class="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black text-gray-400 hover:text-white uppercase tracking-widest bg-white/5 hover:bg-white/10 rounded-md transition-all border border-transparent hover:border-white/10 group">
                 <i class="fa-solid fa-sliders text-spigo-lime group-hover:scale-110 transition-transform"></i>
                 <span>Gestão</span>
                 <i class="fa-solid fa-chevron-down text-[8px] opacity-40"></i>
             </button>
         </x-slot>
         <x-slot name="content">
-            <div class="px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50/50 dark:bg-gray-800/50">
+            <div
+                class="px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50/50 dark:bg-gray-800/50">
                 Em breve
             </div>
             <x-dropdown-link href="#" class="opacity-50 cursor-not-allowed">

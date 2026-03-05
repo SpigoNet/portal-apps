@@ -27,6 +27,7 @@ class AIProvedorController extends Controller
         $validated = $request->validate([
             'nome' => 'required|string|max:255',
             'url_json_modelos' => 'nullable|url',
+            'api_key' => 'nullable|string',
             'default_input_types' => 'nullable|array',
             'default_output_types' => 'nullable|array',
         ]);
@@ -46,6 +47,7 @@ class AIProvedorController extends Controller
         $validated = $request->validate([
             'nome' => 'required|string|max:255',
             'url_json_modelos' => 'nullable|url',
+            'api_key' => 'nullable|string',
             'default_input_types' => 'nullable|array',
             'default_output_types' => 'nullable|array',
         ]);

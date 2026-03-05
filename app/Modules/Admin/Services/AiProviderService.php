@@ -4,7 +4,7 @@ namespace App\Modules\Admin\Services;
 
 use App\Models\User;
 use App\Models\AiGatewayProvider;
-use App\Models\AIProvider;
+use App\Modules\MundosDeMim\Models\AIProvider;
 use App\Modules\MundosDeMim\Models\UserAiSetting;
 
 class AiProviderService
@@ -44,6 +44,11 @@ class AiProviderService
     {
         $provider = $this->getModelForUserEntity($user);
 
+        return $this->getDriverForProvider($provider);
+    }
+
+    public function getDriverForProvider(?AIProvider $provider): string
+    {
         if (! $provider) {
             return 'pollination';
         }
@@ -54,15 +59,56 @@ class AiProviderService
     public function getApiKeyForUser(?User $user): ?string
     {
         $provider = $this->getModelForUserEntity($user);
+        
+        return $this->getApiKeyForProvider($provider);
+    }
 
-        return $provider?->gatewayProvider?->api_key;
+    public function getApiKeyForProvider(?AIProvider $provider): ?string
+    {
+        if (! $provider) return null;
+
+        // 1. Tenta pelo link direto do Gateway Provider
+        if ($provider->gatewayProvider) {
+            $adminProvedor = \App\Modules\Admin\Models\AIProvedor::where('nome', $provider->gatewayProvider->name)->first();
+            if ($adminProvedor && $adminProvedor->api_key) {
+                return $adminProvedor->api_key;
+            }
+            
+            if ($provider->gatewayProvider->api_key) {
+                return $provider->gatewayProvider->api_key;
+            }
+        }
+
+        // 2. Fallback: Se não tem gateway linkado, tenta pelo nome do Driver (ex: pollination -> Pollination)
+        if ($provider->driver) {
+            $adminProvedor = \App\Modules\Admin\Models\AIProvedor::where('nome', 'LIKE', $provider->driver)->first();
+            if ($adminProvedor && $adminProvedor->api_key) {
+                return $adminProvedor->api_key;
+            }
+        }
+
+        return $provider->api_key; // Último recurso: chave no próprio modelo de provedor do MundosDeMim
     }
 
     public function getBaseUrlForUser(?User $user): ?string
     {
         $provider = $this->getModelForUserEntity($user);
 
-        return $provider?->gatewayProvider?->base_url;
+        return $this->getBaseUrlForProvider($provider);
+    }
+
+    public function getBaseUrlForProvider(?AIProvider $provider): ?string
+    {
+        if (! $provider) return null;
+
+        if ($provider->gatewayProvider) {
+            $adminProvedor = \App\Modules\Admin\Models\AIProvedor::where('nome', $provider->gatewayProvider->name)->first();
+            if ($adminProvedor && $adminProvedor->url_json_modelos) {
+                // Fallback ou lógica futura para URL base do Admin
+            }
+        }
+
+        return $provider->gatewayProvider?->base_url;
     }
 
     public function supportsImageInput(?User $user): bool

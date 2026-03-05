@@ -132,7 +132,7 @@ class DailyPhotoService
         };
     }
 
-    protected function sendNotification(UserAttribute $userAttr, string $imageUrl, string $preference): bool
+    public function sendNotification(UserAttribute $userAttr, string $imageUrl, string $preference): bool
     {
         $user = $userAttr->user;
 

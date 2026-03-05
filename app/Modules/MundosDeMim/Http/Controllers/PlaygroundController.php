@@ -98,7 +98,7 @@ class PlaygroundController extends Controller
                 ['role' => 'user', 'content' => "Refine este prompt: '{$request->input('prompt')}'. {$bio}"],
             ];
 
-            $refinedPrompt = $driver->generateText($messages, ['model' => 'gemini']);
+            $refinedPrompt = $driver->generateText($messages, ['model' => $provider->model]);
 
             if (! $refinedPrompt) {
                 return response()->json(['error' => 'Não foi possível refinar o prompt no momento.'], 500);

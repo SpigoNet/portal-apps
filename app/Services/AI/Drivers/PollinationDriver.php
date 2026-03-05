@@ -77,6 +77,10 @@ class PollinationDriver implements AiDriverInterface
                 $headers['X-API-Key'] = $this->apiKey;
             }
 
+            Log::debug('URL: '.$this->textEndpoint);
+            Log::debug('Payload: '.json_encode($payload));
+            Log::debug('Headers: '.json_encode($headers));
+
             $response = Http::withOptions(['verify' => false, 'timeout' => 60])
                 ->withHeaders($headers)
                 ->post($this->textEndpoint, $payload);

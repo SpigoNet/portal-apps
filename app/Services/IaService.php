@@ -23,6 +23,7 @@ class IaService
         $driverName = $aiProviderService->getDriverForUser(null);
         $key = $aiProviderService->getApiKeyForUser(null);
         $url = $aiProviderService->getBaseUrlForUser(null);
+        $model = $aiProviderService->getModelForUser(null);
 
         // Fallback para AntConfiguracao se o Admin não tiver nada (compatibilidade)
         if ($driverName === 'pollination' && empty($key)) {
@@ -44,7 +45,7 @@ class IaService
 
             case 'pollination':
             default:
-                $this->driver = new PollinationDriver(null, $key, $url);
+                $this->driver = new PollinationDriver($model, $key, $url);
                 break;
         }
     }

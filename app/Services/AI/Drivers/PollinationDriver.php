@@ -48,7 +48,7 @@ class PollinationDriver implements AiDriverInterface
     public function generateText(array $messages, array $options = []): ?string
     {
         // ... (Mantém a implementação de texto do Gemini/OpenAI inalterada)
-        $textModel = $options['model'] ?? 'gemini-fast';
+        $textModel = $options['model'] ?? $this->model;
 
         $payload = array_merge([
             'model' => $textModel,

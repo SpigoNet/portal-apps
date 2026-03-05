@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 class AIProvedor extends Model
 {
     protected $table = 'ai_provedores';
-    protected $fillable = ['nome', 'url_json_modelos', 'default_input_types', 'default_output_types'];
+    protected $fillable = ['nome', 'url_json_modelos', 'api_key', 'default_input_types', 'default_output_types'];
     protected $casts = [
+        'api_key' => 'encrypted',
         'default_input_types' => 'array',
         'default_output_types' => 'array'
     ];

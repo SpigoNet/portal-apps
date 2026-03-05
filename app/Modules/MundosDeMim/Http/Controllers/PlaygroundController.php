@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Modules\MundosDeMim\Models\AIProvider;
 use App\Modules\MundosDeMim\Models\Prompt;
 use App\Modules\MundosDeMim\Models\UserAttribute;
-use App\Modules\MundosDeMim\Services\AiProviderService;
+use App\Modules\Admin\Services\AiProviderService;
 use App\Services\AI\Drivers\AirForceDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\PollinationDriver;
@@ -57,9 +57,10 @@ class PlaygroundController extends Controller
             $user = $this->getTargetUser();
             $attributes = UserAttribute::where('user_id', $user->id)->first();
             $provider = $this->resolveModel($user, $request->input('ai_provider_id'));
-            $driverName = $provider?->gatewayProvider?->driver ?? $provider?->driver;
-            $apiKey = $provider?->gatewayProvider?->api_key ?? $provider?->api_key;
-            $baseUrl = $provider?->gatewayProvider?->base_url;
+            $aiService = new AiProviderService();
+            $driverName = $aiService->getDriverForProvider($provider);
+            $apiKey = $aiService->getApiKeyForProvider($provider);
+            $baseUrl = $aiService->getBaseUrlForProvider($provider);
 
             if (! $provider || ! in_array($driverName, ['pollination', 'airforce'])) {
                 return response()->json(['error' => 'Provedor selecionado não suporta refinamento no Playground.'], 422);
@@ -123,9 +124,10 @@ class PlaygroundController extends Controller
         $user = $this->getTargetUser();
         $attributes = UserAttribute::where('user_id', $user->id)->first();
         $provider = $this->resolveModel($user, $request->input('ai_provider_id'));
-        $driverName = $provider?->gatewayProvider?->driver ?? $provider?->driver;
-        $apiKey = $provider?->gatewayProvider?->api_key ?? $provider?->api_key;
-        $baseUrl = $provider?->gatewayProvider?->base_url;
+        $aiService = new AiProviderService();
+        $driverName = $aiService->getDriverForProvider($provider);
+        $apiKey = $aiService->getApiKeyForProvider($provider);
+        $baseUrl = $aiService->getBaseUrlForProvider($provider);
 
         if (! $provider) {
             return back()->with('error', 'Nenhum provedor de IA ativo encontrado.')->withInput();

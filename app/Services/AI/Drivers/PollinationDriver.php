@@ -142,6 +142,8 @@ class PollinationDriver implements AiDriverInterface
                 'Referer' => 'https://pollinations.ai/',
             ];
 
+            Log::debug('Pollination Driver - API Key Present: ' . (!empty($this->apiKey) ? 'Yes (Starts with: ' . substr($this->apiKey, 0, 4) . '...)' : 'No'));
+
             if (! empty($this->apiKey)) {
                 $headers['Authorization'] = 'Bearer '.$this->apiKey;
                 $headers['X-API-Key'] = $this->apiKey;

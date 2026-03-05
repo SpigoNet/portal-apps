@@ -5,7 +5,8 @@ namespace App\Services;
 use App\Services\AI\AiDriverInterface;
 use App\Services\AI\Drivers\PollinationDriver;
 use App\Services\AI\Drivers\LmStudioDriver;
-use App\Services\AI\Drivers\GeminiDriver; // <--- Novo
+use App\Services\AI\Drivers\GeminiDriver;
+use App\Modules\Admin\Services\AiProviderService;
 use App\Modules\ANT\Models\AntConfiguracao;
 
 class IaService
@@ -14,15 +15,26 @@ class IaService
 
     public function __construct()
     {
+        $aiProviderService = new AiProviderService();
         $config = AntConfiguracao::first();
 
-        $driverName = $config->ia_driver ?? 'pollination';
-        $url = $config->ia_url ?? 'http://localhost:1234/v1';
-        $key = $config->ia_key ?? ''; // <--- Pegamos a chave
+        // Tenta pegar o driver do sistema centralizado (Admin)
+        // Se não houver um usuário logado (ex: cron), pegamos o padrão do sistema.
+        $driverName = $aiProviderService->getDriverForUser(null);
+        $key = $aiProviderService->getApiKeyForUser(null);
+        $url = $aiProviderService->getBaseUrlForUser(null);
+
+        // Fallback para AntConfiguracao se o Admin não tiver nada (compatibilidade)
+        if ($driverName === 'pollination' && empty($key)) {
+             if ($config) {
+                 $driverName = $config->ia_driver ?? 'pollination';
+                 $url = $config->ia_url ?? $url;
+                 $key = $config->ia_key ?? $key;
+             }
+        }
 
         switch ($driverName) {
             case 'gemini':
-                // Se não tiver chave configurada, loga erro ou tenta sem (vai falhar)
                 $this->driver = new GeminiDriver($key);
                 break;
 
@@ -32,7 +44,7 @@ class IaService
 
             case 'pollination':
             default:
-                $this->driver = new PollinationDriver();
+                $this->driver = new PollinationDriver(null, $key, $url);
                 break;
         }
     }

@@ -5,6 +5,7 @@ namespace App\Modules\MundosDeMim\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Modules\MundosDeMim\Models\AIProvider;
+use App\Modules\MundosDeMim\Models\DailyGeneration;
 use App\Modules\MundosDeMim\Models\Prompt;
 use App\Modules\MundosDeMim\Models\UserAttribute;
 use App\Modules\Admin\Services\AiProviderService;
@@ -179,6 +180,23 @@ class PlaygroundController extends Controller
             if ($imageUrl) {
                 // Deduz crédito
                 $user->decrement('credits');
+
+                // Salva na Galeria
+                $savedPromptId = $request->input('prompt_id');
+                $themeId = null;
+                if ($savedPromptId) {
+                    $savedPrompt = Prompt::find($savedPromptId);
+                    $themeId = $savedPrompt?->theme_id;
+                }
+
+                DailyGeneration::create([
+                    'user_id' => $user->id,
+                    'theme_id' => $themeId,
+                    'prompt_id' => $savedPromptId,
+                    'image_url' => $imageUrl,
+                    'final_prompt_used' => $promptText,
+                    'reference_date' => now()->toDateString(),
+                ]);
 
                 $providerLabel = e(($provider->gatewayProvider?->name ?? 'Sem provedor').' / '.$provider->name.' ('.$provider->model.')');
                 $htmlResult = "

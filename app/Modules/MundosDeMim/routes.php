@@ -91,4 +91,12 @@ Route::middleware(['web', 'auth', 'admin'])
             Route::post('/copy', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminGalleryController::class, 'copyToPublic'])->name('copy');
             Route::delete('/delete', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminGalleryController::class, 'deleteFromPublic'])->name('delete');
         });
+
+        // Gerenciador de Galeria dos Usuários
+        Route::prefix('usuarios-galeria')->name('user-gallery.')->group(function () {
+            Route::get('/', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminUserGalleryController::class, 'index'])->name('index');
+            Route::get('/{user}', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminUserGalleryController::class, 'show'])->name('show');
+            Route::post('/{id}/reenviar', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminUserGalleryController::class, 'send'])->name('send');
+            Route::delete('/{id}', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminUserGalleryController::class, 'destroy'])->name('destroy');
+        });
     });

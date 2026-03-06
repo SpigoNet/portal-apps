@@ -148,6 +148,18 @@
                             </div>
 
                             <div class="absolute top-2 right-2 flex items-center gap-2">
+                                @if($theme->example_input_path)
+                                    <form action="{{ route('mundos-de-mim.admin.prompts.generateFromBefore', $prompt->id) }}"
+                                          method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit"
+                                                class="p-1 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 rounded"
+                                                title="Gerar a partir do Antes">
+                                            🖼️
+                                        </button>
+                                    </form>
+                                @endif
+
                                 <a href="{{ route('mundos-de-mim.admin.prompts.edit', $prompt->id) }}"
                                    class="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded"
                                    title="Editar Prompt e Requisitos">

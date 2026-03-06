@@ -103,6 +103,31 @@
                                         @endforeach
                                     </select>
                                 </div>
+
+                                <div class="max-h-80 overflow-y-auto space-y-2 pr-1">
+                                    <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Lista de prompts para gerar</p>
+                                    @foreach($prompts as $promptItem)
+                                        @php
+                                            $previewImage = optional(optional($promptItem->theme)->examples->first())->image_path;
+                                            $previewUrl = $previewImage ? Storage::url($previewImage) : null;
+                                        @endphp
+                                        <button type="button"
+                                                onclick="applyPromptFromList('{{ $promptItem->id }}', @js($promptItem->prompt_text))"
+                                                class="w-full text-left p-2 border rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition">
+                                            <div class="flex gap-2 items-start">
+                                                @if($previewUrl)
+                                                    <img src="{{ $previewUrl }}" class="h-10 w-10 object-cover rounded border" alt="Resultado">
+                                                @else
+                                                    <div class="h-10 w-10 rounded border bg-gray-100 flex items-center justify-center text-[10px] text-gray-500">sem img</div>
+                                                @endif
+                                                <div class="min-w-0">
+                                                    <p class="text-xs font-semibold text-indigo-700 truncate">{{ $promptItem->theme->name ?? 'Sem tema' }}</p>
+                                                    <p class="text-xs text-gray-600 line-clamp-2">{{ $promptItem->prompt_text }}</p>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    @endforeach
+                                </div>
                                 @endif
 
                                 @if($currentUser->can('admin-do-app'))
@@ -171,6 +196,30 @@ The image size is 9/16." }}</textarea>
                 </div>
             @endif
 
+            @if(isset($recentGenerations) && $recentGenerations->isNotEmpty())
+                <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-lg border-t-4 border-emerald-500">
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b">Resultados Recentes (clique para reutilizar prompt)</h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @foreach($recentGenerations as $generation)
+                                <button type="button"
+                                        onclick="applyPromptFromList('{{ $generation->prompt_id ?? '' }}', @js($generation->final_prompt_used))"
+                                        class="text-left border rounded-lg overflow-hidden hover:border-indigo-300 transition bg-white">
+                                    <div class="aspect-video bg-gray-100">
+                                        <img src="{{ $generation->image_url }}" class="w-full h-full object-cover" alt="Resultado gerado">
+                                    </div>
+                                    <div class="p-3">
+                                        <p class="text-xs text-gray-500 mb-1">{{ optional($generation->created_at)->format('d/m/Y H:i') }}</p>
+                                        <p class="text-sm text-gray-700 line-clamp-3">{{ $generation->final_prompt_used }}</p>
+                                    </div>
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endif
+
         </div>
     </div>
 
@@ -184,6 +233,21 @@ The image size is 9/16." }}</textarea>
             
             if (promptText) {
                 document.getElementById('prompt').value = promptText;
+            }
+        }
+
+        function applyPromptFromList(promptId, promptText) {
+            if (promptId) {
+                const select = document.getElementById('prompt_id');
+                if (select) {
+                    select.value = promptId;
+                }
+            }
+
+            if (promptText) {
+                const promptArea = document.getElementById('prompt');
+                promptArea.value = promptText;
+                promptArea.focus();
             }
         }
 

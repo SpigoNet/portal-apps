@@ -1,16 +1,17 @@
 <?php
 
 use App\Http\Middleware\EnsureUserIsAdmin;
-use App\Modules\Admin\Http\Controllers\AppManagerController;
-use App\Modules\Admin\Http\Controllers\AIProvedorController;
 use App\Modules\Admin\Http\Controllers\AIModeloController;
+use App\Modules\Admin\Http\Controllers\AIProvedorController;
+use App\Modules\Admin\Http\Controllers\AppManagerController;
+use App\Modules\Admin\Http\Controllers\LogViewerController;
 use Illuminate\Support\Facades\Route;
 
 // O grupo de rotas é protegido pelo nosso middleware, que verifica
 // tanto a autenticação (se o usuário está logado) quanto a autorização (se é admin).
 Route::middleware([EnsureUserIsAdmin::class])->prefix('admin')->name('admin.')->group(function () {
     // Redireciona a rota base /admin para a lista de apps
-    Route::get('/', fn() => redirect()->route('admin.apps.index'));
+    Route::get('/', fn () => redirect()->route('admin.apps.index'));
 
     // Modulo de gerenciamento de icones
     Route::get('/icon-generator', [App\Modules\Admin\Http\Controllers\IconGeneratorController::class, 'index'])->name('icon-generator');
@@ -21,7 +22,7 @@ Route::middleware([EnsureUserIsAdmin::class])->prefix('admin')->name('admin.')->
 
     // Gerenciamento de usuarios do app
     Route::resource('apps.users', App\Modules\Admin\Http\Controllers\AppUserManagerController::class)->only(['index', 'store', 'update', 'destroy'])->scoped([
-        'user' => 'user' // Garante que o usuario pertença ao app? Nao necessariamente, user é global.
+        'user' => 'user', // Garante que o usuario pertença ao app? Nao necessariamente, user é global.
     ]);
 
     // Gerenciamento Geral de Usuários
@@ -33,7 +34,7 @@ Route::middleware([EnsureUserIsAdmin::class])->prefix('admin')->name('admin.')->
     // Gestão de IA
     Route::prefix('ai')->name('ai.')->group(function () {
         Route::resource('provedores', AIProvedorController::class)->parameters([
-            'provedores' => 'provedor'
+            'provedores' => 'provedor',
         ]);
         Route::post('/provedores/{provedor}/sync', [AIProvedorController::class, 'sync'])->name('provedores.sync');
 
@@ -42,5 +43,10 @@ Route::middleware([EnsureUserIsAdmin::class])->prefix('admin')->name('admin.')->
         Route::post('/modelos/{modelo}/toggle', [AIModeloController::class, 'toggle'])->name('modelos.toggle');
         Route::post('/modelos/{modelo}/set-default', [AIModeloController::class, 'setDefault'])->name('modelos.set-default');
     });
-});
 
+    // Log Viewer
+    Route::get('/logs', [LogViewerController::class, 'index'])->name('logs.index');
+    Route::get('/logs/tail', [LogViewerController::class, 'tail'])->name('logs.tail');
+    Route::post('/logs/clear', [LogViewerController::class, 'clear'])->name('logs.clear');
+    Route::get('/logs/download', [LogViewerController::class, 'download'])->name('logs.download');
+});

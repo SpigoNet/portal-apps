@@ -3,10 +3,12 @@
 namespace App\Modules\MundosDeMim\Services;
 
 use App\Modules\MundosDeMim\Models\AIProvider;
+use App\Modules\MundosDeMim\Models\DailyGeneration;
 use App\Modules\MundosDeMim\Models\UserAttribute;
 use App\Services\AI\Drivers\AirForceDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\PollinationDriver;
+use App\Services\IaService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -73,7 +75,8 @@ class DailyPhotoService
             return false;
         }
 
-        $imageUrl = $this->generateImage($userAttr);
+        $prompt = $this->buildPrompt($userAttr);
+        $imageUrl = $this->generateImage($userAttr, $prompt);
 
         if (! $imageUrl) {
             Log::error("DailyPhotoService: Falha ao gerar imagem para usuário {$userAttr->user_id}");
@@ -81,18 +84,18 @@ class DailyPhotoService
             return false;
         }
 
-        return $this->sendNotification($userAttr, $imageUrl, $preference);
+        $this->saveGeneration($userAttr, $imageUrl, $prompt);
+
+        return $this->sendNotification($userAttr, $imageUrl, $prompt, $preference);
     }
 
-    protected function generateImage(UserAttribute $userAttr): ?string
+    protected function generateImage(UserAttribute $userAttr, string $prompt): ?string
     {
         if (! $this->driver) {
             Log::error('DailyPhotoService: Nenhum provedor de IA ativo configurado');
 
             return null;
         }
-
-        $prompt = $this->buildPrompt($userAttr);
 
         $options = [];
         if ($this->driver === 'pollination' && $userAttr->photo_path) {
@@ -132,7 +135,7 @@ class DailyPhotoService
         };
     }
 
-    public function sendNotification(UserAttribute $userAttr, string $imageUrl, string $preference): bool
+    public function sendNotification(UserAttribute $userAttr, string $imageUrl, string $prompt, string $preference): bool
     {
         $user = $userAttr->user;
 
@@ -141,27 +144,36 @@ class DailyPhotoService
         }
 
         return match ($preference) {
-            'email' => $this->sendEmail($user, $imageUrl),
-            'telegram' => $this->sendTelegram($user, $imageUrl),
-            'whatsapp' => $this->sendWhatsapp($user, $imageUrl),
+            'email' => $this->sendEmail($user, $imageUrl, $prompt),
+            'telegram' => $this->sendTelegram($user, $imageUrl, $prompt),
+            'whatsapp' => $this->sendWhatsapp($user, $imageUrl, $prompt),
             default => false,
         };
     }
 
-    protected function sendEmail($user, string $imageUrl): bool
+    protected function saveGeneration(UserAttribute $userAttr, string $imageUrl, string $prompt): void
     {
         try {
-            Mail::send([], [], function ($message) use ($user, $imageUrl) {
+            DailyGeneration::create([
+                'user_id' => $userAttr->user_id,
+                'image_url' => $imageUrl,
+                'final_prompt_used' => $prompt,
+                'reference_date' => now()->toDateString(),
+            ]);
+        } catch (\Exception $e) {
+            Log::warning('DailyPhotoService: Erro ao salvar geração: '.$e->getMessage());
+        }
+    }
+
+    protected function sendEmail($user, string $imageUrl, string $prompt): bool
+    {
+        try {
+            $emailBody = $this->generateEmailBody($user, $imageUrl, $prompt);
+
+            Mail::send([], [], function ($message) use ($user, $emailBody) {
                 $message->to($user->email, $user->name)
                     ->subject('🌟 Sua Foto do Dia!')
-                    ->html("
-                        <h1>Olá, {$user->name}!</h1>
-                        <p>Sua foto do dia foi gerada!</p>
-                        <p><a href='{$imageUrl}' target='_blank'><img src='{$imageUrl}' style='max-width: 100%; border-radius: 10px;'/></a></p>
-                        <p><a href='{$imageUrl}' target='_blank'>Clique aqui para ver a imagem em tamanho maior</a></p>
-                        <br>
-                        <p>Atenciosamente,<br>Equipe Mundos de Mim</p>
-                    ");
+                    ->html($emailBody);
             });
 
             Log::info("DailyPhotoService: Email enviado para {$user->email}");
@@ -174,7 +186,78 @@ class DailyPhotoService
         }
     }
 
-    protected function sendTelegram($user, string $imageUrl): bool
+    protected function generateEmailBody($user, string $imageUrl, string $prompt): string
+    {
+        try {
+            $iaService = new IaService;
+
+            $messages = $this->buildTextPrompt($prompt, $user->name);
+
+            $response = $iaService->generateText($messages, []);
+
+            if ($response) {
+                return $this->formatEmailBody($user, $imageUrl, $response);
+            }
+
+            return $this->getDefaultEmailBody($user, $imageUrl);
+        } catch (\Exception $e) {
+            Log::error('DailyPhotoService: Erro ao gerar corpo do email: '.$e->getMessage());
+
+            return $this->getDefaultEmailBody($user, $imageUrl);
+        }
+    }
+
+    protected function buildTextPrompt(string $imagePrompt, string $userName): array
+    {
+        return [
+            [
+                'role' => 'user',
+                'content' => "Com base no seguinte prompt de geração de imagem, escreva uma mensagem calorosa e motivadora para o usuário em português brasileiro:\n\n\"{$imagePrompt}\"\n\nEscreva 2-3 parágrafos curtos, friendly e inspirador. Foque na emoção e energia do que foi gerado. Não inclua saudação com nome próprio, apenas a mensagem.",
+            ],
+        ];
+    }
+
+    protected function createTextDriver(string $driverName, ?string $model, ?string $apiKey, ?string $baseUrl)
+    {
+        return match ($driverName) {
+            'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
+            'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
+            default => new PollinationDriver($model, $apiKey, $baseUrl),
+        };
+    }
+
+    protected function formatEmailBody($user, string $imageUrl, string $aiMessage): string
+    {
+        return "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
+                <h1 style='color: #6366f1;'>Olá, {$user->name}!</h1>
+                <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; margin: 20px 0;'>
+                    <p style='color: white; font-size: 18px; margin: 0;'>{$aiMessage}</p>
+                </div>
+                <p><a href='{$imageUrl}' target='_blank'><img src='{$imageUrl}' style='max-width: 100%; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'/></a></p>
+                <p><a href='{$imageUrl}' target='_blank' style='color: #6366f1;'>Clique aqui para ver a imagem em tamanho maior</a></p>
+                <br>
+                <p style='color: #666; font-size: 14px;'>
+                    Com carinho,<br>
+                    Equipe Mundos de Mim
+                </p>
+            </div>
+        ";
+    }
+
+    protected function getDefaultEmailBody($user, string $imageUrl): string
+    {
+        return "
+            <h1>Olá, {$user->name}!</h1>
+            <p>Sua foto do dia foi gerada!</p>
+            <p><a href='{$imageUrl}' target='_blank'><img src='{$imageUrl}' style='max-width: 100%; border-radius: 10px;'/></a></p>
+            <p><a href='{$imageUrl}' target='_blank'>Clique aqui para ver a imagem em tamanho maior</a></p>
+            <br>
+            <p>Atenciosamente,<br>Equipe Mundos de Mim</p>
+        ";
+    }
+
+    protected function sendTelegram($user, string $imageUrl, string $prompt): bool
     {
         $telegramId = $user->telegram_id ?? null;
 
@@ -202,7 +285,7 @@ class DailyPhotoService
         }
     }
 
-    protected function sendWhatsapp($user, string $imageUrl): bool
+    protected function sendWhatsapp($user, string $imageUrl, string $prompt): bool
     {
         // Implementação futura quando a API do WhatsApp estiver disponível
         Log::info("DailyPhotoService: WhatsApp ainda não implementado para usuário {$user->id}");

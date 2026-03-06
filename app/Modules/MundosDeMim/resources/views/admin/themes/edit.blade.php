@@ -93,11 +93,15 @@
                 </form>
             </div>
 
-            @if($theme->examples->isNotEmpty())
+            @php
+                $unlinkedExamples = $theme->examples->whereNull('prompt_id');
+            @endphp
+
+            @if($unlinkedExamples->isNotEmpty())
                 <div class="bg-white p-6 rounded shadow-sm">
-                    <h3 class="text-lg font-bold mb-4 text-gray-800">Galeria de Exemplos Atuais</h3>
+                    <h3 class="text-lg font-bold mb-4 text-gray-800">Galeria de Exemplos Sem Prompt Vinculado</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        @foreach($theme->examples as $example)
+                        @foreach($unlinkedExamples as $example)
                             <div class="relative group aspect-square rounded-lg overflow-hidden border bg-gray-100">
                                 <img src="{{ Storage::url($example->image_path) }}" class="w-full h-full object-cover">
 
@@ -145,6 +149,31 @@
                                         </span>
                                     @endforelse
                                 </div>
+
+                                @if($prompt->generatedExamples->isNotEmpty())
+                                    <div class="mt-4 pt-3 border-t border-gray-200">
+                                        <p class="text-xs font-semibold text-gray-500 mb-2">Resultados gerados deste prompt</p>
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                            @foreach($prompt->generatedExamples->sortByDesc('created_at') as $example)
+                                                <div class="relative group/example aspect-square rounded-lg overflow-hidden border bg-gray-100">
+                                                    <img src="{{ Storage::url($example->image_path) }}" class="w-full h-full object-cover">
+
+                                                    <form action="{{ route('mundos-de-mim.admin.themes.destroyExample', $example->id) }}"
+                                                          method="POST"
+                                                          class="absolute inset-0 bg-black/50 opacity-0 group-hover/example:opacity-100 flex items-center justify-center transition-opacity">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                                class="bg-red-600 text-white p-2 rounded-full hover:bg-red-700"
+                                                                title="Remover Imagem">
+                                                            🗑️
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="absolute top-2 right-2 flex items-center gap-2">

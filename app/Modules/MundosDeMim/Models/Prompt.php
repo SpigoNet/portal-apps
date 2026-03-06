@@ -19,4 +19,9 @@ class Prompt extends Model
     {
         return $this->hasMany(PromptRequirement::class);
     }
+
+    public function generatedExamples()
+    {
+        return $this->hasMany(ThemeExample::class, 'prompt_id');
+    }
 }

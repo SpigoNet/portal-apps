@@ -91,6 +91,7 @@ class AdminPromptController extends Controller
         }
 
         $theme->examples()->create([
+            'prompt_id' => $prompt->id,
             'image_path' => $storedPath,
         ]);
 

@@ -52,6 +52,7 @@ class AdminThemeController extends Controller
             foreach ($request->file('example_outputs') as $photo) {
                 $path = $photo->store('themes/examples', 'public');
                 $theme->examples()->create([
+                    'prompt_id' => null,
                     'image_path' => $path
                 ]);
             }
@@ -63,7 +64,11 @@ class AdminThemeController extends Controller
     public function edit($id)
     {
         // Carregamos também os exemplos para mostrar na galeria de edição
-        $theme = Theme::with(['prompts', 'examples'])->findOrFail($id);
+        $theme = Theme::with([
+            'prompts.requirements',
+            'prompts.generatedExamples',
+            'examples',
+        ])->findOrFail($id);
         return view('MundosDeMim::admin.themes.edit', compact('theme'));
     }
 
@@ -99,6 +104,7 @@ class AdminThemeController extends Controller
             foreach ($request->file('example_outputs') as $photo) {
                 $path = $photo->store('themes/examples', 'public');
                 $theme->examples()->create([
+                    'prompt_id' => null,
                     'image_path' => $path
                 ]);
             }

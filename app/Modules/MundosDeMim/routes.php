@@ -98,5 +98,5 @@ Route::middleware(['web', 'auth', 'admin'])
             Route::get('/{user}', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminUserGalleryController::class, 'show'])->name('show');
             Route::post('/{id}/reenviar', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminUserGalleryController::class, 'send'])->name('send');
             Route::delete('/{id}', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminUserGalleryController::class, 'destroy'])->name('destroy');
-        });
+        }); 
     });

@@ -2,13 +2,13 @@
 
 namespace App\Modules\MundosDeMim\Services;
 
+use App\Modules\Admin\Services\AiProviderService;
 use App\Modules\MundosDeMim\Models\AIProvider;
 use App\Modules\MundosDeMim\Models\DailyGeneration;
 use App\Modules\MundosDeMim\Models\UserAttribute;
 use App\Services\AI\Drivers\AirForceDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\PollinationDriver;
-use App\Services\IaService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -189,11 +189,27 @@ class DailyPhotoService
     protected function generateEmailBody($user, string $imageUrl, string $prompt): string
     {
         try {
-            $iaService = new IaService;
+            $aiProviderService = new AiProviderService;
+            $provider = $aiProviderService->getTextToTextProvider();
+
+            if (! $provider) {
+                return $this->getDefaultEmailBody($user, $imageUrl);
+            }
+
+            $driverName = $aiProviderService->getDriverForProvider($provider);
+            $apiKey = $aiProviderService->getApiKeyForProvider($provider);
+            $baseUrl = $aiProviderService->getBaseUrlForProvider($provider);
+            $model = $provider->model;
+
+            $driver = $this->createTextDriver($driverName, $model, $apiKey, $baseUrl);
+
+            if (! $driver) {
+                return $this->getDefaultEmailBody($user, $imageUrl);
+            }
 
             $messages = $this->buildTextPrompt($prompt, $user->name);
 
-            $response = $iaService->generateText($messages, []);
+            $response = $driver->generateText($messages, []);
 
             if ($response) {
                 return $this->formatEmailBody($user, $imageUrl, $response);

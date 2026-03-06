@@ -28,10 +28,10 @@
 
                             <div class="p-4">
                                 <h3 class="font-bold text-gray-800 text-sm truncate">
-                                    {{ $art->theme->name ?? 'Tema Surpresa' }}
+                                    {{ $art->theme?->name ?? 'Tema Surpresa' }}
                                 </h3>
                                 <p class="text-xs text-gray-500 mt-1">
-                                    {{ $art->theme->is_seasonal ? '✨ Edição Especial' : 'Estilo Clássico' }}
+                                    {{ $art->theme?->is_seasonal ? '✨ Edição Especial' : 'Estilo Clássico' }}
                                 </p>
 
                                 <div class="mt-3 flex justify-between items-center">

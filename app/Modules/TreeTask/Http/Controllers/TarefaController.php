@@ -15,6 +15,10 @@ class TarefaController extends Controller
     {
         $fase = Fase::with('projeto')->findOrFail($id_fase);
 
+        if ($fase->projeto->id_user_owner !== auth()->id()) {
+            abort(403);
+        }
+
         // Precisamos listar usuários para selecionar o responsável
         $users = User::all(['id', 'name']);
 
@@ -33,6 +37,11 @@ class TarefaController extends Controller
             'estimativa_tempo' => 'nullable|numeric',
         ]);
 
+        $fase = Fase::with('projeto')->findOrFail($validated['id_fase']);
+        if ($fase->projeto->id_user_owner !== auth()->id()) {
+            abort(403);
+        }
+
         // Cria a tarefa
         $tarefa = Tarefa::create($validated);
 
@@ -48,7 +57,11 @@ class TarefaController extends Controller
      */
     public function edit($id)
     {
-        $tarefa = Tarefa::with('fase')->findOrFail($id);
+        $tarefa = Tarefa::with('fase.projeto')->findOrFail($id);
+
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->id()) {
+            abort(403);
+        }
 
         // Busca todas as fases DO MESMO PROJETO para permitir a movimentação
         $fases = Fase::where('id_projeto', $tarefa->fase->id_projeto)
@@ -65,7 +78,11 @@ class TarefaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $tarefa = Tarefa::findOrFail($id);
+        $tarefa = Tarefa::with('fase.projeto')->findOrFail($id);
+
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->id()) {
+            abort(403);
+        }
 
         $validated = $request->validate([
             'titulo' => 'required|string|max:255',
@@ -106,7 +123,12 @@ class TarefaController extends Controller
             'status' => 'required|string|in:' . $this->statusList,
         ]);
 
-        $tarefa = Tarefa::findOrFail($id);
+        $tarefa = Tarefa::with('fase.projeto')->findOrFail($id);
+
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->id()) {
+            abort(403);
+        }
+
         $tarefa->update(['status' => $request->status]);
 
         if ($request->status === 'Concluído') {
@@ -119,7 +141,12 @@ class TarefaController extends Controller
     }
     public function show($id)
     {
-        $tarefa = Tarefa::with(['fase', 'responsavel'])->findOrFail($id);
+        $tarefa = Tarefa::with(['fase.projeto', 'responsavel'])->findOrFail($id);
+
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->id()) {
+            abort(403);
+        }
+
         return view('TreeTask::tarefas.show', compact('tarefa'));
     }
 }

@@ -15,6 +15,11 @@ class FaseController extends Controller
             'nome' => 'required|string|max:255',
         ]);
 
+        $projeto = \App\Modules\TreeTask\Models\Projeto::findOrFail($validated['id_projeto']);
+        if ($projeto->id_user_owner !== auth()->id()) {
+            abort(403);
+        }
+
         // Define ordem padrão (última + 1) ou 0
         $ultimaOrdem = Fase::where('id_projeto', $validated['id_projeto'])->max('ordem');
         $validated['ordem'] = $ultimaOrdem ? $ultimaOrdem + 1 : 0;
@@ -28,6 +33,11 @@ class FaseController extends Controller
     public function destroy($id)
     {
         $fase = Fase::findOrFail($id);
+
+        if ($fase->projeto->id_user_owner !== auth()->id()) {
+            abort(403);
+        }
+
         $projetoId = $fase->id_projeto;
         $fase->delete();
 

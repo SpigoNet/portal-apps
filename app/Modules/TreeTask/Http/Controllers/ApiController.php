@@ -22,6 +22,7 @@ class ApiController extends Controller
     public function projetosIndex()
     {
         $projetos = Projeto::with('owner')
+            ->where('id_user_owner', auth()->user()->id)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -42,6 +43,10 @@ class ApiController extends Controller
             $q->orderBy('ordem', 'asc');
         }, 'fases.tarefas.responsavel'])
             ->findOrFail($id);
+
+        if ($projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
 
         return response()->json([
             'success' => true,
@@ -82,6 +87,10 @@ class ApiController extends Controller
     {
         $projeto = Projeto::findOrFail($id);
 
+        if ($projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
+
         $validated = $request->validate([
             'nome' => 'sometimes|required|string|max:255',
             'descricao' => 'sometimes|required|string',
@@ -106,6 +115,11 @@ class ApiController extends Controller
     public function projetosDestroy($id)
     {
         $projeto = Projeto::findOrFail($id);
+
+        if ($projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
+
         $projeto->delete();
 
         return response()->json([
@@ -121,6 +135,12 @@ class ApiController extends Controller
      */
     public function fasesIndex($id_projeto)
     {
+        $projeto = Projeto::findOrFail($id_projeto);
+
+        if ($projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
+
         $fases = Fase::where('id_projeto', $id_projeto)
             ->with('tarefas')
             ->orderBy('ordem', 'asc')
@@ -140,6 +160,10 @@ class ApiController extends Controller
         $fase = Fase::with(['projeto', 'tarefas'])
             ->findOrFail($id);
 
+        if ($fase->projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
+
         return response()->json([
             'success' => true,
             'data' => $fase,
@@ -156,6 +180,12 @@ class ApiController extends Controller
             'nome' => 'required|string|max:255',
             'descricao' => 'nullable|string',
         ]);
+
+        $projeto = Projeto::findOrFail($validated['id_projeto']);
+
+        if ($projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
 
         $ultimaOrdem = Fase::where('id_projeto', $validated['id_projeto'])->max('ordem');
         $validated['ordem'] = $ultimaOrdem ? $ultimaOrdem + 1 : 0;
@@ -174,7 +204,11 @@ class ApiController extends Controller
      */
     public function fasesUpdate(Request $request, $id)
     {
-        $fase = Fase::findOrFail($id);
+        $fase = Fase::with('projeto')->findOrFail($id);
+
+        if ($fase->projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
 
         $validated = $request->validate([
             'nome' => 'sometimes|required|string|max:255',
@@ -197,7 +231,12 @@ class ApiController extends Controller
      */
     public function fasesDestroy($id)
     {
-        $fase = Fase::findOrFail($id);
+        $fase = Fase::with('projeto')->findOrFail($id);
+
+        if ($fase->projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
+
         $fase->delete();
 
         return response()->json([
@@ -213,6 +252,12 @@ class ApiController extends Controller
      */
     public function tarefasIndex($id_fase)
     {
+        $fase = Fase::with('projeto')->findOrFail($id_fase);
+
+        if ($fase->projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
+
         $tarefas = Tarefa::where('id_fase', $id_fase)
             ->with(['responsavel', 'anexos'])
             ->orderBy('ordem', 'asc')
@@ -231,6 +276,10 @@ class ApiController extends Controller
     {
         $tarefa = Tarefa::with(['fase.projeto', 'responsavel', 'anexos'])
             ->findOrFail($id);
+
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
 
         return response()->json([
             'success' => true,
@@ -253,6 +302,12 @@ class ApiController extends Controller
             'estimativa_tempo' => 'nullable|numeric',
         ]);
 
+        $fase = Fase::with('projeto')->findOrFail($validated['id_fase']);
+
+        if ($fase->projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
+
         $tarefa = Tarefa::create($validated);
         $tarefa->load(['responsavel', 'anexos']);
 
@@ -268,7 +323,11 @@ class ApiController extends Controller
      */
     public function tarefasUpdate(Request $request, $id)
     {
-        $tarefa = Tarefa::findOrFail($id);
+        $tarefa = Tarefa::with('fase.projeto')->findOrFail($id);
+
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
 
         $validated = $request->validate([
             'titulo' => 'sometimes|required|string|max:255',
@@ -311,7 +370,12 @@ class ApiController extends Controller
             'status' => 'required|string|in:'.$this->statusList,
         ]);
 
-        $tarefa = Tarefa::findOrFail($id);
+        $tarefa = Tarefa::with('fase.projeto')->findOrFail($id);
+
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
+
         $tarefa->update(['status' => $request->status]);
 
         return response()->json([
@@ -326,7 +390,12 @@ class ApiController extends Controller
      */
     public function tarefasDestroy($id)
     {
-        $tarefa = Tarefa::findOrFail($id);
+        $tarefa = Tarefa::with('fase.projeto')->findOrFail($id);
+
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
+
         $tarefa->delete();
 
         return response()->json([
@@ -342,7 +411,12 @@ class ApiController extends Controller
      */
     public function anexosIndex($id_tarefa)
     {
-        $tarefa = Tarefa::findOrFail($id_tarefa);
+        $tarefa = Tarefa::with('fase.projeto')->findOrFail($id_tarefa);
+
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
+
         $anexos = $tarefa->anexos;
 
         return response()->json([
@@ -374,7 +448,12 @@ class ApiController extends Controller
             'arquivo' => 'required|file|max:10240',
         ]);
 
-        $tarefa = Tarefa::findOrFail($id_tarefa);
+        $tarefa = Tarefa::with('fase.projeto')->findOrFail($id_tarefa);
+
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
+
         $file = $request->file('arquivo');
 
         $path = $file->store('treetask_uploads');
@@ -403,7 +482,12 @@ class ApiController extends Controller
     {
         $anexo = Anexo::findOrFail($id_anexo);
 
-        $tarefa = Tarefa::findOrFail($id_tarefa);
+        $tarefa = Tarefa::with('fase.projeto')->findOrFail($id_tarefa);
+
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
+
         $tarefa->anexos()->detach($id_anexo);
 
         if ($anexo->tarefas()->count() == 0) {
@@ -465,8 +549,13 @@ class ApiController extends Controller
      */
     public function tarefasList(Request $request)
     {
+        $userId = auth()->user()->id;
+
         $query = Tarefa::query()
-            ->with(['fase.projeto', 'responsavel']);
+            ->with(['fase.projeto', 'responsavel'])
+            ->whereHas('fase.projeto', function ($q) use ($userId) {
+                $q->where('id_user_owner', $userId);
+            });
 
         // Filtros de status
         if ($request->has('status')) {
@@ -539,12 +628,16 @@ class ApiController extends Controller
      */
     public function tarefasRelatorio(Request $request)
     {
+        $userId = auth()->user()->id;
         $dias = $request->input('dias', 7);
         $limit = $request->input('limit', 3);
         $dataLimite = now()->addDays($dias);
 
         $query = Tarefa::query()
             ->with(['fase.projeto', 'responsavel'])
+            ->whereHas('fase.projeto', function ($q) use ($userId) {
+                $q->where('id_user_owner', $userId);
+            })
             ->where('status', '!=', 'Concluído')
             ->where(function ($q) use ($dataLimite) {
                 $q->where('data_vencimento', '<=', $dataLimite)
@@ -584,11 +677,15 @@ class ApiController extends Controller
      */
     public function tarefasParadas(Request $request)
     {
+        $userId = auth()->user()->id;
         $horas = $request->input('horas', 24);
         $dataLimite = now()->subHours($horas);
 
         $tarefas = Tarefa::query()
             ->with(['fase.projeto', 'responsavel'])
+            ->whereHas('fase.projeto', function ($q) use ($userId) {
+                $q->where('id_user_owner', $userId);
+            })
             ->where('status', 'Em Andamento')
             ->where('updated_at', '<', $dataLimite)
             ->orderBy('updated_at', 'ASC')
@@ -622,12 +719,9 @@ class ApiController extends Controller
         $includes = $request->input('include', 'projeto,fase,responsavel');
         $includeArray = explode(',', $includes);
 
-        $query = Tarefa::query();
+        $query = Tarefa::query()->with('fase.projeto');
 
         // Carrega relacionamentos solicitados
-        if (in_array('projeto', $includeArray) || in_array('fase', $includeArray)) {
-            $query->with(['fase.projeto']);
-        }
         if (in_array('responsavel', $includeArray)) {
             $query->with('responsavel');
         }
@@ -636,6 +730,10 @@ class ApiController extends Controller
         }
 
         $tarefa = $query->findOrFail($id);
+
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->user()->id) {
+            return response()->json(['success' => false, 'message' => 'Acesso negado.'], 403);
+        }
 
         return response()->json([
             'success' => true,

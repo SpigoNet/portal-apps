@@ -13,12 +13,14 @@ if ($token_recebido !== $token_esperado) {
     $output = shell_exec('php ../artisan migrate --force 2>&1');
     $cacheOutput = shell_exec('php ../artisan optimize 2>&1');
     $configClearOutput = shell_exec('php ../artisan config:clear 2>&1');
+    $routeClearOutput = shell_exec('php ../artisan route:clear 2>&1');
 
 
     echo "### Deploy Finalizado com Sucesso! ###\n";
     echo "--- Migrations ---\n" . $output;
     echo "\n--- Otimização ---\n" . $cacheOutput;
     echo "\n--- Limpeza de Configuração ---\n" . $configClearOutput;
+    echo "\n--- Limpeza de Rotas ---\n" . $routeClearOutput;
 
 
 // Caminhos (ajustados para a raiz do projeto)

@@ -26,3 +26,7 @@
 <x-nav-link :href="route('admin.icon-generator')" :active="request()->routeIs('admin.icon-generator')">
     {{ __('Gerador de Ícones') }}
 </x-nav-link>
+
+<x-nav-link :href="route('admin.logs.index')" :active="request()->routeIs('admin.logs.*')">
+    {{ __('Logs') }}
+</x-nav-link>

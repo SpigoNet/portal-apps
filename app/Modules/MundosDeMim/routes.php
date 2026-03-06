@@ -1,6 +1,5 @@
 <?php
 
-use App\Modules\MundosDeMim\Http\Controllers\ConfigController;
 use App\Modules\MundosDeMim\Http\Controllers\DashboardController;
 use App\Modules\MundosDeMim\Http\Controllers\EstilosController;
 use App\Modules\MundosDeMim\Http\Controllers\GaleriaController;
@@ -26,10 +25,6 @@ Route::prefix('mundos-de-mim')
             Route::get('/meu-perfil', [PerfilBiometricoController::class, 'index'])->name('perfil.index');
             Route::post('/meu-perfil', [PerfilBiometricoController::class, 'update'])->name('perfil.update');
             Route::post('/meu-perfil/analisar', [PerfilBiometricoController::class, 'analyze'])->name('perfil.analyze');
-
-            // Rotas de Configuração de IA
-            Route::get('/config', [ConfigController::class, 'index'])->name('config.index');
-            Route::post('/config', [ConfigController::class, 'update'])->name('config.update');
 
             // Rotas de Pessoas
             Route::get('/pessoas', [PessoasRelacionadasController::class, 'index'])->name('pessoas.index');
@@ -98,5 +93,5 @@ Route::middleware(['web', 'auth', 'admin'])
             Route::get('/{user}', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminUserGalleryController::class, 'show'])->name('show');
             Route::post('/{id}/reenviar', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminUserGalleryController::class, 'send'])->name('send');
             Route::delete('/{id}', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminUserGalleryController::class, 'destroy'])->name('destroy');
-        }); 
+        });
     });

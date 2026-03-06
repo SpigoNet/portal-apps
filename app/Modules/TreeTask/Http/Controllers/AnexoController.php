@@ -19,7 +19,12 @@ class AnexoController extends Controller
             'arquivo' => 'required|file|max:10240', // Max 10MB
         ]);
 
-        $tarefa = Tarefa::findOrFail($id_tarefa);
+        $tarefa = Tarefa::with('fase.projeto')->findOrFail($id_tarefa);
+
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->id()) {
+            abort(403);
+        }
+
         $file = $request->file('arquivo');
 
         // 1. Salvar arquivo no disco (pasta 'treetask_uploads')
@@ -64,7 +69,12 @@ class AnexoController extends Controller
         $anexo = Anexo::findOrFail($id_anexo);
 
         // Remove o vínculo (pivô)
-        $tarefa = Tarefa::findOrFail($id_tarefa);
+        $tarefa = Tarefa::with('fase.projeto')->findOrFail($id_tarefa);
+
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->id()) {
+            abort(403);
+        }
+
         $tarefa->anexos()->detach($id_anexo);
 
         // Opcional: Verificar se o anexo está ligado a outras tarefas/projetos antes de deletar o arquivo físico.

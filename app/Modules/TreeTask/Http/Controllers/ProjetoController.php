@@ -10,8 +10,8 @@ class ProjetoController extends Controller
 {
     public function index()
     {
-        // Busca projetos onde o usuário é dono (exemplo)
         $projetos = Projeto::with('owner')
+            ->where('id_user_owner', auth()->id())
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -53,12 +53,21 @@ class ProjetoController extends Controller
         }, 'fases.tarefas.responsavel'])
             ->findOrFail($id);
 
+        if ($projeto->id_user_owner !== auth()->id()) {
+            abort(403);
+        }
+
         return view('TreeTask::show', compact('projeto'));
     }
 
     public function treeView($id)
     {
         $projeto = Projeto::with(['fases.tarefas'])->findOrFail($id);
+
+        if ($projeto->id_user_owner !== auth()->id()) {
+            abort(403);
+        }
+
         return view('TreeTask::tree', compact('projeto'));
     }
 }

@@ -65,7 +65,7 @@ class AdminPromptController extends Controller
         }
 
         $aiProviderService = new AiProviderService;
-        $provider = $aiProviderService->getVisionTextProvider(auth()->user());
+        $provider = $aiProviderService->getImageToImageProvider(auth()->user());
 
         if (! $provider) {
             return back()->with('error', 'Nenhum modelo de IA ativo para geração de imagem foi encontrado.');

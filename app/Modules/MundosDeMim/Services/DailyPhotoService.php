@@ -2,6 +2,7 @@
 
 namespace App\Modules\MundosDeMim\Services;
 
+use App\Models\DailyNotification;
 use App\Modules\Admin\Services\AiProviderService;
 use App\Modules\MundosDeMim\Models\AIProvider;
 use App\Modules\MundosDeMim\Models\DailyGeneration;
@@ -135,7 +136,7 @@ class DailyPhotoService
         };
     }
 
-    public function sendNotification(UserAttribute $userAttr, string $imageUrl, string $prompt, string $preference): bool
+    public function sendNotification(UserAttribute $userAttr, string $imageUrl, string $prompt, string $preference, ?int $generationId = null): bool
     {
         $user = $userAttr->user;
 
@@ -143,12 +144,22 @@ class DailyPhotoService
             return false;
         }
 
-        return match ($preference) {
-            'email' => $this->sendEmail($user, $imageUrl, $prompt),
-            'telegram' => $this->sendTelegram($user, $imageUrl, $prompt),
-            'whatsapp' => $this->sendWhatsapp($user, $imageUrl, $prompt),
+        $notification = DailyNotification::create([
+            'user_id' => $user->id,
+            'generation_id' => $generationId,
+            'image_url' => $imageUrl,
+            'channel' => $preference,
+            'sent' => false,
+        ]);
+
+        $result = match ($preference) {
+            'email' => $this->sendEmail($user, $imageUrl, $prompt, $notification),
+            'telegram' => $this->sendTelegram($user, $imageUrl, $prompt, $notification),
+            'whatsapp' => $this->sendWhatsapp($user, $imageUrl, $prompt, $notification),
             default => false,
         };
+
+        return $result;
     }
 
     protected function saveGeneration(UserAttribute $userAttr, string $imageUrl, string $prompt): void
@@ -165,7 +176,7 @@ class DailyPhotoService
         }
     }
 
-    protected function sendEmail($user, string $imageUrl, string $prompt): bool
+    protected function sendEmail($user, string $imageUrl, string $prompt, DailyNotification $notification): bool
     {
         try {
             $emailBody = $this->generateEmailBody($user, $imageUrl, $prompt);
@@ -178,9 +189,13 @@ class DailyPhotoService
 
             Log::info("DailyPhotoService: Email enviado para {$user->email}");
 
+            $notification->markAsSent($emailBody);
+
             return true;
         } catch (\Exception $e) {
             Log::error("DailyPhotoService: Erro ao enviar email para {$user->email}: ".$e->getMessage());
+
+            $notification->markAsFailed($e->getMessage());
 
             return false;
         }
@@ -273,38 +288,46 @@ class DailyPhotoService
         ";
     }
 
-    protected function sendTelegram($user, string $imageUrl, string $prompt): bool
+    protected function sendTelegram($user, string $imageUrl, string $prompt, DailyNotification $notification): bool
     {
         $telegramId = $user->telegram_id ?? null;
 
         if (! $telegramId) {
             Log::warning("DailyPhotoService: Usuário {$user->id} não tem Telegram ID configurado");
 
+            $notification->markAsFailed('Telegram ID não configurado');
+
             return false;
         }
 
         try {
-            $message = "🌟 *Sua Foto do Dia!* \n\n";
-            $message .= "Olá, {$user->name}! Sua foto foi gerada:\n";
-            $message .= "[Ver Imagem]({$imageUrl})";
+            $messageText = "🌟 *Sua Foto do Dia!* \n\n";
+            $messageText .= "Olá, {$user->name}! Sua foto foi gerada:\n";
+            $messageText .= "[Ver Imagem]({$imageUrl})";
 
             // Aqui você integraria com a API do Telegram
             // Exemplo: Http::post("https://api.telegram.org/bot{$token}/sendMessage", [...]);
 
             Log::info("DailyPhotoService: Telegram enviado para user_id {$telegramId}");
 
+            $notification->markAsSent($messageText);
+
             return true;
         } catch (\Exception $e) {
             Log::error('DailyPhotoService: Erro ao enviar Telegram: '.$e->getMessage());
+
+            $notification->markAsFailed($e->getMessage());
 
             return false;
         }
     }
 
-    protected function sendWhatsapp($user, string $imageUrl, string $prompt): bool
+    protected function sendWhatsapp($user, string $imageUrl, string $prompt, DailyNotification $notification): bool
     {
         // Implementação futura quando a API do WhatsApp estiver disponível
         Log::info("DailyPhotoService: WhatsApp ainda não implementado para usuário {$user->id}");
+
+        $notification->markAsFailed('WhatsApp não implementado');
 
         return false;
     }

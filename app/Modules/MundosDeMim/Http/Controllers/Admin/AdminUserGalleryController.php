@@ -79,7 +79,7 @@ class AdminUserGalleryController extends Controller
             return back()->with('error', 'O usuário não possui preferência de notificação configurada.');
         }
 
-        $result = $service->sendNotification($userAttr, $generation->image_url, $generation->final_prompt_used, $preference);
+        $result = $service->sendNotification($userAttr, $generation->image_url, $generation->final_prompt_used, $preference, $generation->id);
 
         if ($result) {
             return back()->with('success', 'Foto enviada com sucesso para o usuário!');

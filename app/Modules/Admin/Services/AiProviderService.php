@@ -10,6 +10,23 @@ use App\Modules\MundosDeMim\Models\UserAiSetting;
 
 class AiProviderService
 {
+    private function getProviderByDefaultMapping(string $inputType, string $outputType): ?AIProvider
+    {
+        $modeloPadrao = AIModeloPadrao::getPadrao($inputType, $outputType);
+
+        if ($modeloPadrao) {
+            $provider = AIProvider::where('model', $modeloPadrao->nome)
+                ->where('is_active', true)
+                ->first();
+
+            if ($provider) {
+                return $provider;
+            }
+        }
+
+        return null;
+    }
+
     public function getModelForUserEntity(?User $user): ?AIProvider
     {
         if (! $user) {
@@ -150,16 +167,24 @@ class AiProviderService
 
     public function getVisionTextProvider(?User $user): ?AIProvider
     {
-        $modeloPadrao = AIModeloPadrao::getPadrao('image', 'text');
+        $provider = $this->getProviderByDefaultMapping('image', 'text');
 
-        if ($modeloPadrao) {
-            $provider = AIProvider::where('model', $modeloPadrao->nome)
-                ->where('is_active', true)
-                ->first();
+        if ($provider) {
+            return $provider;
+        }
 
-            if ($provider) {
-                return $provider;
-            }
+        return AIProvider::where('supports_image_input', true)
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->first();
+    }
+
+    public function getImageToImageProvider(?User $user = null): ?AIProvider
+    {
+        $provider = $this->getProviderByDefaultMapping('image', 'image');
+
+        if ($provider) {
+            return $provider;
         }
 
         return AIProvider::where('supports_image_input', true)
@@ -170,16 +195,10 @@ class AiProviderService
 
     public function getTextToTextProvider(): ?AIProvider
     {
-        $modeloPadrao = AIModeloPadrao::getPadrao('text', 'text');
+        $provider = $this->getProviderByDefaultMapping('text', 'text');
 
-        if ($modeloPadrao) {
-            $provider = AIProvider::where('model', $modeloPadrao->nome)
-                ->where('is_active', true)
-                ->first();
-
-            if ($provider) {
-                return $provider;
-            }
+        if ($provider) {
+            return $provider;
         }
 
         return AIProvider::getDefault();

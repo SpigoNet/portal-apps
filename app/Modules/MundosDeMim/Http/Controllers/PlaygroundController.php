@@ -27,7 +27,7 @@ class PlaygroundController extends Controller
         $attributes = UserAttribute::where('user_id', $targetUser->id)->first();
         $aiProviderService = new AiProviderService;
         $providers = $aiProviderService->getActiveModels()->where('supports_image_input', true)->values();
-        $selectedProvider = $aiProviderService->getProviderForUser($targetUser);
+        $selectedProvider = $aiProviderService->getImageToImageProvider($targetUser);
 
         $hasPhoto = $attributes && ! empty($attributes->photo_path) && Storage::disk('public')->exists($attributes->photo_path);
 
@@ -243,7 +243,7 @@ class PlaygroundController extends Controller
             return AIProvider::with('gatewayProvider')->where('is_active', true)->find($providerId);
         }
 
-        return $service->getModelForUserEntity($user);
+        return $service->getImageToImageProvider($user);
     }
 
     private function createDriver(string $driverName, ?string $model, ?string $apiKey, ?string $baseUrl)

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 // tanto a autenticação (se o usuário está logado) quanto a autorização (se é admin).
 Route::middleware([EnsureUserIsAdmin::class])->prefix('admin')->name('admin.')->group(function () {
     // Redireciona a rota base /admin para a lista de apps
-    Route::get('/', fn () => redirect()->route('admin.apps.index'));
+    Route::get('/', fn () => redirect()->route('admin.apps.index'))->name('dashboard');
 
     // Modulo de gerenciamento de icones
     Route::get('/icon-generator', [App\Modules\Admin\Http\Controllers\IconGeneratorController::class, 'index'])->name('icon-generator');

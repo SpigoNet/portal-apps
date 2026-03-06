@@ -10,7 +10,9 @@ use App\Modules\MundosDeMim\Models\Prompt;
 use App\Modules\MundosDeMim\Models\UserAttribute;
 use App\Modules\Admin\Services\AiProviderService;
 use App\Services\AI\Drivers\AirForceDriver;
+use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
+use App\Services\AI\Drivers\LmStudioDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -55,23 +57,23 @@ class PlaygroundController extends Controller
     {
         $request->validate([
             'prompt' => 'required|string|min:3',
-            'ai_provider_id' => 'nullable|exists:mundos_de_mim_ai_providers,id',
         ]);
 
         try {
             $user = $this->getTargetUser();
             $attributes = UserAttribute::where('user_id', $user->id)->first();
-            $provider = $this->resolveModel($user, $request->input('ai_provider_id'));
             $aiService = new AiProviderService();
+            $provider = $aiService->getTextToTextProvider();
+
+            if (! $provider) {
+                return response()->json(['error' => 'Nenhum modelo padrão text->text ativo configurado no portal.'], 422);
+            }
+
             $driverName = $aiService->getDriverForProvider($provider);
             $apiKey = $aiService->getApiKeyForProvider($provider);
             $baseUrl = $aiService->getBaseUrlForProvider($provider);
 
-            if (! $provider || ! in_array($driverName, ['pollination', 'airforce'])) {
-                return response()->json(['error' => 'Provedor selecionado não suporta refinamento no Playground.'], 422);
-            }
-
-            $driver = $this->createDriver($driverName, $provider->model, $apiKey, $baseUrl);
+            $driver = $this->createTextDriver($driverName, $provider->model, $apiKey, $baseUrl);
 
             // Monta contexto biográfico
             $bio = '';
@@ -88,14 +90,20 @@ class PlaygroundController extends Controller
                 }
             }
 
-            $systemPrompt = 'Você é um mestre de Prompt Engineering para modelos de imagem como Midjourney e Stable Diffusion.
-            Sua tarefa é pegar uma ideia simples do usuário e transformá-la em um prompt visual rico, cinematográfico e detalhado, em INGLÊS.
+            $systemPrompt = 'You are an expert prompt engineer for image-to-image generation.
+            Rewrite the user prompt into a high-quality ENGLISH prompt suitable for tools like Midjourney/Stable Diffusion, preserving the original idea.
 
-            REGRAS:
-            1. Use a descrição física do usuário se fornecida para manter a consistência.
-            2. Adicione detalhes de iluminação, estilo artístico (ex: 8k, unreal engine 5, cinematic lighting).
-            3. Mantenha o foco na ideia original do usuário.
-            4. Retorne APENAS o prompt refinado em inglês, sem explicações.';
+            CRITICAL IDENTITY PRESERVATION RULES (HIGHEST PRIORITY):
+            1. The generated image MUST be a variation of the original reference person, not a new person.
+            2. Keep the same face identity, facial structure, and expression from the reference image.
+            3. Preserve all unique human traits exactly as they are, including birthmarks, moles, freckles, skin spots, scars, asymmetries, and any distinctive facial detail.
+            4. Do not beautify, replace, remove, or invent facial traits.
+            5. If any style request conflicts with identity preservation, identity preservation always wins.
+
+            QUALITY RULES:
+            1. Add concise cinematic visual details (lighting, lens, composition, texture) without changing identity.
+            2. Keep the result clear and production-ready.
+            3. Return ONLY the final refined prompt text in English, with no explanation.';
 
             $messages = [
                 ['role' => 'system', 'content' => $systemPrompt],
@@ -251,6 +259,17 @@ class PlaygroundController extends Controller
         return match ($driverName) {
             'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
+            default => new PollinationDriver($model, $apiKey, $baseUrl),
+        };
+    }
+
+    private function createTextDriver(string $driverName, ?string $model, ?string $apiKey, ?string $baseUrl)
+    {
+        return match ($driverName) {
+            'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
+            'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
+            'gemini' => new GeminiDriver($apiKey),
+            'lm_studio' => new LmStudioDriver($baseUrl),
             default => new PollinationDriver($model, $apiKey, $baseUrl),
         };
     }

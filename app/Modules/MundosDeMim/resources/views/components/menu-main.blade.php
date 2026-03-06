@@ -19,9 +19,6 @@
         <x-dropdown-link :href="route('mundos-de-mim.estilos.index')">
             Meus Mundos
         </x-dropdown-link>
-        <x-dropdown-link :href="route('mundos-de-mim.config.index')">
-            Configurações de IA
-        </x-dropdown-link>
     </x-slot>
 </x-dropdown>
 @can('admin-do-app')
@@ -48,6 +45,9 @@
             </x-dropdown-link>
             <x-dropdown-link :href="route('mundos-de-mim.admin.user-gallery.index')">
                 Galeria dos Usuários
+            </x-dropdown-link>
+            <x-dropdown-link :href="route('admin.logs.index')">
+                📋 Logs
             </x-dropdown-link>
         </x-slot>
     </x-dropdown>

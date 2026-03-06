@@ -36,8 +36,6 @@ app/Modules/MundosDeMim/
 │       ├── PessoasRelacionadasController.php # Cônjuge/filhos
 │       ├── PlaygroundController.php         # Teste de prompts/geração
 │       └── Admin/
-│           ├── AdminAiModelController.php   # Config modelos IA
-│           ├── AdminAiProviderController.php # Config provedores IA
 │           ├── AdminGalleryController.php   # Galeria pública
 │           ├── AdminPromptController.php    # CRUD de prompts
 │           ├── AdminThemeController.php     # CRUD de temas
@@ -69,9 +67,7 @@ app/Modules/MundosDeMim/
 │       ├── admin/prompts/                  # Admin: CRUD de prompts
 │       ├── admin/import/                   # Admin: importador
 │       ├── admin/gallery/                  # Admin: galeria pública
-│       ├── admin/user-gallery/             # Admin: galeria dos usuários
-│       ├── admin/ai-providers/             # Admin: provedores IA
-│       └── admin/ai-models/               # Admin: modelos IA
+│       └── admin/user-gallery/             # Admin: galeria dos usuários
 ├── docs/
 │   └── Documentação de Projeto_ Mundos de Mim.md
 ├── MundosDeMimServiceProvider.php
@@ -123,8 +119,6 @@ app/Modules/MundosDeMim/
 | Importador | `/mundos-de-mim/admin/import` | Importação em lote de prompts |
 | Galeria pública | `/mundos-de-mim/admin/gallery` | Gerenciar galeria pública |
 | Galeria usuários | `/mundos-de-mim/admin/user-gallery` | Ver/reenviar imagens dos usuários |
-| Provedores IA | `/mundos-de-mim/admin/ai-providers` | Configurar provedores |
-| Modelos IA | `/mundos-de-mim/admin/ai-models` | Configurar modelos |
 
 ---
 
@@ -173,8 +167,8 @@ Gerencia a galeria pública: copia imagens de usuários para exibição pública
 #### `AdminUserGalleryController`
 Visão administrativa das imagens de cada usuário, com opção de reenviar via WhatsApp/Telegram.
 
-#### `AdminAiProviderController` / `AdminAiModelController`
-Configuração dos provedores e modelos de IA específicos deste módulo (independente do Admin global).
+#### IA no módulo
+Este módulo não administra provedores/modelos de IA localmente. Toda configuração deve ser feita no portal/admin e o consumo ocorre via `App\Modules\Admin\Services\AiProviderService`.
 
 ---
 
@@ -283,7 +277,7 @@ Prefixo: `mundos_de_mim_`
 ## 8. Notas para Agentes de IA
 
 - A documentação de produto detalhada está em `docs/Documentação de Projeto_ Mundos de Mim.md`.
-- O módulo tem sua própria camada de configuração de IA (`AdminAiProviderController`, `AdminAiModelController`) independente do módulo Admin global.
+- A configuração de provedores/modelos de IA é centralizada no portal/admin; este módulo apenas consome essa definição via `AiProviderService`.
 - O controle de admin é via Gate `admin-do-app` (portal_app_id: 10).
 - As migrations estão dentro do módulo em `Database/Migrations/` (note o 'D' maiúsculo).
 - Temas sazonais têm datas de vigência — só aparecem no período configurado.

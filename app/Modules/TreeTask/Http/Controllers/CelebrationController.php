@@ -13,6 +13,10 @@ class CelebrationController extends Controller
         // Busca a tarefa concluída com os relacionamentos necessários
         $tarefa = Tarefa::with('fase.projeto')->findOrFail($id);
 
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->id()) {
+            abort(403);
+        }
+
         // Busca tarefas da mesma fase (irmãs) que ainda não foram concluídas
         // Ordenadas por prioridade para sugerir o que é mais importante
         $sugestoes = Tarefa::where('id_fase', $tarefa->id_fase)

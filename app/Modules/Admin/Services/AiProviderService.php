@@ -2,8 +2,9 @@
 
 namespace App\Modules\Admin\Services;
 
-use App\Models\User;
 use App\Models\AiGatewayProvider;
+use App\Models\User;
+use App\Modules\Admin\Models\AIModeloPadrao;
 use App\Modules\MundosDeMim\Models\AIProvider;
 use App\Modules\MundosDeMim\Models\UserAiSetting;
 
@@ -59,13 +60,15 @@ class AiProviderService
     public function getApiKeyForUser(?User $user): ?string
     {
         $provider = $this->getModelForUserEntity($user);
-        
+
         return $this->getApiKeyForProvider($provider);
     }
 
     public function getApiKeyForProvider(?AIProvider $provider): ?string
     {
-        if (! $provider) return null;
+        if (! $provider) {
+            return null;
+        }
 
         // 1. Tenta pelo link direto do Gateway Provider
         if ($provider->gatewayProvider) {
@@ -73,7 +76,7 @@ class AiProviderService
             if ($adminProvedor && $adminProvedor->api_key) {
                 return $adminProvedor->api_key;
             }
-            
+
             if ($provider->gatewayProvider->api_key) {
                 return $provider->gatewayProvider->api_key;
             }
@@ -99,7 +102,9 @@ class AiProviderService
 
     public function getBaseUrlForProvider(?AIProvider $provider): ?string
     {
-        if (! $provider) return null;
+        if (! $provider) {
+            return null;
+        }
 
         if ($provider->gatewayProvider) {
             $adminProvedor = \App\Modules\Admin\Models\AIProvedor::where('nome', $provider->gatewayProvider->name)->first();
@@ -141,5 +146,42 @@ class AiProviderService
     public function getProviderCatalog(): \Illuminate\Database\Eloquent\Collection
     {
         return AiGatewayProvider::query()->orderBy('name')->get();
+    }
+
+    public function getVisionTextProvider(?User $user): ?AIProvider
+    {
+        $modeloPadrao = AIModeloPadrao::getPadrao('image', 'text');
+
+        if ($modeloPadrao) {
+            $provider = AIProvider::where('model', $modeloPadrao->nome)
+                ->where('is_active', true)
+                ->first();
+
+            if ($provider) {
+                return $provider;
+            }
+        }
+
+        return AIProvider::where('supports_image_input', true)
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->first();
+    }
+
+    public function getTextToTextProvider(): ?AIProvider
+    {
+        $modeloPadrao = AIModeloPadrao::getPadrao('text', 'text');
+
+        if ($modeloPadrao) {
+            $provider = AIProvider::where('model', $modeloPadrao->nome)
+                ->where('is_active', true)
+                ->first();
+
+            if ($provider) {
+                return $provider;
+            }
+        }
+
+        return AIProvider::getDefault();
     }
 }

@@ -93,12 +93,13 @@ class PlaygroundController extends Controller
             $systemPrompt = 'You are an expert prompt engineer for image-to-image generation.
             Rewrite the user prompt into a high-quality ENGLISH prompt suitable for tools like Midjourney/Stable Diffusion, preserving the original idea.
 
-            CRITICAL IDENTITY PRESERVATION RULES (HIGHEST PRIORITY):
+            Adicione essas regras de identidade e qualidade ao refinar adicionando ao prompt:            
             1. The generated image MUST be a variation of the original reference person, not a new person.
             2. Keep the same face identity, facial structure, and expression from the reference image.
             3. Preserve all unique human traits exactly as they are, including birthmarks, moles, freckles, skin spots, scars, asymmetries, and any distinctive facial detail.
             4. Do not beautify, replace, remove, or invent facial traits.
             5. If any style request conflicts with identity preservation, identity preservation always wins.
+            6. It is very important to clearly state at the beginning that the original person\'s photo should be used as a reference, maintaining the appearance, face, hair type, eyes, and expression of the person in the original photo.
 
             QUALITY RULES:
             1. Add concise cinematic visual details (lighting, lens, composition, texture) without changing identity.

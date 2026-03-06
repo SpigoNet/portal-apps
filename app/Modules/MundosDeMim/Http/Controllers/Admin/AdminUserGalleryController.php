@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Modules\MundosDeMim\Models\DailyGeneration;
 use App\Modules\MundosDeMim\Models\UserAttribute;
 use App\Modules\MundosDeMim\Services\DailyPhotoService;
-use Illuminate\Http\Request;
 
 class AdminUserGalleryController extends Controller
 {
@@ -25,7 +24,7 @@ class AdminUserGalleryController extends Controller
 
         // Ajuste: Vamos pegar os IDs de usuários que realmente têm gerações
         $userIdsWithGenerations = DailyGeneration::distinct()->pluck('user_id');
-        
+
         $users = User::whereIn('id', $userIdsWithGenerations)
             ->withCount(['mundosDeMimAiSetting']) // Apenas para ter algo, mas vamos contar gerações manualmente se necessário
             ->orderBy('name')
@@ -71,16 +70,16 @@ class AdminUserGalleryController extends Controller
         $generation = DailyGeneration::findOrFail($id);
         $userAttr = UserAttribute::where('user_id', $generation->user_id)->first();
 
-        if (!$userAttr) {
+        if (! $userAttr) {
             return back()->with('error', 'Atributos do usuário não encontrados para envio.');
         }
 
         $preference = $userAttr->notification_preference;
-        if (!$preference || $preference === 'none') {
+        if (! $preference || $preference === 'none') {
             return back()->with('error', 'O usuário não possui preferência de notificação configurada.');
         }
 
-        $result = $service->sendNotification($userAttr, $generation->image_url, $preference);
+        $result = $service->sendNotification($userAttr, $generation->image_url, $generation->final_prompt_used, $preference);
 
         if ($result) {
             return back()->with('success', 'Foto enviada com sucesso para o usuário!');

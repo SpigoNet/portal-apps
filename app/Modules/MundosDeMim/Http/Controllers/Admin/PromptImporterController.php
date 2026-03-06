@@ -3,23 +3,20 @@
 namespace App\Modules\MundosDeMim\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Admin\Services\AiProviderService;
 use App\Modules\MundosDeMim\Models\Theme;
 use App\Modules\MundosDeMim\Models\Prompt;
-use App\Services\IaService; // <--- Serviço de IA existente
+use App\Services\AI\Drivers\AirForceDriver;
+use App\Services\AI\Drivers\GeminiDriver;
+use App\Services\AI\Drivers\KdjingpaiDriver;
+use App\Services\AI\Drivers\LmStudioDriver;
+use App\Services\AI\Drivers\PollinationDriver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class PromptImporterController extends Controller
 {
-    protected $aiService;
-
-    // Injeção de dependência do serviço de IA
-    public function __construct(IaService $aiService)
-    {
-        $this->aiService = $aiService;
-    }
-
     public function index()
     {
         return view('MundosDeMim::admin.import.index');
@@ -72,8 +69,20 @@ EOT;
                 ['role' => 'user', 'content' => "Prompt Original: " . $rawPrompt]
             ];
 
-            // Chama o serviço (Gemini, LmStudio ou Pollination - Texto)
-            $aiResponse = $this->aiService->generateText($messages);
+            // Usa explicitamente o modelo padrão global text->text configurado no módulo Admin.
+            $aiProviderService = new AiProviderService;
+            $provider = $aiProviderService->getTextToTextProvider();
+
+            if (! $provider) {
+                throw new \Exception('Nenhum modelo padrão text->text ativo configurado no portal.');
+            }
+
+            $driverName = $aiProviderService->getDriverForProvider($provider);
+            $apiKey = $aiProviderService->getApiKeyForProvider($provider);
+            $baseUrl = $aiProviderService->getBaseUrlForProvider($provider);
+            $driver = $this->createTextDriver($driverName, $provider->model, $apiKey, $baseUrl);
+
+            $aiResponse = $driver->generateText($messages, []);
 
             Log::debug("Resposta da IA: " . $aiResponse);
             // Limpeza básica caso a IA retorne ```json ... ```
@@ -158,5 +167,16 @@ EOT;
 
         return redirect()->route('mundos-de-mim.admin.themes.edit', $theme->id)
             ->with('success', 'Prompt importado via IA com sucesso!');
+    }
+
+    private function createTextDriver(string $driverName, ?string $model, ?string $apiKey, ?string $baseUrl)
+    {
+        return match ($driverName) {
+            'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
+            'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
+            'gemini' => new GeminiDriver($apiKey),
+            'lm_studio' => new LmStudioDriver($baseUrl),
+            default => new PollinationDriver($model, $apiKey, $baseUrl),
+        };
     }
 }

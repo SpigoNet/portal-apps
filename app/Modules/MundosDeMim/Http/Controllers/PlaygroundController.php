@@ -42,9 +42,13 @@ class PlaygroundController extends Controller
             $allUsers = collect();
         }
 
-        $prompts = Prompt::with('theme')->orderBy('theme_id')->get();
+        $prompts = Prompt::with(['theme.examples'])->orderBy('theme_id')->get();
+        $recentGenerations = DailyGeneration::where('user_id', $targetUser->id)
+            ->latest()
+            ->limit(8)
+            ->get();
 
-        return view('MundosDeMim::playground.index', compact('attributes', 'hasPhoto', 'providers', 'selectedProvider', 'targetUser', 'allUsers', 'currentUser', 'prompts'));
+        return view('MundosDeMim::playground.index', compact('attributes', 'hasPhoto', 'providers', 'selectedProvider', 'targetUser', 'allUsers', 'currentUser', 'prompts', 'recentGenerations'));
     }
 
     public function refine(Request $request)

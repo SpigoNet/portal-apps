@@ -70,6 +70,7 @@ Route::middleware(['web', 'auth', 'admin'])
             // O "Atalho" de gerenciamento que você pediu: Edição
             Route::get('/{id}/editar', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminPromptController::class, 'edit'])->name('edit');
             Route::put('/{id}', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminPromptController::class, 'update'])->name('update');
+            Route::post('/{id}/gerar-do-antes', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminPromptController::class, 'generateFromBefore'])->name('generateFromBefore');
 
             Route::delete('/{id}', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminPromptController::class, 'destroy'])->name('destroy');
         });

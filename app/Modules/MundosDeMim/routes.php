@@ -15,7 +15,24 @@ Route::prefix('mundos-de-mim')
         // Rota Principal Pública (Landing Page)
         Route::get('/', [DashboardController::class, 'landing'])->name('landing');
 
+        // Rota de Avaliação por Email (Auto-login)
+        Route::get('/avaliar/{generation}', [GaleriaController::class, 'rate'])->name('rate');
+
+        
+
+        
+        // Auth Routes Específicas do Módulo
+        Route::get('/login', [\App\Modules\MundosDeMim\Http\Controllers\AuthController::class, 'showLogin'])->name('login')->middleware('guest');
+        Route::post('/login', [\App\Modules\MundosDeMim\Http\Controllers\AuthController::class, 'login'])->name('login.submit')->middleware('guest');
+        
+        Route::get('/register', [\App\Modules\MundosDeMim\Http\Controllers\AuthController::class, 'showRegister'])->name('register')->middleware('guest');
+        Route::post('/register', [\App\Modules\MundosDeMim\Http\Controllers\AuthController::class, 'register'])->name('register.submit')->middleware('guest');
+
+        Route::post('/logout', [\App\Modules\MundosDeMim\Http\Controllers\AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
         // Rotas Protegidas que Exigem Login
+
+
         Route::middleware(['auth'])->group(function () {
 
             // Dashboard Interno

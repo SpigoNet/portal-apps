@@ -58,8 +58,8 @@
                 <a href="{{ route('mundos-de-mim.index') }}"
                     class="text-sm font-semibold hover:text-[#62A87C] transition">Dashboard</a>
             @else
-                <a href="{{ route('login') }}" class="text-sm font-semibold hover:text-[#62A87C] transition">Entrar</a>
-                <a href="{{ route('register') }}"
+                <a href="{{ route('mundos-de-mim.login') }}" class="text-sm font-semibold hover:text-[#62A87C] transition">Entrar</a>
+                <a href="{{ route('mundos-de-mim.register') }}"
                     class="bg-[#62A87C] text-black px-5 py-2 rounded-full font-bold text-sm hover:scale-105 transition transform">Começar
                     Agora</a>
             @endauth
@@ -84,7 +84,7 @@
             <a href="#planos"
                 class="bg-[#62A87C] text-black px-10 py-5 rounded-2xl font-black text-xl hover:shadow-[0_0_30px_rgba(163,230,53,0.5)] transition hover:scale-105 transform">VER
                 PLANOS</a>
-            <a href="{{ route('register') }}"
+            <a href="{{ route('mundos-de-mim.register') }}"
                 class="glass border border-white/20 px-10 py-5 rounded-2xl font-black text-xl hover:bg-white/10 transition flex items-center gap-3">
                 COMEÇAR AGORA <i class="fa-solid fa-bolt text-[#62A87C]"></i>
             </a>
@@ -187,7 +187,7 @@
                     <li class="flex items-center gap-3"><i class="fa-solid fa-check text-[#62A87C]"></i> Galeria Online
                         Completa</li>
                 </ul>
-                <a href="{{ route('register') }}"
+                <a href="{{ route('mundos-de-mim.register') }}"
                     class="block w-full text-center bg-white/5 hover:bg-white/10 border border-white/10 py-4 rounded-2xl font-bold transition">Começar
                     Agora</a>
             </div>
@@ -216,7 +216,7 @@
                     <li class="flex items-center gap-3"><i class="fa-solid fa-check text-green-600"></i> Suporte
                         Prioritário</li>
                 </ul>
-                <a href="{{ route('register') }}"
+                <a href="{{ route('mundos-de-mim.register') }}"
                     class="block w-full text-center bg-black text-white py-4 rounded-2xl font-bold hover:bg-slate-800 transition">Assinar
                     Agora</a>
             </div>

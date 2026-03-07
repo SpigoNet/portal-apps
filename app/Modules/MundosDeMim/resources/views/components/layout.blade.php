@@ -123,6 +123,8 @@
                     <a href="{{ route('mundos-de-mim.playground.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Playground</a>
                     <a href="{{ route('mundos-de-mim.admin.themes.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Temas</a>
                     <a href="{{ route('mundos-de-mim.admin.importador.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Importador</a>
+                    <a href="{{ route('mundos-de-mim.admin.gallery.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Galeria Pública</a>
+                    <a href="{{ route('mundos-de-mim.admin.user-gallery.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Galeria de Usuários</a>
                 @endcan
 
                 <div class="border-t border-white/10 my-2 pt-2">

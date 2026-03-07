@@ -7,23 +7,33 @@
     <title>Mundos de Mim - Sua Vida em Arte Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        
         body {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
+        .font-heading {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .bg-dark-tech {
+            background-color: #1E1E24;
+            background-image: radial-gradient(circle at top right, rgba(123, 44, 191, 0.15), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(0, 119, 182, 0.15), transparent 40%);
+        }
+
 
         .glass {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(10px);
         }
 
-        .bg-gradient-spigo {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        .bg-dark-tech {
+            background: linear-gradient(135deg, #1E1E24 0%, #141419 100%);
         }
 
         .text-gradient {
-            background: linear-gradient(to right, #8b5cf6, #d946ef, #a3e635);
+            background: linear-gradient(to right, #8b5cf6, #d946ef, #62A87C);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -34,23 +44,23 @@
     </style>
 </head>
 
-<body class="bg-gradient-spigo text-white min-h-screen">
+<body class="bg-dark-tech text-white min-h-screen">
 
     <div class="hero-pattern absolute inset-0 z-0"></div>
 
     {{-- Header --}}
     <nav class="relative z-10 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto">
         <div class="flex items-center gap-2">
-            <span class="text-2xl font-black tracking-tighter">MUNDOS DE <span class="text-[#a3e635]">MIM</span></span>
+            <span class="text-2xl font-black tracking-tighter font-heading">MUNDOS DE <span class="text-[#62A87C]">MIM</span></span>
         </div>
         <div class="flex gap-4 items-center">
             @auth
                 <a href="{{ route('mundos-de-mim.index') }}"
-                    class="text-sm font-semibold hover:text-[#a3e635] transition">Dashboard</a>
+                    class="text-sm font-semibold hover:text-[#62A87C] transition">Dashboard</a>
             @else
-                <a href="{{ route('login') }}" class="text-sm font-semibold hover:text-[#a3e635] transition">Entrar</a>
+                <a href="{{ route('login') }}" class="text-sm font-semibold hover:text-[#62A87C] transition">Entrar</a>
                 <a href="{{ route('register') }}"
-                    class="bg-[#a3e635] text-black px-5 py-2 rounded-full font-bold text-sm hover:scale-105 transition transform">Começar
+                    class="bg-[#62A87C] text-black px-5 py-2 rounded-full font-bold text-sm hover:scale-105 transition transform">Começar
                     Agora</a>
             @endauth
         </div>
@@ -59,10 +69,10 @@
     {{-- Hero --}}
     <main class="relative z-10 px-6 pt-20 pb-16 text-center max-w-7xl mx-auto">
         <div
-            class="inline-block px-4 py-1.5 mb-6 rounded-full bg-[#a3e635]/10 border border-[#a3e635]/20 text-[#a3e635] text-sm font-bold tracking-wide uppercase">
+            class="inline-block px-4 py-1.5 mb-6 rounded-full bg-[#62A87C]/10 border border-[#62A87C]/20 text-[#62A87C] text-sm font-bold tracking-wide uppercase">
             A Nova Fronteira da Arte Digital
         </div>
-        <h1 class="text-6xl md:text-8xl font-extrabold mb-8 leading-tight tracking-tighter">
+        <h1 class="text-6xl md:text-8xl font-extrabold mb-8 leading-tight tracking-tighter font-heading">
             Sua essência em <br><span class="text-gradient">universos infinitos</span>.
         </h1>
         <p class="text-lg md:text-2xl text-slate-400 mb-12 max-w-4xl mx-auto leading-relaxed">
@@ -72,11 +82,11 @@
 
         <div class="flex flex-wrap justify-center gap-6 mb-24">
             <a href="#planos"
-                class="bg-[#a3e635] text-black px-10 py-5 rounded-2xl font-black text-xl hover:shadow-[0_0_30px_rgba(163,230,53,0.5)] transition hover:scale-105 transform">VER
+                class="bg-[#62A87C] text-black px-10 py-5 rounded-2xl font-black text-xl hover:shadow-[0_0_30px_rgba(163,230,53,0.5)] transition hover:scale-105 transform">VER
                 PLANOS</a>
             <a href="{{ route('register') }}"
                 class="glass border border-white/20 px-10 py-5 rounded-2xl font-black text-xl hover:bg-white/10 transition flex items-center gap-3">
-                COMEÇAR AGORA <i class="fa-solid fa-bolt text-[#a3e635]"></i>
+                COMEÇAR AGORA <i class="fa-solid fa-bolt text-[#62A87C]"></i>
             </a>
         </div>
 
@@ -107,11 +117,11 @@
                 </div>
             @endif
             <div
-                class="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent pointer-events-none">
+                class="absolute inset-0 bg-gradient-to-t from-[#1E1E24] via-transparent to-transparent pointer-events-none">
             </div>
         </div>
         <div
-            class="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent pointer-events-none">
+            class="absolute inset-0 bg-gradient-to-t from-[#1E1E24] via-transparent to-transparent pointer-events-none">
         </div>
         </div>
     </main>
@@ -119,29 +129,29 @@
     {{-- Features Grid --}}
     <section class="relative z-10 px-6 py-20 bg-black/30 backdrop-blur-sm">
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="glass p-8 rounded-3xl border border-white/5 hover:border-[#a3e635]/30 transition group">
+            <div class="glass p-8 rounded-3xl border border-white/5 hover:border-[#62A87C]/30 transition group">
                 <div
-                    class="w-12 h-12 bg-[#a3e635]/10 rounded-xl flex items-center justify-center text-[#a3e635] mb-6 group-hover:scale-110 transition-transform">
+                    class="w-12 h-12 bg-[#62A87C]/10 rounded-xl flex items-center justify-center text-[#62A87C] mb-6 group-hover:scale-110 transition-transform">
                     <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-3">Artes Diárias</h3>
+                <h3 class="text-xl font-bold mb-3 font-heading">Artes Diárias</h3>
                 <p class="text-slate-400">Uma nova surpresa todo dia. Nossa IA cria cenários baseados na sua biometria e
                     preferências.</p>
             </div>
-            <div class="glass p-8 rounded-3xl border border-white/5 hover:border-[#a3e635]/30 transition group">
+            <div class="glass p-8 rounded-3xl border border-white/5 hover:border-[#62A87C]/30 transition group">
                 <div
                     class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-400 mb-6 group-hover:scale-110 transition-transform">
                     <i class="fa-solid fa-users text-xl"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-3">Você e Criaturas</h3>
+                <h3 class="text-xl font-bold mb-3 font-heading">Você e Criaturas</h3>
                 <p class="text-slate-400">Adicione seu parceiro(a) ou filhos e receba artes memoráveis em família.</p>
             </div>
-            <div class="glass p-8 rounded-3xl border border-white/5 hover:border-[#a3e635]/30 transition group">
+            <div class="glass p-8 rounded-3xl border border-white/5 hover:border-[#62A87C]/30 transition group">
                 <div
                     class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 mb-6 group-hover:scale-110 transition-transform">
                     <i class="fa-brands fa-whatsapp text-xl"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-3">Direto no Celular</h3>
+                <h3 class="text-xl font-bold mb-3 font-heading">Direto no Celular</h3>
                 <p class="text-slate-400">Assine o plano Prime e receba as artes diretamente no seu WhatsApp sem
                     complicações.</p>
             </div>
@@ -151,7 +161,7 @@
     {{-- Pricing --}}
     <section id="planos" class="relative z-10 px-6 py-24 max-w-7xl mx-auto">
         <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold mb-4">Escolha o seu Mundo</h2>
+            <h2 class="text-4xl font-bold mb-4 font-heading">Escolha o seu Mundo</h2>
             <p class="text-slate-400">Planos flexíveis para quem ama arte e tecnologia.</p>
         </div>
 
@@ -161,20 +171,20 @@
                 <div
                     class="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/10 blur-3xl group-hover:bg-blue-500/20 transition-colors">
                 </div>
-                <h3 class="text-2xl font-bold mb-2">Plano ECO</h3>
+                <h3 class="text-2xl font-bold mb-2 font-heading">Plano ECO</h3>
                 <div class="flex items-baseline gap-1 mb-6">
-                    <span class="text-4xl font-extrabold text-[#a3e635]">R$ 14,90</span>
+                    <span class="text-4xl font-extrabold text-[#62A87C]">R$ 14,90</span>
                     <span class="text-slate-400">/mês</span>
                 </div>
                 <ul class="space-y-4 mb-10 text-slate-300">
-                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-[#a3e635]"></i> 1 Arte por dia
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-[#62A87C]"></i> 1 Arte por dia
                     </li>
-                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-[#a3e635]"></i> Entrega via
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-[#62A87C]"></i> Entrega via
                         <strong>Telegram</strong>
                     </li>
-                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-[#a3e635]"></i> 5 Créditos
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-[#62A87C]"></i> 5 Créditos
                         semanais sob demanda</li>
-                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-[#a3e635]"></i> Galeria Online
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-[#62A87C]"></i> Galeria Online
                         Completa</li>
                 </ul>
                 <a href="{{ route('register') }}"
@@ -184,11 +194,11 @@
 
             {{-- Prime --}}
             <div
-                class="bg-white text-black p-10 rounded-[3rem] relative shadow-[0_0_40px_rgba(163,230,53,0.3)] transform scale-105 border-4 border-[#a3e635]">
+                class="bg-white text-black p-10 rounded-[3rem] relative shadow-[0_0_40px_rgba(163,230,53,0.3)] transform scale-105 border-4 border-[#62A87C]">
                 <div
-                    class="absolute top-6 right-8 bg-[#a3e635] text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">
+                    class="absolute top-6 right-8 bg-[#62A87C] text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">
                     Recomendado</div>
-                <h3 class="text-2xl font-bold mb-2">Plano PRIME</h3>
+                <h3 class="text-2xl font-bold mb-2 font-heading">Plano PRIME</h3>
                 <div class="flex items-baseline gap-1 mb-6">
                     <span class="text-4xl font-extrabold">R$ 34,90</span>
                     <span class="text-slate-600">/mês</span>

@@ -108,21 +108,27 @@
                                     <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Lista de prompts para gerar</p>
                                     @foreach($prompts as $promptItem)
                                         @php
-                                            $previewImage = optional(optional($promptItem->theme)->examples->first())->image_path;
+                                            $promptExample = $promptItem->generatedExamples->first();
+                                            $themeExample = optional($promptItem->theme)->examples->first();
+                                            
+                                            $previewImage = $promptExample ? $promptExample->image_path : ($themeExample ? $themeExample->image_path : null);
                                             $previewUrl = $previewImage ? Storage::url($previewImage) : null;
                                         @endphp
                                         <button type="button"
                                                 onclick="applyPromptFromList('{{ $promptItem->id }}', @js($promptItem->prompt_text))"
-                                                class="w-full text-left p-2 border rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition">
-                                            <div class="flex gap-2 items-start">
+                                                class="w-full text-left p-3 border border-gray-200 rounded-xl hover:border-[#62A87C] hover:bg-[#62A87C]/5 transition group">
+                                            <div class="flex gap-4 items-start">
                                                 @if($previewUrl)
-                                                    <img src="{{ $previewUrl }}" class="h-10 w-10 object-cover rounded border" alt="Resultado">
+                                                    <img src="{{ $previewUrl }}" class="h-20 w-20 object-cover rounded-lg border border-gray-200 shadow-sm group-hover:scale-105 transition-transform" alt="Resultado">
                                                 @else
-                                                    <div class="h-10 w-10 rounded border bg-gray-100 flex items-center justify-center text-[10px] text-gray-500">sem img</div>
+                                                    <div class="h-20 w-20 rounded-lg border border-gray-200 bg-gray-50 flex flex-col items-center justify-center text-gray-400">
+                                                        <i class="fa-solid fa-image text-xl mb-1"></i>
+                                                        <span class="text-[9px] uppercase tracking-wider">Sem Img</span>
+                                                    </div>
                                                 @endif
-                                                <div class="min-w-0">
-                                                    <p class="text-xs font-semibold text-indigo-700 truncate">{{ $promptItem->theme->name ?? 'Sem tema' }}</p>
-                                                    <p class="text-xs text-gray-600 line-clamp-2">{{ $promptItem->prompt_text }}</p>
+                                                <div class="min-w-0 flex-1 pt-1">
+                                                    <p class="text-sm font-bold text-[#7B2CBF] truncate mb-1">{{ $promptItem->theme->name ?? 'Sem tema' }}</p>
+                                                    <p class="text-xs text-gray-600 line-clamp-3 leading-relaxed">{{ $promptItem->prompt_text }}</p>
                                                 </div>
                                             </div>
                                         </button>

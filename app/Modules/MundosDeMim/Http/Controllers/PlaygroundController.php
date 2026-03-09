@@ -309,12 +309,14 @@ class PlaygroundController extends Controller
                 $message->to($user->email, $user->name)
                     ->subject('🌟 Sua Nova Imagem Gerada!')
                     ->html("
-                        <h1>Olá, {$user->name}!</h1>
-                        <p>Uma nova imagem foi gerada para você!</p>
-                        <p><a href='{$imageUrl}' target='_blank'><img src='{$imageUrl}' style='max-width: 100%; border-radius: 10px;'/></a></p>
-                        <p><a href='{$imageUrl}' target='_blank'>Clique aqui para ver a imagem em tamanho maior</a></p>
-                        <br>
-                        <p>Atenciosamente,<br>Equipe Mundos de Mim</p>
+                        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; color: #1e1e24;'>
+                            <h1 style='color: #6366f1;'>Olá, {$user->name}!</h1>
+                            <p style='color: #333333;'>Uma nova imagem foi gerada para você!</p>
+                            <p><a href='{$imageUrl}' target='_blank'><img src='{$imageUrl}' style='max-width: 100%; border-radius: 10px;'/></a></p>
+                            <p><a href='{$imageUrl}' target='_blank' style='color: #6366f1;'>Clique aqui para ver a imagem em tamanho maior</a></p>
+                            <br>
+                            <p style='color: #555555; font-size: 14px;'>Atenciosamente,<br>Equipe Mundos de Mim</p>
+                        </div>
                     ");
             });
 

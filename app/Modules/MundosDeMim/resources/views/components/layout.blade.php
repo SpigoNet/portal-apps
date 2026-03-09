@@ -45,7 +45,7 @@
                     </a>
 
                     <!-- Desktop Menu -->
-                    <div class="hidden md:flex items-center space-x-1">
+                    <div class="hidden md:flex items-center space-x-2">
                         <a href="{{ route('mundos-de-mim.index') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('mundos-de-mim.index') ? 'bg-[#62A87C]/20 text-[#62A87C]' : 'text-slate-300 hover:text-white hover:bg-white/5' }} transition">Dashboard</a>
                         <a href="{{ route('mundos-de-mim.perfil.index') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('mundos-de-mim.perfil.*') ? 'bg-[#3B9AB2]/20 text-[#3B9AB2]' : 'text-slate-300 hover:text-white hover:bg-white/5' }} transition">Meu Perfil</a>
                         <a href="{{ route('mundos-de-mim.pessoas.index') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('mundos-de-mim.pessoas.*') ? 'bg-[#7B2CBF]/20 text-[#7B2CBF]' : 'text-slate-300 hover:text-white hover:bg-white/5' }} transition">Entes Queridos</a>

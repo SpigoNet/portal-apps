@@ -45,24 +45,38 @@
                     </a>
 
                     <!-- Desktop Menu -->
-                    <div class="hidden md:flex items-center space-x-2">
+                    <div class="hidden md:flex items-center space-x-1">
                         <a href="{{ route('mundos-de-mim.index') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('mundos-de-mim.index') ? 'bg-[#62A87C]/20 text-[#62A87C]' : 'text-slate-300 hover:text-white hover:bg-white/5' }} transition">Dashboard</a>
-                        <a href="{{ route('mundos-de-mim.perfil.index') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('mundos-de-mim.perfil.*') ? 'bg-[#3B9AB2]/20 text-[#3B9AB2]' : 'text-slate-300 hover:text-white hover:bg-white/5' }} transition">Meu Perfil</a>
-                        <a href="{{ route('mundos-de-mim.pessoas.index') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('mundos-de-mim.pessoas.*') ? 'bg-[#7B2CBF]/20 text-[#7B2CBF]' : 'text-slate-300 hover:text-white hover:bg-white/5' }} transition">Entes Queridos</a>
-                        <a href="{{ route('mundos-de-mim.galeria.index') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('mundos-de-mim.galeria.*') ? 'bg-[#0077B6]/20 text-[#0077B6]' : 'text-slate-300 hover:text-white hover:bg-white/5' }} transition">Minha Galeria</a>
-                        <a href="{{ route('mundos-de-mim.estilos.index') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('mundos-de-mim.estilos.*') ? 'bg-[#62A87C]/20 text-[#62A87C]' : 'text-slate-300 hover:text-white hover:bg-white/5' }} transition">Estilos & Temas</a>
-                        
+
+                        {{-- Dropdown: Meu Espaço --}}
+                        @php
+                            $menuAtivo = request()->routeIs('mundos-de-mim.perfil.*') || request()->routeIs('mundos-de-mim.pessoas.*') || request()->routeIs('mundos-de-mim.galeria.*') || request()->routeIs('mundos-de-mim.estilos.*');
+                        @endphp
+                        <div x-data="{ menuOpen: false }" class="relative">
+                            <button @click="menuOpen = !menuOpen" @click.away="menuOpen = false"
+                                class="px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1 transition
+                                    {{ $menuAtivo ? 'bg-[#3B9AB2]/20 text-[#3B9AB2]' : 'text-slate-300 hover:text-white hover:bg-white/5' }}">
+                                Meu Espaço <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                            </button>
+                            <div x-show="menuOpen" x-cloak class="absolute left-0 mt-2 w-52 bg-[#141419] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
+                                <a href="{{ route('mundos-de-mim.perfil.index') }}" class="block px-4 py-2.5 text-sm {{ request()->routeIs('mundos-de-mim.perfil.*') ? 'text-[#3B9AB2] bg-[#3B9AB2]/10' : 'text-slate-300 hover:bg-white/5' }} transition">Meu Perfil</a>
+                                <a href="{{ route('mundos-de-mim.pessoas.index') }}" class="block px-4 py-2.5 text-sm {{ request()->routeIs('mundos-de-mim.pessoas.*') ? 'text-[#7B2CBF] bg-[#7B2CBF]/10' : 'text-slate-300 hover:bg-white/5' }} transition">Entes Queridos</a>
+                                <a href="{{ route('mundos-de-mim.galeria.index') }}" class="block px-4 py-2.5 text-sm {{ request()->routeIs('mundos-de-mim.galeria.*') ? 'text-[#0077B6] bg-[#0077B6]/10' : 'text-slate-300 hover:bg-white/5' }} transition">Minha Galeria</a>
+                                <a href="{{ route('mundos-de-mim.estilos.index') }}" class="block px-4 py-2.5 text-sm {{ request()->routeIs('mundos-de-mim.estilos.*') ? 'text-[#62A87C] bg-[#62A87C]/10' : 'text-slate-300 hover:bg-white/5' }} transition">Estilos & Temas</a>
+                            </div>
+                        </div>
+
                         @can('admin-do-app')
-                        <div x-data="{ adminOpen: false }" class="relative ml-2">
+                        <div x-data="{ adminOpen: false }" class="relative">
                             <button @click="adminOpen = !adminOpen" @click.away="adminOpen = false" class="px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-1">
                                 Admin <i class="fa-solid fa-chevron-down text-[10px]"></i>
                             </button>
-                            <div x-show="adminOpen" x-cloak class="absolute left-0 mt-2 w-48 bg-[#141419] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
-                                <a href="{{ route('mundos-de-mim.playground.index') }}" class="block px-4 py-2 text-sm text-slate-300 hover:bg-white/5 transition">Playground</a>
-                                <a href="{{ route('mundos-de-mim.admin.themes.index') }}" class="block px-4 py-2 text-sm text-slate-300 hover:bg-white/5 transition">Temas</a>
-                                <a href="{{ route('mundos-de-mim.admin.importador.index') }}" class="block px-4 py-2 text-sm text-slate-300 hover:bg-white/5 transition">Importador</a>
-                                <a href="{{ route('mundos-de-mim.admin.gallery.index') }}" class="block px-4 py-2 text-sm text-slate-300 hover:bg-white/5 transition">Galeria Pública</a>
-                                <a href="{{ route('mundos-de-mim.admin.user-gallery.index') }}" class="block px-4 py-2 text-sm text-slate-300 hover:bg-white/5 transition">Galeria de Usuários</a>
+                            <div x-show="adminOpen" x-cloak class="absolute left-0 mt-2 w-52 bg-[#141419] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
+                                <a href="{{ route('mundos-de-mim.playground.index') }}" class="block px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 transition">Playground</a>
+                                <a href="{{ route('mundos-de-mim.admin.themes.index') }}" class="block px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 transition">Temas</a>
+                                <a href="{{ route('mundos-de-mim.admin.importador.index') }}" class="block px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 transition">Importador</a>
+                                <a href="{{ route('mundos-de-mim.admin.gallery.index') }}" class="block px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 transition">Galeria Pública</a>
+                                <a href="{{ route('mundos-de-mim.admin.user-gallery.index') }}" class="block px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 transition">Galeria de Usuários</a>
                             </div>
                         </div>
                         @endcan

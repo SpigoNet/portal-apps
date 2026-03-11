@@ -65,7 +65,7 @@ class TrabalhoController extends Controller
         // Validação básica
         $request->validate([
             'comentario_aluno' => 'nullable|string',
-            'arquivos.*' => 'nullable|file|max:10240',
+            'arquivos.*' => 'nullable|file|max:102400',
             'link' => 'nullable|url',
             'integrantes' => 'nullable|array' // Valida o array de RAs
         ]);

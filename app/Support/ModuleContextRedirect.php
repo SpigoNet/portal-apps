@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Facades\Route;
+
 class ModuleContextRedirect
 {
     public static function loginFallback(): string
@@ -23,6 +25,13 @@ class ModuleContextRedirect
         $homeUrl = session('module_home_url');
 
         if (self::isValidModuleUrl($homeUrl)) {
+            $path = parse_url($homeUrl, PHP_URL_PATH) ?? '';
+            $firstSegment = explode('/', trim($path, '/'))[0] ?? null;
+
+            if ($firstSegment && Route::has($firstSegment . '.login')) {
+                return route($firstSegment . '.login', absolute: false);
+            }
+
             return $homeUrl;
         }
 

@@ -286,16 +286,16 @@ class DailyPhotoService
         $ratingHtml = $this->generateRatingHtml($generationId);
 
         return "
-            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; color: #1e1e24;'>
                 <h1 style='color: #6366f1;'>Olá, {$user->name}!</h1>
-                <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; margin: 20px 0;'>
-                    <p style='color: white; font-size: 18px; margin: 0;'>{$aiMessage}</p>
+                <div style='background-color: #ede9fe; border-left: 4px solid #6366f1; padding: 20px; border-radius: 0 10px 10px 0; margin: 20px 0;'>
+                    <p style='color: #3730a3; font-size: 18px; margin: 0;'>{$aiMessage}</p>
                 </div>
                 <p><a href='{$imageUrl}' target='_blank'><img src='{$imageUrl}' style='max-width: 100%; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'/></a></p>
                 <p><a href='{$imageUrl}' target='_blank' style='color: #6366f1;'>Clique aqui para ver a imagem em tamanho maior</a></p>
                 {$ratingHtml}
                 <br>
-                <p style='color: #666; font-size: 14px;'>
+                <p style='color: #555555; font-size: 14px;'>
                     Com carinho,<br>
                     Equipe Mundos de Mim
                 </p>
@@ -308,14 +308,13 @@ class DailyPhotoService
         $ratingHtml = $this->generateRatingHtml($generationId);
 
         return "
-            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
-                <h1>Olá, {$user->name}!</h1>
-                <p>Sua foto do dia foi gerada!</p>
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; color: #1e1e24;'>
+                <h1 style='color: #6366f1;'>Olá, {$user->name}!</h1>
+                <p style='color: #333333;'>Sua foto do dia foi gerada!</p>
                 <p><a href='{$imageUrl}' target='_blank'><img src='{$imageUrl}' style='max-width: 100%; border-radius: 10px;'/></a></p>
-                <p><a href='{$imageUrl}' target='_blank'>Clique aqui para ver a imagem em tamanho maior</a></p>
-                {$ratingHtml}
+                <p><a href='{$imageUrl}' target='_blank' style='color: #6366f1;'>Clique aqui para ver a imagem em tamanho maior</a></p>
                 <br>
-                <p>Atenciosamente,<br>Equipe Mundos de Mim</p>
+                <p style='color: #555555; font-size: 14px;'>Atenciosamente,<br>Equipe Mundos de Mim</p>
             </div>
         ";
     }

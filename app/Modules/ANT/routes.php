@@ -4,6 +4,7 @@ use App\Modules\ANT\Http\Controllers\AdminAlunoController;
 use App\Modules\ANT\Http\Controllers\AdminMateriaController;
 use App\Modules\ANT\Http\Controllers\AdminProfessorController;
 use App\Modules\ANT\Http\Controllers\AntAdminController;
+use App\Modules\ANT\Http\Controllers\AuthController;
 use App\Modules\ANT\Http\Controllers\CorrecaoController;
 use App\Modules\ANT\Http\Controllers\MaterialController;
 use App\Modules\ANT\Http\Controllers\PesoController;
@@ -13,6 +14,20 @@ use App\Modules\ANT\Http\Controllers\TrabalhoController;
 use App\Modules\Metricas\Http\Middleware\RegistrarAcesso;
 use Illuminate\Support\Facades\Route;
 use App\Modules\ANT\Http\Controllers\AntHomeController;
+
+// Rotas de Autenticação do Módulo ANT
+Route::prefix('ant')->name('ant.')->middleware('web')->group(function () {
+    Route::middleware('guest')->group(function () {
+        Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+        Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+        Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+        Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
+    });
+
+    Route::middleware('auth')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    });
+});
 
 // Grupo Principal com Prefixo 'ant' e Middleware de Autenticação
 Route::prefix('ant')

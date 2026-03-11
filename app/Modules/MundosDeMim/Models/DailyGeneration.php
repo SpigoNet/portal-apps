@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Modules\MundosDeMim\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 class DailyGeneration extends Model
 {
@@ -14,7 +15,8 @@ class DailyGeneration extends Model
         'prompt_id',
         'image_url',
         'final_prompt_used',
-        'reference_date'
+        'reference_date',
+        'rating',
     ];
 
     protected $casts = [

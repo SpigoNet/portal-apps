@@ -85,9 +85,9 @@ class DailyPhotoService
             return false;
         }
 
-        $this->saveGeneration($userAttr, $imageUrl, $prompt);
+        $generation = $this->saveGeneration($userAttr, $imageUrl, $prompt);
 
-        return $this->sendNotification($userAttr, $imageUrl, $prompt, $preference);
+        return $this->sendNotification($userAttr, $imageUrl, $prompt, $preference, $generation?->id);
     }
 
     protected function generateImage(UserAttribute $userAttr, string $prompt): ?string
@@ -162,10 +162,10 @@ class DailyPhotoService
         return $result;
     }
 
-    protected function saveGeneration(UserAttribute $userAttr, string $imageUrl, string $prompt): void
+    protected function saveGeneration(UserAttribute $userAttr, string $imageUrl, string $prompt): ?DailyGeneration
     {
         try {
-            DailyGeneration::create([
+            return DailyGeneration::create([
                 'user_id' => $userAttr->user_id,
                 'image_url' => $imageUrl,
                 'final_prompt_used' => $prompt,
@@ -173,13 +173,15 @@ class DailyPhotoService
             ]);
         } catch (\Exception $e) {
             Log::warning('DailyPhotoService: Erro ao salvar geração: '.$e->getMessage());
+
+            return null;
         }
     }
 
     protected function sendEmail($user, string $imageUrl, string $prompt, DailyNotification $notification): bool
     {
         try {
-            $emailBody = $this->generateEmailBody($user, $imageUrl, $prompt);
+            $emailBody = $this->generateEmailBody($user, $imageUrl, $prompt, $notification->generation_id);
 
             Mail::send([], [], function ($message) use ($user, $emailBody) {
                 $message->to($user->email, $user->name)
@@ -201,14 +203,14 @@ class DailyPhotoService
         }
     }
 
-    protected function generateEmailBody($user, string $imageUrl, string $prompt): string
+    protected function generateEmailBody($user, string $imageUrl, string $prompt, ?int $generationId = null): string
     {
         try {
             $aiProviderService = new AiProviderService;
             $provider = $aiProviderService->getTextToTextProvider();
 
             if (! $provider) {
-                return $this->getDefaultEmailBody($user, $imageUrl);
+                return $this->getDefaultEmailBody($user, $imageUrl, $generationId);
             }
 
             $driverName = $aiProviderService->getDriverForProvider($provider);
@@ -219,7 +221,7 @@ class DailyPhotoService
             $driver = $this->createTextDriver($driverName, $model, $apiKey, $baseUrl);
 
             if (! $driver) {
-                return $this->getDefaultEmailBody($user, $imageUrl);
+                return $this->getDefaultEmailBody($user, $imageUrl, $generationId);
             }
 
             $messages = $this->buildTextPrompt($prompt, $user->name);
@@ -227,14 +229,14 @@ class DailyPhotoService
             $response = $driver->generateText($messages, []);
 
             if ($response) {
-                return $this->formatEmailBody($user, $imageUrl, $response);
+                return $this->formatEmailBody($user, $imageUrl, $response, $generationId);
             }
 
-            return $this->getDefaultEmailBody($user, $imageUrl);
+            return $this->getDefaultEmailBody($user, $imageUrl, $generationId);
         } catch (\Exception $e) {
             Log::error('DailyPhotoService: Erro ao gerar corpo do email: '.$e->getMessage());
 
-            return $this->getDefaultEmailBody($user, $imageUrl);
+            return $this->getDefaultEmailBody($user, $imageUrl, $generationId);
         }
     }
 
@@ -257,8 +259,32 @@ class DailyPhotoService
         };
     }
 
-    protected function formatEmailBody($user, string $imageUrl, string $aiMessage): string
+    protected function generateRatingHtml(?int $generationId): string
     {
+        if (! $generationId) {
+            return '';
+        }
+
+        $html = "<div style='text-align: center; margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 10px;'>";
+        $html .= "<p style='color: #475569; font-weight: bold; margin-bottom: 10px;'>Como você avalia a imagem de hoje?</p>";
+        $html .= "<div style='font-size: 32px;'>";
+
+        for ($i = 1; $i <= 5; $i++) {
+            $url = \Illuminate\Support\Facades\URL::signedRoute('mundos-de-mim.rate', ['generation' => $generationId, 'rating' => $i]);
+            $html .= "<a href='{$url}' style='text-decoration: none; color: #fbbf24; margin: 0 5px;'>★</a>";
+        }
+
+        $html .= '</div>';
+        $html .= "<p style='color: #64748b; font-size: 12px; margin-top: 10px;'>Ao avaliar, você será automaticamente logado na sua galeria.</p>";
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    protected function formatEmailBody($user, string $imageUrl, string $aiMessage, ?int $generationId = null): string
+    {
+        $ratingHtml = $this->generateRatingHtml($generationId);
+
         return "
             <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
                 <h1 style='color: #6366f1;'>Olá, {$user->name}!</h1>
@@ -267,6 +293,7 @@ class DailyPhotoService
                 </div>
                 <p><a href='{$imageUrl}' target='_blank'><img src='{$imageUrl}' style='max-width: 100%; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'/></a></p>
                 <p><a href='{$imageUrl}' target='_blank' style='color: #6366f1;'>Clique aqui para ver a imagem em tamanho maior</a></p>
+                {$ratingHtml}
                 <br>
                 <p style='color: #666; font-size: 14px;'>
                     Com carinho,<br>
@@ -276,15 +303,20 @@ class DailyPhotoService
         ";
     }
 
-    protected function getDefaultEmailBody($user, string $imageUrl): string
+    protected function getDefaultEmailBody($user, string $imageUrl, ?int $generationId = null): string
     {
+        $ratingHtml = $this->generateRatingHtml($generationId);
+
         return "
-            <h1>Olá, {$user->name}!</h1>
-            <p>Sua foto do dia foi gerada!</p>
-            <p><a href='{$imageUrl}' target='_blank'><img src='{$imageUrl}' style='max-width: 100%; border-radius: 10px;'/></a></p>
-            <p><a href='{$imageUrl}' target='_blank'>Clique aqui para ver a imagem em tamanho maior</a></p>
-            <br>
-            <p>Atenciosamente,<br>Equipe Mundos de Mim</p>
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
+                <h1>Olá, {$user->name}!</h1>
+                <p>Sua foto do dia foi gerada!</p>
+                <p><a href='{$imageUrl}' target='_blank'><img src='{$imageUrl}' style='max-width: 100%; border-radius: 10px;'/></a></p>
+                <p><a href='{$imageUrl}' target='_blank'>Clique aqui para ver a imagem em tamanho maior</a></p>
+                {$ratingHtml}
+                <br>
+                <p>Atenciosamente,<br>Equipe Mundos de Mim</p>
+            </div>
         ";
     }
 

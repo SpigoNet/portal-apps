@@ -1,3 +1,10 @@
+<IfModule mod_php.c>
+    # For Apache + mod_php setups only. For PHP-FPM (more common in production),
+    # configure upload_max_filesize and post_max_size in php.ini or the FPM pool config.
+    php_value upload_max_filesize 100M
+    php_value post_max_size 110M
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

@@ -4,11 +4,12 @@ namespace App\Modules\MundosDeMim\Services;
 
 use App\Models\DailyNotification;
 use App\Modules\Admin\Services\AiProviderService;
-use App\Modules\MundosDeMim\Models\AIProvider;
 use App\Modules\MundosDeMim\Models\DailyGeneration;
 use App\Modules\MundosDeMim\Models\UserAttribute;
 use App\Services\AI\Drivers\AirForceDriver;
+use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
+use App\Services\AI\Drivers\LmStudioDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -25,15 +26,14 @@ class DailyPhotoService
 
     public function __construct()
     {
-        $provider = AIProvider::where('is_active', true)
-            ->whereNotNull('provider_id')
-            ->first();
+        $service = new AiProviderService;
+        $provider = $service->getImageToImageProvider();
 
-        if ($provider && $provider->gatewayProvider) {
-            $this->driver = $provider->gatewayProvider->driver;
+        if ($provider && $provider->provedor) {
+            $this->driver = $service->getDriverForProvider($provider);
             $this->model = $provider->model;
-            $this->apiKey = $provider->gatewayProvider->api_key;
-            $this->baseUrl = $provider->gatewayProvider->base_url;
+            $this->apiKey = $service->getApiKeyForProvider($provider);
+            $this->baseUrl = $service->getBaseUrlForProvider($provider);
         }
     }
 
@@ -255,6 +255,8 @@ class DailyPhotoService
         return match ($driverName) {
             'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
+            'gemini' => new GeminiDriver($apiKey),
+            'lm_studio' => new LmStudioDriver($baseUrl),
             default => new PollinationDriver($model, $apiKey, $baseUrl),
         };
     }

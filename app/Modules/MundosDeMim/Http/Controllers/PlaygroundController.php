@@ -3,8 +3,8 @@
 namespace App\Modules\MundosDeMim\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\AiModel;
 use App\Models\User;
-use App\Modules\MundosDeMim\Models\AIProvider;
 use App\Modules\MundosDeMim\Models\DailyGeneration;
 use App\Modules\MundosDeMim\Models\Prompt;
 use App\Modules\MundosDeMim\Models\UserAttribute;
@@ -16,6 +16,7 @@ use App\Services\AI\Drivers\LmStudioDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class PlaygroundController extends Controller
@@ -28,7 +29,9 @@ class PlaygroundController extends Controller
 
         $attributes = UserAttribute::where('user_id', $targetUser->id)->first();
         $aiProviderService = new AiProviderService;
-        $providers = $aiProviderService->getActiveModels()->where('supports_image_input', true)->values();
+        $providers = $aiProviderService->getActiveModels()
+            ->filter(fn (AiModel $model) => $model->supports_image_input)
+            ->values();
         $selectedProvider = $aiProviderService->getImageToImageProvider($targetUser);
 
         $hasPhoto = $attributes && ! empty($attributes->photo_path) && Storage::disk('public')->exists($attributes->photo_path);
@@ -130,7 +133,7 @@ class PlaygroundController extends Controller
         $request->validate([
             'prompt' => 'required|string|min:3|max:2000',
             'prompt_id' => 'nullable|exists:mundos_de_mim_prompts,id',
-            'ai_provider_id' => 'nullable|exists:mundos_de_mim_ai_providers,id',
+            'ai_provider_id' => 'nullable|exists:ai_modelos,id',
             'send_to_user' => 'nullable|boolean',
         ]);
 
@@ -244,12 +247,12 @@ class PlaygroundController extends Controller
         }
     }
 
-    private function resolveModel($user, ?string $providerId = null): ?AIProvider
+    private function resolveModel($user, ?string $providerId = null): ?AiModel
     {
         $service = new AiProviderService;
 
         if ($providerId) {
-            return AIProvider::with('gatewayProvider')->where('is_active', true)->find($providerId);
+            return $service->getActiveModels()->firstWhere('id', (int) $providerId);
         }
 
         return $service->getImageToImageProvider($user);

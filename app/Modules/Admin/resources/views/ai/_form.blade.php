@@ -6,6 +6,22 @@
         <x-input-error class="mt-2" :messages="$errors->get('nome')" />
     </div>
 
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <x-input-label for="driver" :value="__('Driver')" />
+            <x-text-input id="driver" name="driver" type="text" class="block mt-1 w-full"
+                :value="old('driver', $provedor->driver ?? '')" required placeholder="pollination, airforce, gemini..." />
+            <x-input-error class="mt-2" :messages="$errors->get('driver')" />
+        </div>
+
+        <div>
+            <x-input-label for="base_url" :value="__('Base URL da API')" />
+            <x-text-input id="base_url" name="base_url" type="text" class="block mt-1 w-full"
+                :value="old('base_url', $provedor->base_url ?? '')" />
+            <x-input-error class="mt-2" :messages="$errors->get('base_url')" />
+        </div>
+    </div>
+
     <div>
         <x-input-label for="url_json_modelos" :value="__('URL JSON para Sincronização')" />
         <x-text-input id="url_json_modelos" name="url_json_modelos" type="text" class="block mt-1 w-full"
@@ -54,5 +70,15 @@
             </div>
             <x-input-error class="mt-2" :messages="$errors->get('default_output_types')" />
         </div>
+    </div>
+
+    <div>
+        <label class="inline-flex items-center">
+            <input type="checkbox" name="is_active" value="1"
+                class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800"
+                {{ old('is_active', $provedor->is_active ?? true) ? 'checked' : '' }}>
+            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Provedor ativo</span>
+        </label>
+        <x-input-error class="mt-2" :messages="$errors->get('is_active')" />
     </div>
 </div>

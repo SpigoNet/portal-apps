@@ -237,12 +237,13 @@ class ProfessorController extends Controller
         $request->validate([
             'nome' => 'required|string|max:255',
             'materia_id' => 'required|exists:ant_materias,id',
-            'tipo_trabalho_id' => 'required|exists:ant_tipos_trabalho,id',
+            'tipos_ids' => 'required|array|min:1',
+            'tipos_ids.*' => 'exists:ant_tipos_trabalho,id',
             'peso_id' => 'required|exists:ant_pesos,id',
             'prazo' => 'required|date',
             'maximo_alunos' => 'required|integer|min:1',
             'descricao' => 'required|string',
-            'dicas_correcao' => 'nullable|string', // Campo novo da IA
+            'dicas_correcao' => 'nullable|string',
         ]);
 
         $config = AntConfiguracao::first();
@@ -259,6 +260,8 @@ class ProfessorController extends Controller
             abort(403, 'Você não tem permissão para criar trabalhos nesta disciplina.');
         }
 
+        $tiposIds = array_map('intval', $request->tipos_ids);
+
         // Criação
         AntTrabalho::create([
             'semestre' => $semestreAtual,
@@ -266,7 +269,8 @@ class ProfessorController extends Controller
             'descricao' => $request->descricao,
             'dicas_correcao' => $request->dicas_correcao,
             'materia_id' => $request->materia_id,
-            'tipo_trabalho_id' => $request->tipo_trabalho_id,
+            'tipo_trabalho_id' => $tiposIds[0], // first selection for backward compat
+            'tipos_trabalho_ids' => $tiposIds,
             'prazo' => $request->prazo,
             'maximo_alunos' => $request->maximo_alunos,
             'peso_id' => $request->peso_id,

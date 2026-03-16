@@ -28,15 +28,23 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Tipo de Entrega</label>
-                                <select name="tipo_trabalho_id" required
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tipos de Entrega Aceitos</label>
+                                <p class="text-xs text-gray-500 mb-2">Selecione um ou mais formatos que o aluno poderá enviar.</p>
+                                <div class="space-y-2 border border-gray-300 rounded-md p-3 bg-gray-50 max-h-48 overflow-y-auto">
                                     @foreach($tipos as $tipo)
-                                        <option value="{{ $tipo->id }}">
-                                            {{ $tipo->descricao }} ({{ $tipo->arquivos }})
-                                        </option>
+                                        <label class="flex items-start gap-2 cursor-pointer hover:bg-white rounded p-1 transition-colors">
+                                            <input type="checkbox" name="tipos_ids[]" value="{{ $tipo->id }}"
+                                                   class="mt-0.5 rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                                            <span>
+                                                <span class="text-sm font-medium text-gray-800">{{ $tipo->descricao }}</span>
+                                                <span class="text-xs text-gray-500 ml-1">({{ $tipo->arquivos }})</span>
+                                            </span>
+                                        </label>
                                     @endforeach
-                                </select>
+                                </div>
+                                @error('tipos_ids')
+                                    <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 

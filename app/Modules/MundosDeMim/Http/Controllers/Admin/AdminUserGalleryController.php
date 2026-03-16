@@ -15,25 +15,17 @@ class AdminUserGalleryController extends Controller
      */
     public function index()
     {
-        $users = User::whereHas('mundosDeMimAiSetting') // Ou podemos usar DailyGeneration para filtrar
-            ->withCount(['mundosDeMimAiSetting as generations_count' => function ($query) {
-                // Como não temos a relação direta no User ainda, vamos usar uma subquery ou join
-            }])
+        $users = User::query()
+            ->select('users.*', 'geracoes.generations_count')
+            ->joinSub(
+                DailyGeneration::query()
+                    ->selectRaw('user_id, COUNT(*) as generations_count')
+                    ->groupBy('user_id'),
+                'geracoes',
+                fn ($join) => $join->on('geracoes.user_id', '=', 'users.id')
+            )
             ->orderBy('name')
             ->paginate(20);
-
-        // Ajuste: Vamos pegar os IDs de usuários que realmente têm gerações
-        $userIdsWithGenerations = DailyGeneration::distinct()->pluck('user_id');
-
-        $users = User::whereIn('id', $userIdsWithGenerations)
-            ->withCount(['mundosDeMimAiSetting']) // Apenas para ter algo, mas vamos contar gerações manualmente se necessário
-            ->orderBy('name')
-            ->paginate(20);
-
-        // Adicionando contagem de gerações manualmente para cada usuário na coleção
-        foreach ($users as $user) {
-            $user->generations_count = DailyGeneration::where('user_id', $user->id)->count();
-        }
 
         return view('MundosDeMim::admin.user-gallery.index', compact('users'));
     }

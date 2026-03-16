@@ -67,14 +67,9 @@ class User extends Authenticatable
         return $this->hasMany(\App\Modules\StreamingManager\Models\Streaming::class);
     }
 
-    public function mundosDeMimAiSetting()
+    public function aiModelDefaults()
     {
-        return $this->hasOne(\App\Modules\MundosDeMim\Models\UserAiSetting::class);
-    }
-
-    public function mundosDeMimDefaultAiProvider()
-    {
-        return $this->belongsTo(\App\Modules\MundosDeMim\Models\AIProvider::class, 'mundos_de_mim_default_ai_provider_id');
+        return $this->hasMany(\App\Models\AiUserModelDefault::class);
     }
 
     public function isProfessor(): bool

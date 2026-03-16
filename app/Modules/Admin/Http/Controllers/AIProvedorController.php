@@ -26,12 +26,16 @@ class AIProvedorController extends Controller
     {
         $validated = $request->validate([
             'nome' => 'required|string|max:255',
+            'driver' => 'required|string|max:100|unique:ai_provedores,driver',
             'url_json_modelos' => 'nullable|url',
+            'base_url' => 'nullable|url',
             'api_key' => 'nullable|string',
             'default_input_types' => 'nullable|array',
             'default_output_types' => 'nullable|array',
+            'is_active' => 'nullable|boolean',
         ]);
 
+        $validated['is_active'] = $request->boolean('is_active', true);
         AIProvedor::create($validated);
 
         return redirect()->route('admin.ai.provedores.index')->with('success', 'Provedor criado com sucesso!');
@@ -46,12 +50,19 @@ class AIProvedorController extends Controller
     {
         $validated = $request->validate([
             'nome' => 'required|string|max:255',
+            'driver' => 'required|string|max:100|unique:ai_provedores,driver,'.$provedor->id,
             'url_json_modelos' => 'nullable|url',
+            'base_url' => 'nullable|url',
             'api_key' => 'nullable|string',
             'default_input_types' => 'nullable|array',
             'default_output_types' => 'nullable|array',
+            'is_active' => 'nullable|boolean',
         ]);
 
+        $validated['is_active'] = $request->boolean('is_active');
+        if (($validated['api_key'] ?? null) === '********' || empty($validated['api_key'])) {
+            unset($validated['api_key']);
+        }
         $provedor->update($validated);
 
         return redirect()->route('admin.ai.provedores.index')->with('success', 'Provedor atualizado com sucesso!');
@@ -65,7 +76,7 @@ class AIProvedorController extends Controller
 
     public function sync(AIProvedor $provedor)
     {
-        if (!$provedor->url_json_modelos) {
+        if (! $provedor->url_json_modelos) {
             return back()->with('error', 'URL de sincronização não definida.');
         }
 
@@ -82,42 +93,44 @@ class AIProvedorController extends Controller
 
             return back()->with('success', 'Modelos sincronizados com sucesso!');
         } catch (\Exception $e) {
-            return back()->with('error', 'Falha ao sincronizar: ' . $e->getMessage());
+            return back()->with('error', 'Falha ao sincronizar: '.$e->getMessage());
         }
     }
 
     private function processModel(AIProvedor $provedor, array $item)
     {
         $externalId = $item['id'] ?? $item['name'] ?? null;
-        if (!$externalId) return;
-
-        // 1. Tratar tipos de entrada/saída (Pollinations vs Airforce)
-        $input = $item['input_modalities'] ?? ($item['supports_chat'] ?? false ? ['text'] : ($provedor->default_input_types ?? ['text']));
-        $output = $item['output_modalities'] ?? ($item['supports_images'] ?? false ? ['image'] : ($provedor->default_output_types ?? ['text']));
-
-        if ($item['supports_images'] ?? false) {
-            $input = array_unique(array_merge((array)$input, ['text']));
-            $output = array_unique(array_merge((array)$output, ['image']));
+        if (! $externalId) {
+            return;
         }
 
-        // 2. Tratar Pricing (Converter Notação Científica)
+        $input = $item['input_modalities']
+            ?? ($item['supports_chat'] ?? false ? ['text'] : ($provedor->default_input_types ?? ['text']));
+        $output = $item['output_modalities']
+            ?? ($item['supports_images'] ?? false ? ['image'] : ($provedor->default_output_types ?? ['text']));
+
+        if ($item['supports_images'] ?? false) {
+            $input = array_values(array_unique(array_merge((array) $input, ['text'])));
+            $output = array_values(array_unique(array_merge((array) $output, ['image'])));
+        }
+
         $pricing = null;
         if (isset($item['pricing'])) {
             $pricing = collect($item['pricing'])->map(function ($value) {
-                return is_numeric($value) ? number_format((float)$value, 15, '.', '') : $value;
+                return is_numeric($value) ? number_format((float) $value, 15, '.', '') : $value;
             })->toArray();
         }
 
-        // 3. Persistir
         AIModelo::updateOrCreate(
             ['ai_provedor_id' => $provedor->id, 'modelo_id_externo' => $externalId],
             [
                 'nome' => $item['name'] ?? $item['id'],
                 'descricao' => $item['description'] ?? ($item['owned_by'] ?? ''),
-                'input_types' => (array)$input,
-                'output_types' => (array)$output,
+                'input_types' => array_values((array) $input),
+                'output_types' => array_values((array) $output),
                 'pricing' => $pricing,
-                'raw_data' => $item // Salva tudo conforme solicitado
+                'raw_data' => $item,
+                'is_active' => true,
             ]
         );
     }

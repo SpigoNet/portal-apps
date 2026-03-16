@@ -1,20 +1,6 @@
 <?php
 namespace App\Modules\Admin\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class AIProvedor extends Model
+class AIProvedor extends \App\Models\AiProvider
 {
-    protected $table = 'ai_provedores';
-    protected $fillable = ['nome', 'url_json_modelos', 'api_key', 'default_input_types', 'default_output_types'];
-    protected $casts = [
-        'api_key' => 'encrypted',
-        'default_input_types' => 'array',
-        'default_output_types' => 'array'
-    ];
-
-    public function modelos()
-    {
-        return $this->hasMany(AIModelo::class, 'ai_provedor_id');
-    }
 }

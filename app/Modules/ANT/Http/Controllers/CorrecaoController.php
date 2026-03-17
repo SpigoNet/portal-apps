@@ -95,11 +95,32 @@ class CorrecaoController extends Controller
                 $dadosVisualizacao['linguagem'] = $extensao;
 
             } elseif ($extensao === 'zip') {
-                $publicPath = $this->prepararProjetoWeb($caminhoArquivo, $entrega->id, $fileIndex);
-                if ($publicPath) {
-                    $dadosVisualizacao['tipo'] = 'unity';
-                    // USANDO Storage::url()
-                    $dadosVisualizacao['url'] = Storage::url($publicPath . '/index.html');
+                $extractBasePath = "ant/extracted/{$entrega->id}_{$fileIndex}";
+                $unityPath = $this->prepararProjetoWeb($caminhoArquivo, $entrega->id, $fileIndex);
+
+                if ($unityPath !== null) {
+                    // List all files inside the extracted ZIP
+                    $allExtractedFiles = Storage::disk('public')->allFiles($extractBasePath);
+
+                    // Build relative paths (relative to the extraction root)
+                    $relativeFiles = array_map(function ($f) use ($extractBasePath) {
+                        return ltrim(substr($f, strlen($extractBasePath)), '/');
+                    }, $allExtractedFiles);
+                    sort($relativeFiles);
+
+                    // Detect a Unity WebGL build: look for index.html anywhere in the extraction
+                    $unityUrl = null;
+                    foreach ($allExtractedFiles as $f) {
+                        if (basename($f) === 'index.html') {
+                            $unityUrl = Storage::url($f);
+                            break;
+                        }
+                    }
+
+                    $dadosVisualizacao['tipo'] = 'zip';
+                    $dadosVisualizacao['arquivos_extraidos'] = $relativeFiles;
+                    $dadosVisualizacao['unity_url'] = $unityUrl;
+                    $dadosVisualizacao['url'] = $urlPublica;
                 } else {
                     $dadosVisualizacao['tipo'] = 'download';
                     $dadosVisualizacao['url'] = $urlPublica;

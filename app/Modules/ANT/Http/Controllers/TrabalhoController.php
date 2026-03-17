@@ -95,8 +95,9 @@ class TrabalhoController extends Controller
         }
 
         // 2. Processamento de Arquivos (FAZ UMA ÚNICA VEZ)
-        $tiposPermitidos = explode('|', strtoupper($trabalho->tipoTrabalho->arquivos));
+        $tiposPermitidos = $trabalho->getAllowedExtensions();
         $ehLink = in_array('LINK', $tiposPermitidos);
+        $extensoesArquivo = array_values(array_filter($tiposPermitidos, fn($e) => $e !== 'LINK'));
         $caminhos = [];
 
         if ($ehLink && $request->filled('link')) {
@@ -106,8 +107,8 @@ class TrabalhoController extends Controller
         if ($request->hasFile('arquivos')) {
             foreach ($request->file('arquivos') as $arquivo) {
                 $extensaoDoArquivo = strtoupper($arquivo->getClientOriginalExtension());
-                if (!$ehLink && !in_array($extensaoDoArquivo, $tiposPermitidos)) {
-                    return back()->withErrors(['arquivos' => "Extensão inválida."]);
+                if (!empty($extensoesArquivo) && !in_array($extensaoDoArquivo, $extensoesArquivo)) {
+                    return back()->withErrors(['arquivos' => "Extensão inválida: .{$extensaoDoArquivo}"]);
                 }
 
                 // Salva no diretório do LÍDER (para organização)

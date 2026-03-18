@@ -99,9 +99,7 @@ class DailyPhotoService
         }
 
         $options = [];
-        if ($this->driver === 'pollination' && $userAttr->photo_path) {
-            $options['reference_image_path'] = $userAttr->photo_path;
-        } elseif ($this->driver === 'airforce' && $userAttr->photo_path) {
+        if ($userAttr->photo_path && in_array($this->driver, ['pollination', 'airforce'], true)) {
             $options['reference_image_path'] = $userAttr->photo_path;
         }
 
@@ -112,23 +110,9 @@ class DailyPhotoService
 
     protected function buildPrompt(UserAttribute $userAttr): string
     {
-        $parts = [];
-
-        foreach ($userAttr->promptContextSections(220) as $label => $content) {
-            $parts[] = "{$label}: {$content}";
-        }
-
-        if ($avoid = $userAttr->avoidPromptContext(180)) {
-            $parts[] = "evitar: {$avoid}";
-        }
-
-        $prompt = implode(', ', $parts);
-
-        if (empty($prompt)) {
-            $prompt = 'beautiful person, portrait, high quality';
-        }
-
-        return $prompt.', photorealistic, 8k, cinematic lighting, professional photography';
+        return $userAttr->buildImageGenerationPrompt(
+            'Crie a imagem do dia desta pessoa usando o perfil completo para definir visual, energia, estilo, cenarios e preferencias.'
+        );
     }
 
     protected function createDriver()

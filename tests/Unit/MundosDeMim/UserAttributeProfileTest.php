@@ -51,4 +51,23 @@ class UserAttributeProfileTest extends TestCase
         $this->assertStringContainsString('peso aproximado de 78.5 kg', $sections['perfil visual']);
         $this->assertSame('homem', $sections['genero com que se identifica']);
     }
+
+    public function test_it_builds_full_generation_prompt_with_request_and_profile(): void
+    {
+        $attribute = new UserAttribute([
+            'gender_identity' => 'não binárie',
+            'visual_profile' => 'Pessoa de pele oliva, olhos escuros e cabelo curto ondulado.',
+            'personality_vibe' => 'Energia criativa e introspectiva.',
+            'favorite_settings' => 'Céu noturno, chuva leve e ruas iluminadas.',
+            'avoid_in_generations' => 'Evitar neon excessivo.',
+        ]);
+
+        $prompt = $attribute->buildImageGenerationPrompt('Criar uma cena cinematográfica urbana.');
+
+        $this->assertStringContainsString('Use a imagem de referencia anexada', $prompt);
+        $this->assertStringContainsString('Pedido principal: Criar uma cena cinematográfica urbana.', $prompt);
+        $this->assertStringContainsString('genero com que se identifica: não binárie', $prompt);
+        $this->assertStringContainsString('perfil visual: Pessoa de pele oliva, olhos escuros e cabelo curto ondulado.', $prompt);
+        $this->assertStringContainsString('evitar: Evitar neon excessivo.', $prompt);
+    }
 }

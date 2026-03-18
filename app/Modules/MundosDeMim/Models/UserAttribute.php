@@ -68,6 +68,40 @@ class UserAttribute extends Model
         return $this->cleanPromptText($this->avoid_in_generations, $maxLength);
     }
 
+    public function buildImageGenerationPrompt(?string $userPrompt, int $maxTotalLength = 1300): string
+    {
+        $request = $this->cleanPromptText($userPrompt, 280)
+            ?? 'Crie uma nova imagem personalizada inspirada nesta pessoa.';
+
+        $parts = [
+            'Use a imagem de referencia anexada para preservar a mesma pessoa, mantendo rosto, cabelo, expressao e tracos unicos.',
+            'Pedido principal: '.$request,
+        ];
+
+        $profileDetails = [];
+        foreach ($this->promptContextSections(150) as $label => $content) {
+            $profileDetails[] = "{$label}: {$content}";
+        }
+
+        if ($avoid = $this->avoidPromptContext(120)) {
+            $profileDetails[] = "evitar: {$avoid}";
+        }
+
+        if ($profileDetails !== []) {
+            $parts[] = 'Perfil do usuario: '.implode('; ', $profileDetails).'.';
+        }
+
+        $parts[] = 'Resultado final com alta qualidade, aparencia coerente com o perfil, composicao bem resolvida e identidade preservada.';
+
+        $prompt = trim(implode(' ', $parts));
+
+        if (mb_strlen($prompt) > $maxTotalLength) {
+            $prompt = rtrim(mb_substr($prompt, 0, $maxTotalLength - 1)).'…';
+        }
+
+        return $prompt;
+    }
+
     protected function legacyVisualSummary(): ?string
     {
         $parts = [];

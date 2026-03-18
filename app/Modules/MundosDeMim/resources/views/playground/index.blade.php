@@ -38,10 +38,10 @@
 
                     <div class="mb-8 border-b pb-6">
                         <h3 class="text-lg font-bold mb-2 flex items-center gap-2">
-                            <span>📸</span> 1. Imagem de Referência (Opcional)
+                            <span>📸</span> 1. Imagem de Referência
                         </h3>
                         <p class="text-sm text-gray-500 mb-4">
-                            Se houver foto, ela será enviada para análise (Gemini) ou usada como base (Pollinations).
+                            A foto de referência é enviada junto com o perfil e o prompt final para preservar a identidade na nova imagem.
                         </p>
 
                         @if($hasPhoto)
@@ -60,8 +60,7 @@
                             <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
                                 <p class="text-yellow-700 text-sm">
                                     <strong>Sem foto:</strong> Configure seu <a
-                                        href="{{ route('mundos-de-mim.perfil.index') }}" class="underline font-bold">Perfil
-                                        Biométrico</a> para testar recursos visuais.
+                                        href="{{ route('mundos-de-mim.perfil.index') }}" class="underline font-bold">Perfil</a> para gerar imagens no playground.
                                 </p>
                             </div>
                         @endif
@@ -166,6 +165,13 @@
                                             <i id="magic-icon" class="fa-solid fa-wand-magic-sparkles"></i>
                                             Refinar (Varinha Mágica)
                                         </button>
+
+                                        <button type="button" id="btn-preview-prompt"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 rounded-full text-slate-700 text-xs font-bold border border-slate-200 hover:bg-slate-200 transition">
+                                            <span id="preview-spinner" class="hidden animate-spin">🌀</span>
+                                            <i id="preview-icon" class="fa-solid fa-eye"></i>
+                                            Ver prévia enviada para IA
+                                        </button>
                                     </div>
                                 </div>
 
@@ -184,6 +190,23 @@
                             </button>
                         </div>
                     </form>
+
+                    <div id="prompt-preview-panel" class="hidden mt-6 rounded-xl border border-slate-200 bg-slate-50 shadow-sm">
+                        <div class="flex items-center justify-between gap-4 px-4 py-3 border-b border-slate-200">
+                            <div>
+                                <h4 class="font-bold text-slate-800">Prévia do texto final enviado para a IA</h4>
+                                <p id="prompt-preview-note" class="text-xs text-slate-500 mt-1">
+                                    Esta prévia usa a mesma montagem aplicada na geração.
+                                </p>
+                            </div>
+                            <button type="button" id="btn-close-preview" class="text-slate-500 hover:text-slate-700">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <pre id="prompt-preview-content" class="whitespace-pre-wrap break-words text-sm text-slate-700 font-sans leading-6"></pre>
+                        </div>
+                    </div>
 
                 </div>
             </div>
@@ -255,6 +278,10 @@
             }
         }
 
+        document.getElementById('btn-close-preview')?.addEventListener('click', function () {
+            document.getElementById('prompt-preview-panel')?.classList.add('hidden');
+        });
+
         document.getElementById('btn-magic-wand')?.addEventListener('click', async function () {
             const promptArea = document.getElementById('prompt');
             const btn = this;
@@ -292,6 +319,58 @@
                     promptArea.classList.add('bg-indigo-50');
                     setTimeout(() => promptArea.classList.remove('bg-indigo-50'), 1000);
                 }
+            } catch (error) {
+                console.error(error);
+                alert('Erro na comunicação com o servidor.');
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+                icon.classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('btn-preview-prompt')?.addEventListener('click', async function () {
+            const promptArea = document.getElementById('prompt');
+            const btn = this;
+            const spinner = document.getElementById('preview-spinner');
+            const icon = document.getElementById('preview-icon');
+            const panel = document.getElementById('prompt-preview-panel');
+            const content = document.getElementById('prompt-preview-content');
+            const note = document.getElementById('prompt-preview-note');
+
+            if (!promptArea.value.trim()) {
+                alert('Digite um prompt primeiro para eu montar a prévia.');
+                return;
+            }
+
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+            icon.classList.add('hidden');
+
+            try {
+                const response = await fetch("{{ route('mundos-de-mim.playground.preview') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        prompt: promptArea.value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert('Erro: ' + data.error);
+                    return;
+                }
+
+                content.textContent = data.preview || '';
+                note.textContent = data.has_photo
+                    ? 'Esta prévia usa a mesma montagem aplicada na geração e considera a foto de referência atual.'
+                    : 'A prévia foi montada, mas ainda falta uma foto de referência válida para gerar a imagem.';
+                panel.classList.remove('hidden');
             } catch (error) {
                 console.error(error);
                 alert('Erro na comunicação com o servidor.');

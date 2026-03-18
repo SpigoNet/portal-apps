@@ -172,9 +172,7 @@
                                 <textarea name="prompt" id="prompt" rows="5"
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                     placeholder="Ex: Cyberpunk portrait of a hero, cinematic lighting, ultra detailed"
-                                    required>{{ old('prompt') ?? "Source my Image, keep face 99.9% Orginal, The focus of the 8K is on the face and hairstyle at 100%, as a reference for the uploaded image, a super-clear cinematic portrait photo, wearing the full white kit of the iranian national team, decorated with the club's logo and the sponsor's 'Emirates Fly Better' in black, with the Champions League logo on the sleeve. The movement and atmosphere: A showy move where he balances a football on his right finger; the atmosphere is festive and cheerful, expressing skill and confidence.  
-The location and resolution: A bright green grass in the background suggests being on the pitch; the image is technically modified with very high clarity and saturated colors, highlighting the details of the ball and the shirt.
-The image size is 9/16." }}</textarea>
+                                    required>{{ old('prompt') ?? ($latestPrompt ? $latestPrompt->prompt_text : '') }}</textarea>
                             </div>
                         </div>
 

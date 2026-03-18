@@ -208,7 +208,6 @@ class PollinationDriver implements AiDriverInterface
         // 3. Converte qualquer espaço em branco (inclui enter/tab) para underscore
         $prompt = preg_replace('/\s+/u', '_', trim($prompt));
 
-        // 4. Limita tamanho (opcional, mas seguro para GET request)
-        return Str::limit($prompt, 1500, '');
+        return $prompt;
     }
 }

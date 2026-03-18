@@ -44,33 +44,33 @@ class UserAttribute extends Model
             && $this->filledText($this->hair_type);
     }
 
-    public function promptContextSections(int $maxLength = 320): array
+    public function promptContextSections(): array
     {
         $sections = [
-            'genero com que se identifica' => $this->cleanPromptText($this->gender_identity, 120),
-            'perfil visual' => $this->cleanPromptText($this->visual_profile, $maxLength),
-            'jeito e energia' => $this->cleanPromptText($this->personality_vibe, $maxLength),
-            'gostos e interesses' => $this->cleanPromptText($this->interests_and_symbols, $maxLength),
-            'estilo e roupas' => $this->cleanPromptText($this->style_and_wardrobe, $maxLength),
-            'cenarios favoritos' => $this->cleanPromptText($this->favorite_settings, $maxLength),
-            'detalhes de identidade' => $this->cleanPromptText($this->identity_details, $maxLength),
+            'genero com que se identifica' => $this->cleanPromptText($this->gender_identity),
+            'perfil visual' => $this->cleanPromptText($this->visual_profile),
+            'jeito e energia' => $this->cleanPromptText($this->personality_vibe),
+            'gostos e interesses' => $this->cleanPromptText($this->interests_and_symbols),
+            'estilo e roupas' => $this->cleanPromptText($this->style_and_wardrobe),
+            'cenarios favoritos' => $this->cleanPromptText($this->favorite_settings),
+            'detalhes de identidade' => $this->cleanPromptText($this->identity_details),
         ];
 
         if (! $sections['perfil visual']) {
-            $sections['perfil visual'] = $this->cleanPromptText($this->legacyVisualSummary(), $maxLength);
+            $sections['perfil visual'] = $this->cleanPromptText($this->legacyVisualSummary());
         }
 
         return array_filter($sections);
     }
 
-    public function avoidPromptContext(int $maxLength = 240): ?string
+    public function avoidPromptContext(): ?string
     {
-        return $this->cleanPromptText($this->avoid_in_generations, $maxLength);
+        return $this->cleanPromptText($this->avoid_in_generations);
     }
 
-    public function buildImageGenerationPrompt(?string $userPrompt, int $maxTotalLength = 1300): string
+    public function buildImageGenerationPrompt(?string $userPrompt): string
     {
-        $request = $this->cleanPromptText($userPrompt, 280)
+        $request = $this->cleanPromptText($userPrompt)
             ?? 'Crie uma nova imagem personalizada inspirada nesta pessoa.';
 
         $parts = [
@@ -93,13 +93,7 @@ class UserAttribute extends Model
 
         $parts[] = 'Resultado final com alta qualidade, aparencia coerente com o perfil, composicao bem resolvida e identidade preservada.';
 
-        $prompt = trim(implode(' ', $parts));
-
-        if (mb_strlen($prompt) > $maxTotalLength) {
-            $prompt = rtrim(mb_substr($prompt, 0, $maxTotalLength - 1)).'…';
-        }
-
-        return $prompt;
+        return trim(implode(' ', $parts));
     }
 
     protected function legacyVisualSummary(): ?string
@@ -129,20 +123,15 @@ class UserAttribute extends Model
         return empty($parts) ? null : implode(', ', $parts);
     }
 
-    protected function cleanPromptText(?string $value, int $maxLength): ?string
+    protected function cleanPromptText(?string $value): ?string
     {
         if (! $this->filledText($value)) {
             return null;
         }
 
         $text = preg_replace('/\s+/u', ' ', strip_tags($value));
-        $text = trim((string) $text);
 
-        if (mb_strlen($text) > $maxLength) {
-            $text = rtrim(mb_substr($text, 0, $maxLength - 1)).'…';
-        }
-
-        return $text;
+        return trim((string) $text);
     }
 
     protected function filledText(?string $value): bool

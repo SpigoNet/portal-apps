@@ -93,6 +93,17 @@
                             <p class="text-xs text-gray-500 mt-2">
                                 Dica: escreva como se estivesse explicando sua aparência para alguém que precisa te reconhecer em diferentes cenários.
                             </p>
+
+                            <div class="mt-5">
+                                <label for="gender_identity" class="block font-medium text-sm text-gray-700 mb-2">Gênero com que você se identifica</label>
+                                <input type="text" name="gender_identity" id="gender_identity" required
+                                       value="{{ old('gender_identity', $attributes->gender_identity ?? '') }}"
+                                       class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
+                                       placeholder="Ex.: mulher, homem, mulher trans, homem trans, não binárie, travesti...">
+                                <p class="text-xs text-gray-500 mt-2">
+                                    Essa informação ajuda a geração de imagens a respeitar melhor sua identidade. A IA da foto não tenta adivinhar isso por você.
+                                </p>
+                            </div>
                         </section>
 
                         <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 border-b pb-8">
@@ -142,55 +153,6 @@
                                           class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
                                           placeholder="Ex.: Não gosto de estética neon, terror, exageros futuristas, roupas muito formais ou imagens com sensualização excessiva.">{{ old('avoid_in_generations', $attributes->avoid_in_generations ?? '') }}</textarea>
                                 <p class="text-xs text-gray-500 mt-2">Use este espaço para colocar limites claros de estilo, cenário, cor, clima ou tipo de imagem.</p>
-                            </div>
-                        </section>
-
-                        <section class="border-b pb-8">
-                            <div class="mb-5">
-                                <h3 class="text-lg font-medium text-gray-900">Dados complementares para temas legados</h3>
-                                <p class="text-sm text-gray-500 mt-1">
-                                    Estes campos continuam existindo para compatibilidade com prompts e regras antigas, mas agora são opcionais.
-                                </p>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="height" class="block font-medium text-sm text-gray-700">Altura (cm)</label>
-                                    <input type="number" name="height" id="height"
-                                           value="{{ old('height', $attributes->height ?? '') }}"
-                                           class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full">
-                                </div>
-
-                                <div>
-                                    <label for="weight" class="block font-medium text-sm text-gray-700">Peso (kg)</label>
-                                    <input type="number" name="weight" id="weight" step="0.1"
-                                           value="{{ old('weight', $attributes->weight ?? '') }}"
-                                           class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full">
-                                </div>
-
-                                <div>
-                                    <label for="body_type" class="block font-medium text-sm text-gray-700">Tipo de corpo</label>
-                                    <input type="text" name="body_type" id="body_type"
-                                           value="{{ old('body_type', $attributes->body_type ?? '') }}"
-                                           class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
-                                           placeholder="Ex.: atlético, curvilíneo, magro, forte">
-                                </div>
-
-                                <div>
-                                    <label for="eye_color" class="block font-medium text-sm text-gray-700">Cor dos olhos</label>
-                                    <input type="text" name="eye_color" id="eye_color"
-                                           value="{{ old('eye_color', $attributes->eye_color ?? '') }}"
-                                           class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
-                                           placeholder="Ex.: castanhos, verdes, mel">
-                                </div>
-
-                                <div>
-                                    <label for="hair_type" class="block font-medium text-sm text-gray-700">Cabelo</label>
-                                    <input type="text" name="hair_type" id="hair_type"
-                                           value="{{ old('hair_type', $attributes->hair_type ?? '') }}"
-                                           class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
-                                           placeholder="Ex.: cacheado castanho escuro, liso curto preto">
-                                </div>
                             </div>
                         </section>
 
@@ -264,7 +226,7 @@
                 if (data.error) {
                     alert('Erro: ' + data.error);
                 } else {
-                    const fields = ['visual_profile', 'style_and_wardrobe', 'body_type', 'eye_color', 'hair_type'];
+                    const fields = ['visual_profile', 'style_and_wardrobe'];
 
                     fields.forEach(id => {
                         if (!data[id]) {

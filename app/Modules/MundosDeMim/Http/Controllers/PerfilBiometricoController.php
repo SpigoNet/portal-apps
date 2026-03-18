@@ -39,7 +39,7 @@ class PerfilBiometricoController extends Controller
             $driver = new GeminiDriver($apiKey);
 
             $messages = [
-                ['role' => 'system', 'content' => 'Você transforma uma foto de referencia em uma descricao visual util para geracao de imagens. Analise somente o que e visivel, sem inventar gostos, personalidade ou historia. Retorne APENAS um JSON valido com as chaves: "visual_profile", "style_and_wardrobe", "body_type", "eye_color", "hair_type". Em "visual_profile", descreva em portugues e em texto corrido tom de pele, olhos, cabelo, formato/comprimento/textura do cabelo, tracos unicos visiveis e qualquer detalhe marcante util para preservar a identidade. Em "style_and_wardrobe", descreva roupas, acessorios e estetica visivel, se houver informacao suficiente. Seja especifico, respeitoso e conciso.'],
+                ['role' => 'system', 'content' => 'Você transforma uma foto de referencia em uma descricao visual util para geracao de imagens. Analise somente o que e visivel, sem inventar gostos, personalidade, historia ou genero com que a pessoa se identifica. Retorne APENAS um JSON valido com as chaves: "visual_profile" e "style_and_wardrobe". Em "visual_profile", descreva em portugues e em texto corrido tom de pele, olhos, cabelo, formato/comprimento/textura do cabelo, tracos unicos visiveis e qualquer detalhe marcante util para preservar a identidade. Em "style_and_wardrobe", descreva roupas, acessorios e estetica visivel, se houver informacao suficiente. Seja especifico, respeitoso e conciso.'],
                 [
                     'role' => 'user',
                     'content' => 'Analise meu perfil visual com base nesta foto e sugira textos para o meu perfil.',
@@ -73,17 +73,13 @@ class PerfilBiometricoController extends Controller
         $validated = $request->validate([
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             'visual_profile' => 'required|string|min:20|max:5000',
+            'gender_identity' => 'required|string|min:2|max:100',
             'personality_vibe' => 'nullable|string|max:3000',
             'interests_and_symbols' => 'nullable|string|max:3000',
             'style_and_wardrobe' => 'nullable|string|max:3000',
             'favorite_settings' => 'nullable|string|max:3000',
             'identity_details' => 'nullable|string|max:3000',
             'avoid_in_generations' => 'nullable|string|max:3000',
-            'height' => 'nullable|numeric|min:50|max:250',
-            'weight' => 'nullable|numeric|min:20|max:300',
-            'body_type' => 'nullable|string|max:50',
-            'eye_color' => 'nullable|string|max:50',
-            'hair_type' => 'nullable|string|max:50',
             'notification_preference' => 'nullable|in:none,whatsapp,telegram,email',
         ]);
 
@@ -99,17 +95,13 @@ class PerfilBiometricoController extends Controller
         }
 
         $attributes->visual_profile = trim($validated['visual_profile']);
+        $attributes->gender_identity = trim($validated['gender_identity']);
         $attributes->personality_vibe = $this->nullableTrim($validated['personality_vibe'] ?? null);
         $attributes->interests_and_symbols = $this->nullableTrim($validated['interests_and_symbols'] ?? null);
         $attributes->style_and_wardrobe = $this->nullableTrim($validated['style_and_wardrobe'] ?? null);
         $attributes->favorite_settings = $this->nullableTrim($validated['favorite_settings'] ?? null);
         $attributes->identity_details = $this->nullableTrim($validated['identity_details'] ?? null);
         $attributes->avoid_in_generations = $this->nullableTrim($validated['avoid_in_generations'] ?? null);
-        $attributes->height = $validated['height'] ?? $attributes->height;
-        $attributes->weight = $validated['weight'] ?? $attributes->weight;
-        $attributes->body_type = $this->nullableTrim($validated['body_type'] ?? null) ?? $attributes->body_type ?? 'não informado';
-        $attributes->eye_color = $this->nullableTrim($validated['eye_color'] ?? null) ?? $attributes->eye_color ?? 'não informado';
-        $attributes->hair_type = $this->nullableTrim($validated['hair_type'] ?? null) ?? $attributes->hair_type ?? 'não informado';
         $attributes->notification_preference = $validated['notification_preference'] ?? 'none';
 
         $attributes->save();

@@ -13,6 +13,7 @@ class UserAttribute extends Model
         'user_id',
         'photo_path',
         'visual_profile',
+        'gender_identity',
         'notification_preference',
         'height',     // float
         'weight',     // float
@@ -34,7 +35,7 @@ class UserAttribute extends Model
 
     public function hasCompleteProfile(): bool
     {
-        if ($this->filledText($this->visual_profile)) {
+        if ($this->filledText($this->visual_profile) && $this->filledText($this->gender_identity)) {
             return true;
         }
 
@@ -46,6 +47,7 @@ class UserAttribute extends Model
     public function promptContextSections(int $maxLength = 320): array
     {
         $sections = [
+            'genero com que se identifica' => $this->cleanPromptText($this->gender_identity, 120),
             'perfil visual' => $this->cleanPromptText($this->visual_profile, $maxLength),
             'jeito e energia' => $this->cleanPromptText($this->personality_vibe, $maxLength),
             'gostos e interesses' => $this->cleanPromptText($this->interests_and_symbols, $maxLength),

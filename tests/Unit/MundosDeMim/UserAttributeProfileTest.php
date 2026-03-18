@@ -11,6 +11,7 @@ class UserAttributeProfileTest extends TestCase
     {
         $attribute = new UserAttribute([
             'visual_profile' => "  Pele morena clara,\n olhos castanhos e cabelo cacheado escuro.  ",
+            'gender_identity' => 'mulher',
             'personality_vibe' => 'Calma, criativa e acolhedora.',
             'style_and_wardrobe' => 'Vestidos fluidos, tons terrosos e acessórios discretos.',
             'favorite_settings' => 'Florestas com neblina e cafés aconchegantes.',
@@ -20,6 +21,7 @@ class UserAttributeProfileTest extends TestCase
         $sections = $attribute->promptContextSections();
 
         $this->assertTrue($attribute->hasCompleteProfile());
+        $this->assertSame('mulher', $sections['genero com que se identifica']);
         $this->assertSame('Pele morena clara, olhos castanhos e cabelo cacheado escuro.', $sections['perfil visual']);
         $this->assertSame('Calma, criativa e acolhedora.', $sections['jeito e energia']);
         $this->assertSame('Vestidos fluidos, tons terrosos e acessórios discretos.', $sections['estilo e roupas']);
@@ -30,6 +32,7 @@ class UserAttributeProfileTest extends TestCase
     public function test_it_falls_back_to_legacy_visual_summary_when_visual_profile_is_missing(): void
     {
         $attribute = new UserAttribute([
+            'gender_identity' => 'homem',
             'body_type' => 'atlético',
             'eye_color' => 'castanhos',
             'hair_type' => 'cacheado preto',
@@ -46,5 +49,6 @@ class UserAttributeProfileTest extends TestCase
         $this->assertStringContainsString('tipo fisico atlético', $sections['perfil visual']);
         $this->assertStringContainsString('altura aproximada de 180 cm', $sections['perfil visual']);
         $this->assertStringContainsString('peso aproximado de 78.5 kg', $sections['perfil visual']);
+        $this->assertSame('homem', $sections['genero com que se identifica']);
     }
 }

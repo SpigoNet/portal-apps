@@ -11,6 +11,12 @@ use Illuminate\Database\Eloquent\Collection;
 
 class AiProviderService
 {
+    private const IMAGE_TO_IMAGE_DRIVERS = [
+        'pollination',
+        'pollination_image_edit',
+        'airforce',
+    ];
+
     private function getModelByDefaultMapping(string $inputType, string $outputType): ?AiModel
     {
         return AiModelDefault::getPadrao($inputType, $outputType);
@@ -138,9 +144,33 @@ class AiProviderService
         return $this->getModelForUserEntity($user, 'image', 'text');
     }
 
+    public function supportsImageToImageProvider(?AiModel $provider): bool
+    {
+        if (! $provider) {
+            return false;
+        }
+
+        return in_array($this->getDriverForProvider($provider), self::IMAGE_TO_IMAGE_DRIVERS, true)
+            && in_array('image', $provider->input_types ?? [], true)
+            && in_array('image', $provider->output_types ?? [], true);
+    }
+
+    public function getSupportedImageToImageModels(): Collection
+    {
+        return $this->getActiveModels()
+            ->filter(fn (AiModel $model) => $this->supportsImageToImageProvider($model))
+            ->values();
+    }
+
     public function getImageToImageProvider(?User $user = null): ?AiModel
     {
-        return $this->getModelForUserEntity($user, 'image', 'image');
+        $provider = $this->getModelForUserEntity($user, 'image', 'image');
+
+        if ($this->supportsImageToImageProvider($provider)) {
+            return $provider;
+        }
+
+        return $this->getSupportedImageToImageModels()->first();
     }
 
     public function getTextToTextProvider(?User $user = null): ?AiModel

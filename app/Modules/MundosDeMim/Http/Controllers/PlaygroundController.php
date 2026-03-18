@@ -30,9 +30,7 @@ class PlaygroundController extends Controller
 
         $attributes = UserAttribute::where('user_id', $targetUser->id)->first();
         $aiProviderService = new AiProviderService;
-        $providers = $aiProviderService->getActiveModels()
-            ->filter(fn (AiModel $model) => $model->supports_image_input)
-            ->values();
+        $providers = $aiProviderService->getSupportedImageToImageModels();
         $selectedProvider = $aiProviderService->getImageToImageProvider($targetUser);
 
         $hasPhoto = $attributes && ! empty($attributes->photo_path) && Storage::disk('public')->exists($attributes->photo_path);
@@ -296,7 +294,7 @@ class PlaygroundController extends Controller
         $service = new AiProviderService;
 
         if ($providerId) {
-            return $service->getActiveModels()->firstWhere('id', (int) $providerId);
+            return $service->getSupportedImageToImageModels()->firstWhere('id', (int) $providerId);
         }
 
         return $service->getImageToImageProvider($user);

@@ -7,6 +7,7 @@ use App\Modules\Admin\Services\AiProviderService;
 use App\Modules\MundosDeMim\Models\Prompt;
 use App\Modules\MundosDeMim\Models\Theme;
 use App\Services\AI\Drivers\AirForceDriver;
+use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use App\Services\AI\Drivers\PollinationImageEditDriver;
@@ -138,6 +139,7 @@ class AdminPromptController extends Controller
     {
         return match ($driverName) {
             'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
+            'gemini' => new GeminiDriver($apiKey, $model, $baseUrl),
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
             'pollination_image_edit' => new PollinationImageEditDriver($model, $apiKey, $baseUrl),
             default => new PollinationDriver($model, $apiKey, $baseUrl),

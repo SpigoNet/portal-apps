@@ -37,7 +37,7 @@ class AiProviderServiceTest extends TestCase
     #[Test]
     public function it_falls_back_to_a_supported_image_to_image_provider_when_default_driver_is_not_supported(): void
     {
-        $unsupported = $this->makeImageModel('Gemini Vision', 'gemini');
+        $unsupported = $this->makeImageModel('LM Studio Vision', 'lm_studio');
         $supported = $this->makeImageModel('Pollinations Edit', 'pollination_image_edit');
 
         $service = new class($unsupported, [$unsupported, $supported]) extends AiProviderService
@@ -59,6 +59,15 @@ class AiProviderServiceTest extends TestCase
         };
 
         $this->assertSame($supported, $service->getImageToImageProvider());
+    }
+
+    #[Test]
+    public function it_treats_gemini_as_a_supported_image_to_image_provider(): void
+    {
+        $gemini = $this->makeImageModel('Gemini Vision', 'gemini');
+        $service = new AiProviderService();
+
+        $this->assertTrue($service->supportsImageToImageProvider($gemini));
     }
 
     private function makeImageModel(string $name, string $driver): AiModel

@@ -100,7 +100,7 @@ class DailyPhotoService
         }
 
         $options = [];
-        if ($userAttr->photo_path && in_array($this->driver, ['pollination', 'pollination_image_edit', 'airforce'], true)) {
+        if ($userAttr->photo_path && in_array($this->driver, ['pollination', 'pollination_image_edit', 'airforce', 'gemini'], true)) {
             $options['reference_image_path'] = $userAttr->photo_path;
         }
 
@@ -120,6 +120,7 @@ class DailyPhotoService
     {
         return match ($this->driver) {
             'airforce' => new AirForceDriver($this->model, $this->apiKey, $this->baseUrl),
+            'gemini' => new GeminiDriver($this->apiKey, $this->model, $this->baseUrl),
             'kdjingpai' => new KdjingpaiDriver($this->model, $this->apiKey, $this->baseUrl),
             'pollination_image_edit' => new PollinationImageEditDriver($this->model, $this->apiKey, $this->baseUrl),
             default => new PollinationDriver($this->model, $this->apiKey, $this->baseUrl),
@@ -245,7 +246,7 @@ class DailyPhotoService
         return match ($driverName) {
             'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
-            'gemini' => new GeminiDriver($apiKey),
+            'gemini' => new GeminiDriver($apiKey, $model, $baseUrl),
             'lm_studio' => new LmStudioDriver($baseUrl),
             default => new PollinationDriver($model, $apiKey, $baseUrl),
         };

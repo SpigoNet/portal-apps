@@ -40,7 +40,7 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         // Dados existentes
-        $hasBiometrics = UserAttribute::where('user_id', $userId)->exists();
+        $attributes = UserAttribute::where('user_id', $userId)->first();
         $relatedCount = RelatedPerson::where('user_id', $userId)->count();
         $activeRelated = RelatedPerson::where('user_id', $userId)->where('is_active', true)->count();
 
@@ -54,7 +54,7 @@ class DashboardController extends Controller
             ->count();
 
         $stats = [
-            'biometria_ok' => $hasBiometrics,
+            'perfil_ok' => $attributes?->hasCompleteProfile() ?? false,
             'total_pessoas' => $relatedCount,
             'pessoas_ativas' => $activeRelated,
             'total_artes' => $artCount,      // <--- Novo

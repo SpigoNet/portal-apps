@@ -79,23 +79,27 @@ class PlaygroundController extends Controller
 
             $driver = $this->createTextDriver($driverName, $provider->model, $apiKey, $baseUrl);
 
-            // Monta contexto biográfico
-            $bio = '';
+            $profileContext = '';
             if ($attributes) {
-                $bio = 'O usuário tem as seguintes características: ';
-                if ($attributes->eye_color) {
-                    $bio .= "olhos {$attributes->eye_color}, ";
+                $contextLines = [];
+
+                foreach ($attributes->promptContextSections() as $label => $content) {
+                    $contextLines[] = "- {$label}: {$content}";
                 }
-                if ($attributes->hair_type) {
-                    $bio .= "cabelo {$attributes->hair_type}, ";
+
+                if ($avoid = $attributes->avoidPromptContext()) {
+                    $contextLines[] = "- evitar: {$avoid}";
                 }
-                if ($attributes->body_type) {
-                    $bio .= "tipo físico {$attributes->body_type}. ";
+
+                if ($contextLines !== []) {
+                    $profileContext = "<perfil_usuario>\n".implode("\n", $contextLines)."\n</perfil_usuario>";
                 }
             }
 
             $systemPrompt = 'You are an expert prompt engineer for image-to-image generation.
             Rewrite the user prompt into a high-quality ENGLISH prompt suitable for tools like Midjourney/Stable Diffusion, preserving the original idea.
+
+            Use the provided user profile as high-priority context for identity, vibe, clothing, preferences, favorite settings, and distinctive details. Never invent profile details that are not present in the provided context.
 
             Adicione essas regras de identidade e qualidade ao refinar adicionando ao prompt:            
             1. The generated image MUST be a variation of the original reference person, not a new person.
@@ -112,7 +116,7 @@ class PlaygroundController extends Controller
 
             $messages = [
                 ['role' => 'system', 'content' => $systemPrompt],
-                ['role' => 'user', 'content' => "Refine este prompt: '{$request->input('prompt')}'. {$bio}"],
+                ['role' => 'user', 'content' => "Refine este prompt: '{$request->input('prompt')}'.\n\n{$profileContext}"],
             ];
 
             $refinedPrompt = $driver->generateText($messages, ['model' => $provider->model]);

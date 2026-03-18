@@ -45,8 +45,10 @@
                             <dd class="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{{ $trabalho->descricao }}</dd>
                         </div>
                         <div class="sm:col-span-1">
-                            <dt class="text-sm font-medium text-gray-500">Formato Aceito</dt>
-                            <dd class="mt-1 text-sm text-gray-900 uppercase">{{ $trabalho->tipoTrabalho->arquivos }}</dd>
+                            <dt class="text-sm font-medium text-gray-500">Formatos Aceitos</dt>
+                            <dd class="mt-1 text-sm text-gray-900 uppercase">
+                                {{ implode(', ', $trabalho->getAllowedExtensions()) }}
+                            </dd>
                         </div>
                         <div class="sm:col-span-1">
                             <dt class="text-sm font-medium text-gray-500">Máximo de Alunos</dt>
@@ -108,15 +110,32 @@
                         <form action="{{ route('ant.trabalhos.store', $trabalho->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
-                            @if(str_contains($trabalho->tipoTrabalho->arquivos, 'link'))
+                            @php
+                                $extensoesAceitas = $trabalho->getAllowedExtensions();
+                                $aceitaLink = in_array('LINK', $extensoesAceitas);
+                                $extensoesArquivo = array_values(array_filter($extensoesAceitas, fn($e) => $e !== 'LINK'));
+                                $aceitaArquivo = count($extensoesArquivo) > 0;
+                            @endphp
+
+                            @if($aceitaLink)
                                 <div class="mb-4">
                                     <label for="link" class="block text-sm font-medium text-gray-700">Link do Trabalho</label>
-                                    <input type="url" name="link" id="link" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                    <input type="url" name="link" id="link"
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
-                            @else
+                            @endif
+
+                            @if($aceitaArquivo)
                                 <div class="mb-4">
-                                    <label for="arquivos" class="block text-sm font-medium text-gray-700">Selecione o(s) Arquivo(s)</label>
-                                    <input id="arquivos" name="arquivos[]" type="file" multiple class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                                    <label for="arquivos" class="block text-sm font-medium text-gray-700">
+                                        Selecione o(s) Arquivo(s)
+                                        <span class="text-xs font-normal text-gray-500 ml-1">
+                                            (formatos aceitos: {{ implode(', ', $extensoesArquivo) }})
+                                        </span>
+                                    </label>
+                                    <input id="arquivos" name="arquivos[]" type="file" multiple
+                                           accept="{{ implode(',', array_map(fn($e) => '.' . strtolower($e), $extensoesArquivo)) }}"
+                                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                                     <p class="mt-1 text-xs text-gray-400">Máximo de 100 MB por arquivo. Você pode selecionar múltiplos arquivos.</p>
                                 </div>
                             @endif

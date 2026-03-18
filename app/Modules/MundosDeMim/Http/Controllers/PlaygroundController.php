@@ -136,7 +136,7 @@ class PlaygroundController extends Controller
     {
         // Validação básica
         $request->validate([
-            'prompt' => 'required|string|min:3|max:2000',
+            'prompt' => 'required|string|min:3',
             'prompt_id' => 'nullable|exists:mundos_de_mim_prompts,id',
             'ai_provider_id' => 'nullable|exists:ai_modelos,id',
             'send_to_user' => 'nullable|boolean',
@@ -264,7 +264,7 @@ class PlaygroundController extends Controller
     public function preview(Request $request)
     {
         $request->validate([
-            'prompt' => 'required|string|min:3|max:2000',
+            'prompt' => 'required|string|min:3',
         ]);
 
         $user = $this->getTargetUser();

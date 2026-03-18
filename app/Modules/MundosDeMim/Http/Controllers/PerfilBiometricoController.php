@@ -72,14 +72,14 @@ class PerfilBiometricoController extends Controller
     {
         $validated = $request->validate([
             'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-            'visual_profile' => 'required|string|min:20|max:5000',
-            'gender_identity' => 'required|string|min:2|max:100',
-            'personality_vibe' => 'nullable|string|max:3000',
-            'interests_and_symbols' => 'nullable|string|max:3000',
-            'style_and_wardrobe' => 'nullable|string|max:3000',
-            'favorite_settings' => 'nullable|string|max:3000',
-            'identity_details' => 'nullable|string|max:3000',
-            'avoid_in_generations' => 'nullable|string|max:3000',
+            'visual_profile' => 'required|string|min:20',
+            'gender_identity' => 'required|string|min:2',
+            'personality_vibe' => 'nullable|string',
+            'interests_and_symbols' => 'nullable|string',
+            'style_and_wardrobe' => 'nullable|string',
+            'favorite_settings' => 'nullable|string',
+            'identity_details' => 'nullable|string',
+            'avoid_in_generations' => 'nullable|string',
             'notification_preference' => 'nullable|in:none,whatsapp,telegram,email',
         ]);
 

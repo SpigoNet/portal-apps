@@ -54,20 +54,27 @@ class UserAttributeProfileTest extends TestCase
 
     public function test_it_builds_full_generation_prompt_with_request_and_profile(): void
     {
+        $longVisual = str_repeat('Detalhe visual marcante. ', 30);
+        $longRequest = str_repeat('Criar uma cena cinematográfica urbana muito detalhada. ', 20);
+
         $attribute = new UserAttribute([
             'gender_identity' => 'não binárie',
-            'visual_profile' => 'Pessoa de pele oliva, olhos escuros e cabelo curto ondulado.',
+            'visual_profile' => 'Pessoa de pele oliva, olhos escuros e cabelo curto ondulado. '.$longVisual,
             'personality_vibe' => 'Energia criativa e introspectiva.',
             'favorite_settings' => 'Céu noturno, chuva leve e ruas iluminadas.',
             'avoid_in_generations' => 'Evitar neon excessivo.',
         ]);
 
-        $prompt = $attribute->buildImageGenerationPrompt('Criar uma cena cinematográfica urbana.');
+        $prompt = $attribute->buildImageGenerationPrompt($longRequest);
 
         $this->assertStringContainsString('Use a imagem de referencia anexada', $prompt);
-        $this->assertStringContainsString('Pedido principal: Criar uma cena cinematográfica urbana.', $prompt);
+        $this->assertStringContainsString('Pedido principal: '.$longRequest, $prompt);
         $this->assertStringContainsString('genero com que se identifica: não binárie', $prompt);
-        $this->assertStringContainsString('perfil visual: Pessoa de pele oliva, olhos escuros e cabelo curto ondulado.', $prompt);
+        $this->assertStringContainsString(
+            'perfil visual: '.trim(preg_replace('/\s+/u', ' ', 'Pessoa de pele oliva, olhos escuros e cabelo curto ondulado. '.$longVisual)),
+            $prompt
+        );
         $this->assertStringContainsString('evitar: Evitar neon excessivo.', $prompt);
+        $this->assertStringNotContainsString('…', $prompt);
     }
 }

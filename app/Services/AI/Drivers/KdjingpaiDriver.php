@@ -74,6 +74,6 @@ class KdjingpaiDriver implements AiDriverInterface
     protected function cleanPrompt(string $prompt): string
     {
         $prompt = preg_replace('/[^\p{L}\p{N}\s,.-]/u', '', $prompt);
-        return trim(Str::limit($prompt, 500, ''));
+        return trim($prompt);
     }
 }

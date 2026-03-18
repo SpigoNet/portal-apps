@@ -71,10 +71,10 @@ class UserAttribute extends Model
     public function buildImageGenerationPrompt(?string $userPrompt): string
     {
         $request = $this->cleanPromptText($userPrompt)
-            ?? 'Crie uma nova imagem personalizada inspirada nesta pessoa.';
+            ?? 'Create a new custom image inspired by this person.';
 
         $parts = [
-            'Use a imagem de referencia anexada para preservar a mesma pessoa, mantendo rosto, cabelo, expressao e tracos unicos.',
+            'Use the attached reference image to preserve the same person, maintaining unique face, hair, expression, and features..',
             'Pedido principal: '.$request,
         ];
 

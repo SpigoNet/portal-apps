@@ -14,6 +14,7 @@ use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\LmStudioDriver;
 use App\Services\AI\Drivers\PollinationDriver;
+use App\Services\AI\Drivers\PollinationImageEditDriver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -161,7 +162,7 @@ class PlaygroundController extends Controller
             : null;
 
         try {
-            if ($driverName !== 'pollination' && $driverName !== 'airforce') {
+            if (! in_array($driverName, ['pollination', 'pollination_image_edit', 'airforce'], true)) {
                 return back()->with('error', "O driver '{$driverName}' ainda não é suportado no Playground.")->withInput();
             }
 
@@ -306,6 +307,7 @@ class PlaygroundController extends Controller
         return match ($driverName) {
             'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
+            'pollination_image_edit' => new PollinationImageEditDriver($model, $apiKey, $baseUrl),
             default => new PollinationDriver($model, $apiKey, $baseUrl),
         };
     }

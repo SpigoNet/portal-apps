@@ -97,6 +97,10 @@ class AiProvider extends Model
         $haystack = strtolower(trim(implode(' ', array_filter([$name, $syncUrl, $baseUrl]))));
 
         return match (true) {
+            str_contains($haystack, '/v1/images/edits'),
+            str_contains($haystack, 'pollination image edit'),
+            str_contains($haystack, 'pollinations image edit'),
+            str_contains($haystack, 'pollination edit') => 'pollination_image_edit',
             str_contains($haystack, 'pollination') => 'pollination',
             str_contains($haystack, 'airforce') => 'airforce',
             str_contains($haystack, 'kdjingpai') => 'kdjingpai',

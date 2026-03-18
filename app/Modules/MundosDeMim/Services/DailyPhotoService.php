@@ -11,6 +11,7 @@ use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\LmStudioDriver;
 use App\Services\AI\Drivers\PollinationDriver;
+use App\Services\AI\Drivers\PollinationImageEditDriver;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -99,7 +100,7 @@ class DailyPhotoService
         }
 
         $options = [];
-        if ($userAttr->photo_path && in_array($this->driver, ['pollination', 'airforce'], true)) {
+        if ($userAttr->photo_path && in_array($this->driver, ['pollination', 'pollination_image_edit', 'airforce'], true)) {
             $options['reference_image_path'] = $userAttr->photo_path;
         }
 
@@ -120,6 +121,7 @@ class DailyPhotoService
         return match ($this->driver) {
             'airforce' => new AirForceDriver($this->model, $this->apiKey, $this->baseUrl),
             'kdjingpai' => new KdjingpaiDriver($this->model, $this->apiKey, $this->baseUrl),
+            'pollination_image_edit' => new PollinationImageEditDriver($this->model, $this->apiKey, $this->baseUrl),
             default => new PollinationDriver($this->model, $this->apiKey, $this->baseUrl),
         };
     }

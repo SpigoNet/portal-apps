@@ -101,7 +101,7 @@ class PlaygroundController extends Controller
 
             Use the provided user profile as high-priority context for identity, vibe, clothing, preferences, favorite settings, and distinctive details. Never invent profile details that are not present in the provided context.
 
-            Adicione essas regras de identidade e qualidade ao refinar adicionando ao prompt:            
+            Adicione essas regras de identidade e qualidade ao refinar adicionando ao prompt:
             1. The generated image MUST be a variation of the original reference person, not a new person.
             2. Keep the same face identity, facial structure, and expression from the reference image.
             3. Preserve all unique human traits exactly as they are, including birthmarks, moles, freckles, skin spots, scars, asymmetries, and any distinctive facial detail.
@@ -287,7 +287,7 @@ class PlaygroundController extends Controller
 
         $promptText = trim($promptText);
 
-        return 'Use a imagem de referencia anexada para preservar a mesma pessoa. Pedido principal: '.$promptText.'. Resultado final com identidade preservada e alta qualidade.';
+        return 'Use the attached reference image to preserve the same person. Main request: '.$promptText.'. Final result with preserved identity and high quality.';
     }
 
     private function resolveModel($user, ?string $providerId = null): ?AiModel

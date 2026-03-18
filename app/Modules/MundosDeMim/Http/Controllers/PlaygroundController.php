@@ -5,10 +5,10 @@ namespace App\Modules\MundosDeMim\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\AiModel;
 use App\Models\User;
+use App\Modules\Admin\Services\AiProviderService;
 use App\Modules\MundosDeMim\Models\DailyGeneration;
 use App\Modules\MundosDeMim\Models\Prompt;
 use App\Modules\MundosDeMim\Models\UserAttribute;
-use App\Modules\Admin\Services\AiProviderService;
 use App\Services\AI\Drivers\AirForceDriver;
 use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
@@ -48,12 +48,13 @@ class PlaygroundController extends Controller
         }
 
         $prompts = Prompt::with(['theme.examples'])->orderBy('theme_id')->get();
+        $latestPrompt = Prompt::latest()->first();
         $recentGenerations = DailyGeneration::where('user_id', $targetUser->id)
             ->latest()
             ->limit(8)
             ->get();
 
-        return view('MundosDeMim::playground.index', compact('attributes', 'hasPhoto', 'providers', 'selectedProvider', 'targetUser', 'allUsers', 'currentUser', 'prompts', 'recentGenerations'));
+        return view('MundosDeMim::playground.index', compact('attributes', 'hasPhoto', 'providers', 'selectedProvider', 'targetUser', 'allUsers', 'currentUser', 'prompts', 'latestPrompt', 'recentGenerations'));
     }
 
     public function refine(Request $request)
@@ -65,7 +66,7 @@ class PlaygroundController extends Controller
         try {
             $user = $this->getTargetUser();
             $attributes = UserAttribute::where('user_id', $user->id)->first();
-            $aiService = new AiProviderService();
+            $aiService = new AiProviderService;
             $provider = $aiService->getTextToTextProvider();
 
             if (! $provider) {
@@ -141,7 +142,7 @@ class PlaygroundController extends Controller
         $user = $this->getTargetUser();
         $attributes = UserAttribute::where('user_id', $user->id)->first();
         $provider = $this->resolveModel($user, $request->input('ai_provider_id'));
-        $aiService = new AiProviderService();
+        $aiService = new AiProviderService;
         $driverName = $aiService->getDriverForProvider($provider);
         $apiKey = $aiService->getApiKeyForProvider($provider);
         $baseUrl = $aiService->getBaseUrlForProvider($provider);

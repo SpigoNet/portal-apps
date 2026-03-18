@@ -22,7 +22,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Perfil: Verde Aquarela -->
                 <a href="{{ route('mundos-de-mim.perfil.index') }}" class="group block">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1 h-full border-l-4 {{ $stats['biometria_ok'] ? 'border-[#62A87C]' : 'border-orange-500' }}">
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1 h-full border-l-4 {{ $stats['perfil_ok'] ? 'border-[#62A87C]' : 'border-orange-500' }}">
                         <div class="p-8">
                             <div class="flex items-center justify-between mb-4">
                                 <h4 class="text-xl font-bold text-gray-900 group-hover:text-[#62A87C] transition-colors font-heading">
@@ -33,10 +33,10 @@
                                 </div>
                             </div>
                             <p class="text-gray-600 mb-6">
-                                Defina sua altura, foto de referência e características físicas.
+                                Conte para a IA como você é, sua energia, seus gostos e os cenários que mais combinam com você.
                             </p>
                             <div class="flex items-center text-sm mt-auto">
-                                @if($stats['biometria_ok'])
+                                @if($stats['perfil_ok'])
                                     <span class="text-[#62A87C] font-semibold bg-[#62A87C]/10 px-3 py-1.5 rounded-lg flex items-center gap-2">
                                         <i class="fa-solid fa-circle-check"></i> Configurado
                                     </span>

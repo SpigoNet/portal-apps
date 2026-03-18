@@ -114,8 +114,12 @@ class DailyPhotoService
     {
         $parts = [];
 
-        if ($userAttr->body_type) {
-            $parts[] = $userAttr->body_type;
+        foreach ($userAttr->promptContextSections(220) as $label => $content) {
+            $parts[] = "{$label}: {$content}";
+        }
+
+        if ($avoid = $userAttr->avoidPromptContext(180)) {
+            $parts[] = "evitar: {$avoid}";
         }
 
         $prompt = implode(', ', $parts);

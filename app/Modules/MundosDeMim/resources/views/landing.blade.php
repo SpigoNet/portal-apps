@@ -135,7 +135,7 @@
                     <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
                 </div>
                 <h3 class="text-xl font-bold mb-3 font-heading">Artes Diárias</h3>
-                <p class="text-slate-400">Uma nova surpresa todo dia. Nossa IA cria cenários baseados na sua biometria e
+                <p class="text-slate-400">Uma nova surpresa todo dia. Nossa IA cria cenários baseados no seu perfil visual,
                     preferências.</p>
             </div>
             <div class="glass p-8 rounded-3xl border border-white/5 hover:border-[#62A87C]/30 transition group">

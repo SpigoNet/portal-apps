@@ -16,6 +16,8 @@ class GeminiDriver implements AiDriverInterface
 
     protected string $model = 'gemini-2.5-flash';
 
+    protected string $imageModel = 'gemini-2.5-flash-image';
+
     public function __construct(?string $apiKey, ?string $model = null, ?string $baseUrl = null)
     {
         $this->apiKey = (string) $apiKey;
@@ -138,6 +140,9 @@ class GeminiDriver implements AiDriverInterface
                 'role' => 'user',
                 'parts' => $parts,
             ]],
+            'generationConfig' => [
+                'responseModalities' => ['IMAGE', 'TEXT'],
+            ],
         ];
 
         if (! empty($options['system_instruction'])) {
@@ -146,7 +151,11 @@ class GeminiDriver implements AiDriverInterface
             ];
         }
 
-        $response = $this->sendPayload($payload, $options['model'] ?? $this->model);
+        $response = $this->sendPayload(
+            $payload,
+            $this->resolveImageModel($options['model'] ?? null),
+            'streamGenerateContent'
+        );
 
         if (! $response) {
             return null;
@@ -178,14 +187,14 @@ class GeminiDriver implements AiDriverInterface
 
     protected function sendRequestWithRetry(array $payload): ?string
     {
-        $response = $this->sendPayload($payload, $this->model);
+        $response = $this->sendPayload($payload, $this->model, 'generateContent');
 
         return data_get($response, 'candidates.0.content.parts.0.text');
     }
 
-    protected function sendPayload(array $payload, string $model): ?array
+    protected function sendPayload(array $payload, string $model, string $method = 'generateContent'): ?array
     {
-        $url = $this->buildUrlForModel($model);
+        $url = $this->buildUrlForModel($model, $method);
         $maxRetries = 1;
         $delay = 1000;
 
@@ -212,7 +221,7 @@ class GeminiDriver implements AiDriverInterface
 
                 if ($response->successful()) {
                     Log::debug('🤖 [GEMINI SUCCESS] Body: ' . $response->body());
-                    return $response->json();
+                    return $this->decodeGeminiResponse($response->body());
                 }
 
                 if ($response->status() === 429 || $response->status() >= 500) {
@@ -237,9 +246,86 @@ class GeminiDriver implements AiDriverInterface
         return null;
     }
 
-    protected function buildUrlForModel(string $model): string
+    protected function buildUrlForModel(string $model, string $method = 'generateContent'): string
     {
-        return rtrim($this->baseUrl, '/').'/'.$model.':generateContent?key='.$this->apiKey;
+        return rtrim($this->baseUrl, '/').'/'.$model.':'.$method.'?key='.$this->apiKey;
+    }
+
+    protected function resolveImageModel(?string $requestedModel = null): string
+    {
+        $model = $requestedModel ?: $this->model;
+
+        if (str_contains(strtolower($model), 'image')) {
+            return $model;
+        }
+
+        return $this->imageModel;
+    }
+
+    protected function decodeGeminiResponse(string $body): ?array
+    {
+        $decoded = json_decode($body, true);
+
+        if (is_array($decoded)) {
+            return $this->normalizeGeminiResponse($decoded);
+        }
+
+        $normalizedBody = preg_replace('/^\s*data:\s*/m', '', trim($body));
+        $decoded = json_decode($normalizedBody, true);
+
+        if (is_array($decoded)) {
+            return $this->normalizeGeminiResponse($decoded);
+        }
+
+        $chunks = [];
+        foreach (preg_split("/\R+/", $normalizedBody) ?: [] as $line) {
+            $line = trim($line);
+            if ($line === '' || $line === '[DONE]') {
+                continue;
+            }
+
+            $json = json_decode($line, true);
+            if (is_array($json)) {
+                $chunks[] = $json;
+            }
+        }
+
+        if ($chunks !== []) {
+            return $this->normalizeGeminiResponse($chunks);
+        }
+
+        return null;
+    }
+
+    protected function normalizeGeminiResponse(array $payload): ?array
+    {
+        if (isset($payload['candidates'])) {
+            return $payload;
+        }
+
+        if (! array_is_list($payload)) {
+            return null;
+        }
+
+        $parts = [];
+
+        foreach ($payload as $chunk) {
+            foreach (data_get($chunk, 'candidates.0.content.parts', []) as $part) {
+                $parts[] = $part;
+            }
+        }
+
+        if ($parts === []) {
+            return null;
+        }
+
+        return [
+            'candidates' => [[
+                'content' => [
+                    'parts' => $parts,
+                ],
+            ]],
+        ];
     }
 
     protected function buildInlineImagePart(string $imagePath): ?array

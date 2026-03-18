@@ -160,7 +160,7 @@ class PlaygroundController extends Controller
             : null;
 
         try {
-            if (! in_array($driverName, ['pollination', 'pollination_image_edit', 'airforce'], true)) {
+            if (! in_array($driverName, ['pollination', 'pollination_image_edit', 'airforce', 'gemini'], true)) {
                 return back()->with('error', "O driver '{$driverName}' ainda não é suportado no Playground.")->withInput();
             }
 
@@ -304,6 +304,7 @@ class PlaygroundController extends Controller
     {
         return match ($driverName) {
             'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
+            'gemini' => new GeminiDriver($apiKey, $model, $baseUrl),
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
             'pollination_image_edit' => new PollinationImageEditDriver($model, $apiKey, $baseUrl),
             default => new PollinationDriver($model, $apiKey, $baseUrl),
@@ -315,7 +316,7 @@ class PlaygroundController extends Controller
         return match ($driverName) {
             'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
-            'gemini' => new GeminiDriver($apiKey),
+            'gemini' => new GeminiDriver($apiKey, $model, $baseUrl),
             'lm_studio' => new LmStudioDriver($baseUrl),
             default => new PollinationDriver($model, $apiKey, $baseUrl),
         };

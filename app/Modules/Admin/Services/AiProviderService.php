@@ -15,6 +15,7 @@ class AiProviderService
         'pollination',
         'pollination_image_edit',
         'airforce',
+        'gemini',
     ];
 
     private function getModelByDefaultMapping(string $inputType, string $outputType): ?AiModel

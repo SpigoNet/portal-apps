@@ -91,7 +91,13 @@ class AiProvider extends Model
         $candidate = strtolower((string) ($driver ?: ''));
 
         if ($candidate !== '') {
-            return $candidate;
+            return match ($candidate) {
+                'pollinations image edit',
+                'pollination image edit',
+                'pollination edit',
+                'pollinations_image_edit' => 'pollination_image_edit',
+                default => $candidate,
+            };
         }
 
         $haystack = strtolower(trim(implode(' ', array_filter([$name, $syncUrl, $baseUrl]))));

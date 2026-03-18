@@ -65,7 +65,12 @@ class AiProviderService
             return 'pollination';
         }
 
-        return $provider->driver ?? $provider->provedor?->driver ?? 'pollination';
+        return AiProvider::guessDriver(
+            $provider->driver ?? $provider->provedor?->driver,
+            $provider->nome ?? $provider->name ?? null,
+            $provider->provedor?->url_json_modelos,
+            $provider->provedor?->base_url
+        ) ?? 'pollination';
     }
 
     public function getApiKeyForUser(?User $user): ?string

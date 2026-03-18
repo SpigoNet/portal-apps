@@ -156,11 +156,17 @@ class PlaygroundController extends Controller
         }
 
         // Opções comuns (caminho da foto, se houver)
-        $photoPath = ($attributes && ! empty($attributes->photo_path)) ? $attributes->photo_path : null;
+        $photoPath = ($attributes && ! empty($attributes->photo_path) && Storage::disk('public')->exists($attributes->photo_path))
+            ? $attributes->photo_path
+            : null;
 
         try {
             if ($driverName !== 'pollination' && $driverName !== 'airforce') {
                 return back()->with('error', "O driver '{$driverName}' ainda não é suportado no Playground.")->withInput();
+            }
+
+            if (! $photoPath) {
+                return back()->with('error', 'Envie uma foto de referência no seu perfil antes de gerar uma nova imagem.')->withInput();
             }
 
             // Verifica créditos se não for admin
@@ -184,6 +190,8 @@ class PlaygroundController extends Controller
                 }
             }
 
+            $finalPrompt = $this->buildGenerationPrompt($attributes, $promptText);
+
             \Illuminate\Support\Facades\Log::debug('Playground generate', [
                 'driver' => $driverName,
                 'model' => $provider->model,
@@ -191,10 +199,11 @@ class PlaygroundController extends Controller
                 'baseUrl' => $baseUrl,
                 'hasPhoto' => ! empty($photoPath),
                 'options' => $options,
-                'promptText' => $promptText,
+                'originalPrompt' => $promptText,
+                'finalPrompt' => $finalPrompt,
             ]);
 
-            $imageUrl = $driver->generateImage($promptText, $options);
+            $imageUrl = $driver->generateImage($finalPrompt, $options);
 
             $sendToUser = $request->boolean('send_to_user');
 
@@ -215,7 +224,7 @@ class PlaygroundController extends Controller
                     'theme_id' => $themeId,
                     'prompt_id' => $savedPromptId,
                     'image_url' => $imageUrl,
-                    'final_prompt_used' => $promptText,
+                    'final_prompt_used' => $finalPrompt,
                     'reference_date' => now()->toDateString(),
                 ]);
 
@@ -250,6 +259,35 @@ class PlaygroundController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Erro no Playground: '.$e->getMessage());
         }
+    }
+
+    public function preview(Request $request)
+    {
+        $request->validate([
+            'prompt' => 'required|string|min:3|max:2000',
+        ]);
+
+        $user = $this->getTargetUser();
+        $attributes = UserAttribute::where('user_id', $user->id)->first();
+        $hasPhoto = $attributes
+            && ! empty($attributes->photo_path)
+            && Storage::disk('public')->exists($attributes->photo_path);
+
+        return response()->json([
+            'preview' => $this->buildGenerationPrompt($attributes, $request->input('prompt')),
+            'has_photo' => $hasPhoto,
+        ]);
+    }
+
+    protected function buildGenerationPrompt(?UserAttribute $attributes, string $promptText): string
+    {
+        if ($attributes) {
+            return $attributes->buildImageGenerationPrompt($promptText);
+        }
+
+        $promptText = trim($promptText);
+
+        return 'Use a imagem de referencia anexada para preservar a mesma pessoa. Pedido principal: '.$promptText.'. Resultado final com identidade preservada e alta qualidade.';
     }
 
     private function resolveModel($user, ?string $providerId = null): ?AiModel

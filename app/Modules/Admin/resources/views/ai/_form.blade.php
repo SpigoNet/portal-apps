@@ -10,7 +10,7 @@
         <div>
             <x-input-label for="driver" :value="__('Driver')" />
             <x-text-input id="driver" name="driver" type="text" class="block mt-1 w-full"
-                :value="old('driver', $provedor->driver ?? '')" required placeholder="pollination, airforce, gemini..." />
+                :value="old('driver', $provedor->driver ?? '')" required placeholder="pollination, pollination_image_edit, airforce, gemini..." />
             <x-input-error class="mt-2" :messages="$errors->get('driver')" />
         </div>
 

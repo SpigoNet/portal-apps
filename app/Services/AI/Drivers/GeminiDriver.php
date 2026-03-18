@@ -101,6 +101,11 @@ class GeminiDriver implements AiDriverInterface
         return $this->sendRequestWithRetry($payload);
     }
 
+    public function generateImage(string $prompt, array $options = []): ?string
+    {
+        return null;
+    }
+
     protected function sendRequestWithRetry(array $payload): ?string
     {
         $url = $this->baseUrl . '?key=' . $this->apiKey;

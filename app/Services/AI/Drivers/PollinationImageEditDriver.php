@@ -15,7 +15,7 @@ class PollinationImageEditDriver implements AiDriverInterface
 
     protected ?string $apiKey = null;
 
-    protected string $model = 'nanobanana';
+    protected string $model = 'gptimage';
 
     protected ?string $baseUrl = null;
 

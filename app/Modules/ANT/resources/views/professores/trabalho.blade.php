@@ -6,14 +6,25 @@
                 <span class="text-gray-400 mx-2">/</span>
                 {{ $trabalho->nome }}
             </h2>
-            <div class="text-sm text-gray-500">
-                {{ $trabalho->materia->nome }}
+            <div class="flex items-center gap-3">
+                <span class="text-sm text-gray-500">{{ $trabalho->materia->nome }}</span>
+                <a href="{{ route('ant.professor.trabalho.edit', $trabalho->id) }}"
+                   class="inline-flex items-center gap-1 bg-indigo-600 text-white text-sm px-3 py-1.5 rounded hover:bg-indigo-700 shadow-sm">
+                    <span class="material-icons text-base leading-none">edit</span>
+                    Alterar Trabalho
+                </a>
             </div>
         </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
+            @if(session('success'))
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded">
+                    {{ session('success') }}
+                </div>
+            @endif
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div class="bg-white p-4 rounded shadow border-l-4 border-gray-500">

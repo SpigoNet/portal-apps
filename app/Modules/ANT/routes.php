@@ -64,6 +64,9 @@ Route::prefix('ant')
             Route::post('/novo-trabalho', [ProfessorController::class, 'store'])->name('ant.professor.store');
             // Lista de Entregas de um Trabalho
             Route::get('/trabalho/{id}', [ProfessorController::class, 'trabalho'])->name('ant.professor.trabalho');
+            // Editar Trabalho
+            Route::get('/trabalho/{id}/editar', [ProfessorController::class, 'edit'])->name('ant.professor.trabalho.edit');
+            Route::put('/trabalho/{id}/editar', [ProfessorController::class, 'update'])->name('ant.professor.trabalho.update');
 
             Route::get('/materia/{idMateria}/boletim', [ProfessorController::class, 'boletim'])->name('ant.professor.boletim');
 

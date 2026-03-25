@@ -201,6 +201,77 @@ class ProfessorController extends Controller
 
         return view('ANT::professores.boletim', compact('materia', 'semestreAtual', 'gruposNome', 'dadosBoletim', 'pesoTotal'));
     }
+    // Formulário de Edição de Trabalho
+    public function edit($id)
+    {
+        $user = auth()->user();
+
+        $trabalho = AntTrabalho::with(['materia'])->findOrFail($id);
+
+        // Segurança: Verifica se o user é professor desta matéria
+        $ehProfessorDestaMateria = DB::table('ant_professor_materia')
+            ->where('user_id', $user->id)
+            ->where('materia_id', $trabalho->materia_id)
+            ->exists();
+
+        if (!$ehProfessorDestaMateria) {
+            abort(403, 'Acesso negado a esta disciplina.');
+        }
+
+        $tipos = AntTipoTrabalho::all();
+
+        $pesos = AntPeso::where('materia_id', $trabalho->materia_id)
+            ->where('semestre', $trabalho->semestre)
+            ->with('materia')
+            ->get();
+
+        return view('ANT::professores.edit', compact('trabalho', 'tipos', 'pesos'));
+    }
+
+    // Atualizar Trabalho
+    public function update(Request $request, $id)
+    {
+        $user = auth()->user();
+
+        $trabalho = AntTrabalho::findOrFail($id);
+
+        // Segurança: Verifica se o user é professor desta matéria
+        $ehProfessorDestaMateria = DB::table('ant_professor_materia')
+            ->where('user_id', $user->id)
+            ->where('materia_id', $trabalho->materia_id)
+            ->exists();
+
+        if (!$ehProfessorDestaMateria) {
+            abort(403, 'Acesso negado a esta disciplina.');
+        }
+
+        $request->validate([
+            'nome' => 'required|string|max:255',
+            'tipos_ids' => 'required|array|min:1',
+            'tipos_ids.*' => 'exists:ant_tipos_trabalho,id',
+            'peso_id' => 'required|exists:ant_pesos,id',
+            'prazo' => 'required|date',
+            'maximo_alunos' => 'required|integer|min:1',
+            'descricao' => 'required|string',
+            'dicas_correcao' => 'nullable|string',
+        ]);
+
+        $tiposIds = array_map('intval', $request->tipos_ids);
+
+        $trabalho->update([
+            'nome' => $request->nome,
+            'descricao' => $request->descricao,
+            'dicas_correcao' => $request->dicas_correcao,
+            'tipo_trabalho_id' => $tiposIds[0],
+            'tipos_trabalho_ids' => $tiposIds,
+            'prazo' => $request->prazo,
+            'maximo_alunos' => $request->maximo_alunos,
+            'peso_id' => $request->peso_id,
+        ]);
+
+        return redirect()->route('ant.professor.trabalho', $trabalho->id)->with('success', 'Trabalho atualizado com sucesso!');
+    }
+
     // Formulário de Novo Trabalho
     public function create()
     {

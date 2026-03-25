@@ -201,6 +201,93 @@ class ProfessorController extends Controller
 
         return view('ANT::professores.boletim', compact('materia', 'semestreAtual', 'gruposNome', 'dadosBoletim', 'pesoTotal'));
     }
+    // Formulário de Editar Trabalho
+    public function edit($id)
+    {
+        $user = auth()->user();
+        $config = AntConfiguracao::first();
+        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+
+        $trabalho = AntTrabalho::findOrFail($id);
+
+        $ehProfessor = DB::table('ant_professor_materia')
+            ->where('user_id', $user->id)
+            ->where('materia_id', $trabalho->materia_id)
+            ->exists();
+
+        if (!$ehProfessor) {
+            abort(403, 'Você não tem permissão para editar trabalhos desta disciplina.');
+        }
+
+        $materias = AntMateria::whereHas('professores', function($q) use ($user, $semestreAtual) {
+            $q->where('user_id', $user->id)->where('semestre', $semestreAtual);
+        })->get();
+
+        $tipos = AntTipoTrabalho::all();
+
+        $pesos = AntPeso::whereIn('materia_id', $materias->pluck('id'))
+            ->where('semestre', $semestreAtual)
+            ->with('materia')
+            ->get();
+
+        return view('ANT::professores.edit', compact('trabalho', 'materias', 'tipos', 'pesos', 'semestreAtual'));
+    }
+
+    // Salvar Alterações do Trabalho
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'nome' => 'required|string|max:255',
+            'materia_id' => 'required|exists:ant_materias,id',
+            'tipos_ids' => 'required|array|min:1',
+            'tipos_ids.*' => 'exists:ant_tipos_trabalho,id',
+            'peso_id' => 'required|exists:ant_pesos,id',
+            'prazo' => 'required|date',
+            'maximo_alunos' => 'required|integer|min:1',
+            'descricao' => 'required|string',
+            'dicas_correcao' => 'nullable|string',
+        ]);
+
+        $trabalho = AntTrabalho::findOrFail($id);
+
+        $ehProfessor = DB::table('ant_professor_materia')
+            ->where('user_id', auth()->id())
+            ->where('materia_id', $trabalho->materia_id)
+            ->exists();
+
+        if (!$ehProfessor) {
+            abort(403, 'Você não tem permissão para editar trabalhos desta disciplina.');
+        }
+
+        // Se a matéria foi alterada, verificar que o professor também leciona a nova matéria
+        if ($request->materia_id != $trabalho->materia_id) {
+            $ehProfessorNovaMateria = DB::table('ant_professor_materia')
+                ->where('user_id', auth()->id())
+                ->where('materia_id', $request->materia_id)
+                ->exists();
+
+            if (!$ehProfessorNovaMateria) {
+                abort(403, 'Você não tem permissão para mover este trabalho para a disciplina selecionada.');
+            }
+        }
+
+        $tiposIds = array_map('intval', $request->tipos_ids);
+
+        $trabalho->update([
+            'nome' => $request->nome,
+            'descricao' => $request->descricao,
+            'dicas_correcao' => $request->dicas_correcao,
+            'materia_id' => $request->materia_id,
+            'tipo_trabalho_id' => $tiposIds[0],
+            'tipos_trabalho_ids' => $tiposIds,
+            'prazo' => $request->prazo,
+            'maximo_alunos' => $request->maximo_alunos,
+            'peso_id' => $request->peso_id,
+        ]);
+
+        return redirect()->route('ant.professor.trabalho', $trabalho->id)->with('success', 'Trabalho atualizado com sucesso!');
+    }
+
     // Formulário de Novo Trabalho
     public function create()
     {

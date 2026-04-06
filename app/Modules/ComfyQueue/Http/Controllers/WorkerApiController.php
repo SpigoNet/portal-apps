@@ -10,26 +10,11 @@ use Illuminate\Support\Facades\DB;
 
 class WorkerApiController extends Controller
 {
-    private function authorized(Request $request): bool
-    {
-        $key = env('COMFYQUEUE_API_KEY');
-
-        if (! $key) {
-            return true; // sem chave configurada: acesso livre (desenvolvimento)
-        }
-
-        return $request->header('X-Api-Key') === $key;
-    }
-
     /**
      * Retorna todos os modelos necessários para os jobs pendentes (sem duplicatas por URL).
      */
     public function pendingModels(Request $request): JsonResponse
     {
-        if (! $this->authorized($request)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
         $models = Job::where('status', 'pending')
             ->whereNotNull('required_models')
             ->get()
@@ -45,10 +30,6 @@ class WorkerApiController extends Controller
      */
     public function nextJob(Request $request): JsonResponse
     {
-        if (! $this->authorized($request)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
         $job = DB::transaction(function () {
             $job = Job::where('status', 'pending')
                 ->lockForUpdate()
@@ -85,10 +66,6 @@ class WorkerApiController extends Controller
      */
     public function done(Request $request, int $id): JsonResponse
     {
-        if (! $this->authorized($request)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
         $job = Job::findOrFail($id);
 
         $job->status       = 'done';
@@ -108,10 +85,6 @@ class WorkerApiController extends Controller
      */
     public function fail(Request $request, int $id): JsonResponse
     {
-        if (! $this->authorized($request)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
         $job = Job::findOrFail($id);
         $error = $request->input('error', 'Erro desconhecido');
 

@@ -21,6 +21,8 @@ Route::prefix('api/comfy-queue')
     ->group(function () {
         Route::get('/models', [WorkerApiController::class, 'pendingModels'])->name('models');
         Route::get('/next',   [WorkerApiController::class, 'nextJob'])->name('next');
+        Route::get('/job/{id}/done', [WorkerApiController::class, 'done'])->name('job.done.get');
         Route::post('/job/{id}/done', [WorkerApiController::class, 'done'])->name('job.done');
+        Route::get('/job/{id}/fail', [WorkerApiController::class, 'fail'])->name('job.fail.get');
         Route::post('/job/{id}/fail', [WorkerApiController::class, 'fail'])->name('job.fail');
     });

@@ -10,6 +10,23 @@ use Illuminate\Support\Facades\DB;
 
 class WorkerApiController extends Controller
 {
+    private function normalizeOutputFiles(Request $request): array
+    {
+        $outputFiles = $request->input('output_files', []);
+
+        if (is_array($outputFiles)) {
+            return $outputFiles;
+        }
+
+        if (! is_string($outputFiles) || trim($outputFiles) === '') {
+            return [];
+        }
+
+        $decoded = json_decode($outputFiles, true);
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
     /**
      * Retorna todos os modelos necessários para os jobs pendentes (sem duplicatas por URL).
      */
@@ -42,6 +59,8 @@ class WorkerApiController extends Controller
 
             $job->status = 'processing';
             $job->started_at = now();
+            $job->finished_at = null;
+            $job->error = null;
             $job->appendLog('Job reivindicado pelo worker Colab');
             $job->save();
 
@@ -70,7 +89,7 @@ class WorkerApiController extends Controller
 
         $job->status       = 'done';
         $job->finished_at  = now();
-        $job->output_files = $request->input('output_files', []);
+        $job->output_files = $this->normalizeOutputFiles($request);
         $job->prompt_id    = $request->input('prompt_id');
         $job->error        = null;
         $job->appendLog('Job concluído com sucesso');

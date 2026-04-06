@@ -57,6 +57,14 @@
                                 <td class="border-b py-2 px-4 text-xs text-gray-600 dark:text-gray-300">
                                     @if($job->output_files && count($job->output_files) > 0)
                                         {{ count($job->output_files) }} arquivo(s)
+                                        @php($linkedOutputs = collect($job->output_files)->filter(fn ($file) => is_array($file) && !empty($file['url']))->take(2))
+                                        @if($linkedOutputs->isNotEmpty())
+                                            <div class="mt-1 space-x-2">
+                                                @foreach($linkedOutputs as $index => $file)
+                                                    <a href="{{ $file['url'] }}" target="_blank" class="text-indigo-600 hover:text-indigo-800 underline">Arquivo {{ $index + 1 }}</a>
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     @elseif($job->error)
                                         <span class="text-red-500" title="{{ $job->error }}">Erro</span>
                                     @else

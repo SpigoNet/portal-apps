@@ -4,9 +4,11 @@ namespace App\Modules\ComfyQueue\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\ComfyQueue\Models\Job;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class WorkerApiController extends Controller
 {
@@ -25,6 +27,41 @@ class WorkerApiController extends Controller
         $decoded = json_decode($outputFiles, true);
 
         return is_array($decoded) ? $decoded : [];
+    }
+
+    private function storeUploadedOutputs(Request $request, Job $job): array
+    {
+        $uploaded = $request->file('outputs', []);
+
+        if ($uploaded instanceof UploadedFile) {
+            $uploaded = [$uploaded];
+        }
+
+        if (! is_array($uploaded) || $uploaded === []) {
+            return [];
+        }
+
+        $stored = [];
+
+        foreach ($uploaded as $file) {
+            if (! $file instanceof UploadedFile) {
+                continue;
+            }
+
+            $path = $file->store("comfy-queue/jobs/{$job->id}", 'public');
+
+            $stored[] = [
+                'original_name' => $file->getClientOriginalName(),
+                'filename' => basename($path),
+                'path' => $path,
+                'url' => Storage::disk('public')->url($path),
+                'mime' => $file->getClientMimeType(),
+                'size' => $file->getSize(),
+                'type' => 'uploaded',
+            ];
+        }
+
+        return $stored;
     }
 
     /**
@@ -87,12 +124,21 @@ class WorkerApiController extends Controller
     {
         $job = Job::findOrFail($id);
 
+        $outputFiles = $this->normalizeOutputFiles($request);
+        $storedUploads = $this->storeUploadedOutputs($request, $job);
+        if ($storedUploads !== []) {
+            $outputFiles = array_values(array_merge($outputFiles, $storedUploads));
+        }
+
         $job->status       = 'done';
         $job->finished_at  = now();
-        $job->output_files = $this->normalizeOutputFiles($request);
+        $job->output_files = $outputFiles;
         $job->prompt_id    = $request->input('prompt_id');
         $job->error        = null;
-        $job->appendLog('Job concluído com sucesso');
+        $job->appendLog('Job concluído com sucesso', [
+            'outputs' => count($outputFiles),
+            'uploaded_files' => count($storedUploads),
+        ]);
         $job->save();
 
         return response()->json(['message' => 'Job marcado como concluído']);

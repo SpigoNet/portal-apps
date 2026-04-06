@@ -14,5 +14,5 @@ return [
     App\Modules\MundosDeMim\MundosDeMimServiceProvider::class,
     App\Modules\StreamingManager\StreamingManagerServiceProvider::class,
     App\Modules\BolaoReuniao\BolaoReuniaoServiceProvider::class,
+    App\Modules\ComfyQueue\ComfyQueueServiceProvider::class,
 ];
-

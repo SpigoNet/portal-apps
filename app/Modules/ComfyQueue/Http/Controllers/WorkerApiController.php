@@ -8,6 +8,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class WorkerApiController extends Controller
@@ -57,6 +58,50 @@ class WorkerApiController extends Controller
                 'url' => Storage::disk('public')->url($path),
                 'mime' => $file->getClientMimeType(),
                 'size' => $file->getSize(),
+                'type' => 'uploaded',
+            ];
+        }
+
+        return $stored;
+    }
+
+    private function storeBase64Outputs(Request $request, Job $job): array
+    {
+        $uploadedFiles = $request->input('uploaded_files', []);
+
+        if (! is_array($uploadedFiles) || $uploadedFiles === []) {
+            return [];
+        }
+
+        $stored = [];
+
+        foreach ($uploadedFiles as $fileData) {
+            if (! is_array($fileData) || empty($fileData['content']) || empty($fileData['filename'])) {
+                Log::warning('ComfyQueue: entrada de arquivo base64 inválida ignorada', ['job_id' => $job->id, 'data' => is_array($fileData) ? array_keys($fileData) : gettype($fileData)]);
+                continue;
+            }
+
+            $content = base64_decode($fileData['content'], true);
+            if ($content === false) {
+                Log::warning('ComfyQueue: falha ao decodificar base64 do arquivo', ['job_id' => $job->id, 'filename' => $fileData['filename']]);
+                continue;
+            }
+
+            $originalName = basename($fileData['filename']);
+            $mime = $fileData['mime'] ?? 'application/octet-stream';
+            $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION)) ?: 'bin';
+            $storedFilename = uniqid('', true) . '.' . $extension;
+            $path = "comfy-queue/jobs/{$job->id}/{$storedFilename}";
+
+            Storage::disk('public')->put($path, $content);
+
+            $stored[] = [
+                'original_name' => $originalName,
+                'filename' => $storedFilename,
+                'path' => $path,
+                'url' => Storage::disk('public')->url($path),
+                'mime' => $mime,
+                'size' => strlen($content),
                 'type' => 'uploaded',
             ];
         }
@@ -126,8 +171,10 @@ class WorkerApiController extends Controller
 
         $outputFiles = $this->normalizeOutputFiles($request);
         $storedUploads = $this->storeUploadedOutputs($request, $job);
-        if ($storedUploads !== []) {
-            $outputFiles = array_values(array_merge($outputFiles, $storedUploads));
+        $base64Uploads = $this->storeBase64Outputs($request, $job);
+        $allUploads = array_merge($storedUploads, $base64Uploads);
+        if ($allUploads !== []) {
+            $outputFiles = array_values(array_merge($outputFiles, $allUploads));
         }
 
         $job->status       = 'done';
@@ -137,7 +184,7 @@ class WorkerApiController extends Controller
         $job->error        = null;
         $job->appendLog('Job concluído com sucesso', [
             'outputs' => count($outputFiles),
-            'uploaded_files' => count($storedUploads),
+            'uploaded_files' => count($allUploads),
         ]);
         $job->save();
 

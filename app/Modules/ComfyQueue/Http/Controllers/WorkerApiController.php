@@ -13,6 +13,14 @@ use Illuminate\Support\Facades\Storage;
 
 class WorkerApiController extends Controller
 {
+    private function appendUploadedFileToJob(Job $job, array $fileMeta): void
+    {
+        $existing = is_array($job->output_files) ? $job->output_files : [];
+        $existing[] = $fileMeta;
+        $job->output_files = array_values($existing);
+        $job->save();
+    }
+
     private function normalizeOutputFiles(Request $request): array
     {
         $outputFiles = $request->input('output_files', []);
@@ -33,6 +41,9 @@ class WorkerApiController extends Controller
     private function storeUploadedOutputs(Request $request, Job $job): array
     {
         $uploaded = $request->file('outputs', []);
+        if ($uploaded === [] || $uploaded === null) {
+            $uploaded = $request->file('outputs[]', []);
+        }
 
         if ($uploaded instanceof UploadedFile) {
             $uploaded = [$uploaded];
@@ -107,6 +118,88 @@ class WorkerApiController extends Controller
         }
 
         return $stored;
+    }
+
+    /**
+     * Recebe upload em partes pequenas para contornar bloqueio do ModSecurity.
+     */
+    public function uploadChunk(Request $request, int $id): JsonResponse
+    {
+        $job = Job::findOrFail($id);
+
+        $uploadId = (string) $request->input('upload_id', '');
+        $filename = basename((string) $request->input('filename', ''));
+        $mime = (string) $request->input('mime', 'application/octet-stream');
+        $chunkIndex = (int) $request->input('chunk_index', -1);
+        $totalChunks = (int) $request->input('total_chunks', 0);
+        $chunkBase64 = (string) $request->input('chunk', '');
+
+        if ($uploadId === '' || $filename === '' || $chunkIndex < 0 || $totalChunks <= 0 || $chunkBase64 === '') {
+            return response()->json(['message' => 'Payload de chunk inválido'], 422);
+        }
+
+        $chunkData = base64_decode($chunkBase64, true);
+        if ($chunkData === false) {
+            return response()->json(['message' => 'Chunk base64 inválido'], 422);
+        }
+
+        $tmpDir = storage_path("app/comfy-queue/chunks/{$job->id}");
+        if (! is_dir($tmpDir)) {
+            mkdir($tmpDir, 0775, true);
+        }
+
+        $safeUploadId = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $uploadId) ?: uniqid('upload_', true);
+        $tmpPath = "{$tmpDir}/{$safeUploadId}.part";
+
+        if ($chunkIndex === 0 && file_exists($tmpPath)) {
+            @unlink($tmpPath);
+        }
+
+        $handle = fopen($tmpPath, 'ab');
+        if ($handle === false) {
+            return response()->json(['message' => 'Falha ao abrir arquivo temporário'], 500);
+        }
+
+        fwrite($handle, $chunkData);
+        fclose($handle);
+
+        if ($chunkIndex + 1 < $totalChunks) {
+            return response()->json([
+                'message' => 'Chunk recebido',
+                'chunk_index' => $chunkIndex,
+                'total_chunks' => $totalChunks,
+                'completed' => false,
+            ]);
+        }
+
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION)) ?: 'bin';
+        $storedFilename = uniqid('', true) . '.' . $extension;
+        $path = "comfy-queue/jobs/{$job->id}/{$storedFilename}";
+        $content = file_get_contents($tmpPath);
+        if ($content === false) {
+            return response()->json(['message' => 'Falha ao finalizar upload'], 500);
+        }
+
+        Storage::disk('public')->put($path, $content);
+        @unlink($tmpPath);
+
+        $fileMeta = [
+            'original_name' => $filename,
+            'filename' => $storedFilename,
+            'path' => $path,
+            'url' => Storage::disk('public')->url($path),
+            'mime' => $mime,
+            'size' => strlen($content),
+            'type' => 'uploaded',
+        ];
+
+        $this->appendUploadedFileToJob($job, $fileMeta);
+
+        return response()->json([
+            'message' => 'Upload concluído',
+            'completed' => true,
+            'file' => $fileMeta,
+        ]);
     }
 
     /**

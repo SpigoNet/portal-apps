@@ -12,6 +12,11 @@ Route::middleware(['web', 'auth'])
         Route::get('/', [DashboardController::class, 'index'])->name('index');
         Route::get('/create', [DashboardController::class, 'create'])->name('create');
         Route::post('/store', [DashboardController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [DashboardController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [DashboardController::class, 'update'])->name('update');
+        Route::post('/{id}/requeue', [DashboardController::class, 'requeue'])->name('requeue');
+        Route::post('/{id}/duplicate', [DashboardController::class, 'duplicate'])->name('duplicate');
+        Route::delete('/{id}', [DashboardController::class, 'destroy'])->name('destroy');
     });
 
 // API Routes para o worker Colab (sem sessão/CSRF, autenticado por X-Api-Key)

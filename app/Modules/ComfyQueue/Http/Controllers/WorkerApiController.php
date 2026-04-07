@@ -127,20 +127,43 @@ class WorkerApiController extends Controller
     {
         $job = Job::findOrFail($id);
 
-        $uploadId = (string) $request->input('upload_id', '');
-        $filename = basename((string) $request->input('filename', ''));
-        $mime = (string) $request->input('mime', 'application/octet-stream');
-        $chunkIndex = (int) $request->input('chunk_index', -1);
-        $totalChunks = (int) $request->input('total_chunks', 0);
+        $uploadId = (string) $request->input('u', $request->input('upload_id', ''));
+        $filename = basename((string) $request->input('f', $request->input('filename', '')));
+        $mime = (string) $request->input('m', $request->input('mime', 'application/octet-stream'));
+        $chunkIndex = (int) $request->input('i', $request->input('chunk_index', -1));
+        $totalChunks = (int) $request->input('t', $request->input('total_chunks', 0));
+        $chunkHex = (string) $request->input('h', '');
+        $chunkBase64Url = (string) $request->input('c', '');
         $chunkBase64 = (string) $request->input('chunk', '');
 
-        if ($uploadId === '' || $filename === '' || $chunkIndex < 0 || $totalChunks <= 0 || $chunkBase64 === '') {
+        if ($uploadId === '' || $filename === '' || $chunkIndex < 0 || $totalChunks <= 0) {
             return response()->json(['message' => 'Payload de chunk inválido'], 422);
         }
 
-        $chunkData = base64_decode($chunkBase64, true);
-        if ($chunkData === false) {
-            return response()->json(['message' => 'Chunk base64 inválido'], 422);
+        $chunkData = null;
+
+        if ($chunkHex !== '') {
+            $chunkData = @hex2bin($chunkHex);
+            if ($chunkData === false) {
+                return response()->json(['message' => 'Chunk hex inválido'], 422);
+            }
+        } elseif ($chunkBase64Url !== '') {
+            $normalized = strtr($chunkBase64Url, '-_', '+/');
+            $padding = strlen($normalized) % 4;
+            if ($padding > 0) {
+                $normalized .= str_repeat('=', 4 - $padding);
+            }
+            $chunkData = base64_decode($normalized, true);
+            if ($chunkData === false) {
+                return response()->json(['message' => 'Chunk base64url inválido'], 422);
+            }
+        } elseif ($chunkBase64 !== '') {
+            $chunkData = base64_decode($chunkBase64, true);
+            if ($chunkData === false) {
+                return response()->json(['message' => 'Chunk base64 inválido'], 422);
+            }
+        } else {
+            return response()->json(['message' => 'Chunk ausente'], 422);
         }
 
         $tmpDir = storage_path("app/comfy-queue/chunks/{$job->id}");

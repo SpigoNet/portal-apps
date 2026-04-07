@@ -262,7 +262,12 @@ class WorkerApiController extends Controller
     {
         $job = Job::findOrFail($id);
 
+        $existingOutputFiles = is_array($job->output_files) ? $job->output_files : [];
         $outputFiles = $this->normalizeOutputFiles($request);
+        if ($existingOutputFiles !== []) {
+            $outputFiles = array_values(array_merge($existingOutputFiles, $outputFiles));
+        }
+
         $storedUploads = $this->storeUploadedOutputs($request, $job);
         $base64Uploads = $this->storeBase64Outputs($request, $job);
         $allUploads = array_merge($storedUploads, $base64Uploads);

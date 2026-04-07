@@ -23,6 +23,7 @@ Route::prefix('api/comfy-queue')
         Route::get('/next',   [WorkerApiController::class, 'nextJob'])->name('next');
         Route::get('/job/{id}/done', [WorkerApiController::class, 'done'])->name('job.done.get');
         Route::post('/job/{id}/done', [WorkerApiController::class, 'done'])->name('job.done');
+        Route::post('/job/{id}/upload-chunk', [WorkerApiController::class, 'uploadChunk'])->name('job.upload-chunk');
         Route::get('/job/{id}/fail', [WorkerApiController::class, 'fail'])->name('job.fail.get');
         Route::post('/job/{id}/fail', [WorkerApiController::class, 'fail'])->name('job.fail');
     });

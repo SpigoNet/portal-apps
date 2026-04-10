@@ -2,6 +2,7 @@
 
 namespace App\Modules\GestorHoras\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,13 +14,23 @@ class Apontamento extends Model
     protected $fillable = [
         'gh_contrato_id',
         'gh_contrato_item_id',
+        'user_id',
         'descricao',
         'data_realizacao',
         'minutos_gastos',
+        'iniciado_em',
+        'finalizado_em',
+        'apontamento_ativo',
+        'faturamento_status',
+        'faturamento_selecionado_em',
+        'faturamento_selecionado_por',
     ];
 
     protected $casts = [
         'data_realizacao' => 'date',
+        'iniciado_em' => 'datetime',
+        'finalizado_em' => 'datetime',
+        'faturamento_selecionado_em' => 'datetime',
     ];
 
     public function item(): BelongsTo
@@ -29,6 +40,16 @@ class Apontamento extends Model
     public function contrato(): BelongsTo
     {
         return $this->belongsTo(Contrato::class, 'gh_contrato_id');
+    }
+
+    public function usuario(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function selecionadoPor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'faturamento_selecionado_por');
     }
 
     /**

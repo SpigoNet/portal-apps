@@ -13,8 +13,9 @@ class Contrato extends Model
     protected $fillable = [
         'gh_cliente_id',
         'titulo',
-        'tipo', // 'fixo' ou 'recorrente'
+        'tipo', // 'fixo', 'recorrente' ou 'livre'
         'horas_contratadas',
+        'valor_hora',
         'data_inicio',
         'data_fim',
         'status',
@@ -24,6 +25,7 @@ class Contrato extends Model
         'data_inicio' => 'date',
         'data_fim' => 'date',
         'horas_contratadas' => 'decimal:2',
+        'valor_hora' => 'decimal:2',
     ];
 
     /**
@@ -59,6 +61,10 @@ class Contrato extends Model
      */
     public function getSaldoAttribute()
     {
+        if ($this->tipo === 'livre') {
+            return null;
+        }
+
         // Total Contratado (Soma das horas estimadas de TODOS os itens/meses)
         // Isso é mais preciso do que usar o campo fixo do contrato
         $totalContratado = $this->itens->sum('horas_estimadas');

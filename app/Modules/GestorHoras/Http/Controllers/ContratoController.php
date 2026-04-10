@@ -58,8 +58,9 @@ class ContratoController extends Controller
         $validated = $request->validate([
             'gh_cliente_id' => 'required|exists:gh_clientes,id',
             'titulo' => 'required|string|max:255',
-            'tipo' => 'required|in:fixo,recorrente',
+            'tipo' => 'required|in:fixo,recorrente,livre',
             'horas_contratadas' => 'required|numeric|min:0', // Valor Mensal (se recorrente) ou Total (se fixo)
+            'valor_hora' => 'required|numeric|min:0',
             'data_inicio' => 'required|date',
             'data_fim' => 'nullable|date|after:data_inicio',
         ]);
@@ -95,8 +96,12 @@ class ContratoController extends Controller
             }
         }
 
+        $mensagem = $contrato->tipo === 'recorrente'
+            ? 'Contrato criado e meses gerados com sucesso!'
+            : 'Contrato criado com sucesso!';
+
         return redirect()->route('gestor-horas.index')
-            ->with('success', 'Contrato criado e meses gerados com sucesso!');
+            ->with('success', $mensagem);
     }
 
     public function show($id)

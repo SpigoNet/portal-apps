@@ -23,6 +23,12 @@ Route::middleware(['web', 'auth'])
 
         // Rota para Lançar Horas
         Route::post('/contrato/{id}/apontar', [ApontamentoController::class, 'store'])->name('apontar');
+        Route::post('/contrato/{id}/separar-faturamento', [ApontamentoController::class, 'separarParaFaturamento'])->name('separar-faturamento');
+        Route::post('/contrato/{id}/faturamento-status', [ApontamentoController::class, 'atualizarStatusFaturamento'])->name('faturamento-status');
+
+        Route::get('/mobile/apontamento', [ApontamentoController::class, 'mobileTimer'])->name('mobile.timer');
+        Route::post('/mobile/apontamento/iniciar', [ApontamentoController::class, 'iniciarTimer'])->name('mobile.start');
+        Route::post('/mobile/apontamento/finalizar', [ApontamentoController::class, 'finalizarTimer'])->name('mobile.finish');
 
         Route::get('/contrato/{id}', [ContratoController::class, 'show'])->name('show');
     });

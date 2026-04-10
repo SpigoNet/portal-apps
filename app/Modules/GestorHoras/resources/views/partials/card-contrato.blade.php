@@ -1,10 +1,11 @@
 @php
     $consumido = $contrato->horas_consumidas;
+    $isLivre = $contrato->tipo == 'livre';
     // Para calcular % corretamente no visual, usamos o maior valor entre contratado e itens somados
     $totalBase = $contrato->tipo == 'fixo' ? $contrato->horas_contratadas : $contrato->itens->sum('horas_estimadas');
     if($totalBase == 0) $totalBase = $contrato->horas_contratadas; // Fallback
 
-    $porcentagem = $totalBase > 0 ? ($consumido / $totalBase) * 100 : 0;
+    $porcentagem = $isLivre ? 0 : ($totalBase > 0 ? ($consumido / $totalBase) * 100 : 0);
 
     // Cores
     if ($inativo) {
@@ -28,7 +29,7 @@
         <div class="flex justify-between items-start mb-4">
             <div>
                 <span class="inline-block px-2 py-1 text-xs font-semibold rounded mb-1
-                    {{ $contrato->tipo == 'recorrente' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
+                    {{ $contrato->tipo == 'recorrente' ? 'bg-purple-100 text-purple-800' : ($contrato->tipo == 'livre' ? 'bg-slate-100 text-slate-700' : 'bg-blue-100 text-blue-800') }}">
                     {{ ucfirst($contrato->tipo) }}
                 </span>
                 @if(auth()->user()->gh_role !== 'client')
@@ -47,16 +48,25 @@
         </h3>
 
         <div class="mt-4">
-            <div class="flex justify-between text-sm mb-1">
-                <span class="font-medium text-gray-500">Consumo Geral</span>
-                <span class="font-bold {{ !$inativo && $consumido > $totalBase ? 'text-red-600' : 'text-gray-700' }}">
-                    {{ number_format($consumido, 2, ',', '.') }}h
-                    <span class="text-xs font-normal text-gray-400">/ {{ number_format($totalBase, 2, ',', '.') }}h</span>
-                </span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-                <div class="{{ $corBarra }} h-2 rounded-full" style="width: {{ min($porcentagem, 100) }}%"></div>
-            </div>
+            @if($isLivre)
+                <div class="flex justify-between text-sm mb-1">
+                    <span class="font-medium text-gray-500">Horas Apontadas</span>
+                    <span class="font-bold text-gray-700">
+                        {{ number_format($consumido, 2, ',', '.') }}h
+                    </span>
+                </div>
+            @else
+                <div class="flex justify-between text-sm mb-1">
+                    <span class="font-medium text-gray-500">Consumo Geral</span>
+                    <span class="font-bold {{ !$inativo && $consumido > $totalBase ? 'text-red-600' : 'text-gray-700' }}">
+                        {{ number_format($consumido, 2, ',', '.') }}h
+                        <span class="text-xs font-normal text-gray-400">/ {{ number_format($totalBase, 2, ',', '.') }}h</span>
+                    </span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="{{ $corBarra }} h-2 rounded-full" style="width: {{ min($porcentagem, 100) }}%"></div>
+                </div>
+            @endif
         </div>
 
         <div class="mt-6 flex justify-between items-center">

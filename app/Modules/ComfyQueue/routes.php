@@ -12,6 +12,8 @@ Route::middleware(['web', 'auth'])
         Route::get('/', [DashboardController::class, 'index'])->name('index');
         Route::get('/create', [DashboardController::class, 'create'])->name('create');
         Route::post('/store', [DashboardController::class, 'store'])->name('store');
+        Route::get('/assistant', [DashboardController::class, 'assistant'])->name('assistant');
+        Route::post('/assistant/store', [DashboardController::class, 'assistantStore'])->name('assistant.store');
         Route::get('/{id}/edit', [DashboardController::class, 'edit'])->name('edit');
         Route::put('/{id}', [DashboardController::class, 'update'])->name('update');
         Route::post('/{id}/requeue', [DashboardController::class, 'requeue'])->name('requeue');

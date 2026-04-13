@@ -160,4 +160,73 @@ class DashboardController extends Controller
 
         return redirect()->route('comfy-queue.index')->with('success', "Job #{$id} removido.");
     }
+
+    public function assistant()
+    {
+        return view('ComfyQueue::assistant');
+    }
+
+    public function assistantStore(Request $request)
+    {
+        $validated = $request->validate([
+            'prompt' => 'required|string',
+            'negative_prompt' => 'nullable|string',
+            'workflow_json' => 'required|string',
+        ]);
+
+        $workflowJson = json_decode($validated['workflow_json'], true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return back()->withErrors(['workflow_json' => 'Workflow deve ser um JSON válido.'])->withInput();
+        }
+
+        $workflowJson = $this->updateWorkflowWithPrompts($workflowJson, $validated['prompt'], $validated['negative_prompt'] ?? '');
+
+        Job::create([
+            'type' => 'prompt',
+            'params' => $workflowJson,
+            'required_models' => $this->extractModelsFromWorkflow($workflowJson),
+            'status' => 'pending',
+        ]);
+
+        return redirect()->route('comfy-queue.index')->with('success', 'Job criado com sucesso.');
+    }
+
+    private function updateWorkflowWithPrompts(array $workflow, string $positivePrompt, string $negativePrompt): array
+    {
+        foreach ($workflow as &$node) {
+            if (isset($node['class_type']) && isset($node['inputs']['text'])) {
+                if (empty($node['inputs']['text']) || stripos($node['inputs']['text'], 'positive') !== false) {
+                    $node['inputs']['text'] = $positivePrompt;
+                }
+            }
+            if (isset($node['class_type']) && isset($node['inputs']['negative'])) {
+                $node['inputs']['negative'] = [[7, 0]];
+            }
+        }
+
+        if (isset($workflow['7'])) {
+            $workflow['7']['inputs']['text'] = $negativePrompt ?: 'text, watermark';
+        }
+
+        return $workflow;
+    }
+
+    private function extractModelsFromWorkflow(array $workflow): ?array
+    {
+        $models = [];
+
+        foreach ($workflow as $node) {
+            if (isset($node['class_type']) && $node['class_type'] === 'CheckpointLoaderSimple') {
+                if (isset($node['inputs']['ckpt_name'])) {
+                    $models[] = [
+                        'name' => $node['inputs']['ckpt_name'],
+                        'dest' => 'models/checkpoints',
+                        'url' => '',
+                    ];
+                }
+            }
+        }
+
+        return empty($models) ? null : $models;
+    }
 }

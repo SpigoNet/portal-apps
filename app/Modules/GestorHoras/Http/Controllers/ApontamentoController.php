@@ -24,10 +24,10 @@ class ApontamentoController extends Controller
         }
 
         $validated = $request->validate([
-            'descricao' => 'required|string|max:255',
+            'descricao' => 'required|string',
             'data_realizacao' => 'required|date',
             'horas_gastas' => 'required|numeric|min:0.1',
-            'gh_contrato_item_id' => 'nullable|exists:gh_contrato_itens,id', // Validação nova
+            'gh_contrato_item_id' => 'nullable|exists:gh_contrato_itens,id',
         ]);
 
         // Verifica se o item pertence mesmo a este contrato (segurança extra)
@@ -291,7 +291,7 @@ class ApontamentoController extends Controller
         Gate::authorize('gh.operacional');
 
         $validated = $request->validate([
-            'descricao' => 'required|string|max:255',
+            'descricao' => 'required|string',
         ]);
 
         $apontamento = Apontamento::where('user_id', auth()->id())
@@ -316,5 +316,28 @@ class ApontamentoController extends Controller
 
         return redirect()->route('gestor-horas.mobile.timer')
             ->with('success', 'Apontamento finalizado com sucesso.');
+    }
+
+    public function salvarDescricao(Request $request)
+    {
+        Gate::authorize('gh.operacional');
+
+        $validated = $request->validate([
+            'descricao' => 'nullable|string',
+        ]);
+
+        $apontamento = Apontamento::where('user_id', auth()->id())
+            ->where('apontamento_ativo', 1)
+            ->first();
+
+        if (!$apontamento) {
+            return response()->json(['erro' => 'Nenhum apontamento ativo encontrado.'], 422);
+        }
+
+        $apontamento->update([
+            'descricao' => $validated['descricao'] ?? '',
+        ]);
+
+        return response()->json(['success' => true, 'mensagem' => 'Descrição salva com sucesso!']);
     }
 }

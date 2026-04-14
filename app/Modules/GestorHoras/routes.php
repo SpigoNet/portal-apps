@@ -28,6 +28,7 @@ Route::middleware(['web', 'auth'])
 
         Route::get('/mobile/apontamento', [ApontamentoController::class, 'mobileTimer'])->name('mobile.timer');
         Route::post('/mobile/apontamento/iniciar', [ApontamentoController::class, 'iniciarTimer'])->name('mobile.start');
+        Route::post('/mobile/apontamento/salvar-descricao', [ApontamentoController::class, 'salvarDescricao'])->name('mobile.save-desc');
         Route::post('/mobile/apontamento/finalizar', [ApontamentoController::class, 'finalizarTimer'])->name('mobile.finish');
 
         Route::get('/contrato/{id}', [ContratoController::class, 'show'])->name('show');

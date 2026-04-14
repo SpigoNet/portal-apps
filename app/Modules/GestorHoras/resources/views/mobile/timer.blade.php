@@ -19,18 +19,64 @@
 
             @if($apontamentoAtivo)
                 <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6 space-y-4">
+                    <div class="text-center">
+                        <p class="text-xs uppercase tracking-wide text-slate-500 font-bold">Apontamento em andamento</p>
+                        <p class="text-sm text-slate-700 mt-1">Descreva o que foi feito durante o dia.</p>
+                    </div>
+
+                    <form id="salvarDescricaoForm" x-data>
+                        @csrf
+                        <textarea 
+                            name="descricao" 
+                            id="descricao"
+                            rows="4" 
+                            class="w-full rounded-lg border-slate-300 focus:border-slate-500 focus:ring-slate-500 text-sm"
+                            placeholder="Descreva o que você está fazendo..."
+                            x-model="$store.descricao"
+                        >{{ $apontamentoAtivo->descricao }}</textarea>
+                        
+                        <button 
+                            type="button"
+                            @click="
+                                fetch('{{ route('gestor-horas.mobile.save-desc') }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                    },
+                                    body: JSON.stringify({ descricao: $store.descricao })
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        alert(data.mensagem);
+                                    }
+                                })
+                            "
+                            class="mt-3 w-full bg-slate-600 hover:bg-slate-500 border border-slate-600 text-white font-semibold py-2 rounded-lg text-sm"
+                        >
+                            💾 Salvar Descrição
+                        </button>
+                    </form>
+
                     <form action="{{ route('gestor-horas.mobile.finish') }}"
                           method="POST"
-                          onsubmit="const d = prompt('Descreva o trabalho realizado:'); if (!d || !d.trim()) { return false; } this.querySelector('input[name=descricao]').value = d.trim();"
-                          class="space-y-4">
+                          class="space-y-4"
+                          x-data="{ descricao: $store.descricao }">
                         @csrf
-                        <input type="hidden" name="descricao" value="">
+                        <input type="hidden" name="descricao" x-model="descricao">
 
                         <button type="submit" class="w-full bg-red-700 hover:bg-red-600 border border-red-700 text-white font-bold py-4 rounded-lg text-lg">
                             Finalizar Apontamento
                         </button>
                     </form>
                 </div>
+
+                <script>
+                    document.addEventListener('alpine:init', () => {
+                        Alpine.store('descricao', @json($apontamentoAtivo->descricao ?? ''));
+                    });
+                </script>
             @else
                 <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6 space-y-4">
                     <div class="text-center">

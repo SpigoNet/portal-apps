@@ -60,7 +60,7 @@ class JobModel extends Model
             return $data;
         } elseif (is_string($data)) {
             foreach ($valores as $varName => $varValue) {
-                $data = str_replace('__{$varName}__', $varValue, $data);
+                $data = str_replace("__{$varName}__", (string) $varValue, $data);
             }
             return $data;
         }

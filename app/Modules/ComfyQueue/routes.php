@@ -2,6 +2,7 @@
 
 use App\Modules\ComfyQueue\Http\Controllers\DashboardController;
 use App\Modules\ComfyQueue\Http\Controllers\WorkerApiController;
+use App\Modules\ComfyQueue\Http\Controllers\JobModelController;
 use Illuminate\Support\Facades\Route;
 
 // Web Routes
@@ -14,6 +15,14 @@ Route::middleware(['web', 'auth'])
         Route::post('/store', [DashboardController::class, 'store'])->name('store');
         Route::get('/assistant', [DashboardController::class, 'assistant'])->name('assistant');
         Route::post('/assistant/store', [DashboardController::class, 'assistantStore'])->name('assistant.store');
+
+        Route::get('/job-models', [JobModelController::class, 'index'])->name('job-models.index');
+        Route::get('/job-models/create', [JobModelController::class, 'create'])->name('job-models.create');
+        Route::post('/job-models', [JobModelController::class, 'store'])->name('job-models.store');
+        Route::get('/job-models/{id}/edit', [JobModelController::class, 'edit'])->name('job-models.edit');
+        Route::put('/job-models/{id}', [JobModelController::class, 'update'])->name('job-models.update');
+        Route::delete('/job-models/{id}', [JobModelController::class, 'destroy'])->name('job-models.destroy');
+
         Route::get('/{id}/edit', [DashboardController::class, 'edit'])->name('edit');
         Route::put('/{id}', [DashboardController::class, 'update'])->name('update');
         Route::post('/{id}/requeue', [DashboardController::class, 'requeue'])->name('requeue');

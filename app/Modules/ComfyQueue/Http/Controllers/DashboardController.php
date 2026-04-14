@@ -4,6 +4,7 @@ namespace App\Modules\ComfyQueue\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\ComfyQueue\Models\Job;
+use App\Modules\ComfyQueue\Models\JobModel;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -163,28 +164,49 @@ class DashboardController extends Controller
 
     public function assistant()
     {
-        return view('ComfyQueue::assistant');
+        $modelos = JobModel::orderBy('nome')->get();
+
+        return view('ComfyQueue::assistant', compact('modelos'));
     }
 
     public function assistantStore(Request $request)
     {
         $validated = $request->validate([
-            'prompt' => 'required|string',
+            'tipo' => 'required|in:manual,modelo',
+            'modelo_id' => 'nullable|exists:comfy_queue_job_models,id',
+            'prompt' => 'required_if:tipo,manual|string',
             'negative_prompt' => 'nullable|string',
-            'workflow_json' => 'required|string',
+            'workflow_json' => 'required_if:tipo,manual|string',
         ]);
 
-        $workflowJson = json_decode($validated['workflow_json'], true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return back()->withErrors(['workflow_json' => 'Workflow deve ser um JSON válido.'])->withInput();
-        }
+        $workflowJson = null;
+        $requiredModels = null;
 
-        $workflowJson = $this->updateWorkflowWithPrompts($workflowJson, $validated['prompt'], $validated['negative_prompt'] ?? '');
+        if ($validated['tipo'] === 'modelo') {
+            $modelo = JobModel::findOrFail($validated['modelo_id']);
+            $variaveis = $modelo->variaveis;
+            $valores = [];
+
+            foreach ($variaveis as $var) {
+                $valores[$var] = $request->input("variavel_{$var}", '');
+            }
+
+            $workflowJson = $modelo->processarJsonComValores($valores);
+            $requiredModels = $this->extractModelsFromWorkflow($workflowJson);
+        } else {
+            $workflowJson = json_decode($validated['workflow_json'], true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return back()->withErrors(['workflow_json' => 'Workflow deve ser um JSON válido.'])->withInput();
+            }
+
+            $workflowJson = $this->updateWorkflowWithPrompts($workflowJson, $validated['prompt'], $validated['negative_prompt'] ?? '');
+            $requiredModels = $this->extractModelsFromWorkflow($workflowJson);
+        }
 
         Job::create([
             'type' => 'prompt',
             'params' => $workflowJson,
-            'required_models' => $this->extractModelsFromWorkflow($workflowJson),
+            'required_models' => $requiredModels,
             'status' => 'pending',
         ]);
 

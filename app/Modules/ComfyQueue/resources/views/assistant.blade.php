@@ -8,7 +8,7 @@
                         Assistente de Insert — ComfyQueue
                     </h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        Cole o workflow JSON e altere apenas o prompt de entrada.
+                        Crie um job manualmente ou utilize um modelo salvo.
                     </p>
                 </div>
                 <a href="{{ route('comfy-queue.index') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
@@ -33,59 +33,116 @@
                     <form action="{{ route('comfy-queue.assistant.store') }}" method="POST" x-data="assistantForm()">
                         @csrf
 
-                        {{-- Prompt Positivo --}}
+                        {{-- Tipo de Criação --}}
                         <div class="mb-6">
-                            <label for="prompt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Prompt Positivo <span class="text-red-500">*</span>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Tipo de Criação
                             </label>
-                            <textarea x-model="prompt" name="prompt" id="prompt" rows="4" required
-                                placeholder="Ex: Chibi anime sticker of Monkey D. Luffy from One Piece..."
-                                class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">O texto principal que será usado no nó de prompt positivo.</p>
+                            <div class="flex gap-4">
+                                <label class="flex items-center">
+                                    <input type="radio" name="tipo" value="manual" x-model="tipo" class="mr-2">
+                                    Manual
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="tipo" value="modelo" x-model="tipo" class="mr-2">
+                                    Usar Modelo
+                                </label>
+                            </div>
                         </div>
 
-                        {{-- Prompt Negativo --}}
-                        <div class="mb-6">
-                            <label for="negative_prompt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Prompt Negativo
+                        {{-- Seleção de Modelo --}}
+                        <div x-show="tipo === 'modelo'" class="mb-6">
+                            <label for="modelo_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Selecione um Modelo
                             </label>
-                            <textarea x-model="negativePrompt" name="negative_prompt" id="negative_prompt" rows="2"
-                                placeholder="Ex: text, watermark, low quality..."
-                                class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">O que evitar na geração. Padrão: "text, watermark"</p>
+                            <select x-model="modeloId" name="modelo_id" @change="carregarModelo"
+                                class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                                <option value="">Selecione...</option>
+                                @foreach($modelos as $modelo)
+                                    <option value="{{ $modelo->id }}">{{ $modelo->nome }}</option>
+                                @endforeach
+                            </select>
                         </div>
 
-                        {{-- Workflow JSON --}}
-                        <div class="mb-6">
-                            <label for="workflow_json" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Workflow JSON <span class="text-red-500">*</span>
-                            </label>
-                            <textarea x-model="workflowJson" name="workflow_json" id="workflow_json" rows="18" required
-                                placeholder='Cole aqui o workflow completo no formato API do ComfyUI'
-                                class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono text-xs"></textarea>
-                            <div class="mt-2 flex gap-2">
-                                <button type="button" @click="formatJson" 
-                                    class="text-xs px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    Formatar JSON
-                                </button>
-                                <button type="button" @click="clearWorkflow" 
-                                    class="text-xs px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                    Limpar
+                        {{-- Campos de Variáveis do Modelo --}}
+                        <template x-if="tipo === 'modelo' && modeloId && variaveis.length > 0">
+                            <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                                <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-3">Preencha as variáveis</h3>
+                                <template x-for="var in variaveis" :key="var">
+                                    <div class="mb-3">
+                                        <label :for="'variavel_' + var" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            <span x-text="var"></span> <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="text" :name="'variavel_' + var" :id="'variavel_' + var" required
+                                            class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        {{-- Campos Manuais (apenas quando tipo=manual) --}}
+                        <div x-show="tipo === 'manual'>
+
+                            {{-- Prompt Positivo --}}
+                            <div class="mb-6">
+                                <label for="prompt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Prompt Positivo <span class="text-red-500">*</span>
+                                </label>
+                                <textarea x-model="prompt" name="prompt" id="prompt" rows="4" 
+                                    placeholder="Ex: Chibi anime sticker of Monkey D. Luffy from One Piece..."
+                                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">O texto principal que será usado no nó de prompt positivo.</p>
+                            </div>
+
+                            {{-- Prompt Negativo --}}
+                            <div class="mb-6">
+                                <label for="negative_prompt" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Prompt Negativo
+                                </label>
+                                <textarea x-model="negativePrompt" name="negative_prompt" id="negative_prompt" rows="2"
+                                    placeholder="Ex: text, watermark, low quality..."
+                                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">O que evitar na geração. Padrão: "text, watermark"</p>
+                            </div>
+
+                            {{-- Workflow JSON --}}
+                            <div class="mb-6">
+                                <label for="workflow_json" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Workflow JSON <span class="text-red-500">*</span>
+                                </label>
+                                <textarea x-model="workflowJson" name="workflow_json" id="workflow_json" rows="18" 
+                                    placeholder='Cole aqui o workflow completo no formato API do ComfyUI'
+                                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono text-xs"></textarea>
+                                <div class="mt-2 flex gap-2">
+                                    <button type="button" @click="formatJson" 
+                                        class="text-xs px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        Formatar JSON
+                                    </button>
+                                    <button type="button" @click="clearWorkflow" 
+                                        class="text-xs px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        Limpar
+                                    </button>
+                                </div>
+                            </div>
+
+                            {{-- Preview --}}
+                            <div x-show="previewShow" class="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preview do Workflow</h3>
+                                <pre class="text-xs text-gray-600 dark:text-gray-400 overflow-x-auto" x-text="previewJson"></pre>
+                            </div>
+
+                            <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                <button type="button" @click="togglePreview" 
+                                    class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                    <span x-text="previewShow ? 'Ocultar Preview' : 'Mostrar Preview'"></span>
                                 </button>
                             </div>
                         </div>
 
-                        {{-- Preview --}}
-                        <div x-show="previewShow" class="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
-                            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preview do Workflow</h3>
-                            <pre class="text-xs text-gray-600 dark:text-gray-400 overflow-x-auto" x-text="previewJson"></pre>
-                        </div>
-
                         <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <button type="button" @click="togglePreview" 
-                                class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                                <span x-text="previewShow ? 'Ocultar Preview' : 'Mostrar Preview'"></span>
-                            </button>
+                            <a href="{{ route('comfy-queue.job-models.index') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+                                Gerenciar Modelos
+                            </a>
                             
                             <div class="flex gap-3">
                                 <a href="{{ route('comfy-queue.assistant') }}" class="px-4 py-2 border rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
@@ -106,6 +163,10 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('assistantForm', () => ({
+                tipo: 'manual',
+                modeloId: '',
+                variaveis: [],
+                modelos: @json($modelos->map(fn($m) => ['id' => $m->id, 'nome' => $m->nome, 'variaveis' => $m->variaveis])),
                 prompt: '',
                 negativePrompt: 'text, watermark',
                 workflowJson: '',
@@ -120,6 +181,15 @@
                     } catch (e) {
                         return 'JSON inválido';
                     }
+                },
+
+                carregarModelo() {
+                    if (!this.modeloId) {
+                        this.variaveis = [];
+                        return;
+                    }
+                    const modelo = this.modelos.find(m => m.id == this.modeloId);
+                    this.variaveis = modelo ? modelo.variaveis : [];
                 },
 
                 updateWorkflow(workflow, positive, negative) {

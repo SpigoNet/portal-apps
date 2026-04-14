@@ -39,8 +39,14 @@ class JobModel extends Model
                 $newPrefix = $prefix ? "{$prefix}.{$key}" : $key;
                 $this->extractVariaveis($value, $newPrefix, $variaveis);
             }
-        } elseif (is_string($data) && preg_match('/^__(.+)__$/', $data, $matches)) {
-            $variaveis[] = $matches[1];
+        } elseif (is_string($data)) {
+            if (preg_match_all('/__(\w+)__/', $data, $matches)) {
+                foreach ($matches[1] as $varName) {
+                    if (!in_array($varName, $variaveis)) {
+                        $variaveis[] = $varName;
+                    }
+                }
+            }
         }
     }
 

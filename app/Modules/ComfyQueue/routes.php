@@ -26,6 +26,7 @@ Route::prefix('api/comfy-queue')
     ->name('comfy-queue.api.')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
     ->group(function () {
+        Route::get('/assistant', [WorkerApiController::class, 'assistantCreate'])->name('assistant');
         Route::get('/models', [WorkerApiController::class, 'pendingModels'])->name('models');
         Route::get('/next',   [WorkerApiController::class, 'nextJob'])->name('next');
         Route::get('/job/{id}/done', [WorkerApiController::class, 'done'])->name('job.done.get');

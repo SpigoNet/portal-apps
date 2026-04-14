@@ -313,6 +313,82 @@ class WorkerApiController extends Controller
     }
 
     /**
+     * Cria um novo job via assistente (endpoint público de API).
+     * Query params: prompt (obrigatório), negative_prompt (opcional), workflow (obrigatório, JSON).
+     */
+    public function assistantCreate(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'prompt'          => 'required|string',
+            'negative_prompt' => 'nullable|string',
+            'workflow'        => 'required|string',
+        ]);
+
+        $workflowJson = json_decode($validated['workflow'], true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return response()->json(['message' => 'O parâmetro workflow deve ser um JSON válido.'], 422);
+        }
+
+        $workflowJson = $this->applyPromptsToWorkflow(
+            $workflowJson,
+            $validated['prompt'],
+            $validated['negative_prompt'] ?? ''
+        );
+
+        $job = Job::create([
+            'type'            => 'prompt',
+            'params'          => $workflowJson,
+            'required_models' => $this->extractModelsFromWorkflow($workflowJson),
+            'status'          => 'pending',
+        ]);
+
+        return response()->json([
+            'message' => 'Job criado com sucesso.',
+            'job_id'  => $job->id,
+            'status'  => $job->status,
+        ], 201);
+    }
+
+    private function applyPromptsToWorkflow(array $workflow, string $positivePrompt, string $negativePrompt): array
+    {
+        foreach ($workflow as &$node) {
+            if (isset($node['class_type']) && isset($node['inputs']['text'])) {
+                if (empty($node['inputs']['text']) || stripos($node['inputs']['text'], 'positive') !== false) {
+                    $node['inputs']['text'] = $positivePrompt;
+                }
+            }
+            if (isset($node['class_type']) && isset($node['inputs']['negative'])) {
+                $node['inputs']['negative'] = [[7, 0]];
+            }
+        }
+
+        if (isset($workflow['7'])) {
+            $workflow['7']['inputs']['text'] = $negativePrompt ?: 'text, watermark';
+        }
+
+        return $workflow;
+    }
+
+    private function extractModelsFromWorkflow(array $workflow): ?array
+    {
+        $models = [];
+
+        foreach ($workflow as $node) {
+            if (isset($node['class_type']) && $node['class_type'] === 'CheckpointLoaderSimple') {
+                if (isset($node['inputs']['ckpt_name'])) {
+                    $models[] = [
+                        'name' => $node['inputs']['ckpt_name'],
+                        'dest' => 'models/checkpoints',
+                        'url'  => '',
+                    ];
+                }
+            }
+        }
+
+        return empty($models) ? null : $models;
+    }
+
+    /**
      * Marca o job como falhou.
      * Body: { "error": "mensagem de erro" }
      */

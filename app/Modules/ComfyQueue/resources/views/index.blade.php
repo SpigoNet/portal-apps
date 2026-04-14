@@ -6,7 +6,10 @@
                 <h2 class="font-semibold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
                     {{ __('Gerenciador ComfyUI') }}
                 </h2>
-                <a href="{{ route('comfy-queue.create') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700">Novo Job</a>
+                <div class="flex flex-col items-end gap-2">
+                    <a href="{{ route('comfy-queue.create') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700">Novo Job</a>
+                    <a href="{{ route('comfy-queue.assistant') }}" class="px-4 py-2 bg-gray-600 text-white rounded-md text-sm hover:bg-gray-700">Assistente de Criação</a>
+                </div>
             </div>
 
             <div class="mb-4 px-4 sm:px-0">

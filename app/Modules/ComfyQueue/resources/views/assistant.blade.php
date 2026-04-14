@@ -68,20 +68,21 @@
                         <template x-if="tipo === 'modelo' && modeloId && variaveis.length > 0">
                             <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                                 <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-3">Preencha as variáveis</h3>
-                                <template x-for="var in variaveis" :key="var">
+                                <template x-for="(variavel, index) in variaveis" :key="variavel">
                                     <div class="mb-3">
-                                        <label :for="'variavel_' + var" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            <span x-text="var"></span> <span class="text-red-500">*</span>
+                                        <label :for="'variavel_' + index" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            <span x-text="variavel"></span> <span class="text-red-500">*</span>
                                         </label>
-                                        <input type="text" :name="'variavel_' + var" :id="'variavel_' + var" required
-                                            class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                                        <input type="hidden" :name="'variaveis[' + index + '][nome]'" :value="variavel">
+                                        <textarea :name="'variaveis[' + index + '][valor]'" :id="'variavel_' + index" rows="3" required
+                                            class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"></textarea>
                                     </div>
                                 </template>
                             </div>
                         </template>
 
                         {{-- Campos Manuais (apenas quando tipo=manual) --}}
-                        <div x-show="tipo === 'manual'>
+                        <div x-show="tipo === 'manual'">
 
                             {{-- Prompt Positivo --}}
                             <div class="mb-6">

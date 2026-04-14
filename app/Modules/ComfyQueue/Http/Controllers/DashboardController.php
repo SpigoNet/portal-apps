@@ -173,10 +173,10 @@ class DashboardController extends Controller
     {
         $validated = $request->validate([
             'tipo' => 'required|in:manual,modelo',
-            'modelo_id' => 'nullable|exists:comfy_queue_job_models,id',
-            'prompt' => 'required_if:tipo,manual|string',
+            'modelo_id' => 'required_if:tipo,modelo|nullable|exists:comfy_queue_job_models,id',
+            'prompt' => 'nullable|string|required_if:tipo,manual',
             'negative_prompt' => 'nullable|string',
-            'workflow_json' => 'required_if:tipo,manual|string',
+            'workflow_json' => 'nullable|string|required_if:tipo,manual',
         ]);
 
         $workflowJson = null;
@@ -184,11 +184,25 @@ class DashboardController extends Controller
 
         if ($validated['tipo'] === 'modelo') {
             $modelo = JobModel::findOrFail($validated['modelo_id']);
-            $variaveis = $modelo->variaveis;
+            $variaveis = is_array($modelo->variaveis) ? $modelo->variaveis : [];
             $valores = [];
+            $variaveisInput = $request->validate([
+                'variaveis' => 'nullable|array',
+                'variaveis.*.nome' => 'required|string',
+                'variaveis.*.valor' => 'required|string',
+            ]);
+
+            $valoresPorNome = [];
+            foreach (($variaveisInput['variaveis'] ?? []) as $item) {
+                $nome = (string) ($item['nome'] ?? '');
+                $valor = (string) ($item['valor'] ?? '');
+                if ($nome !== '') {
+                    $valoresPorNome[$nome] = $valor;
+                }
+            }
 
             foreach ($variaveis as $var) {
-                $valores[$var] = $request->input("variavel_{$var}", '');
+                $valores[$var] = $valoresPorNome[$var] ?? '';
             }
 
             $workflowJson = $modelo->processarJsonComValores($valores);

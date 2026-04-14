@@ -11,6 +11,7 @@ Route::middleware(['web', 'auth'])
     ->name('comfy-queue.')
     ->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('index');
+        Route::get('/api/jobs', [DashboardController::class, 'apiJobs'])->name('api.jobs');
         Route::get('/create', [DashboardController::class, 'create'])->name('create');
         Route::post('/store', [DashboardController::class, 'store'])->name('store');
         Route::get('/assistant', [DashboardController::class, 'assistant'])->name('assistant');

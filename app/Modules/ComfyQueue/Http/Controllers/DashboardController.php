@@ -31,9 +31,68 @@ class DashboardController extends Controller
             });
         }
 
-        $jobs = $query->paginate(15)->withQueryString();
+        $jobs = $query->paginate(20)->withQueryString();
 
         return view('ComfyQueue::index', compact('jobs'));
+    }
+
+    public function apiJobs(Request $request)
+    {
+        $page = (int) $request->query('page', 1);
+        $status = (string) $request->query('status', '');
+        $search = trim((string) $request->query('q', ''));
+
+        $query = Job::query()->orderBy('created_at', 'desc');
+
+        if ($status !== '') {
+            $query->where('status', $status);
+        }
+
+        if ($search !== '') {
+            $query->where(function ($inner) use ($search) {
+                if (ctype_digit($search)) {
+                    $inner->orWhere('id', (int) $search);
+                }
+
+                $inner->orWhere('type', 'like', '%' . $search . '%')
+                    ->orWhere('prompt_id', 'like', '%' . $search . '%')
+                    ->orWhere('error', 'like', '%' . $search . '%');
+            });
+        }
+
+        $jobs = $query->paginate(20, ['*'], 'page', $page);
+
+        return response()->json([
+            'jobs' => $jobs->map(function ($job) {
+                $latestLog = $job->latestLogEntry();
+                $validOutputFiles = [];
+                if (is_array($job->output_files)) {
+                    foreach ($job->output_files as $file) {
+                        if (is_array($file) && !empty($file['url'])) {
+                            $validOutputFiles[] = $file;
+                        }
+                    }
+                }
+                return [
+                    'id' => $job->id,
+                    'type' => $job->type,
+                    'status' => $job->status,
+                    'created_at' => $job->created_at?->format('d/m H:i'),
+                    'finished_at' => $job->finished_at?->format('d/m H:i'),
+                    'error' => $job->error,
+                    'required_models' => $job->required_models,
+                    'output_files' => $validOutputFiles,
+                    'latest_log' => $latestLog['message'] ?? null,
+                ];
+            }),
+            'pagination' => [
+                'current_page' => $jobs->currentPage(),
+                'last_page' => $jobs->lastPage(),
+                'total' => $jobs->total(),
+                'per_page' => $jobs->perPage(),
+                'has_more' => $jobs->hasMorePages(),
+            ],
+        ]);
     }
 
     public function create()

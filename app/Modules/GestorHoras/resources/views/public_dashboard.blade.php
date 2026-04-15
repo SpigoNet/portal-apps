@@ -135,7 +135,7 @@
                                     <div class="w-full bg-gray-200 rounded-full h-3 mb-3">
                                         <div class="{{ $corBarra }} h-3 rounded-full" style="width: {{ min($porcentagem, 100) }}%"></div>
                                     </div>
-                                    <p class="text-sm text-gray-600">{{ $item->descricao }}</p>
+                                    <p class="text-sm text-gray-600 whitespace-pre-wrap">{{ $item->descricao }}</p>
                                 </div>
 
                                 <div class="bg-gray-50 border-t border-gray-200 p-4 sm:p-6">
@@ -173,7 +173,7 @@
                                                     @endphp
                                                     <tr class="hover:bg-gray-50">
                                                         <td class="px-4 py-2 text-gray-600 whitespace-nowrap font-medium">{{ $log->data_realizacao->format('d/m/Y') }}</td>
-                                                        <td class="px-4 py-2 text-gray-800">{{ $log->descricao }}</td>
+                                                        <td class="px-4 py-2 text-gray-800 whitespace-pre-wrap">{{ $log->descricao }}</td>
                                                         <td class="px-4 py-2 text-center text-gray-600 whitespace-nowrap font-mono text-xs">
                                                             @if($log->iniciado_em && $log->finalizado_em)
                                                                 <span class="font-semibold">{{ $log->iniciado_em->format('H:i') }}</span> a <span class="font-semibold">{{ $log->finalizado_em->format('H:i') }}</span>
@@ -264,7 +264,7 @@
                                                         <td class="px-6 py-3 text-gray-600 whitespace-nowrap font-medium text-sm">
                                                             {{ $apontamento->data_realizacao->format('d/m/Y') }}
                                                         </td>
-                                                        <td class="px-6 py-3 text-gray-800 text-sm">
+                                                        <td class="px-6 py-3 text-gray-800 text-sm whitespace-pre-wrap">
                                                             {{ $apontamento->descricao }}
                                                         </td>
                                                         <td class="px-6 py-3 text-center text-gray-600 whitespace-nowrap font-mono text-xs">
@@ -449,7 +449,7 @@
                                                         <td class="px-6 py-3 text-gray-600 whitespace-nowrap font-medium text-sm">
                                                             {{ $apontamento->data_realizacao->format('d/m/Y') }}
                                                         </td>
-                                                        <td class="px-6 py-3 text-gray-800 text-sm">
+                                                        <td class="px-6 py-3 text-gray-800 text-sm whitespace-pre-wrap">
                                                             {{ $apontamento->descricao }}
                                                         </td>
                                                         <td class="px-6 py-3 text-center text-gray-600 whitespace-nowrap font-mono text-xs">

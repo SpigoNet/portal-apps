@@ -10,7 +10,7 @@
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 antialiased">
+<body class="bg-gray-100 text-gray-800 antialiased" x-data="{ showValues: false }">
 
 <div class="bg-white shadow-sm border-b border-gray-200">
     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -20,10 +20,17 @@
             </h1>
             <p class="text-sm text-gray-500 mt-1">Cliente: <span class="font-semibold text-gray-700">{{ $cliente->nome }}</span></p>
         </div>
-        <div class="text-right">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
-                    Atualizado em {{ date('d/m/Y H:i') }}
-                </span>
+        <div class="flex items-center gap-3">
+            <button 
+                @click="showValues = !showValues"
+                class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition"
+                :class="showValues ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-gray-100 text-gray-600 border border-gray-300 hover:bg-gray-200'"
+            >
+                <span x-text="showValues ? '🔒 Ocultar Valores' : '👁️ Mostrar Valores'"></span>
+            </button>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                Atualizado em {{ date('d/m/Y H:i') }}
+            </span>
         </div>
     </div>
 </div>
@@ -54,8 +61,11 @@
                         </div>
                         <div class="p-4 text-center">
                             <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Valor Hora</p>
-                            <p class="text-2xl font-bold text-emerald-700 mt-1">
+                            <p class="text-2xl font-bold text-emerald-700 mt-1" x-show="showValues">
                                 R$ {{ number_format($contrato->valor_hora, 2, ',', '.') }}
+                            </p>
+                            <p class="text-2xl font-bold text-gray-400 mt-1" x-show="!showValues">
+                                •••••
                             </p>
                         </div>
                         <div class="p-4 text-center">
@@ -183,7 +193,10 @@
                                                         </td>
                                                         <td class="px-4 py-2 text-right font-mono text-gray-600 font-bold">{{ number_format($log->horas, 2, ',', '.') }}</td>
                                                         @if($contrato->valor_hora > 0)
-                                                            <td class="px-4 py-2 text-right font-mono text-emerald-700 font-bold">R$ {{ number_format($log->horas * $contrato->valor_hora, 2, ',', '.') }}</td>
+                                                            <td class="px-4 py-2 text-right font-mono" x-show="showValues">
+                                                                <span class="text-emerald-700 font-bold">R$ {{ number_format($log->horas * $contrato->valor_hora, 2, ',', '.') }}</span>
+                                                            </td>
+                                                            <td class="px-4 py-2 text-right font-mono text-gray-400" x-show="!showValues">••••</td>
                                                         @endif
                                                         <td class="px-4 py-2 text-center">
                                                             <span class="inline-block px-2 py-1 rounded-full text-xs font-bold {{ $statusCor['bg'] }} {{ $statusCor['text'] }} border {{ $statusCor['border'] }}">
@@ -230,7 +243,8 @@
                                             <div class="flex gap-4 items-center">
                                                 <div class="font-bold">{{ number_format($totalMes, 2, ',', '.') }} h</div>
                                                 @if($contrato->valor_hora > 0)
-                                                    <div class="font-bold text-emerald-700">R$ {{ number_format($valorMes, 2, ',', '.') }}</div>
+                                                    <div class="font-bold" x-show="showValues" style="color: #065f46;">R$ {{ number_format($valorMes, 2, ',', '.') }}</div>
+                                                    <div class="font-bold text-gray-400" x-show="!showValues">••••</div>
                                                 @endif
                                             </div>
                                         </div>
@@ -279,7 +293,8 @@
                                                         </td>
                                                         @if($contrato->valor_hora > 0)
                                                             <td class="px-6 py-3 text-right font-mono text-emerald-700 font-bold text-sm">
-                                                                R$ {{ number_format($apontamento->horas * $contrato->valor_hora, 2, ',', '.') }}
+                                                                <span x-show="showValues">R$ {{ number_format($apontamento->horas * $contrato->valor_hora, 2, ',', '.') }}</span>
+                                                                <span x-show="!showValues" class="text-gray-400">••••</span>
                                                             </td>
                                                         @endif
                                                         <td class="px-6 py-3 text-center">
@@ -295,7 +310,10 @@
                                                         <td colspan="3" class="px-6 py-3 text-right text-gray-700">Subtotal do Mês:</td>
                                                         <td class="px-6 py-3 text-right font-mono text-gray-800">{{ number_format($totalMes, 2, ',', '.') }} h</td>
                                                         @if($contrato->valor_hora > 0)
-                                                            <td class="px-6 py-3 text-right font-mono text-emerald-700">R$ {{ number_format($valorMes, 2, ',', '.') }}</td>
+                                                            <td class="px-6 py-3 text-right font-mono text-emerald-700">
+                                                                <span x-show="showValues">R$ {{ number_format($valorMes, 2, ',', '.') }}</span>
+                                                                <span x-show="!showValues" class="text-gray-400">••••</span>
+                                                            </td>
                                                         @endif
                                                         <td></td>
                                                     </tr>
@@ -370,7 +388,8 @@
                                             </div>
                                             @if($contrato->valor_hora > 0)
                                                 <div class="px-4 py-2 text-center text-sm font-semibold text-emerald-700 bg-emerald-50">
-                                                    R$ {{ number_format($resumo['valor'], 2, ',', '.') }}
+                                                    <span x-show="showValues">R$ {{ number_format($resumo['valor'], 2, ',', '.') }}</span>
+                                                    <span x-show="!showValues" class="text-gray-400">••••</span>
                                                 </div>
                                             @endif
                                         </div>
@@ -388,7 +407,10 @@
                                     @if($contrato->valor_hora > 0)
                                         <div class="text-right">
                                             <p class="text-xs font-bold uppercase tracking-widest opacity-80">Valor Total Previsto</p>
-                                            <p class="text-3xl font-bold text-emerald-400 mt-1">R$ {{ number_format($totalGeralValor, 2, ',', '.') }}</p>
+                                            <p class="text-3xl font-bold text-emerald-400 mt-1">
+                                                <span x-show="showValues">R$ {{ number_format($totalGeralValor, 2, ',', '.') }}</span>
+                                                <span x-show="!showValues" class="text-gray-400">••••</span>
+                                            </p>
                                         </div>
                                     @endif
                                 </div>
@@ -411,7 +433,10 @@
                                         <div class="flex gap-4 items-center">
                                             <div class="text-lg font-bold">{{ number_format($totalHoras, 2, ',', '.') }} h</div>
                                             @if($contrato->valor_hora > 0)
-                                                <div class="text-lg font-bold">R$ {{ number_format($totalHoras * $contrato->valor_hora, 2, ',', '.') }}</div>
+                                                <div class="text-lg font-bold">
+                                                    <span x-show="showValues">R$ {{ number_format($totalHoras * $contrato->valor_hora, 2, ',', '.') }}</span>
+                                                    <span x-show="!showValues" class="text-gray-400">••••</span>
+                                                </div>
                                             @endif
                                         </div>
                                     </div>
@@ -464,7 +489,8 @@
                                                         </td>
                                                         @if($contrato->valor_hora > 0)
                                                             <td class="px-6 py-3 text-right font-mono text-emerald-700 font-bold text-sm">
-                                                                R$ {{ number_format($apontamento->horas * $contrato->valor_hora, 2, ',', '.') }}
+                                                                <span x-show="showValues">R$ {{ number_format($apontamento->horas * $contrato->valor_hora, 2, ',', '.') }}</span>
+                                                                <span x-show="!showValues" class="text-gray-400">••••</span>
                                                             </td>
                                                         @endif
                                                         <td class="px-6 py-3 text-center">
@@ -492,7 +518,10 @@
                                                         <td colspan="3" class="px-6 py-3 text-right text-gray-700">Subtotal:</td>
                                                         <td class="px-6 py-3 text-right font-mono text-gray-800">{{ number_format($totalHoras, 2, ',', '.') }} h</td>
                                                         @if($contrato->valor_hora > 0)
-                                                            <td class="px-6 py-3 text-right font-mono text-emerald-700">R$ {{ number_format($totalHoras * $contrato->valor_hora, 2, ',', '.') }}</td>
+                                                            <td class="px-6 py-3 text-right font-mono text-emerald-700">
+                                                                <span x-show="showValues">R$ {{ number_format($totalHoras * $contrato->valor_hora, 2, ',', '.') }}</span>
+                                                                <span x-show="!showValues" class="text-gray-400">••••</span>
+                                                            </td>
                                                         @endif
                                                         <td colspan="{{ in_array($status, ['separado', 'aprovado_cliente', 'faturado']) ? '2' : '1' }}"></td>
                                                     </tr>

@@ -21,7 +21,8 @@
                 <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6 space-y-4">
                     <div class="text-center">
                         <p class="text-xs uppercase tracking-wide text-slate-500 font-bold">Apontamento em andamento</p>
-                        <p class="text-sm text-slate-700 mt-1">Descreva o que foi feito durante o dia.</p>
+                        <p class="text-2xl font-mono text-slate-800 mt-2">{{ $apontamentoAtivo->iniciado_em?->format('H:i') ?? '00:00' }}</p>
+                        <p class="text-sm text-slate-700 mt-1">Iniciado em {{ $apontamentoAtivo->iniciado_em?->format('d/m/Y') }}</p>
                     </div>
 
                     <form id="salvarDescricaoForm" x-data>

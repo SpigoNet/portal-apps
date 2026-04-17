@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Vocabulario extends Model
 {
+    protected $connection = 'vocabulario_legacy';
+
     protected $table = 'vocabulario';
 
     public $timestamps = false;

@@ -35,6 +35,25 @@ class SolicitacaoController extends Controller
     }
 
     /**
+     * Fragmento HTML da lista pública para scroll infinito.
+     */
+    public function listaFragmento(Request $request): View
+    {
+        $palavraLista = trim((string) $request->query('palavra_lista', ''));
+
+        $query = Vocabulario::whereIn('status', ['Disponível', 'Aprovado'])
+            ->orderByRaw('TRIM(palavra)');
+
+        if ($palavraLista !== '') {
+            $query->where('palavra', 'LIKE', '%'.$palavraLista.'%');
+        }
+
+        $listaTermos = $query->simplePaginate(50, ['*'], 'pagina_lista');
+
+        return view('VocabularioControlado::solicitacao._lista-completa-fragmento', compact('listaTermos'));
+    }
+
+    /**
      * Recebe a solicitação de novo termo (perfil: bibliotecario).
      */
     public function store(Request $request): View

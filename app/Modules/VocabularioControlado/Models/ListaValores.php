@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ListaValores extends Model
 {
+    protected $connection = 'vocabulario_legacy';
+
     protected $table = 'listaValores';
 
     protected $primaryKey = 'idValor';

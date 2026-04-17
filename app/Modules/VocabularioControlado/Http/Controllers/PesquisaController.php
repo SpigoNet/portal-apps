@@ -5,26 +5,25 @@ namespace App\Modules\VocabularioControlado\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\VocabularioControlado\Models\Vocabulario;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class PesquisaController extends Controller
 {
-    public function index(): \Illuminate\View\View
+    /**
+     * Lista pública. Com ?palavra= realiza a busca inline na mesma página.
+     */
+    public function index(Request $request): View
     {
-        return view('VocabularioControlado::pesquisa.index');
-    }
+        $termo = trim((string) $request->query('palavra', ''));
 
-    public function buscar(Request $request): \Illuminate\View\View
-    {
-        $request->validate([
-            'palavra' => 'required|string|max:200',
-        ]);
+        $resultados = null;
 
-        $termo = $request->input('palavra');
+        if ($termo !== '') {
+            $resultados = Vocabulario::where('palavra', 'LIKE', '%'.$termo.'%')
+                ->orderBy('palavra')
+                ->get();
+        }
 
-        $resultados = Vocabulario::where('palavra', 'LIKE', '%'.$termo.'%')
-            ->orderBy('palavra')
-            ->get();
-
-        return view('VocabularioControlado::pesquisa.resultados', compact('resultados', 'termo'));
+        return view('VocabularioControlado::pesquisa.index', compact('termo', 'resultados'));
     }
 }

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Perfil extends Model
 {
+    protected $connection = 'vocabulario_legacy';
+
     protected $table = 'perfil';
 
     // Tabela não tem coluna id numérica; mail é a chave natural

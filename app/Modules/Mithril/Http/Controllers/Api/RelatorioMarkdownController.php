@@ -189,7 +189,7 @@ class RelatorioMarkdownController extends Controller
                 $conta = $l['conta_nome'] ?? '-';
                 $valor = number_format($l['valor'], 2, ',', '.');
                 $status = $l['status'];
-                $saldo = number_format($l['saldo_acumulado_efetivado'], 2, ',', '.');
+                $saldo = number_format($l['saldo_acumulado_efetivado'] ?? $l['saldo_acumulado_previsto'] ?? 0, 2, ',', '.');
 
                 $md .= "| {$data} | {$descricao} | {$conta} | R$ {$valor} | {$status} | R$ {$saldo} |\n";
             }

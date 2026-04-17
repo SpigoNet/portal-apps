@@ -5,7 +5,9 @@ use App\Modules\Mithril\Http\Controllers\Api\DashboardController;
 use App\Modules\Mithril\Http\Controllers\Api\FechamentoController;
 use App\Modules\Mithril\Http\Controllers\Api\LancamentoController;
 use App\Modules\Mithril\Http\Controllers\Api\PreTransacaoController;
+use App\Modules\Mithril\Http\Controllers\Api\RelatorioMarkdownController;
 use App\Modules\Mithril\Http\Controllers\Api\TransacaoController;
+use App\Modules\Mithril\Http\Middleware\TokenAuth;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('mithril')
@@ -22,8 +24,6 @@ Route::prefix('mithril')
     ->middleware(TokenAuth::class)
     ->group(function () {
         Route::get('/relatorio-markdown', [RelatorioMarkdownController::class, 'index'])->name('relatorio.markdown.token');
-    });
-
         Route::get('/contas', [ContaController::class, 'index'])->name('contas.index');
         Route::post('/contas', [ContaController::class, 'store'])->name('contas.store');
         Route::get('/contas/{id}', [ContaController::class, 'show'])->name('contas.show');

@@ -22,6 +22,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->appendToGroup('web', [
             \App\Http\Middleware\SetModuleContext::class,
         ]);
+
+        // Vocabulário Controlado: acessado via iframe sem sessão Laravel (sem auth clássica).
+        // CSRF é desabilitado nestas rotas pois o acesso é externo/iframe.
+        $middleware->validateCsrfTokens(except: [
+            'vocabulario-controlado/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

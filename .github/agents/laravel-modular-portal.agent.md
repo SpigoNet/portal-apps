@@ -1,7 +1,7 @@
 ---
 name: "Laravel Modular Portal"
 description: "Use when creating, extending, refactoring, or reviewing Laravel modules in Portal Apps; for MVC SSR development in app/Modules, Blade views, controllers, routes, service providers, Eloquent models, form validation, module registration, and related integration changes without Livewire, Volt, or frontend REST APIs."
-tools: [execute/runNotebookCell, execute/testFailure, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/runTask, execute/createAndRunTask, execute/runInTerminal, read/getNotebookSummary, read/problems, read/readFile, read/viewImage, read/readNotebookCellOutput, read/terminalSelection, read/terminalLastCommand, read/getTaskOutput, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, edit/rename, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/textSearch, search/usages, todo]
+tools: [execute/runNotebookCell, execute/testFailure, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/runTask, execute/createAndRunTask, execute/runInTerminal, read/getNotebookSummary, read/problems, read/readFile, read/viewImage, read/readNotebookCellOutput, read/terminalSelection, read/terminalLastCommand, read/getTaskOutput, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, edit/rename, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/textSearch, search/usages, browser/openBrowserPage, todo]
 argument-hint: "What module or feature should be built or adjusted in Portal Apps?"
 user-invocable: true
 ---

@@ -101,6 +101,25 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        'vocabulario_legacy' => [
+            'driver' => 'mysql',
+            'host' => env('VC_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('VC_DB_PORT', env('DB_PORT', '3306')),
+            'database' => env('VC_DB_DATABASE', 'spigo594_riccps'),
+            'username' => env('VC_DB_USERNAME', 'spigo594_riccps'),
+            'password' => env('VC_DB_PASSWORD', 'Q}5KY!,~O%#r'),
+            'unix_socket' => env('VC_DB_SOCKET', env('DB_SOCKET', '')),
+            'charset' => env('VC_DB_CHARSET', 'utf8mb4'),
+            'collation' => env('VC_DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => false,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
     ],
 
     /*

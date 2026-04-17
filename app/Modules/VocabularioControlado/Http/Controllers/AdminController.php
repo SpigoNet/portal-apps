@@ -51,7 +51,7 @@ class AdminController extends Controller
 
     public function listas(): View
     {
-        $nomeListas = \DB::table('nomeListas')->get();
+        $nomeListas = \DB::connection('vocabulario_legacy')->table('nomeListas')->get();
 
         $listaValores = ListaValores::orderBy('value_pairs_name')
             ->orderBy('displayed_value')

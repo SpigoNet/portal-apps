@@ -15,4 +15,5 @@ return [
     App\Modules\StreamingManager\StreamingManagerServiceProvider::class,
     App\Modules\BolaoReuniao\BolaoReuniaoServiceProvider::class,
     App\Modules\ComfyQueue\ComfyQueueServiceProvider::class,
+    App\Modules\VocabularioControlado\VocabularioControladoServiceProvider::class,
 ];

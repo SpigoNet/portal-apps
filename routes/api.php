@@ -1,18 +1,28 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Modules\Mithril\Http\Controllers\Api\DashboardController;
 use App\Modules\Mithril\Http\Controllers\Api\ContaController;
-use App\Modules\Mithril\Http\Controllers\Api\TransacaoController;
-use App\Modules\Mithril\Http\Controllers\Api\PreTransacaoController;
-use App\Modules\Mithril\Http\Controllers\Api\LancamentoController;
+use App\Modules\Mithril\Http\Controllers\Api\DashboardController;
 use App\Modules\Mithril\Http\Controllers\Api\FechamentoController;
+use App\Modules\Mithril\Http\Controllers\Api\LancamentoController;
+use App\Modules\Mithril\Http\Controllers\Api\PreTransacaoController;
+use App\Modules\Mithril\Http\Controllers\Api\TransacaoController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('mithril')
     ->name('mithril.')
     ->middleware('auth:sanctum')
     ->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('/relatorio-markdown', [RelatorioMarkdownController::class, 'index'])->name('relatorio.markdown');
+    });
+
+Route::prefix('mithril')
+    ->name('mithril.')
+    ->middleware(TokenAuth::class)
+    ->group(function () {
+        Route::get('/relatorio-markdown', [RelatorioMarkdownController::class, 'index'])->name('relatorio.markdown.token');
+    });
 
         Route::get('/contas', [ContaController::class, 'index'])->name('contas.index');
         Route::post('/contas', [ContaController::class, 'store'])->name('contas.store');

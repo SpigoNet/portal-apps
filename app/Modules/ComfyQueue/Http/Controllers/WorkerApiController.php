@@ -274,6 +274,7 @@ class WorkerApiController extends Controller
             'type'            => $job->type,
             'params'          => $job->params,
             'required_models' => $job->required_models ?? [],
+            'input_files'     => $job->input_files ?? [],
         ]);
     }
 

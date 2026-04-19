@@ -100,6 +100,46 @@
                             <input type="hidden" name="required_models" :value="JSON.stringify(models.filter(m => m.name || m.url))">
                         </div>
 
+                        {{-- Arquivos de entrada --}}
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Arquivos de entrada (input_files)
+                            </label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                Arquivos que devem ser baixados para a pasta <code>input/</code> do ComfyUI antes da execução (ex: imagens de referência).
+                            </p>
+
+                            <div class="space-y-3">
+                                <template x-for="(file, idx) in inputFiles" :key="idx">
+                                    <div class="flex gap-2 items-start p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                        <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            <div>
+                                                <label class="text-xs text-gray-500 dark:text-gray-400">URL do arquivo</label>
+                                                <input type="url" x-model="file.url"
+                                                    placeholder="https://exemplo.com/imagem.jpg"
+                                                    class="mt-1 block w-full rounded text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                            </div>
+                                            <div>
+                                                <label class="text-xs text-gray-500 dark:text-gray-400">Nome do arquivo (opcional)</label>
+                                                <input type="text" x-model="file.name"
+                                                    placeholder="deixe vazio para usar o nome da URL"
+                                                    class="mt-1 block w-full rounded text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                            </div>
+                                        </div>
+                                        <button type="button" @click="removeInputFile(idx)"
+                                            class="mt-5 text-red-400 hover:text-red-600 transition text-sm px-2 py-1">✕</button>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <button type="button" @click="addInputFile"
+                                class="mt-3 text-sm px-4 py-2 border border-dashed border-gray-400 dark:border-gray-600 rounded hover:border-indigo-500 text-gray-600 dark:text-gray-400 hover:text-indigo-600 transition">
+                                + Adicionar arquivo de entrada
+                            </button>
+
+                            <input type="hidden" name="input_files" :value="JSON.stringify(inputFiles.filter(f => f.url).map(f => f.name ? f : { url: f.url }))">
+                        </div>
+
                         <div class="flex justify-end gap-3 mt-6">
                             <a href="{{ route('comfy-queue.index') }}" class="px-4 py-2 border rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition">Cancelar</a>
                             <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">Criar Job</button>
@@ -117,12 +157,19 @@
                 type: "{!! old('type', '') !!}",
                 paramsData: `{!! old('params', '') !!}`,
                 models: {!! old('required_models') ? json_encode(json_decode(old('required_models'))) : '[]' !!},
+                inputFiles: {!! old('input_files') ? json_encode(json_decode(old('input_files'))) : '[]' !!},
 
                 addModel() {
                     this.models.push({ name: '', dest: 'models/checkpoints', url: '' });
                 },
                 removeModel(idx) {
                     this.models.splice(idx, 1);
+                },
+                addInputFile() {
+                    this.inputFiles.push({ url: '', name: '' });
+                },
+                removeInputFile(idx) {
+                    this.inputFiles.splice(idx, 1);
                 },
             }))
         })

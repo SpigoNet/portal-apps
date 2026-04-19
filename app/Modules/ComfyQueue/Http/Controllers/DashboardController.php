@@ -106,6 +106,7 @@ class DashboardController extends Controller
             'type'            => 'required|string',
             'params'          => 'required|string',
             'required_models' => 'nullable|string',
+            'input_files'     => 'nullable|string',
         ]);
 
         $params = json_decode($validated['params'], true);
@@ -121,10 +122,19 @@ class DashboardController extends Controller
             }
         }
 
+        $inputFiles = null;
+        if (! empty($validated['input_files'])) {
+            $inputFiles = json_decode($validated['input_files'], true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return back()->withErrors(['input_files' => 'Lista de arquivos de entrada deve ser um JSON válido.'])->withInput();
+            }
+        }
+
         Job::create([
             'type'            => $validated['type'],
             'params'          => $params,
             'required_models' => $requiredModels,
+            'input_files'     => $inputFiles,
             'status'          => 'pending',
         ]);
 
@@ -143,12 +153,13 @@ class DashboardController extends Controller
         $job = Job::findOrFail($id);
 
         $validated = $request->validate([
-            'type' => 'required|string|max:120',
-            'status' => 'required|in:pending,processing,done,error',
-            'params' => 'required|string',
+            'type'            => 'required|string|max:120',
+            'status'          => 'required|in:pending,processing,done,error',
+            'params'          => 'required|string',
             'required_models' => 'nullable|string',
-            'error' => 'nullable|string|max:5000',
-            'prompt_id' => 'nullable|string|max:255',
+            'input_files'     => 'nullable|string',
+            'error'           => 'nullable|string|max:5000',
+            'prompt_id'       => 'nullable|string|max:255',
         ]);
 
         $params = json_decode($validated['params'], true);
@@ -164,12 +175,21 @@ class DashboardController extends Controller
             }
         }
 
+        $inputFiles = null;
+        if (! empty($validated['input_files'])) {
+            $inputFiles = json_decode($validated['input_files'], true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return back()->withErrors(['input_files' => 'Lista de arquivos de entrada deve ser um JSON válido.'])->withInput();
+            }
+        }
+
         $beforeStatus = $job->status;
 
         $job->type = $validated['type'];
         $job->status = $validated['status'];
         $job->params = $params;
         $job->required_models = $requiredModels;
+        $job->input_files = $inputFiles;
         $job->error = $validated['error'] ?: null;
         $job->prompt_id = $validated['prompt_id'] ?: null;
         $job->appendLog('Job editado manualmente', [

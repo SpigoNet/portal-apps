@@ -28,7 +28,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('comfy-queue.update', $job->id) }}" method="POST">
+                    <form action="{{ route('comfy-queue.update', $job->id) }}" method="POST" x-data="editJobForm()">
                         @csrf
                         @method('PUT')
 
@@ -62,21 +62,99 @@
                             </div>
                         </div>
 
+                        {{-- Workflow JSON --}}
                         <div class="mb-6">
                             <label for="params" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Workflow JSON (params)
+                                Workflow JSON <span class="text-gray-400 font-normal">(params)</span>
                             </label>
-                            <textarea name="params" id="params" rows="14" required
-                                class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono text-xs">{{ old('params', json_encode($job->params ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}</textarea>
+                            <textarea name="params" id="params" rows="14" x-model="paramsData" required
+                                class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono text-xs"></textarea>
                         </div>
 
+                        {{-- Modelos necessários --}}
                         <div class="mb-6">
-                            <label for="required_models" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Modelos necessários (JSON)
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Modelos necessários
                             </label>
-                            <textarea name="required_models" id="required_models" rows="8"
-                                class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono text-xs">{{ old('required_models', json_encode($job->required_models ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) }}</textarea>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pode ficar vazio ou [] se não houver modelos para download.</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                Lista de modelos que devem ser baixados antes da execução.
+                            </p>
+
+                            <div class="space-y-3">
+                                <template x-for="(model, idx) in models" :key="idx">
+                                    <div class="flex gap-2 items-start p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                        <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                            <div>
+                                                <label class="text-xs text-gray-500 dark:text-gray-400">Nome do arquivo</label>
+                                                <input type="text" x-model="model.name"
+                                                    placeholder="flux_dev.safetensors"
+                                                    class="mt-1 block w-full rounded text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                            </div>
+                                            <div>
+                                                <label class="text-xs text-gray-500 dark:text-gray-400">Destino (pasta no ComfyUI)</label>
+                                                <input type="text" x-model="model.dest"
+                                                    placeholder="models/checkpoints"
+                                                    class="mt-1 block w-full rounded text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                            </div>
+                                            <div>
+                                                <label class="text-xs text-gray-500 dark:text-gray-400">URL de download</label>
+                                                <input type="url" x-model="model.url"
+                                                    placeholder="https://huggingface.co/..."
+                                                    class="mt-1 block w-full rounded text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                            </div>
+                                        </div>
+                                        <button type="button" @click="removeModel(idx)"
+                                            class="mt-5 text-red-400 hover:text-red-600 transition text-sm px-2 py-1">✕</button>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <button type="button" @click="addModel"
+                                class="mt-3 text-sm px-4 py-2 border border-dashed border-gray-400 dark:border-gray-600 rounded hover:border-indigo-500 text-gray-600 dark:text-gray-400 hover:text-indigo-600 transition">
+                                + Adicionar modelo
+                            </button>
+
+                            <input type="hidden" name="required_models" :value="JSON.stringify(models.filter(m => m.name || m.url))">
+                        </div>
+
+                        {{-- Arquivos de entrada --}}
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Arquivos de entrada (input_files)
+                            </label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                Arquivos que devem ser baixados para a pasta <code>input/</code> do ComfyUI antes da execução (ex: imagens de referência).
+                            </p>
+
+                            <div class="space-y-3">
+                                <template x-for="(file, idx) in inputFiles" :key="idx">
+                                    <div class="flex gap-2 items-start p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                        <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            <div>
+                                                <label class="text-xs text-gray-500 dark:text-gray-400">URL do arquivo</label>
+                                                <input type="url" x-model="file.url"
+                                                    placeholder="https://exemplo.com/imagem.jpg"
+                                                    class="mt-1 block w-full rounded text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                            </div>
+                                            <div>
+                                                <label class="text-xs text-gray-500 dark:text-gray-400">Nome do arquivo (opcional)</label>
+                                                <input type="text" x-model="file.name"
+                                                    placeholder="deixe vazio para usar o nome da URL"
+                                                    class="mt-1 block w-full rounded text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                                            </div>
+                                        </div>
+                                        <button type="button" @click="removeInputFile(idx)"
+                                            class="mt-5 text-red-400 hover:text-red-600 transition text-sm px-2 py-1">✕</button>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <button type="button" @click="addInputFile"
+                                class="mt-3 text-sm px-4 py-2 border border-dashed border-gray-400 dark:border-gray-600 rounded hover:border-indigo-500 text-gray-600 dark:text-gray-400 hover:text-indigo-600 transition">
+                                + Adicionar arquivo de entrada
+                            </button>
+
+                            <input type="hidden" name="input_files" :value="JSON.stringify(inputFiles.filter(f => f.url).map(f => f.name ? f : { url: f.url }))">
                         </div>
 
                         <div class="flex justify-end gap-3 mt-6">
@@ -89,4 +167,27 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('editJobForm', () => ({
+                paramsData: `{!! old('params', json_encode($job->params ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) !!}`,
+                models: {!! old('required_models') ? json_encode(json_decode(old('required_models'))) : json_encode($job->required_models ?? []) !!},
+                inputFiles: {!! old('input_files') ? json_encode(json_decode(old('input_files'))) : json_encode($job->input_files ?? []) !!},
+
+                addModel() {
+                    this.models.push({ name: '', dest: 'models/checkpoints', url: '' });
+                },
+                removeModel(idx) {
+                    this.models.splice(idx, 1);
+                },
+                addInputFile() {
+                    this.inputFiles.push({ url: '', name: '' });
+                },
+                removeInputFile(idx) {
+                    this.inputFiles.splice(idx, 1);
+                },
+            }))
+        })
+    </script>
 </x-app-layout>

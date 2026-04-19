@@ -13,6 +13,7 @@ class Job extends Model
         'type',
         'params',
         'required_models',
+        'input_files',
         'status',
         'prompt_id',
         'result_url',
@@ -28,6 +29,7 @@ class Job extends Model
     protected $casts = [
         'params'          => 'array',
         'required_models' => 'array',
+        'input_files'     => 'array',
         'output_files'    => 'array',
         'last_heartbeat'  => 'datetime',
         'started_at'      => 'datetime',

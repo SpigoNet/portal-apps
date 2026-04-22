@@ -85,6 +85,7 @@ class RelatorioMarkdownController extends Controller
             $lancamentosProjetados->push([
                 'id' => null,
                 'pre_transacao_id' => $pt->id,
+                'conta_id' => $pt->conta_id,
                 'data_efetiva' => $dataPrevista->format('Y-m-d'),
                 'descricao' => $pt->descricao,
                 'conta_nome' => $pt->conta?->nome,
@@ -98,6 +99,7 @@ class RelatorioMarkdownController extends Controller
         $lancamentosReais = $transacoes->map(fn ($t) => [
             'id' => $t->id,
             'pre_transacao_id' => $t->pre_transacao_id,
+            'conta_id' => $t->conta_id,
             'data_efetiva' => $t->data_efetiva->format('Y-m-d'),
             'descricao' => $t->descricao,
             'conta_nome' => $t->conta?->nome,
@@ -145,6 +147,7 @@ class RelatorioMarkdownController extends Controller
             'qtd_agendados' => $qtdAgendados,
             'qtd_confirmados' => $qtdConfirmados,
             'lancamentos' => $listaCombinada,
+            'contas' => $contas,
         ]);
 
         return response($markdown, 200, [
@@ -159,9 +162,18 @@ class RelatorioMarkdownController extends Controller
         $md .= "**Período:** {$dados['nome_mes']} de {$dados['ano']}\n\n";
         $md .= "---\n\n";
 
+        // Seção de referência técnica de contas
+        $md .= "## Referência de Contas\n\n";
+        $md .= "| conta_id | Nome | Tipo |\n";
+        $md .= "|----------|------|------|\n";
+        foreach ($dados['contas'] as $conta) {
+            $md .= "| {$conta->id} | {$conta->nome} | {$conta->tipo} |\n";
+        }
+        $md .= "\n---\n\n";
+
         $md .= "## Resumo Financeiro\n\n";
-        $md .= sprintf("| Indicador | Valor |\n", '');
-        $md .= sprintf("|----------|-------|\n", '');
+        $md .= "| Indicador | Valor |\n";
+        $md .= "|-----------|-------|\n";
         $md .= sprintf("| Saldo Inicial | R$ %s |\n", number_format($dados['saldo_inicial'], 2, ',', '.'));
         $md .= sprintf("| Total Entradas | R$ %s |\n", number_format($dados['total_entradas'], 2, ',', '.'));
         $md .= sprintf("| Total Saídas | R$ %s |\n", number_format($dados['total_saidas'], 2, ',', '.'));
@@ -169,29 +181,37 @@ class RelatorioMarkdownController extends Controller
         $md .= sprintf("| Saldo Acumulado (Previsto) | R$ %s |\n\n", number_format($dados['saldo_acumulado_previsto'], 2, ',', '.'));
 
         $md .= "## Quantidade por Status\n\n";
-        $md .= sprintf("| Status | Quantidade |\n", '');
-        $md .= sprintf("|--------|------------|\n", '');
+        $md .= "| Status | Quantidade |\n";
+        $md .= "|--------|------------|\n";
         $md .= sprintf("| Efetivado | %d |\n", $dados['qtd_efetivados']);
         $md .= sprintf("| Confirmado | %d |\n", $dados['qtd_confirmados']);
         $md .= sprintf("| Agendado | %d |\n\n", $dados['qtd_agendados']);
 
         $md .= "## Lançamentos\n\n";
+        $md .= '> **IDs para uso na API:** `transacao_id` identifica registros em `/api/mithril/transacoes/{id}`; ';
+        $md .= '`pre_transacao_id` identifica registros em `/api/mithril/pre-transacoes/{id}`; ';
+        $md .= "`conta_id` identifica registros em `/api/mithril/contas/{id}`.\n\n";
 
         if ($dados['lancamentos']->isEmpty()) {
             $md .= "*Nenhum lançamento encontrado para este período.*\n";
         } else {
-            $md .= sprintf("| Data | Descrição | Conta | Valor | Status | Saldo Acumulado |\n", '');
-            $md .= sprintf("|------|-----------|------|-------|--------|---------------|\n", '');
+            $md .= "| transacao_id | pre_transacao_id | conta_id | Data | Descrição | Conta | Parcela | Valor | Status | Saldo Efetivado | Saldo Previsto |\n";
+            $md .= "|-------------|-----------------|---------|------|-----------|-------|---------|-------|--------|-----------------|----------------|\n";
 
             foreach ($dados['lancamentos'] as $l) {
+                $transacaoId = $l['id'] !== null ? $l['id'] : '-';
+                $preTransacaoId = $l['pre_transacao_id'] !== null ? $l['pre_transacao_id'] : '-';
+                $contaId = $l['conta_id'] !== null ? $l['conta_id'] : '-';
                 $data = Carbon::parse($l['data_efetiva'])->format('d/m');
                 $descricao = $l['descricao'];
                 $conta = $l['conta_nome'] ?? '-';
-                $valor = number_format($l['valor'], 2, ',', '.');
+                $parcela = $l['meta_parcela'] ?? '-';
+                $valor = ($l['valor'] >= 0 ? '+' : '').'R$ '.number_format($l['valor'], 2, ',', '.');
                 $status = $l['status'];
-                $saldo = number_format($l['saldo_acumulado_efetivado'] ?? $l['saldo_acumulado_previsto'] ?? 0, 2, ',', '.');
+                $saldoEfetivado = number_format($l['saldo_acumulado_efetivado'] ?? 0, 2, ',', '.');
+                $saldoPrevisto = number_format($l['saldo_acumulado_previsto'] ?? 0, 2, ',', '.');
 
-                $md .= "| {$data} | {$descricao} | {$conta} | R$ {$valor} | {$status} | R$ {$saldo} |\n";
+                $md .= "| {$transacaoId} | {$preTransacaoId} | {$contaId} | {$data} | {$descricao} | {$conta} | {$parcela} | {$valor} | {$status} | R$ {$saldoEfetivado} | R$ {$saldoPrevisto} |\n";
             }
         }
 

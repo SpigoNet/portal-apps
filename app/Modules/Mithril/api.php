@@ -4,11 +4,19 @@ use App\Modules\Mithril\Http\Controllers\Api\ContaController;
 use App\Modules\Mithril\Http\Controllers\Api\DashboardController;
 use App\Modules\Mithril\Http\Controllers\Api\FechamentoController;
 use App\Modules\Mithril\Http\Controllers\Api\LancamentoController;
+use App\Modules\Mithril\Http\Controllers\Api\MithrilMcpController;
 use App\Modules\Mithril\Http\Controllers\Api\PreTransacaoController;
 use App\Modules\Mithril\Http\Controllers\Api\RelatorioMarkdownController;
 use App\Modules\Mithril\Http\Controllers\Api\TransacaoController;
 use App\Modules\Mithril\Http\Middleware\TokenAuth;
 use Illuminate\Support\Facades\Route;
+
+Route::prefix('mithril/mcp')
+    ->name('mithril.mcp.')
+    ->middleware(TokenAuth::class)
+    ->group(function () {
+        Route::post('/', [MithrilMcpController::class, 'handle'])->name('handle');
+    });
 
 Route::prefix('mithril')
     ->name('mithril.')

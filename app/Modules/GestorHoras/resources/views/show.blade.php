@@ -127,6 +127,18 @@
                                          style="width: {{ min($porcentagem, 100) }}%"></div>
                                 </div>
                                 <p class="text-sm text-gray-600 mb-4">{{ $item->descricao }}</p>
+
+                                <div class="flex items-center gap-3">
+                                    @if(!empty($item->homologado))
+                                        <span class="inline-block px-3 py-1 rounded-md bg-green-100 text-green-800 text-sm font-semibold">HOMOLOGADO em {{ optional($item->homologado_em)->format('d/m/Y H:i') }}</span>
+                                    @else
+                                        <form method="POST" action="{{ route('gestor-horas.item.homologar', $item->id) }}" onsubmit="return confirm('Ao confirmar, a Contratante declara que as atividades descritas e as horas apontadas foram revisadas, testadas e aceitas. Autorizar faturamento?');">
+                                            @csrf
+                                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-semibold hover:bg-blue-700">Homologar Entrega e Horas</button>
+                                        </form>
+                                    @endif
+                                    <p class="text-xs text-gray-400">Ao confirmar, autoriza faturamento conforme Cláusula 5.</p>
+                                </div>
                             </div>
 
                             <div class="bg-gray-50 border-t border-gray-200 p-4 sm:p-6">

@@ -32,4 +32,5 @@ Route::middleware(['web', 'auth'])
         Route::post('/mobile/apontamento/finalizar', [ApontamentoController::class, 'finalizarTimer'])->name('mobile.finish');
 
         Route::get('/contrato/{id}', [ContratoController::class, 'show'])->name('show');
+        Route::post('/contrato/item/{id}/homologar', [ContratoController::class, 'homologarItem'])->name('item.homologar');
     });

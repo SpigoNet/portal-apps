@@ -14,6 +14,9 @@ Route::prefix('vocabulario-controlado')->name('vocabulario-controlado.')->group(
     // PDF para download / impressão
     Route::get('/pdf', [PdfController::class, 'index'])->name('pdf');
 
+    // Public XML export (legacy xmlgenerator)
+    Route::get('/xml', [\App\Modules\VocabularioControlado\Http\Controllers\XmlGeneratorController::class, 'index'])->name('xml');
+
     // Portal de solicitação (identificado por ?mail= e ?nome=)
     Route::get('/solicitacao', [SolicitacaoController::class, 'index'])->name('solicitacao');
     Route::get('/solicitacao/lista-fragmento', [SolicitacaoController::class, 'listaFragmento'])->name('solicitacao.lista-fragmento');

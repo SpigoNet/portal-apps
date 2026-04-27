@@ -15,16 +15,16 @@ class XmlGeneratorController extends Controller
             ->orderByRaw('TRIM(palavra)')
             ->get();
 
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-        $xml .= '<node id="riccps" label="">\n    <isComposedBy>\n';
+        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+        $xml .= "<node id=\"riccps\" label=\"\">\n    <isComposedBy>\n";
 
         foreach ($termos as $t) {
             $palavra = trim($t->palavra);
             $id = $t->id;
-            $xml .= '        <node label="' . e($palavra) . '" id="' . $id . '"></node>\n';
+            $xml .= '        <node label="' . e($palavra) . '" id="' . $id . '"></node>' . "\n";
         }
 
-        $xml .= '    </isComposedBy>\n</node>';
+        $xml .= "    </isComposedBy>\n</node>";
 
         return response($xml, 200)
             ->header('Content-Type', 'text/xml; charset=UTF-8');

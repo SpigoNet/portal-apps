@@ -36,7 +36,18 @@
     </a>
     @endif
 </form>
-
+{{-- Estado inicial: instrução + link para PDF --}}
+<div class="text-center pb-16 text-gray-400">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-blue-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+    </svg>
+    <p class="text-sm">Digite um termo acima para pesquisar.</p>
+    <a href="{{ route('vocabulario-controlado.pdf') }}"
+        target="_blank"
+        class="mt-6 inline-block text-sm text-blue-600 hover:underline">
+        ↓ Baixar / imprimir vocabulário completo em PDF
+    </a>
+</div>
 <div class="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
     <table class="w-full text-sm">
         <thead class="bg-gray-100 text-gray-600 uppercase text-xs tracking-wider">

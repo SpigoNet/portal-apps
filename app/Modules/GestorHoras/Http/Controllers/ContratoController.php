@@ -7,6 +7,10 @@ use App\Modules\GestorHoras\Models\Contrato;
 use App\Modules\GestorHoras\Models\Cliente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
+use App\Modules\GestorHoras\Models\ContratoItem;
+use App\Modules\GestorHoras\Models\LogAceite;
+use Illuminate\Support\Str;
 
 class ContratoController extends Controller
 {
@@ -132,6 +136,79 @@ class ContratoController extends Controller
         }
 
         return view('GestorHoras::show', compact('contrato'));
+    }
+
+    public function homologarItem(Request $request, $id)
+    {
+        // Permite que clientes autenticados ou operadores realizem a homologação
+        Gate::authorize('gh.acessar');
+
+        $item = ContratoItem::with(['apontamentos', 'contrato'])->findOrFail($id);
+
+        // Impede homologação se já homologado
+        if ($item->homologado) {
+            return back()->withErrors(['erro' => 'Este item já foi homologado.']);
+        }
+
+        // Gera snapshot do conteúdo relevante
+        $snapshot = [
+            'item' => [
+                'id' => $item->id,
+                'titulo' => $item->titulo,
+                'descricao' => $item->descricao,
+                'horas_estimadas' => $item->horas_estimadas,
+                'data_referencia' => optional($item->data_referencia)->toDateString(),
+            ],
+            'apontamentos' => $item->apontamentos->map(function($a){
+                return [
+                    'id' => $a->id,
+                    'user_id' => $a->user_id,
+                    'descricao' => $a->descricao,
+                    'data_realizacao' => $a->data_realizacao?->toDateString(),
+                    'minutos_gastos' => $a->minutos_gastos,
+                ];
+            })->toArray(),
+        ];
+
+        $snapshotJson = json_encode($snapshot, JSON_UNESCAPED_UNICODE);
+        $hash = hash('sha256', $snapshotJson);
+
+        // Cria log de aceite
+        $log = LogAceite::create([
+            'gh_contrato_id' => $item->gh_contrato_id ?? $item->contrato->id ?? null,
+            'gh_contrato_item_id' => $item->id,
+            'user_id' => auth()->id(),
+            'ip_address' => $request->ip(),
+            'snapshot_hash' => $hash,
+            'snapshot_json' => $snapshotJson,
+        ]);
+
+        // Marca item como homologado
+        $item->update([
+            'homologado' => true,
+            'homologado_por' => auth()->id(),
+            'homologado_em' => now(),
+            'homologado_hash' => $hash,
+        ]);
+
+        // Envia e-mail de notificação
+        $titulo = sprintf('[ACEITE DIGITAL] - Item Homologado - Spigo.Net - %s', $item->titulo);
+        $corpo = "Item: {$item->titulo}\nContrato: {$item->contrato->titulo}\nAceito por: " . auth()->user()->name . " (ID: " . auth()->id() . ")\nData: " . now()->toDateTimeString() . "\nHash: {$hash}\n\nResumo:\n" . strip_tags($item->descricao);
+
+        // Destinatários: gustavo@spigo.net e financeiro (ajustar e-mail de financeiro conforme necessário)
+        $emails = ['gustavo@spigo.net', 'financeiro@nw.com'];
+
+        foreach ($emails as $to) {
+            try {
+                Mail::raw($corpo, function ($m) use ($to, $titulo) {
+                    $m->to($to)->subject($titulo);
+                });
+            } catch (\Throwable $e) {
+                // Não falha a operação principal se o envio falhar
+            }
+        }
+
+        return back()->with('success', 'Item homologado com sucesso. O aceite foi registrado e notificado por e-mail.');
     }
 
     public function publicView($token)

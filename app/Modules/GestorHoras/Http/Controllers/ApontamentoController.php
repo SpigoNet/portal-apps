@@ -36,6 +36,12 @@ class ApontamentoController extends Controller
             if (!$itemPertence) {
                 return back()->withErrors(['gh_contrato_item_id' => 'O item selecionado não pertence a este contrato.']);
             }
+
+            // Impede lançamentos em itens homologados
+            $item = $contrato->itens()->where('id', $validated['gh_contrato_item_id'])->first();
+            if ($item && (!empty($item->homologado))) {
+                return back()->withErrors(['erro' => 'Este item já foi homologado e não permite novos lançamentos.']);
+            }
         }
 
         $minutos = $validated['horas_gastas'] * 60;
@@ -271,6 +277,11 @@ class ApontamentoController extends Controller
             return back()->withErrors(['gh_contrato_item_id' => 'O item selecionado não pertence ao contrato informado.']);
         }
 
+        $item = $contrato->itens()->where('id', $validated['gh_contrato_item_id'])->first();
+        if ($item && $item->homologado) {
+            return back()->withErrors(['erro' => 'Não é possível iniciar apontamento em item já homologado.']);
+        }
+
         $contrato->apontamentos()->create([
             'gh_contrato_item_id' => $validated['gh_contrato_item_id'],
             'user_id' => auth()->id(),
@@ -300,6 +311,14 @@ class ApontamentoController extends Controller
 
         if (!$apontamento) {
             return back()->withErrors(['erro' => 'Nenhum apontamento ativo foi encontrado para finalizar.']);
+        }
+
+        // Se o apontamento pertence a um item homologado, bloqueia alteração
+        if ($apontamento->gh_contrato_item_id) {
+            $item = $apontamento->item()->first();
+            if ($item && $item->homologado) {
+                return back()->withErrors(['erro' => 'Este apontamento pertence a um item homologado e não pode ser alterado.']);
+            }
         }
 
         $inicio = $apontamento->iniciado_em ?? $apontamento->created_at;

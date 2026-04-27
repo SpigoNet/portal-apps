@@ -15,11 +15,17 @@ class ContratoItem extends Model
         'descricao',
         'horas_estimadas',
         'data_referencia', // <--- Novo
+        'homologado',
+        'homologado_por',
+        'homologado_em',
+        'homologado_hash',
     ];
 
     protected $casts = [
         'horas_estimadas' => 'decimal:2',
         'data_referencia' => 'date', // <--- Novo
+        'homologado' => 'boolean',
+        'homologado_em' => 'datetime',
     ];
 
     // RELAÇÃO: Um item tem muitos apontamentos

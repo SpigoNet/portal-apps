@@ -31,15 +31,15 @@ class ApontamentoController extends Controller
         ]);
 
         // Verifica se o item pertence mesmo a este contrato (segurança extra)
-        if (!empty($validated['gh_contrato_item_id'])) {
+        if (! empty($validated['gh_contrato_item_id'])) {
             $itemPertence = $contrato->itens()->where('id', $validated['gh_contrato_item_id'])->exists();
-            if (!$itemPertence) {
+            if (! $itemPertence) {
                 return back()->withErrors(['gh_contrato_item_id' => 'O item selecionado não pertence a este contrato.']);
             }
 
             // Impede lançamentos em itens homologados
             $item = $contrato->itens()->where('id', $validated['gh_contrato_item_id'])->first();
-            if ($item && (!empty($item->homologado))) {
+            if ($item && (! empty($item->homologado))) {
                 return back()->withErrors(['erro' => 'Este item já foi homologado e não permite novos lançamentos.']);
             }
         }
@@ -191,29 +191,34 @@ class ApontamentoController extends Controller
         $linhas = [];
         $totalMinutos = 0;
 
-        foreach ($apontamentos as $apontamento) {
-            $horaInicio = $apontamento->iniciado_em?->format('H:i');
-            $horaFim = $apontamento->finalizado_em?->format('H:i');
+        $apontamentosAgrupados = $apontamentos->groupBy(fn ($a) => $a->data_realizacao->format('Y-m-d'));
 
-            if (!$horaInicio && $horaFim && $apontamento->minutos_gastos > 0) {
-                $horaInicio = $apontamento->finalizado_em
-                    ->copy()
-                    ->subMinutes((int) $apontamento->minutos_gastos)
-                    ->format('H:i');
+        foreach ($apontamentosAgrupados as $dataAgrupada => $itensDoDia) {
+            foreach ($itensDoDia as $index => $apontamento) {
+                $horaInicio = $apontamento->iniciado_em?->format('H:i');
+                $horaFim = $apontamento->finalizado_em?->format('H:i');
+
+                if (! $horaInicio && $horaFim && $apontamento->minutos_gastos > 0) {
+                    $horaInicio = $apontamento->finalizado_em
+                        ->copy()
+                        ->subMinutes((int) $apontamento->minutos_gastos)
+                        ->format('H:i');
+                }
+
+                $horaInicioTexto = $horaInicio ?? 'não informado';
+                $horaFimTexto = $horaFim ?? 'não informado';
+                $horasFormatadas = number_format($apontamento->horas, 2, ',', '.');
+
+                if ($index === 0) {
+                    $prefixoData = $apontamento->data_realizacao->format('d/m/Y');
+                    $linhas[] = "- {$prefixoData} | {$apontamento->descricao} | {$horasFormatadas} h";
+                } else {
+                    $espacos = str_repeat(' ', 23);
+                    $linhas[] = "{$espacos}| {$apontamento->descricao} | {$horasFormatadas} h";
+                }
+
+                $totalMinutos += (int) $apontamento->minutos_gastos;
             }
-
-            $horaInicioTexto = $horaInicio ?? 'não informado';
-            $horaFimTexto = $horaFim ?? 'não informado';
-
-            $linhas[] = sprintf(
-                '- %s | %s | Início: %s | Fim: %s | %s h',
-                $apontamento->data_realizacao->format('d/m/Y'),
-                $apontamento->descricao,
-                $horaInicioTexto,
-                $horaFimTexto,
-                number_format($apontamento->horas, 2, ',', '.')
-            );
-            $totalMinutos += (int) $apontamento->minutos_gastos;
         }
 
         $totalHoras = number_format($totalMinutos / 60, 2, ',', '.');
@@ -228,7 +233,7 @@ class ApontamentoController extends Controller
             "Total de horas: {$totalHoras} h\n".
             "Valor total previsto para faturamento: R$ {$valorTotal}\n\n".
             "Por favor, confirme a aprovação deste fechamento para seguirmos com o faturamento.\n\n".
-            "Fico à disposição para qualquer ajuste ou esclarecimento.";
+            'Fico à disposição para qualquer ajuste ou esclarecimento.';
     }
 
     public function mobileTimer()
@@ -273,7 +278,7 @@ class ApontamentoController extends Controller
             ->where('id', $validated['gh_contrato_item_id'])
             ->exists();
 
-        if (!$itemPertence) {
+        if (! $itemPertence) {
             return back()->withErrors(['gh_contrato_item_id' => 'O item selecionado não pertence ao contrato informado.']);
         }
 
@@ -309,7 +314,7 @@ class ApontamentoController extends Controller
             ->where('apontamento_ativo', 1)
             ->first();
 
-        if (!$apontamento) {
+        if (! $apontamento) {
             return back()->withErrors(['erro' => 'Nenhum apontamento ativo foi encontrado para finalizar.']);
         }
 
@@ -349,7 +354,7 @@ class ApontamentoController extends Controller
             ->where('apontamento_ativo', 1)
             ->first();
 
-        if (!$apontamento) {
+        if (! $apontamento) {
             return response()->json(['erro' => 'Nenhum apontamento ativo encontrado.'], 422);
         }
 

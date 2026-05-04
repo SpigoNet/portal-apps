@@ -220,12 +220,12 @@ class ApontamentoController extends Controller
                             $prefixoData = $apontamento->data_realizacao->format('d/m/Y');
                             $linhas[] = "- {$prefixoData} | {$descricao} | {$horasFormatadas} h";
                         } else {
-                            $espacos = str_repeat(' ', 23);
+                            $espacos = str_repeat(' ', 12);
                             $linhas[] = "{$espacos}| {$descricao} | {$horasFormatadas} h";
                         }
                         $primeiraLinha = false;
                     } else {
-                        $espacos = str_repeat(' ', 23);
+                        $espacos = str_repeat(' ', 12);
                         $linhas[] = "{$espacos}| {$descricao}";
                     }
                 }

@@ -209,12 +209,25 @@ class ApontamentoController extends Controller
                 $horaFimTexto = $horaFim ?? 'não informado';
                 $horasFormatadas = number_format($apontamento->horas, 2, ',', '.');
 
-                if ($index === 0) {
-                    $prefixoData = $apontamento->data_realizacao->format('d/m/Y');
-                    $linhas[] = "- {$prefixoData} | {$apontamento->descricao} | {$horasFormatadas} h";
-                } else {
-                    $espacos = str_repeat(' ', 23);
-                    $linhas[] = "{$espacos}| {$apontamento->descricao} | {$horasFormatadas} h";
+                $descricoes = array_filter(
+                    array_map('trim', explode("\n", $apontamento->descricao))
+                );
+
+                $primeiraLinha = true;
+                foreach ($descricoes as $descricao) {
+                    if ($primeiraLinha) {
+                        if ($index === 0) {
+                            $prefixoData = $apontamento->data_realizacao->format('d/m/Y');
+                            $linhas[] = "- {$prefixoData} | {$descricao} | {$horasFormatadas} h";
+                        } else {
+                            $espacos = str_repeat(' ', 23);
+                            $linhas[] = "{$espacos}| {$descricao} | {$horasFormatadas} h";
+                        }
+                        $primeiraLinha = false;
+                    } else {
+                        $espacos = str_repeat(' ', 23);
+                        $linhas[] = "{$espacos}| {$descricao}";
+                    }
                 }
 
                 $totalMinutos += (int) $apontamento->minutos_gastos;

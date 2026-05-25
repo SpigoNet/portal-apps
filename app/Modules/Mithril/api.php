@@ -12,14 +12,14 @@ use App\Modules\Mithril\Http\Middleware\TokenAuth;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('mithril/mcp')
-    ->name('mithril.mcp.')
+    ->name('api.mithril.mcp.')
     ->middleware(TokenAuth::class)
     ->group(function () {
         Route::post('/', [MithrilMcpController::class, 'handle'])->name('handle');
     });
 
 Route::prefix('mithril')
-    ->name('mithril.')
+    ->name('api.mithril.')
     ->middleware('auth:sanctum')
     ->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -28,7 +28,7 @@ Route::prefix('mithril')
     });
 
 Route::prefix('mithril')
-    ->name('mithril.')
+    ->name('api.mithril.')
     ->middleware(TokenAuth::class)
     ->group(function () {
         Route::get('/relatorio-markdown', [RelatorioMarkdownController::class, 'index'])->name('relatorio.markdown.token');

@@ -131,7 +131,7 @@
 
         <!-- Botões de Ação -->
         <div class="flex gap-3">
-            <a href="{{ route('ant.trabalhos.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            <a href="{{ route('ant.home') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                 ← Voltar para Trabalhos
             </a>
             <button onclick="location.reload()" class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">

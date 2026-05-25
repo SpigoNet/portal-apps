@@ -10,7 +10,7 @@
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="bg-background text-on-surface min-h-screen">
+<body class="bg-white text-on-surface min-h-screen">
 
 @unless($semMenu ?? false)
 <header class="bg-surface-container-high text-on-surface shadow">

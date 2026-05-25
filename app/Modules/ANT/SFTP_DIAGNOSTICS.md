@@ -6,8 +6,43 @@
 phpseclib3\Net\SSH2->login('cdnuser', 'GuMa1726')
 ```
 
-## Causa Raiz
-O módulo ANT tenta fazer upload de arquivos via SFTP para `files.spigo.net:2222`, mas a autenticação está falhando com as credenciais fornecidas.
+## Topologia da Infraestrutura
+
+```
+┌──────────────────────────┐
+│ Laravel Externo          │
+│ /home2/spigo594/apps/    │
+│ (Servidor externo)       │
+└────────────┬─────────────┘
+             │ Tenta conectar
+             ↓
+    ┌────────────────────┐
+    │ files.spigo.net:   │
+    │ 2222               │
+    │ (DNS Público)      │
+    └────────────┬───────┘
+                 │ Redirecionamento Porta
+                 ↓
+    ┌────────────────────────────────────┐
+    │ Roteador/Firewall (SUA REDE)       │
+    │ Port Forward: 2222 → 2222          │
+    └────────────┬───────────────────────┘
+                 │
+                 ↓
+    ┌────────────────────────────────────┐
+    │ Container Docker (LOCAL)           │
+    │ cdn_uploader                       │
+    │ SSH porta 2222                     │
+    │ /data/uploads                      │
+    └────────────────────────────────────┘
+```
+
+**Configuração:**
+- **Laravel:** Servidor externo `/home2/spigo594/apps/`
+- **SFTP:** Container Docker na sua rede local
+- **Acesso:** Redirecionamento de porta 2222
+- **Hostname:** `files.spigo.net` (seu DNS público)
+- **Credenciais:** `cdnuser` / `GuMa1726`
 
 ## Contexto da Infraestrutura
 
@@ -65,45 +100,47 @@ CDN_URL=https://files.spigo.net
 - [ ] Confirmar se `files.spigo.net` é o host correto
 - [ ] Confirmar se porta `2222` está abierta
 - [ ] Confirmar se credenciais `cdnuser` / `GuMa1726` são válidas
-- [ ] Verificar com administrador do servidor se credenciais expiraram
 
 ### 3. Testar Conectividade de Rede
 
-Teste acesso ao host **do servidor `/home2/spigo594/`**:
+**Testes DO SERVIDOR EXTERNO** (onde Laravel roda em `/home2/spigo594/apps/`):
 
-#### 2.1 Resolver DNS
+#### 3.1 Resolver DNS
 ```bash
 # Qual IP o DNS retorna para files.spigo.net?
 nslookup files.spigo.net
 # ou
 dig files.spigo.net
 
-# Esperado: Um IP que direcione para o container Docker
+# Esperado: Seu IP PÚBLICO que redireciona para o container
 ```
 
-#### 2.2 Testar Porta (Conectividade)
+#### 3.2 Testar Conexão à Porta 2222
 ```bash
-# Teste se porta 2222 está respondendo
+# Teste se consegue conectar em files.spigo.net:2222
 telnet files.spigo.net 2222
 # ou
 nc -zv files.spigo.net 2222
 
-# Esperado: Conexão bem-sucedida (não erro de "Connection refused")
+# Esperado: "Connection successful"
+# Errado: "Connection refused" = redirecionamento inativo ou firewall
 ```
 
-#### 2.3 Testar SSH Direto
+#### 3.3 Testar SSH com Credenciais
 ```bash
-# Teste login SSH com as credenciais
 ssh -p 2222 cdnuser@files.spigo.net
 
 # Será solicitada senha: GuMa1726
-# Esperado: Conexão bem-sucedida
+# Esperado: Acesso bem-sucedido
 ```
 
 **Se algum teste falhar:**
-- ✗ `nslookup` falha → DNS não está resolvendo corretamente
-- ✗ `telnet` falha → Porta bloqueada por firewall ou host offline
-- ✗ `ssh` falha → Credenciais incorretas ou permissões do usuário
+| Teste | Resultado | Causa Provável | Ação |
+|-------|-----------|-----------------|------|
+| `nslookup` | Erro/não resolve | DNS não está configurado | Configurar DNS ou usar IP público |
+| `telnet` | "Connection refused" | Redirecionamento inativo | Verificar port-forwarding no roteador |
+| `telnet` | Timeout | Firewall ou host offline | Liberar porta 2222 no firewall |
+| `ssh` | "Permission denied" | Credenciais erradas | Validar `cdnuser` / `GuMa1726` |
 
 ### 4. Verificar Permissões de Usuário
 
@@ -112,158 +149,248 @@ O usuário `cdnuser` no servidor SFTP deve ter:
 - [ ] Permissão de criar diretórios
 - [ ] Acesso via autenticação por senha (não apenas chave SSH)
 
-### 5. Verificar Container Docker (No servidor com Docker)
-
-Se tem acesso ao servidor com Docker:
+### 5. Verificar Container Docker (Na SUA REDE LOCAL)
 
 #### 5.1 Verificar se container está rodando
 ```bash
 docker ps | grep cdn_uploader
 
-# Esperado: Container listado e com status "Up"
+# Esperado: Container listado com status "Up"
 ```
 
 #### 5.2 Verificar logs do container
 ```bash
 docker logs cdn_uploader
 
-# Procure por erros de inicialização ou autenticação
+# Procure por erros de inicialização
 ```
 
-#### 5.3 Testar conectividade DENTRO da rede Docker
-```bash
-# Se outro container está na rede 'proxy', teste:
-docker exec <outro-container> nc -zv sftp 2222
-
-# Esperado: Conexão bem-sucedida
-```
-
-#### 5.4 Verificar porta exposta
+#### 5.3 Verificar porta exposta
 ```bash
 docker port cdn_uploader
 
 # Esperado: 2222/tcp -> 0.0.0.0:2222
 ```
 
-### 6. Resoluções Possíveis
+### 6. Verificar Port-Forwarding (Redirecionamento)
 
-#### Opção A: DNS Não está Resolvendo
-Se `nslookup files.spigo.net` retorna erro:
+**Na SUA REDE LOCAL:**
 
+#### 6.1 Verificar Roteador
+1. Acesse interface do roteador (ex: `192.168.1.1`)
+2. Procure por "Port Forwarding" ou "Encaminhamento de Porta"
+3. Confirme que existe uma regra:
+   - **Porta Externa:** `2222`
+   - **Porta Interna:** `2222`
+   - **IP Interno:** IP do computador onde container roda
+   - **Status:** Ativado
+
+#### 6.2 Testar Port-Forwarding (Localmente)
 ```bash
-# Verificar /etc/hosts
-cat /etc/hosts
+# De um outro PC/servidor externo, teste:
+telnet <seu-ip-publico> 2222
 
-# Se necessário, adicionar manualmente:
-# echo "127.0.0.1 files.spigo.net" >> /etc/hosts
-# ou usar IP do servidor Docker:
-# echo "192.168.x.x files.spigo.net" >> /etc/hosts
+# Ou se tiver SSH em outro servidor:
+ssh -p 2222 cdnuser@<seu-ip-publico>
 ```
 
-**Solução:** Atualize DNS ou adicione entrada em `/etc/hosts` do servidor Laravel.
+#### 6.3 Descobrir seu IP Público
+```bash
+# De um terminal qualquer:
+curl -s https://api.ipify.org
+# ou
+dig +short myip.opendns.com @resolver1.opendns.com
+```
 
 ---
 
-#### Opção B: Porta 2222 Bloqueada por Firewall
-Se `telnet files.spigo.net 2222` falha com "Connection refused":
+## Resoluções Rápidas
 
+### ⚡ Cenário 1: Port-Forward NÃO Está Ativo (MAIS COMUM)
 ```bash
-# Verificar firewall no servidor Docker
-sudo ufw status
+# Symptoma: telnet files.spigo.net 2222 → Connection refused
+
+# Solução:
+# 1. Acesse seu roteador (192.168.1.1)
+# 2. Vá para Port Forwarding
+# 3. Configure:
+#    Porta Externa: 2222
+#    Porta Interna: 2222
+#    IP Interno: <IP do seu PC com container>
+#    Status: Ativo
+# 4. Salve e reinicie se necessário
+```
+
+---
+
+### ⚡ Cenário 2: DNS Não Resolve
+```bash
+# Symptoma: nslookup files.spigo.net → Host not found
+
+# Solução: Usar IP Público ao invés de DNS
+SFTP_HOST=<seu-ip-publico>   # ex: 203.0.113.45
+
+# Descobrir IP público:
+curl -s https://api.ipify.org
+```
+
+---
+
+### ⚡ Cenário 3: Firewall Bloqueando Porta
+```bash
+# Symptoma: telnet files.spigo.net 2222 → Timeout (demora)
+
+# Solução:
 sudo ufw allow 2222
-
-# Ou verificar iptables
-sudo iptables -L | grep 2222
-
-# Ou reiniciar container para reexposição de porta
 docker restart cdn_uploader
 ```
 
-**Solução:** Liberar porta 2222 no firewall.
-
 ---
 
-#### Opção C: Container Docker Não Está Respondendo
-Se o container está offline ou com problemas:
-
+### ⚡ Cenário 4: Container Fora do Ar
 ```bash
-# Reiniciar container
-docker restart cdn_uploader
+# Symptoma: docker ps → Container NÃO aparece
 
-# Ou reconstruir
+# Solução:
+docker restart cdn_uploader
+docker logs cdn_uploader  # Ver erros
+
+# Ou reconstruir:
+docker-compose down sftp
 docker-compose up -d sftp
-
-# Verificar logs
-docker logs -f cdn_uploader
 ```
-
-**Solução:** Reiniciar container ou verificar logs.
 
 ---
 
-#### Opção D: Host Externo Errado
-Se `files.spigo.net` não aponta para container correto:
+## Fluxo de Diagnóstico Passo a Passo
 
-Verificar qual IP está sendo resolvido:
+### Passo 1: Teste SFTP (Em Produção)
+Execute em `/home2/spigo594/apps/`:
 ```bash
-# Do servidor Laravel
+php artisan sftp:test
+```
+
+**Resultado:**
+- ✅ Sucesso → Pule para "Próximos Passos"
+- ❌ Falha → Continue no Passo 2
+
+---
+
+### Passo 2: Teste DNS (Em Produção)
+Execute em `/home2/spigo594/`:
+```bash
 nslookup files.spigo.net
 # ou
-getent hosts files.spigo.net
+dig files.spigo.net
 ```
 
-Se IP está errado, atualizar:
-- DNS do domínio
-- Ou arquivo `/etc/hosts`
+**Resultado esperado:** Retorna um IP (seu IP público)
 
-**Solução:** Alinhar DNS para apontar ao servidor Docker correto.
+**Se retornar erro:**
+- Solução rápida: Usar IP público em `.env`
+  ```
+  SFTP_HOST=203.0.113.45   # Seu IP real
+  ```
+- Continue no Passo 3
 
 ---
 
-#### Opção E: Credenciais Incorretas em Produção
-Se SSH conecta mas falha autenticação:
-
-1. Verificar credenciais no `.env` em produção:
-   ```
-   SFTP_USERNAME=cdnuser
-   SFTP_PASSWORD=GuMa1726
-   ```
-
-2. Se estão corretas, resetar usuário no container:
-   ```bash
-   # Recrear container com mesmas credenciais
-   docker-compose down sftp
-   docker-compose up -d sftp
-   ```
-
-**Solução:** Validar credenciais ou resetar container.
-
-## Logs de Erro
-
-Logs estão em `/storage/logs/` . Procure por:
-- `SFTP Upload Attempt`
-- `SFTP Connection Failed`
-- `SFTP Upload Failed`
-
-Exemplo de como executar tail:
+### Passo 3: Teste Conectividade (Em Produção)
+Execute em `/home2/spigo594/`:
 ```bash
-tail -f storage/logs/laravel.log | grep -i sftp
+telnet files.spigo.net 2222
+# ou
+nc -zv files.spigo.net 2222
 ```
 
-## Arquivos Modificados
+**Resultado esperado:** "Connection successful" ou "succeeded"
 
-- `/app/Console/Commands/TestSftpConnection.php` - Novo comando de teste
-- `/app/Modules/ANT/Services/TrabalhoUploadService.php` - Novo service com melhor tratamento
-- `/app/Modules/ANT/Http/Controllers/TrabalhoController.php` - Melhor tratamento de erro
+**Se falhar com "Connection refused":**
+→ **Ativar Port-Forward** (veja Cenário 1 acima)
+
+**Se falhar com timeout:**
+→ **Liberar Firewall** (veja Cenário 3 acima)
+
+---
+
+### Passo 4: Teste SSH (Em Produção)
+Execute em `/home2/spigo594/`:
+```bash
+ssh -p 2222 cdnuser@files.spigo.net
+# Digite senha: GuMa1726
+```
+
+**Resultado esperado:** Prompt SSH da máquina remota
+
+**Se falhar:** Verificar credenciais (Cenário 4)
+
+---
+
+### Passo 5: Verificar Container (NA SUA REDE)
+```bash
+# Container está rodando?
+docker ps | grep cdn_uploader
+
+# Ver logs
+docker logs cdn_uploader
+
+# Verificar porta
+docker port cdn_uploader
+```
+
+---
 
 ## Próximos Passos
 
-1. Execute `php artisan sftp:test` para diagnosticar
-2. Compartilhe o resultado do teste
-3. Verifique credenciais SFTP em produção
-4. Atualize `.env` se necessário
-5. Teste entrega de trabalho novamente
+1. **Execute:** `php artisan sftp:test`
+2. **Se falhar:** Execute os 5 passos de diagnóstico acima
+3. **Baseado no resultado:** Aplique o cenário correspondente
+4. **Teste novamente:** `php artisan sftp:test`
+5. **Entregue o trabalho:** Teste funcionalidade no módulo ANT
+
+## Logs e Debugging
+
+### Logs de SFTP (Em Produção)
+```bash
+# Ver em tempo real
+tail -f /home2/spigo594/apps/storage/logs/laravel.log | grep -i sftp
+
+# Procure por estas mensagens:
+# SFTP Upload Attempt      → Tentou conectar
+# SFTP Connection Failed   → Falhou na conexão
+# SFTP Upload Failed       → Falhou no upload
+```
 
 ---
 
-**Último Update:** 25/05/2026
+## Arquivos Modificados
+
+1. `/app/Console/Commands/TestSftpConnection.php`
+   - Comando: `php artisan sftp:test`
+   - Diagnóstico rápido de conectividade
+
+2. `/app/Modules/ANT/Services/TrabalhoUploadService.php`
+   - Service com tratamento robusto de erro
+   - Testa conectividade antes de fazer upload
+
+3. `/app/Modules/ANT/Http/Controllers/TrabalhoController.php`
+   - Melhor tratamento de erro de SFTP
+   - Mensagens claras ao usuário
+
+---
+
+## Resumo: O Que Verificar
+
+| Item | O Que Testar | Comando |
+|------|-------------|---------|
+| SFTP Geral | Tudo de uma vez | `php artisan sftp:test` |
+| DNS | Resolve hostname | `nslookup files.spigo.net` |
+| Conectividade | Porta 2222 aberta | `telnet files.spigo.net 2222` |
+| SSH | Login com credenciais | `ssh -p 2222 cdnuser@files.spigo.net` |
+| Container | Está rodando | `docker ps \| grep cdn_uploader` |
+| Port-Forward | Redirecionamento ativo | `docker port cdn_uploader` |
+| Logs | Erros na inicialização | `docker logs cdn_uploader` |
+
+---
+
+**Última atualização:** 25/05/2026

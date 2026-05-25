@@ -6,6 +6,7 @@ use App\Modules\ANT\Http\Controllers\AdminProfessorController;
 use App\Modules\ANT\Http\Controllers\AntAdminController;
 use App\Modules\ANT\Http\Controllers\AuthController;
 use App\Modules\ANT\Http\Controllers\CorrecaoController;
+use App\Modules\ANT\Http\Controllers\DiagnosticController;
 use App\Modules\ANT\Http\Controllers\MaterialController;
 use App\Modules\ANT\Http\Controllers\PesoController;
 use App\Modules\ANT\Http\Controllers\ProfessorController;
@@ -37,6 +38,9 @@ Route::prefix('ant')
 
         // Rota Inicial (Dashboard)
         Route::get('/', [AntHomeController::class, 'index'])->name('ant.home');
+
+        // Rota de Diagnóstico SFTP
+        Route::get('/diagnostico', [DiagnosticController::class, 'index'])->name('ant.diagnostic');
 
         // -- Rotas de Vínculo de RA (Para primeiro acesso do aluno) --
         Route::get('/vincular-ra', [AntHomeController::class, 'vincularRaView'])->name('ant.vincular_ra');

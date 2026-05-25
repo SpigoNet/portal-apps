@@ -10,6 +10,13 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
+            <!-- Botão de Diagnóstico -->
+            <div class="flex justify-end">
+                <a href="{{ route('ant.diagnostic') }}" class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm font-medium">
+                    🔍 Diagnóstico SFTP
+                </a>
+            </div>
+
             @if($materias->isEmpty())
                 <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
                     <div class="flex">

@@ -37,9 +37,9 @@
                                 <tr class="hover:bg-white/5 transition">
                     <td class="px-6 py-4 border-b">
                         @if($user->avatar)
-                            <img src="{{ $user->avatar }}" alt="{{ $user->name }}" class="h-8 w-8 rounded-full object-cover border border-spigo-lime/20">
+                            <img src="{{ $user->avatar }}" alt="{{ $user->name }}" class="h-8 w-8 rounded-full object-cover border border-lime/20">
                         @else
-                            <div class="h-8 w-8 rounded-full bg-spigo-lime/20 flex items-center justify-center text-spigo-lime font-bold text-xs uppercase">
+                            <div class="h-8 w-8 rounded-full bg-lime/20 flex items-center justify-center text-lime font-bold text-xs uppercase">
                                 {{ substr($user->name, 0, 1) }}
                             </div>
                         @endif

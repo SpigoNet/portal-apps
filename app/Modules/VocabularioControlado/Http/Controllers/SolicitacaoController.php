@@ -164,7 +164,7 @@ class SolicitacaoController extends Controller
             ->orderByRaw('TRIM(palavra)')
             ->get();
 
-        return view('VocabularioControlado::solicitacao.aprovador', compact('perfil', 'pendentes', 'unidades', 'todosTermos'));
+        return view('VocabularioControlado::solicitacao.index', compact('perfil', 'pendentes', 'unidades', 'todosTermos'));
     }
 
     /**
@@ -184,7 +184,7 @@ class SolicitacaoController extends Controller
             ->orderByRaw('TRIM(palavra)')
             ->get();
 
-        return view('VocabularioControlado::solicitacao.implantacao', compact('perfil', 'termos'));
+        return view('VocabularioControlado::solicitacao.index', compact('perfil', 'termos'));
     }
 
     // -------------------------------------------------------------------------

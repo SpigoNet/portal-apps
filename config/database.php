@@ -103,7 +103,7 @@ return [
 
         'vocabulario_legacy' => [
             'driver' => 'mysql',
-            'host' => env('VC_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'host' => env('VC_DB_HOST', env('DB_HOST', 'spigo.net')),
             'port' => env('VC_DB_PORT', env('DB_PORT', '3306')),
             'database' => env('VC_DB_DATABASE', 'spigo594_riccps'),
             'username' => env('VC_DB_USERNAME', 'spigo594_riccps'),

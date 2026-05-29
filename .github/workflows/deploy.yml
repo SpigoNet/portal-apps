@@ -10,7 +10,7 @@ permissions:
   
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: gustavospigo/spigo-portal
+  IMAGE_NAME: spigonet/spigo-portal
 
 jobs:
   build-and-push:

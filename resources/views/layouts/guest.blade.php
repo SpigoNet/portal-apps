@@ -15,8 +15,8 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans text-gray-300 antialiased">
-<div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-spigo-dark">
+<body class="font-sans text-on-surface antialiased">
+<div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-background">
     <div>
         <a href="/" wire:navigate>
             <img src="//spigo.net/manual/Spigo.Net_Marcadagua 2_Colorido.png" alt="Spigo.Net Logo" class="w-24 h-auto"
@@ -24,7 +24,7 @@
         </a>
     </div>
 
-    <div class="w-full sm:max-w-md mt-6 px-6 py-8 bg-white/5 shadow-lg shadow-spigo-lime/10 overflow-hidden sm:rounded-lg">
+    <div class="w-full sm:max-w-md mt-6 px-6 py-8 bg-surface-container shadow-lg shadow-lime/10 overflow-hidden sm:rounded-lg">
         {{ $slot }}
     </div>
 </div>

@@ -37,7 +37,7 @@ new #[Layout('layouts.guest')] class extends Component {
         <div>
             <x-input-label for="email" :value="__('Email')" />
             <x-text-input wire:model="form.email" id="email"
-                class="block mt-1 w-full bg-white/5 border-spigo-violet/30 focus:border-spigo-lime focus:ring-spigo-lime"
+                class="block mt-1 w-full"
                 type="email" name="email" required autofocus autocomplete="username" />
             <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
         </div>
@@ -47,7 +47,7 @@ new #[Layout('layouts.guest')] class extends Component {
             <x-input-label for="password" :value="__('Password')" />
 
             <x-text-input wire:model="form.password" id="password"
-                class="block mt-1 w-full bg-white/5 border-spigo-violet/30 focus:border-spigo-lime focus:ring-spigo-lime"
+                class="block mt-1 w-full"
                 type="password" name="password" required autocomplete="current-password" />
 
             <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
@@ -57,15 +57,15 @@ new #[Layout('layouts.guest')] class extends Component {
         <div class="block mt-4">
             <label for="remember" class="inline-flex items-center">
                 <input wire:model="form.remember" id="remember" type="checkbox"
-                    class="rounded bg-spigo-dark border-spigo-violet/30 text-spigo-blue focus:ring-spigo-blue"
+                    class="rounded bg-surface-container border-outline-variant text-lime focus:ring-lime"
                     name="remember">
-                <span class="ms-2 text-sm text-gray-400">{{ __('Remember me') }}</span>
+                <span class="ms-2 text-sm text-on-surface-variant">{{ __('Remember me') }}</span>
             </label>
         </div>
 
         <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-400 hover:text-spigo-lime rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-spigo-lime focus:ring-offset-spigo-dark"
+                <a class="underline text-sm text-on-surface-variant hover:text-lime rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lime focus:ring-offset-background"
                     href="{{ route('password.request') }}" wire:navigate>
                     {{ __('Esqueceu sua senha?') }}
                 </a>
@@ -78,9 +78,9 @@ new #[Layout('layouts.guest')] class extends Component {
     </form>
 
     <div class="relative flex py-5 items-center">
-        <div class="flex-grow border-t border-spigo-violet/20"></div>
-        <span class="flex-shrink mx-4 text-gray-400 text-sm">OU</span>
-        <div class="flex-grow border-t border-spigo-violet/20"></div>
+        <div class="flex-grow border-t border-outline-variant/20"></div>
+        <span class="flex-shrink mx-4 text-on-surface-variant text-sm">OU</span>
+        <div class="flex-grow border-t border-outline-variant/20"></div>
     </div>
 
 
@@ -88,7 +88,7 @@ new #[Layout('layouts.guest')] class extends Component {
     <div class="flex flex-col gap-3">
         <!-- Google -->
         <a href="{{ route('google.redirect') }}"
-            class="w-full inline-flex items-center justify-center px-4 py-2 bg-white/90 border border-transparent rounded-md font-semibold text-xs text-spigo-dark uppercase tracking-widest hover:bg-white focus:bg-white active:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-spigo-lime focus:ring-offset-2 focus:ring-offset-spigo-dark transition ease-in-out duration-150">
+            class="w-full inline-flex items-center justify-center px-4 py-2 bg-white/90 border border-transparent rounded-md font-semibold text-xs text-background uppercase tracking-widest hover:bg-white focus:bg-white active:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-lime focus:ring-offset-2 focus:ring-offset-background transition ease-in-out duration-150">
             <i class="fa-brands fa-google mr-2 text-base"></i>
             {{ __('Login com o Google') }}
         </a>

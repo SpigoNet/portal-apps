@@ -82,7 +82,7 @@ class MaterialController extends Controller
     }
 
     /**
-     * Salva novo material com upload para SFTP (mesmo padrão das entregas de alunos).
+     * Salva novo material com upload (mesmo padrão das entregas de alunos).
      */
     public function store(Request $request, $idMateria)
     {
@@ -118,11 +118,11 @@ class MaterialController extends Controller
             $targetPath = "ant/materiais/{$semestreAtual}/{$materia->nome_curto}/{$request->data_aula}";
 
             try {
-                if (!Storage::disk('sftp')->exists($targetPath)) {
-                    Storage::disk('sftp')->makeDirectory($targetPath);
+                if (!Storage::disk('public')->exists($targetPath)) {
+                    Storage::disk('public')->makeDirectory($targetPath);
                 }
             } catch (\Exception $e) {
-                \Log::error('SFTP Material Directory Creation Failed', [
+                \Log::error('Material Directory Creation Failed', [
                     'path'  => $targetPath,
                     'error' => $e->getMessage(),
                 ]);
@@ -130,13 +130,8 @@ class MaterialController extends Controller
 
             foreach ($request->file('arquivos') as $arquivo) {
                 $fileName = $arquivo->getClientOriginalName();
-                $path = $arquivo->storeAs($targetPath, $fileName, 'sftp');
+                $path = $arquivo->storeAs($targetPath, $fileName, 'public');
                 $caminhos[] = $path;
-
-                \Log::info('SFTP Material Upload', [
-                    'path'   => $path,
-                    'exists' => Storage::disk('sftp')->exists($path),
-                ]);
             }
         }
 
@@ -228,11 +223,11 @@ class MaterialController extends Controller
 
         foreach ($remover as $caminho) {
             try {
-                if (Storage::disk('sftp')->exists($caminho)) {
-                    Storage::disk('sftp')->delete($caminho);
+                if (Storage::disk('public')->exists($caminho)) {
+                    Storage::disk('public')->delete($caminho);
                 }
             } catch (\Exception $e) {
-                \Log::error('SFTP Material Delete Failed', [
+                \Log::error('Material Delete Failed', [
                     'path'  => $caminho,
                     'error' => $e->getMessage(),
                 ]);
@@ -246,11 +241,11 @@ class MaterialController extends Controller
             $targetPath = "ant/materiais/{$semestreAtual}/{$materia->nome_curto}/{$request->data_aula}";
 
             try {
-                if (!Storage::disk('sftp')->exists($targetPath)) {
-                    Storage::disk('sftp')->makeDirectory($targetPath);
+                if (!Storage::disk('public')->exists($targetPath)) {
+                    Storage::disk('public')->makeDirectory($targetPath);
                 }
             } catch (\Exception $e) {
-                \Log::error('SFTP Material Directory Creation Failed', [
+                \Log::error('Material Directory Creation Failed', [
                     'path'  => $targetPath,
                     'error' => $e->getMessage(),
                 ]);
@@ -258,13 +253,8 @@ class MaterialController extends Controller
 
             foreach ($request->file('novos_arquivos') as $arquivo) {
                 $fileName = $arquivo->getClientOriginalName();
-                $path = $arquivo->storeAs($targetPath, $fileName, 'sftp');
+                $path = $arquivo->storeAs($targetPath, $fileName, 'public');
                 $arquivosAtuais[] = $path;
-
-                \Log::info('SFTP Material Upload', [
-                    'path'   => $path,
-                    'exists' => Storage::disk('sftp')->exists($path),
-                ]);
             }
         }
 
@@ -286,7 +276,7 @@ class MaterialController extends Controller
     }
 
     /**
-     * Remove um material e seus arquivos do SFTP (professor).
+     * Remove um material e seus arquivos (professor).
      */
     public function destroy($id)
     {
@@ -309,11 +299,11 @@ class MaterialController extends Controller
         $arquivos = json_decode($material->arquivos, true) ?? [];
         foreach ($arquivos as $caminho) {
             try {
-                if (Storage::disk('sftp')->exists($caminho)) {
-                    Storage::disk('sftp')->delete($caminho);
+                if (Storage::disk('public')->exists($caminho)) {
+                    Storage::disk('public')->delete($caminho);
                 }
             } catch (\Exception $e) {
-                \Log::error('SFTP Material Delete Failed', [
+                \Log::error('Material Delete Failed', [
                     'path'  => $caminho,
                     'error' => $e->getMessage(),
                 ]);

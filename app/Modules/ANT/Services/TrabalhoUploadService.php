@@ -26,31 +26,28 @@ class TrabalhoUploadService
         ]);
         
         try {
-            // Teste de conectividade antes de processar
-            self::testSftpConnection();
-            
             // Cria diretório se não existir
-            if (!Storage::disk('sftp')->exists($targetPath)) {
-                Storage::disk('sftp')->makeDirectory($targetPath);
-                Log::info('Directory created on SFTP', ['path' => $targetPath]);
+            if (!Storage::disk('public')->exists($targetPath)) {
+                Storage::disk('public')->makeDirectory($targetPath);
+                Log::info('Directory created', ['path' => $targetPath]);
             }
             
             // Faz upload
             $path = $arquivo->storeAs(
                 $targetPath,
                 $fileName,
-                'sftp'
+                'public'
             );
             
             // Verifica se arquivo foi salvo
-            if (!Storage::disk('sftp')->exists($path)) {
+            if (!Storage::disk('public')->exists($path)) {
                 throw new \Exception("Arquivo não foi encontrado após upload em $path");
             }
             
             Log::info('File uploaded successfully', [
                 'file' => $fileName,
                 'path' => $path,
-                'size' => Storage::disk('sftp')->size($path) ?? 'unknown'
+                'size' => Storage::disk('public')->size($path) ?? 'unknown'
             ]);
             
             return $path;
@@ -66,47 +63,5 @@ class TrabalhoUploadService
             
             throw $e;
         }
-    }
-    
-    /**
-     * Testa conectividade SFTP
-     * 
-     * @throws \Exception
-     */
-    public static function testSftpConnection()
-    {
-        try {
-            Storage::disk('sftp')->exists('/');
-        } catch (\Exception $e) {
-            Log::error('SFTP connection test failed', [
-                'host' => env('SFTP_HOST'),
-                'port' => env('SFTP_PORT'),
-                'username' => env('SFTP_USERNAME'),
-                'error' => $e->getMessage(),
-                'exception_type' => class_basename($e),
-            ]);
-            
-            throw new \Exception(
-                'Não foi possível conectar ao serviço de armazenamento. ' .
-                'Verifique as credenciais SFTP em .env e tente novamente.',
-                0,
-                $e
-            );
-        }
-    }
-    
-    /**
-     * Retorna informações de diagnóstico
-     */
-    public static function getDiagnosticInfo()
-    {
-        return [
-            'sftp_host' => env('SFTP_HOST'),
-            'sftp_port' => env('SFTP_PORT'),
-            'sftp_username' => env('SFTP_USERNAME'),
-            'sftp_root' => env('SFTP_ROOT'),
-            'cdn_url' => env('CDN_URL'),
-            'connection_status' => 'unknown',
-        ];
     }
 }

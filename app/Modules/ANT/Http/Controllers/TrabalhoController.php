@@ -105,23 +105,6 @@ class TrabalhoController extends Controller
         }
 
         if ($request->hasFile('arquivos')) {
-            $sftpAvailable = true;
-            
-            // Teste de conectividade SFTP antes de processar
-            try {
-                \Storage::disk('sftp')->exists('/');
-            } catch (\Exception $e) {
-                $sftpAvailable = false;
-                \Log::error('SFTP Connection Failed', [
-                    'error' => $e->getMessage(),
-                    'type' => class_basename($e),
-                    'trace' => $e->getTraceAsString()
-                ]);
-                return back()->withErrors([
-                    'arquivos' => 'Serviço de armazenamento temporariamente indisponível. Tente novamente em alguns minutos.'
-                ])->withInput();
-            }
-            
             foreach ($request->file('arquivos') as $arquivo) {
                 $extensaoDoArquivo = strtoupper($arquivo->getClientOriginalExtension());
                 if (!empty($extensoesArquivo) && !in_array($extensaoDoArquivo, $extensoesArquivo)) {
@@ -132,33 +115,21 @@ class TrabalhoController extends Controller
                 $targetPath = "ant/entregas/{$trabalho->semestre}/{$trabalho->materia->nome_curto}/{$trabalho->id}/{$alunoLider->ra}";
                 $fileName = $arquivo->getClientOriginalName();
 
-                \Log::info('SFTP Upload Attempt', [
-                    'target_path' => $targetPath,
-                    'file_name' => $fileName,
-                    'full_path' => $targetPath . '/' . $fileName
-                ]);
-
                 try {
-                    // Cria a estrutura de diretórios no SFTP se não existir
-                    if (!\Storage::disk('sftp')->exists($targetPath)) {
-                        \Storage::disk('sftp')->makeDirectory($targetPath);
-                        \Log::info('SFTP Directory Created', ['path' => $targetPath]);
+                    // Cria a estrutura de diretórios se não existir
+                    if (!\Storage::disk('public')->exists($targetPath)) {
+                        \Storage::disk('public')->makeDirectory($targetPath);
                     }
 
                     $path = $arquivo->storeAs(
                         $targetPath,
                         $fileName,
-                        'sftp'
+                        'public'
                     );
-
-                    \Log::info('SFTP Upload Result', [
-                        'returned_path' => $path,
-                        'exists' => \Storage::disk('sftp')->exists($path)
-                    ]);
 
                     $caminhos[] = $path;
                 } catch (\Exception $e) {
-                    \Log::error('SFTP Upload Failed', [
+                    \Log::error('File Upload Failed', [
                         'file' => $fileName,
                         'target_path' => $targetPath,
                         'error' => $e->getMessage(),

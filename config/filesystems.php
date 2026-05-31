@@ -60,20 +60,6 @@ return [
             'report' => false,
         ],
 
-        'sftp' => [
-            'driver' => 'sftp',
-            'host' => env('SFTP_HOST'),
-            'username' => env('SFTP_USERNAME'),
-            'password' => env('SFTP_PASSWORD'),
-            'port' => (int) env('SFTP_PORT', 2222), // Porta personalizada
-            'root' => env('SFTP_ROOT', '/data/uploads'), // Root directory on the SFTP server
-            // 'privateKey' => env('SFTP_PRIVATE_KEY'),
-            // 'passphrase' => env('SFTP_PASSPHRASE'),
-            'visibility' => 'public', // Set to public to allow CDN
-            // 'directory_permission' => 0755,
-            'timeout' => 10,
-        ],
-
     ],
 
     /*

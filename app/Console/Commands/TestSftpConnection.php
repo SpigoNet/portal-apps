@@ -12,71 +12,50 @@ class TestSftpConnection extends Command
      *
      * @var string
      */
-    protected $signature = 'sftp:test';
+    protected $signature = 'storage:test';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Testa conectividade SFTP e diagnóstico';
+    protected $description = 'Testa armazenamento local e diagnóstico';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $this->info('=== Teste de Conectividade SFTP ===');
+        $this->info('=== Teste de Armazenamento ===');
         $this->newLine();
 
-        // Exibe configuração
-        $this->info('Configuração SFTP:');
-        $this->line("  Host: " . env('SFTP_HOST', 'NÃO CONFIGURADO'));
-        $this->line("  Port: " . env('SFTP_PORT', '2222'));
-        $this->line("  Username: " . env('SFTP_USERNAME', 'NÃO CONFIGURADO'));
-        $this->line("  Root: " . env('SFTP_ROOT', '/data/uploads'));
+        $this->info('Discos configurados:');
+        $this->line("  Default: " . config('filesystems.default'));
         $this->newLine();
 
-        // Tenta conectar
-        $this->info('Testando conexão...');
-        
+        // Tenta acessar disco public
+        $this->info('Testando disco public...');
+
         try {
-            $disk = Storage::disk('sftp');
-            
-            // Teste 1: Verificar se raiz existe
+            $disk = Storage::disk('public');
+
             $rootExists = $disk->exists('/');
-            $this->info('✓ Conexão SSH estabelecida com sucesso');
+            $this->info('✓ Disco public acessível');
             $this->line("  Raiz acessível: " . ($rootExists ? 'SIM' : 'NÃO'));
-            
-            // Teste 2: Listar conteúdo raiz
-            try {
-                $contents = $disk->listContents('/');
-                $this->info("✓ Conteúdo raiz listado ({$contents->count()} itens)");
-            } catch (\Exception $e) {
-                $this->warn("✗ Erro ao listar raiz: {$e->getMessage()}");
-            }
-            
-            // Teste 3: Testar caminho ant/entregas
-            $antPath = 'ant/entregas';
-            $antExists = $disk->exists($antPath);
-            $this->info("Caminho ANT ($antPath): " . ($antExists ? 'EXISTS' : 'NÃO EXISTE'));
-            
+
             $this->newLine();
             $this->info('=== Teste Concluído com Sucesso ===');
             return self::SUCCESS;
-            
         } catch (\Exception $e) {
-            $this->error('✗ FALHA na Conexão SFTP');
+            $this->error('✗ FALHA no acesso ao disco public');
             $this->newLine();
             $this->error("Erro: {$e->getMessage()}");
             $this->line("Tipo: " . class_basename($e));
             $this->newLine();
             $this->warn('Sugestões:');
-            $this->line('  1. Verifique se as credenciais SFTP estão corretas em .env');
-            $this->line('  2. Verifique se o host ' . env('SFTP_HOST') . ' está acessível');
-            $this->line('  3. Verifique a porta ' . env('SFTP_PORT') . ' está aberta no firewall');
-            $this->line('  4. Verifique se o usuário ' . env('SFTP_USERNAME') . ' tem permissão de acesso');
-            
+            $this->line('  1. Verifique se o diretório storage/app/public existe');
+            $this->line('  2. Verifique as permissões do diretório');
+
             return self::FAILURE;
         }
     }

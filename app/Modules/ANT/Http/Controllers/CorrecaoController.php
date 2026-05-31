@@ -206,13 +206,12 @@ class CorrecaoController extends Controller
         // 1. VERIFICAÇÃO DE LEGADO
         if (str_starts_with($path, '/files/')) {
             // URL Externa do sistema legado
-            // Removemos o / inicial para concatenar corretamente se necessário, ou mantemos
             // Ex: /files/2020/arquivo.pdf -> https://spigo.net/trabalhos/files/2020/arquivo.pdf
             return 'https://spigo.net/trabalhos' . $path;
         }
 
-        // 2. Arquivos Novos (Servidor de arquivos externo)
-        return config('app.cdn_url') . '/' . $path;
+        // 2. Arquivos Novos (Storage local do Laravel)
+        return Storage::disk('public')->url($path);
     }
 
     private function getPhysicalPath($path)

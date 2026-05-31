@@ -13,9 +13,14 @@ class TrustProxies
 
     public function handle(Request $request, Closure $next): Response
     {
-        $request->setTrustedProxies($this->proxies, $this->getHeaders());
+        $proxies = $this->proxies === '*'
+            ? [$request->server->get('REMOTE_ADDR')]
+            : (array) $this->proxies;
 
-        if ($this->shouldForceSecureUrls($request)) {
+        $request->setTrustedProxies($proxies, $this->getHeaders());
+
+        if ($request->header('x-forwarded-proto') === 'https'
+            || $request->header('x-forwarded-ssl') === 'on') {
             URL::forceScheme('https');
         }
 
@@ -28,11 +33,5 @@ class TrustProxies
                | Request::HEADER_X_FORWARDED_HOST
                | Request::HEADER_X_FORWARDED_PORT
                | Request::HEADER_X_FORWARDED_PROTO;
-    }
-
-    protected function shouldForceSecureUrls(Request $request): bool
-    {
-        return $request->header('x-forwarded-proto') === 'https'
-               || $request->header('x-forwarded-ssl') === 'on';
     }
 }

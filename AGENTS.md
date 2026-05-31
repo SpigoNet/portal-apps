@@ -13,7 +13,7 @@
 - **Lint:** `./vendor/bin/pint` (Dry run: `./vendor/bin/pint --test`)
 - **Test:** `php artisan test` (Specific: `php artisan test path/to/Test.php`)
 
-## Conventions
+## Conventions 
 - **Naming:**
   - **Portuguese:** Business Entities/Models (e.g., `Tarefa`, `Contrato`). PascalCase. No module prefixes in class names.
   - **English:** Technical concepts (`Controller`, `Service`, `Provider`).

@@ -20,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->appendToGroup('web', [
-            \App\Http\Middleware\TrustProxies::class,
+            //\App\Http\Middleware\TrustProxies::class,
             \App\Http\Middleware\SetModuleContext::class,
         ]);
 

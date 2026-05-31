@@ -115,8 +115,7 @@ class MaterialController extends Controller
         $caminhos = [];
 
         if ($request->hasFile('arquivos')) {
-            $semestre = str_replace('/', '-', $semestreAtual);
-            $targetPath = "ant/materiais/{$semestre}/{$materia->nome_curto}/{$request->data_aula}";
+            $targetPath = "ant/materiais/{$semestreAtual}/{$materia->nome_curto}/{$request->data_aula}";
 
             try {
                 if (!Storage::disk('public')->exists($targetPath)) {
@@ -239,8 +238,7 @@ class MaterialController extends Controller
 
         // Novos arquivos
         if ($request->hasFile('novos_arquivos')) {
-            $semestre = str_replace('/', '-', $semestreAtual);
-            $targetPath = "ant/materiais/{$semestre}/{$materia->nome_curto}/{$request->data_aula}";
+            $targetPath = "ant/materiais/{$semestreAtual}/{$materia->nome_curto}/{$request->data_aula}";
 
             try {
                 if (!Storage::disk('public')->exists($targetPath)) {

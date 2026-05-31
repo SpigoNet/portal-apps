@@ -112,7 +112,8 @@ class TrabalhoController extends Controller
                 }
 
                 // Salva no diretório do LÍDER (para organização)
-                $targetPath = "ant/entregas/{$trabalho->semestre}/{$trabalho->materia->nome_curto}/{$trabalho->id}/{$alunoLider->ra}";
+                $semestre = str_replace('/', '-', $trabalho->semestre);
+                $targetPath = "ant/entregas/{$semestre}/{$trabalho->materia->nome_curto}/{$trabalho->id}/{$alunoLider->ra}";
                 $fileName = $arquivo->getClientOriginalName();
 
                 try {

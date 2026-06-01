@@ -341,7 +341,7 @@ class ApontamentoController extends Controller
 
         $inicio = $apontamento->iniciado_em ?? $apontamento->created_at;
         $fim = now();
-        $minutos = max(1, $inicio->diffInMinutes($fim));
+        $minutos = max(1, (int) $inicio->diffInMinutes($fim));
 
         $apontamento->update([
             'descricao' => $validated['descricao'],

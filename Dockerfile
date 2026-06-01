@@ -13,16 +13,17 @@ RUN npm run build
 # ==========================================
 FROM php:8.3-apache
 
-# 1. Instalar dependências essenciais do sistema operacional e do PostgreSQL
+# 1. Instalar dependências essenciais do sistema operacional e dos drivers de banco
 RUN apt-get update && apt-get install -y \
+    libmariadb-dev \
     libpq-dev \
     libpng-dev \
     libzip-dev \
     zip \
     unzip \
     git \
-    && docker-php-ext-install pdo pdo_pgsql zip gd opcache \
-    && apt-get clean && rm -rf /var/list/apt/lists/*
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip gd opcache \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 2. Habilitar mod_rewrite do Apache para rotas amigáveis do Laravel
 RUN a2enmod rewrite

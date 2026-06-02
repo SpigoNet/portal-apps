@@ -465,13 +465,11 @@
                             </div>
                         </form>
 
-                        <form action="{{ route('gestor-horas.faturamento-status', $contrato->id) }}" method="POST" class="px-4 pb-4 bg-white">
-                            @csrf
-                            <input type="hidden" name="acao" value="gerar_email">
-                            <button type="submit" class="!bg-indigo-700 hover:!bg-indigo-600 !border !border-indigo-700 !text-white font-bold py-2 px-4 rounded text-sm shadow-sm">
-                                Gerar Texto de Aprovação dos Itens Separados
-                            </button>
-                        </form>
+                        <div class="px-4 pb-4 bg-white">
+                            <a href="{{ route('gestor-horas.export-separados', $contrato->id) }}" class="!bg-indigo-700 hover:!bg-indigo-600 !border !border-indigo-700 !text-white font-bold py-2 px-4 rounded text-sm shadow-sm inline-block">
+                                Exportar Excel dos Itens Separados
+                            </a>
+                        </div>
 
                         @if(session('email_aprovacao_texto'))
                             <div class="p-4 border-t border-gray-200 bg-indigo-50">

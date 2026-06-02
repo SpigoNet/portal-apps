@@ -272,9 +272,15 @@ class ApontamentoController extends Controller
         $rows[] = ['Data', 'Descrição', 'Tempo (h)', 'Status'];
 
         foreach ($apontamentos as $a) {
+            // Normaliza quebras: trata sequências literais "\\r\\n" (backslash + r + backslash + n)
+            // e quebras reais CRLF/CR para LF, produzindo newline real para o XML do Excel.
+            $descricao = (string) $a->descricao;
+            $descricao = str_replace(['\\r\\n', '\\n', '\\r'], "\n", $descricao); // literais
+            $descricao = str_replace(["\r\n", "\r"], "\n", $descricao); // reais
+
             $rows[] = [
                 $a->data_realizacao->format('d/m/Y'),
-                str_replace("\r\n", "\n", $a->descricao),
+                $descricao,
                 number_format($a->horas, 2, ',', '.'),
                 ucfirst(str_replace('_', ' ', $a->faturamento_status)),
             ];
@@ -291,7 +297,8 @@ class ApontamentoController extends Controller
                 $c++;
                 $col = $this->numToCol($c);
                 $cellEscaped = htmlspecialchars((string) $cell, ENT_XML1 | ENT_SUBSTITUTE, 'UTF-8');
-                $sheetXml .= '<c r="'.$col.$r.'" t="inlineStr"><is><t>'.$cellEscaped.'</t></is></c>';
+                // Preserva quebras de linha no Excel
+                $sheetXml .= '<c r="'.$col.$r.'" t="inlineStr"><is><t xml:space="preserve">'.$cellEscaped.'</t></is></c>';
             }
             $sheetXml .= '</row>';
             $r++;

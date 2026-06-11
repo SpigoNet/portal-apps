@@ -60,6 +60,12 @@
                         <i class="fa-solid fa-filter mr-2"></i>
                         Filtrar
                     </button>
+                    
+                    <button type="button" id="toggle-efetivados-btn" class="btn-elf text-white bg-black/20"
+                        title="Oculta/mostra lançamentos já efetivados">
+                        <i class="fa-solid fa-eye-slash mr-2"></i>
+                        Ocultar Efetivados
+                    </button>
                 </form>
             </div>
         </div>
@@ -114,7 +120,8 @@
                                 }
                             @endphp
 
-                            <tr class="{{ $rowClass }} hover:bg-white/5 transition duration-150">
+                            <tr class="{{ $rowClass }} hover:bg-white/5 transition duration-150 row-selectable"
+                                data-valor="{{ $item->valor }}" data-status="{{ $item->status }}" data-index="{{ $index }}">
                                 <td class="px-6 py-4 whitespace-nowrap" data-label="Data">
                                     <div class="flex flex-col">
                                         <span
@@ -222,4 +229,87 @@
         </div>
 
     </div>
+
+    <!-- Selected sum overlay -->
+    <div id="selected-sum-overlay" class="hidden fixed bottom-6 right-6 z-50">
+        <div class="mithril-theme-surface px-4 py-3 rounded-xl shadow-lg text-sm flex flex-col items-end gap-1">
+            <div class="text-slate-400 text-xs" id="selected-count">0 selecionado(s)</div>
+            <div class="text-white font-bold text-lg" id="selected-sum">R$ 0,00</div>
+        </div>
+    </div>
+
+    <style>
+        .selected-row {
+            background-color: rgba(255,255,255,0.04) !important;
+            box-shadow: inset 0 0 0 1px rgba(99,102,241,0.06);
+        }
+        table[data-hide-efetivados="true"] tr[data-status="efetivado"] {
+            display: none;
+        }
+        #selected-sum-overlay .mithril-theme-surface {
+            min-width: 180px;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleBtn = document.getElementById('toggle-efetivados-btn');
+            const table = document.querySelector('table.min-w-full');
+            const rows = Array.from(document.querySelectorAll('tbody tr.row-selectable'));
+            const overlay = document.getElementById('selected-sum-overlay');
+            const selectedSumEl = document.getElementById('selected-sum');
+            const selectedCountEl = document.getElementById('selected-count');
+
+            function formatCurrency(value) {
+                return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+            }
+
+            function updateOverlay() {
+                const selected = rows.filter(r => r.classList.contains('selected-row'));
+                if (selected.length === 0) {
+                    overlay.classList.add('hidden');
+                    selectedSumEl.textContent = formatCurrency(0);
+                    selectedCountEl.textContent = '0 selecionado(s)';
+                    return;
+                }
+                const sum = selected.reduce((acc, r) => acc + parseFloat(r.dataset.valor || 0), 0);
+                selectedSumEl.textContent = formatCurrency(sum);
+                selectedCountEl.textContent = selected.length + ' selecionado(s)';
+                overlay.classList.remove('hidden');
+            }
+
+            // Row click selection; ignore clicks on interactive elements
+            rows.forEach(r => {
+                r.addEventListener('click', function (e) {
+                    if (e.target.closest('a, button, form, input, select')) return;
+                    r.classList.toggle('selected-row');
+                    updateOverlay();
+                });
+            });
+
+            // Prevent action buttons from selecting the row
+            document.querySelectorAll('tbody tr.row-selectable a, tbody tr.row-selectable button, tbody tr.row-selectable form').forEach(el => {
+                el.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                });
+            });
+
+            toggleBtn.addEventListener('click', function () {
+                const hide = table.getAttribute('data-hide-efetivados') !== 'true';
+                if (hide) {
+                    table.setAttribute('data-hide-efetivados', 'true');
+                    toggleBtn.innerHTML = '<i class="fa-solid fa-eye mr-2"></i> Mostrar Efetivados';
+                } else {
+                    table.removeAttribute('data-hide-efetivados');
+                    toggleBtn.innerHTML = '<i class="fa-solid fa-eye-slash mr-2"></i> Ocultar Efetivados';
+                }
+            });
+
+            // Accessibility: allow toggle with keyboard
+            toggleBtn.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') toggleBtn.click();
+            });
+        });
+    </script>
+
 </x-Mithril::layout>

@@ -121,7 +121,7 @@
                             @endphp
 
                             <tr class="{{ $rowClass }} hover:bg-white/5 transition duration-150 row-selectable"
-                                data-valor="{{ $item->valor }}" data-status="{{ $item->status }}" data-index="{{ $index }}">
+                                data-valor="{{ $item->valor }}" data-status="{{ $item->status }}" data-index="{{ $index }}" data-dia="{{ $item->dia_vencimento }}" data-conta-id="{{ $item->conta->id }}">
                                 <td class="px-6 py-4 whitespace-nowrap" data-label="Data">
                                     <div class="flex flex-col">
                                         <span
@@ -175,34 +175,40 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium"
                                     data-label="Ações">
                                     <div class="flex justify-center items-center gap-2">
-                                        @if ($item->tipo === 'projetado')
-                                            @if ($item->status === 'pendente')
-                                                <a href="{{ route('mithril.pre-transacoes.form-confirmar', ['id' => $item->pre_transacao_id, 'mes' => $mes, 'ano' => $ano, 'conta_id' => $contaId]) }}"
-                                                    class="p-2 bg-amber-500/20 text-amber-400 rounded-lg hover:bg-amber-500 hover:text-white transition shadow-lg border border-amber-500/20"
-                                                    title="Confirmar Valor">
-                                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
-                                                </a>
-                                            @elseif($item->status === 'confirmado')
-                                                <form
-                                                    action="{{ route('mithril.pre-transacoes.efetivar', ['id' => $item->pre_transacao_id]) }}"
-                                                    method="POST" class="inline">
-                                                    @csrf
-                                                    <input type="hidden" name="mes" value="{{ $mes }}">
-                                                    <input type="hidden" name="ano" value="{{ $ano }}">
-                                                    <input type="hidden" name="conta_id" value="{{ $contaId }}">
-                                                    <button type="submit"
-                                                        class="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500 hover:text-white transition shadow-lg border border-emerald-500/20"
-                                                        onclick="return confirm('Efetivar este lançamento no extrato real?')"
-                                                        title="Pagar / Efetivar">
-                                                        <i class="fa-solid fa-check text-xs"></i>
-                                                    </button>
-                                                </form>
-                                                <a href="{{ route('mithril.pre-transacoes.form-confirmar', ['id' => $item->pre_transacao_id, 'mes' => $mes, 'ano' => $ano, 'conta_id' => $contaId]) }}"
-                                                    class="text-slate-500 hover:text-slate-300 transition">
-                                                    <i class="fa-solid fa-ellipsis-vertical"></i>
-                                                </a>
-                                            @endif
-                                        @else
+                                            @if ($item->tipo === 'projetado')
+                                                @if ($item->status === 'pendente')
+                                                    <a href="{{ route('mithril.pre-transacoes.form-confirmar', ['id' => $item->pre_transacao_id, 'mes' => $mes, 'ano' => $ano, 'conta_id' => $contaId]) }}"
+                                                        class="p-2 bg-amber-500/20 text-amber-400 rounded-lg hover:bg-amber-500 hover:text-white transition shadow-lg border border-amber-500/20 js-open-confirm"
+                                                        title="Confirmar Valor"
+                                                        data-pt-id="{{ $item->pre_transacao_id }}"
+                                                        data-confirm-url="{{ route('mithril.pre-transacoes.confirmar', ['id' => $item->pre_transacao_id]) }}"
+                                                        data-mes="{{ $mes }}" data-ano="{{ $ano }}" data-conta-id="{{ $contaId }}">
+                                                        <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                                    </a>
+                                                @elseif($item->status === 'confirmado')
+                                                    <form
+                                                        action="{{ route('mithril.pre-transacoes.efetivar', ['id' => $item->pre_transacao_id]) }}"
+                                                        method="POST" class="inline">
+                                                        @csrf
+                                                        <input type="hidden" name="mes" value="{{ $mes }}">
+                                                        <input type="hidden" name="ano" value="{{ $ano }}">
+                                                        <input type="hidden" name="conta_id" value="{{ $contaId }}">
+                                                        <button type="submit"
+                                                            class="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500 hover:text-white transition shadow-lg border border-emerald-500/20 js-efetivar-btn"
+                                                            data-pt-id="{{ $item->pre_transacao_id }}"
+                                                            title="Pagar / Efetivar">
+                                                            <i class="fa-solid fa-check text-xs"></i>
+                                                        </button>
+                                                    </form>
+                                                    <a href="{{ route('mithril.pre-transacoes.form-confirmar', ['id' => $item->pre_transacao_id, 'mes' => $mes, 'ano' => $ano, 'conta_id' => $contaId]) }}"
+                                                        class="text-slate-500 hover:text-slate-300 transition js-open-confirm"
+                                                        data-pt-id="{{ $item->pre_transacao_id }}"
+                                                        data-confirm-url="{{ route('mithril.pre-transacoes.confirmar', ['id' => $item->pre_transacao_id]) }}"
+                                                        data-mes="{{ $mes }}" data-ano="{{ $ano }}" data-conta-id="{{ $contaId }}">
+                                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                                    </a>
+                                                @endif
+                                            @else
                                             <div
                                                 class="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full elf-title text-[8px] flex items-center gap-1 border border-emerald-500/20">
                                                 <i class="fa-solid fa-check-double text-[8px]"></i>
@@ -251,6 +257,86 @@
         }
     </style>
 
+    <!-- Confirm / Efetivar modals -->
+    <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60"></div>
+        <div class="relative mithril-theme-surface rounded-xl p-6 w-full max-w-md z-10">
+            <h3 class="text-lg font-bold mb-3">Confirmar lançamento</h3>
+            <form id="confirm-form">
+                <input type="hidden" id="confirm-pt-id" name="pt_id">
+                <input type="hidden" id="confirm-mes" name="mes" value="{{ $mes }}">
+                <input type="hidden" id="confirm-ano" name="ano" value="{{ $ano }}">
+                <input type="hidden" id="confirm-conta-id" name="conta_id">
+
+                <div class="mb-3">
+                    <label class="block text-sm text-slate-400 mb-1">Valor</label>
+                    <input id="confirm-valor" name="valor" type="number" step="0.01"
+                        class="w-full rounded-lg bg-black/10 border border-white/5 px-3 py-2 text-white">
+                </div>
+
+                <div class="mb-4 flex gap-2 items-end">
+                    <div class="flex-1">
+                        <label class="block text-sm text-slate-400 mb-1">Data</label>
+                        <input id="confirm-data" name="data_vencimento" type="date"
+                            class="w-full rounded-lg bg-black/10 border border-white/5 px-3 py-2 text-white">
+                    </div>
+                    <div>
+                        <button type="button" id="confirm-use-today"
+                            class="btn-elf text-white px-3 py-2">Hoje</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <button type="button" id="confirm-cancel"
+                        class="px-4 py-2 rounded-lg border border-white/5 text-slate-300">Cancelar</button>
+                    <button type="submit" id="confirm-submit"
+                        class="btn-elf text-white">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="efetivar-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60"></div>
+        <div class="relative mithril-theme-surface rounded-xl p-6 w-full max-w-md z-10">
+            <h3 class="text-lg font-bold mb-3">Efetivar lançamento</h3>
+            <div class="mb-3 text-sm text-slate-300">Confirme os dados antes de registrar o pagamento.</div>
+            <form id="efetivar-form">
+                <input type="hidden" id="efetivar-pt-id" name="pt_id">
+                <input type="hidden" id="efetivar-mes" name="mes" value="{{ $mes }}">
+                <input type="hidden" id="efetivar-ano" name="ano" value="{{ $ano }}">
+                <input type="hidden" id="efetivar-conta-id" name="conta_id">
+
+                <div class="mb-2">
+                    <div class="text-sm text-slate-400">Descrição</div>
+                    <div id="efetivar-desc" class="text-sm font-medium text-slate-200"></div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="text-sm text-slate-400">Valor</div>
+                    <div id="efetivar-valor" class="text-lg font-bold text-white"></div>
+                </div>
+
+                <div class="mb-4 flex gap-2 items-end">
+                    <div class="flex-1">
+                        <label class="block text-sm text-slate-400 mb-1">Data efetiva</label>
+                        <input id="efetivar-data" name="data_efetiva" type="date"
+                            class="w-full rounded-lg bg-black/10 border border-white/5 px-3 py-2 text-white">
+                    </div>
+                    <div>
+                        <button type="button" id="efetivar-use-today" class="btn-elf text-white px-3 py-2">Hoje</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <button type="button" id="efetivar-cancel"
+                        class="px-4 py-2 rounded-lg border border-white/5 text-slate-300">Cancelar</button>
+                    <button type="submit" id="efetivar-confirm" class="btn-elf text-white">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const toggleBtn = document.getElementById('toggle-efetivados-btn');
@@ -259,6 +345,22 @@
             const overlay = document.getElementById('selected-sum-overlay');
             const selectedSumEl = document.getElementById('selected-sum');
             const selectedCountEl = document.getElementById('selected-count');
+            const confirmModal = document.getElementById('confirm-modal');
+            const confirmForm = document.getElementById('confirm-form');
+            const confirmPtId = document.getElementById('confirm-pt-id');
+            const confirmValor = document.getElementById('confirm-valor');
+            const confirmData = document.getElementById('confirm-data');
+            const confirmContaId = document.getElementById('confirm-conta-id');
+
+            const efetivarModal = document.getElementById('efetivar-modal');
+            const efetivarForm = document.getElementById('efetivar-form');
+            const efetivarPtId = document.getElementById('efetivar-pt-id');
+            const efetivarDesc = document.getElementById('efetivar-desc');
+            const efetivarValor = document.getElementById('efetivar-valor');
+            const efetivarData = document.getElementById('efetivar-data');
+            const efetivarContaId = document.getElementById('efetivar-conta-id');
+
+            let activeRow = null; // referência à linha atualmente em edição
 
             function formatCurrency(value) {
                 return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -294,21 +396,205 @@
                 });
             });
 
-            toggleBtn.addEventListener('click', function () {
-                const hide = table.getAttribute('data-hide-efetivados') !== 'true';
-                if (hide) {
-                    table.setAttribute('data-hide-efetivados', 'true');
-                    toggleBtn.innerHTML = '<i class="fa-solid fa-eye mr-2"></i> Mostrar Efetivados';
+            // Delegated handler: Open confirm modal
+            document.addEventListener('click', function (e) {
+                const a = e.target.closest('a.js-open-confirm');
+                if (!a) return;
+                e.preventDefault();
+                const ptId = a.dataset.ptId;
+                const row = a.closest('tr');
+                activeRow = row;
+
+                // preenche valores
+                confirmPtId.value = ptId;
+                confirmValor.value = parseFloat(row.dataset.valor || 0).toFixed(2);
+                const dia = row.dataset.dia;
+                if (dia) {
+                    // usa ano/mes atuais do filtro
+                    const y = document.getElementById('confirm-ano').value || new Date().getFullYear();
+                    const m = document.getElementById('confirm-mes').value || (new Date().getMonth()+1);
+                    // pad
+                    const mm = String(m).padStart(2, '0');
+                    const dd = String(dia).padStart(2, '0');
+                    confirmData.value = `${y}-${mm}-${dd}`;
                 } else {
-                    table.removeAttribute('data-hide-efetivados');
-                    toggleBtn.innerHTML = '<i class="fa-solid fa-eye-slash mr-2"></i> Ocultar Efetivados';
+                    confirmData.value = new Date().toISOString().slice(0,10);
                 }
+                confirmContaId.value = a.dataset.contaId || document.getElementById('confirm-conta-id').value || '';
+                confirmModal.classList.remove('hidden');
             });
 
-            // Accessibility: allow toggle with keyboard
-            toggleBtn.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter' || e.key === ' ') toggleBtn.click();
+            // confirm modal - use today
+            document.getElementById('confirm-use-today').addEventListener('click', function () {
+                confirmData.value = new Date().toISOString().slice(0,10);
             });
+
+            document.getElementById('confirm-cancel').addEventListener('click', function () {
+                confirmModal.classList.add('hidden');
+            });
+
+            // submit confirm via AJAX
+            confirmForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const ptId = confirmPtId.value;
+                const url = document.querySelector('a.js-open-confirm[data-pt-id="' + ptId + '"]')?.dataset.confirmUrl || `/mithril/pre-transacao/${ptId}/confirmar`;
+                const data = new FormData();
+                data.append('valor', confirmValor.value);
+                data.append('data_vencimento', confirmData.value);
+                data.append('mes', document.getElementById('confirm-mes').value || '{{ $mes }}');
+                data.append('ano', document.getElementById('confirm-ano').value || '{{ $ano }}');
+                data.append('conta_id', confirmContaId.value || '');
+
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrf,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: data,
+                    credentials: 'same-origin'
+                }).then(r => r.json()).then(json => {
+                    if (json?.data) {
+                        // atualiza a linha
+                        const row = activeRow;
+                        if (row) {
+                            row.dataset.valor = json.data.valor_parcela;
+                            row.dataset.status = json.data.status || 'confirmado';
+                            // atualiza célula de valor (3rd td)
+                            const valorTd = row.querySelector('td[data-label="Valor"]');
+                            if (valorTd) {
+                                const v = parseFloat(json.data.valor_parcela || 0);
+                                const sign = v >= 0 ? '+' : '';
+                                valorTd.innerHTML = `${sign} ${formatCurrency(v)}`;
+                                if (v >= 0) {
+                                    valorTd.classList.remove('text-rose-400');
+                                    valorTd.classList.add('text-emerald-400');
+                                } else {
+                                    valorTd.classList.remove('text-emerald-400');
+                                    valorTd.classList.add('text-rose-400');
+                                }
+                            }
+
+                            // Atualiza ação: troca para botão de efetivar + editar
+                            const actionsTd = row.querySelector('td[data-label="Ações"] .flex');
+                            if (actionsTd) {
+                                actionsTd.innerHTML = `
+                                    <form action="/mithril/pre-transacao/${ptId}/efetivar" method="POST" class="inline">
+                                        <input type="hidden" name="_token" value="${csrf}">
+                                        <input type="hidden" name="mes" value="${document.getElementById('confirm-mes').value}">
+                                        <input type="hidden" name="ano" value="${document.getElementById('confirm-ano').value}">
+                                        <input type="hidden" name="conta_id" value="${confirmContaId.value}">
+                                        <button type="button" class="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500 hover:text-white transition shadow-lg border border-emerald-500/20 js-efetivar-btn" data-pt-id="${ptId}" title="Pagar / Efetivar">
+                                            <i class="fa-solid fa-check text-xs"></i>
+                                        </button>
+                                    </form>
+                                    <a href="/mithril/pre-transacao/${ptId}/confirmar" class="text-slate-500 hover:text-slate-300 transition js-open-confirm" data-pt-id="${ptId}" data-confirm-url="/mithril/pre-transacao/${ptId}/confirmar">
+                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    </a>
+                                `;
+                            }
+                        }
+                    }
+                    confirmModal.classList.add('hidden');
+                }).catch(err => {
+                    console.error(err);
+                    alert('Ocorreu um erro ao confirmar.');
+                });
+            });
+
+            // intercept efetivar button to open modal
+            document.addEventListener('click', function (e) {
+                const btn = e.target.closest('.js-efetivar-btn');
+                if (!btn) return;
+                e.preventDefault();
+                const ptId = btn.dataset.ptId;
+                const row = btn.closest('tr');
+                activeRow = row;
+                efetivarPtId.value = ptId;
+                efetivarContaId.value = row.dataset.contaId || document.getElementById('efetivar-conta-id')?.value || '';
+                efetivarDesc.textContent = row.querySelector('td[data-label="Descrição"] .text-sm')?.textContent?.trim() || '';
+                const v = parseFloat(row.dataset.valor || 0);
+                efetivarValor.textContent = formatCurrency(v);
+                // set date
+                const dia = row.dataset.dia;
+                if (dia) {
+                    const y = document.getElementById('efetivar-ano').value || new Date().getFullYear();
+                    const m = document.getElementById('efetivar-mes').value || (new Date().getMonth()+1);
+                    const mm = String(m).padStart(2, '0');
+                    const dd = String(dia).padStart(2, '0');
+                    efetivarData.value = `${y}-${mm}-${dd}`;
+                } else {
+                    efetivarData.value = new Date().toISOString().slice(0,10);
+                }
+                efetivarModal.classList.remove('hidden');
+            });
+
+            document.getElementById('efetivar-use-today').addEventListener('click', function () {
+                efetivarData.value = new Date().toISOString().slice(0,10);
+            });
+
+            document.getElementById('efetivar-cancel').addEventListener('click', function () {
+                efetivarModal.classList.add('hidden');
+            });
+
+            // submit efetivar via AJAX
+            efetivarForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const ptId = efetivarPtId.value;
+                const url = `/mithril/pre-transacao/${ptId}/efetivar`;
+                const data = new FormData();
+                data.append('mes', document.getElementById('efetivar-mes').value || '{{ $mes }}');
+                data.append('ano', document.getElementById('efetivar-ano').value || '{{ $ano }}');
+                data.append('conta_id', efetivarContaId.value || '');
+
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrf,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: data,
+                    credentials: 'same-origin'
+                }).then(r => r.json()).then(json => {
+                    if (json?.data?.transacao) {
+                        const row = activeRow;
+                        if (row) {
+                            row.dataset.status = 'efetivado';
+                            // update date cell
+                            const dateTd = row.querySelector('td[data-label="Data"] .text-sm');
+                            if (dateTd && json.data.transacao.data_efetiva) {
+                                const d = new Date(json.data.transacao.data_efetiva);
+                                const dd = String(d.getDate()).padStart(2, '0');
+                                const mm = String(d.getMonth()+1).padStart(2, '0');
+                                dateTd.textContent = `${dd}/${mm}`;
+                                // also update dataset dia
+                                row.dataset.dia = d.getDate();
+                            }
+
+                            // update actions cell to Efetivado badge
+                            const actionsTd = row.querySelector('td[data-label="Ações"] .flex');
+                            if (actionsTd) {
+                                actionsTd.innerHTML = `
+                                    <div class="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full elf-title text-[8px] flex items-center gap-1 border border-emerald-500/20">
+                                        <i class="fa-solid fa-check-double text-[8px]"></i>
+                                        Efetivado
+                                    </div>
+                                `;
+                            }
+                        }
+                    }
+                    efetivarModal.classList.add('hidden');
+                }).catch(err => {
+                    console.error(err);
+                    alert('Ocorreu um erro ao efetivar.');
+                });
+            });
+
+            // (toggle handlers already attached above)
         });
     </script>
 

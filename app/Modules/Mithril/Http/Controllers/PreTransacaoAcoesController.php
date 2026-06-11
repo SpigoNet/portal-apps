@@ -48,6 +48,20 @@ class PreTransacaoAcoesController extends Controller
         $pt->data_ultima_acao = $novaData->format('Y-m-d');
         $pt->save();
 
+        // Se for requisição AJAX, retornamos JSON com os dados atualizados
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'data' => [
+                    'id' => $pt->id,
+                    'valor_parcela' => (float) $pt->valor_parcela,
+                    'dia_vencimento' => $pt->dia_vencimento,
+                    'data_ultima_acao' => $pt->data_ultima_acao,
+                    'status' => 'confirmado',
+                ],
+                'message' => 'Pré-transação confirmada e valor atualizado.',
+            ]);
+        }
+
         // CORREÇÃO: Redirecionamento explícito mantendo TODOS os filtros
         return redirect()->route('mithril.lancamentos.index', [
             'mes' => $request->mes,
@@ -66,7 +80,7 @@ class PreTransacaoAcoesController extends Controller
         $mes = $request->input('mes', now()->month);
         $ano = $request->input('ano', now()->year);
 
-        Transacao::create([
+        $transacao = Transacao::create([
             'user_id' => auth()->id(),
             'conta_id' => $pt->conta_id,
             'pre_transacao_id' => $pt->id,
@@ -77,6 +91,23 @@ class PreTransacaoAcoesController extends Controller
 
         if ($pt->tipo === 'parcelada') {
             $pt->increment('parcela_atual');
+        }
+
+        // Se for AJAX, retornamos JSON com os dados da transação criada
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'data' => [
+                    'transacao' => [
+                        'id' => $transacao->id,
+                        'descricao' => $transacao->descricao,
+                        'valor' => (float) $transacao->valor,
+                        'data_efetiva' => $transacao->data_efetiva?->format('Y-m-d'),
+                    ],
+                    'pre_transacao_id' => $pt->id,
+                    'parcela_atual' => $pt->parcela_atual,
+                ],
+                'message' => 'Pagamento registado com sucesso!',
+            ], 201);
         }
 
         // CORREÇÃO: Em vez de back(), forçamos o redirecionamento com filtros

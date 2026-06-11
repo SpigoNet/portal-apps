@@ -14,7 +14,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Cliente</label>
-                        <select name="gh_cliente_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <select name="gh_cliente_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-900">
                             <option value="">Selecione um cliente...</option>
                             @foreach($clientes as $cliente)
                                 <option value="{{ $cliente->id }}">{{ $cliente->nome }}</option>
@@ -24,12 +24,12 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Título do Contrato</label>
-                        <input type="text" name="titulo" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <input type="text" name="titulo" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-900">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Tipo</label>
-                        <select name="tipo" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <select name="tipo" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-900">
                             <option value="fixo">Pacote Fechado (Fixo)</option>
                             <option value="recorrente">Recorrente (Mensal)</option>
                             <option value="livre">Livre (Faturamento por apontamento)</option>
@@ -38,22 +38,22 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Quantidade de Horas (Total ou Mensal)</label>
-                        <input type="number" step="0.01" name="horas_contratadas" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <input type="number" step="0.01" name="horas_contratadas" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-900">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Valor da Hora (R$)</label>
-                        <input type="number" step="0.01" min="0" name="valor_hora" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <input type="number" step="0.01" min="0" name="valor_hora" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-900">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Data Início</label>
-                            <input type="date" name="data_inicio" required value="{{ date('Y-m-d') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <input type="date" name="data_inicio" required value="{{ date('Y-m-d') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-900">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Data Fim (Opcional)</label>
-                            <input type="date" name="data_fim" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <input type="date" name="data_fim" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-900">
                         </div>
                     </div>
 

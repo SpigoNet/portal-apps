@@ -31,7 +31,7 @@
                             name="descricao" 
                             id="descricao"
                             rows="4" 
-                            class="w-full rounded-lg border-slate-300 focus:border-slate-500 focus:ring-slate-500 text-sm"
+                            class="w-full rounded-lg border-slate-300 focus:border-slate-500 focus:ring-slate-500 text-sm text-slate-900 placeholder-slate-400"
                             placeholder="Descreva o que você está fazendo..."
                             x-model="$store.descricao"
                         >{{ $apontamentoAtivo->descricao }}</textarea>
@@ -90,7 +90,7 @@
 
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-2">Contrato</label>
-                            <select name="gh_contrato_id" required x-model="contrato" class="w-full rounded-lg border-slate-300 focus:border-slate-500 focus:ring-slate-500">
+                            <select name="gh_contrato_id" required x-model="contrato" class="w-full rounded-lg border-slate-300 focus:border-slate-500 focus:ring-slate-500 text-slate-900">
                                 <option value="">Selecione...</option>
                                 @foreach($contratos as $contrato)
                                     <option value="{{ $contrato->id }}">{{ $contrato->titulo }} - {{ $contrato->cliente->nome }}</option>
@@ -100,7 +100,7 @@
 
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-2">Item do Contrato</label>
-                            <select name="gh_contrato_item_id" required class="w-full rounded-lg border-slate-300 focus:border-slate-500 focus:ring-slate-500">
+                            <select name="gh_contrato_item_id" required class="w-full rounded-lg border-slate-300 focus:border-slate-500 focus:ring-slate-500 text-slate-900">
                                 <option value="">Selecione...</option>
                                 @foreach($contratos as $contrato)
                                     @foreach($contrato->itens as $item)

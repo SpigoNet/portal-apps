@@ -12,11 +12,28 @@
         .page { padding: 15px; max-width: 1200px; margin: 0 auto; }
         h1 { text-align: center; font-size: 28px; color: #d97706; margin-bottom: 15px; }
         .cartelas { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
-        .cartela { width: 180px; border: 2px solid #d97706; border-radius: 10px; padding: 8px; background: #fff; break-inside: avoid; }
-        .cartela h2 { text-align: center; font-size: 11px; color: #d97706; margin-bottom: 6px; }
+        .cartela { border: 2px solid #d97706; border-radius: 10px; padding: 8px; background: #fff; break-inside: avoid; }
+        .cartela.pequena { width: 180px; }
+        .cartela.media { width: calc(50% - 6px); }
+        .cartela.grande { width: 100%; }
+        .cartela h2 { text-align: center; color: #d97706; margin-bottom: 6px; }
+        .cartela.pequena h2 { font-size: 11px; }
+        .cartela.media h2 { font-size: 14px; }
+        .cartela.grande h2 { font-size: 18px; }
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+        .cartela.media .grid { gap: 5px; }
+        .cartela.grande .grid { gap: 8px; }
         .cell { aspect-ratio: 1; border: 1.5px solid #e5e5e5; border-radius: 6px; position: relative; overflow: hidden; background-size: 500% 500%; background-repeat: no-repeat; }
-        .cell span { position: absolute; bottom: 1px; right: 1px; background: rgba(217,119,6,0.85); color: #fff; font-size: 9px; font-weight: 900; padding: 0 3px; border-radius: 3px; line-height: 1.4; }
+        .cartela.pequena .cell { border-radius: 6px; }
+        .cartela.media .cell { border-radius: 10px; }
+        .cartela.grande .cell { border-radius: 14px; }
+        .cell span { position: absolute; background: rgba(217,119,6,0.85); color: #fff; font-weight: 900; border-radius: 3px; line-height: 1.4; }
+        .cartela.pequena .cell span { bottom: 1px; right: 1px; font-size: 9px; padding: 0 3px; }
+        .cartela.media .cell span { bottom: 3px; right: 3px; font-size: 14px; padding: 1px 5px; }
+        .cartela.grande .cell span { bottom: 5px; right: 5px; font-size: 20px; padding: 2px 8px; }
+        .cartela.pequena { padding: 8px; }
+        .cartela.media { padding: 14px; }
+        .cartela.grande { padding: 20px; }
 
         .recortes { margin-top: 30px; page-break-before: always; }
         .recortes h2 { text-align: center; font-size: 22px; color: #d97706; margin-bottom: 15px; }
@@ -40,27 +57,27 @@
 
         <h1>🎉 BINGO! - {{ str_replace('.png', '', $tema) }}</h1>
 
-        <div class="cartelas">
-            @foreach ($cartelas as $idx => $numeros)
-                <div class="cartela">
-                    <h2>Cartela {{ $idx + 1 }}</h2>
-                    <div class="grid">
-                        @foreach ($numeros as $linha)
-                            @foreach ($linha as $num)
-                                @php
-                                    $i = $num - 1;
-                                    $col = $i % 5;
-                                    $row = intdiv($i, 5);
-                                @endphp
-                                <div class="cell" style="background-image:url('{{ $temaUrl }}');background-position:{{ $col * 25 }}% {{ $row * 25 }}%;">
-                                    <span>{{ str_pad($num, 2, '0', STR_PAD_LEFT) }}</span>
-                                </div>
-                            @endforeach
-                        @endforeach
-                    </div>
+                <div class="cartelas">
+                    @foreach ($cartelas as $idx => $numeros)
+                        <div class="cartela {{ $tamanho }}">
+                            <h2>Cartela {{ $idx + 1 }}</h2>
+                            <div class="grid">
+                                @foreach ($numeros as $linha)
+                                    @foreach ($linha as $num)
+                                        @php
+                                            $i = $num - 1;
+                                            $col = $i % 5;
+                                            $row = intdiv($i, 5);
+                                        @endphp
+                                        <div class="cell" style="background-image:url('{{ $temaUrl }}');background-position:{{ $col * 25 }}% {{ $row * 25 }}%;">
+                                            <span>{{ str_pad($num, 2, '0', STR_PAD_LEFT) }}</span>
+                                        </div>
+                                    @endforeach
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
-            @endforeach
-        </div>
 
         @if ($recortar)
             <div class="recortes">

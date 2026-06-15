@@ -33,6 +33,7 @@ class BingoController extends Controller
             'tema' => 'required|string',
             'cartelas' => 'required|integer|min:1|max:30',
             'recortar' => 'boolean',
+            'tamanho' => 'required|in:pequena,media,grande',
         ]);
 
         $temaUrl = route('bingo.temas', ['tema' => $validated['tema']]);
@@ -47,6 +48,7 @@ class BingoController extends Controller
             'temaUrl' => $temaUrl,
             'cartelas' => $cartelas,
             'recortar' => $request->boolean('recortar'),
+            'tamanho' => $validated['tamanho'],
         ]);
     }
 

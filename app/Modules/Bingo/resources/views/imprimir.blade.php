@@ -33,6 +33,39 @@
                     <p class="text-xs text-amber-500 mt-1">Máximo 30 cartelas por página</p>
                 </div>
 
+                <div>
+                    <label class="block text-sm font-bold text-amber-800 mb-3">📐 Tamanho da cartela</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="tamanho" value="pequena"
+                                   class="sr-only peer" checked>
+                            <div class="p-3 rounded-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 text-center transition-all duration-200 peer-checked:ring-4 peer-checked:ring-emerald-400 peer-checked:border-emerald-500 peer-checked:scale-105">
+                                <div class="text-xl mb-1">🔹</div>
+                                <div class="text-xs font-bold text-amber-800">Pequena</div>
+                                <div class="text-[10px] text-amber-500">3 colunas</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="tamanho" value="media"
+                                   class="sr-only peer">
+                            <div class="p-3 rounded-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 text-center transition-all duration-200 peer-checked:ring-4 peer-checked:ring-emerald-400 peer-checked:border-emerald-500 peer-checked:scale-105">
+                                <div class="text-xl mb-1">🔶</div>
+                                <div class="text-xs font-bold text-amber-800">Média</div>
+                                <div class="text-[10px] text-amber-500">2 colunas</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="tamanho" value="grande"
+                                   class="sr-only peer">
+                            <div class="p-3 rounded-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 text-center transition-all duration-200 peer-checked:ring-4 peer-checked:ring-emerald-400 peer-checked:border-emerald-500 peer-checked:scale-105">
+                                <div class="text-xl mb-1">⬜</div>
+                                <div class="text-xs font-bold text-amber-800">Grande</div>
+                                <div class="text-[10px] text-amber-500">1 coluna</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
                 <label class="flex items-center gap-3 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200 cursor-pointer">
                     <input type="checkbox" name="recortar" value="1"
                            class="w-5 h-5 accent-amber-500 rounded">

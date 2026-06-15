@@ -12,7 +12,7 @@ use Illuminate\View\View;
 
 class BingoController extends Controller
 {
-    private const TEMAS_PATH = '/app/Modules/Bingo/temas/';
+    private const TEMAS_PATH = '/Modules/Bingo/temas/';
 
     public function index(): View
     {

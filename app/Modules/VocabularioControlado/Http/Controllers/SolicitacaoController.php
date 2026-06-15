@@ -230,9 +230,9 @@ class SolicitacaoController extends Controller
      *
      * @return int[]
      */
-    private function resolverSugestoes(string $sugestaoStr, string $termoOriginal, string $mail): array
+    private function resolverSugestoes(?string $sugestaoStr, string $termoOriginal, string $mail): array
     {
-        if (trim($sugestaoStr) === '') {
+        if ($sugestaoStr === null || trim($sugestaoStr) === '') {
             return [];
         }
 

@@ -17,6 +17,12 @@
                 🎯 Criar Partida
             </a>
 
+            <br>
+            <a href="{{ route('bingo.imprimir') }}"
+               class="inline-block bg-gradient-to-r from-amber-400 to-orange-400 text-white text-lg font-bold px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 mb-4">
+                🖨️ Imprimir Cartelas
+            </a>
+
             @auth
                 <br>
                 <a href="{{ route('bingo.historico') }}"

@@ -12,6 +12,9 @@ Route::prefix('bingo')->name('bingo.')->group(function () {
         Route::get('/historico', [BingoController::class, 'historico'])->name('historico');
     });
 
+    Route::get('/imprimir', [BingoController::class, 'imprimirForm'])->name('imprimir');
+    Route::post('/imprimir', [BingoController::class, 'imprimirGerar'])->name('imprimir-gerar');
+
     Route::get('/temas/{tema}', [BingoController::class, 'temaImagem'])->name('temas')->where('tema', '.*\.(png|jpg|jpeg|gif|webp)');
 
     Route::get('/{codigo}', [BingoController::class, 'show'])->name('show');

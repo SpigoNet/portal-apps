@@ -28,6 +28,10 @@ Multiplayer bingo game with themed sprite sheets. Public access (no auth require
 | GET | `/{codigo}/resultados` | `bingo.resultados` | No |
 | POST | `/{codigo}/encerrar` | `bingo.encerrar` | No |
 | POST | `/{codigo}/reiniciar` | `bingo.reiniciar` | No |
+| POST | `/{codigo}/resetar` | `bingo.resetar` | No |
+| POST | `/{codigo}/mensagem` | `bingo.mensagem` | No |
+| GET | `/imprimir` | `bingo.imprimir` | No |
+| POST | `/imprimir` | `bingo.imprimir-gerar` | No |
 
 ## Game Flow
 1. **Create match** → choose theme from `temas/*.png`, optionally play along

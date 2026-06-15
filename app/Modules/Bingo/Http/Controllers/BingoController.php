@@ -19,6 +19,37 @@ class BingoController extends Controller
         return view('Bingo::index');
     }
 
+    public function imprimirForm(): View
+    {
+        $temas = glob(app_path(self::TEMAS_PATH.'*.png'));
+        $temas = array_map(fn ($path) => basename($path), $temas);
+
+        return view('Bingo::imprimir', compact('temas'));
+    }
+
+    public function imprimirGerar(Request $request): View
+    {
+        $validated = $request->validate([
+            'tema' => 'required|string',
+            'cartelas' => 'required|integer|min:1|max:30',
+            'recortar' => 'boolean',
+        ]);
+
+        $temaUrl = route('bingo.temas', ['tema' => $validated['tema']]);
+        $cartelas = [];
+
+        for ($i = 0; $i < $validated['cartelas']; $i++) {
+            $cartelas[] = BingoCartela::gerar();
+        }
+
+        return view('Bingo::imprimir-gerar', [
+            'tema' => $validated['tema'],
+            'temaUrl' => $temaUrl,
+            'cartelas' => $cartelas,
+            'recortar' => $request->boolean('recortar'),
+        ]);
+    }
+
     public function create(): View
     {
         $temas = glob(app_path(self::TEMAS_PATH.'*.png'));

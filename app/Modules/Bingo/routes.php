@@ -22,4 +22,7 @@ Route::prefix('bingo')->name('bingo.')->group(function () {
     Route::post('/{codigo}/marcar', [BingoController::class, 'marcar'])->name('marcar');
     Route::post('/{codigo}/declarar-bingo', [BingoController::class, 'declararBingo'])->name('declarar-bingo');
     Route::get('/{codigo}/estado', [BingoController::class, 'estado'])->name('estado');
+    Route::get('/{codigo}/resultados', [BingoController::class, 'resultados'])->name('resultados');
+    Route::post('/{codigo}/encerrar', [BingoController::class, 'encerrar'])->name('encerrar');
+    Route::post('/{codigo}/reiniciar', [BingoController::class, 'reiniciar'])->name('reiniciar');
 });

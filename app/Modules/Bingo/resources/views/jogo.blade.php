@@ -7,10 +7,11 @@
             'modo_gestor' => $partida->modo_gestor,
             'numeros_sorteados' => $partida->numeros_sorteados ?? [],
         ]);
+        $userNameJson = json_encode($userName);
     @endphp
 
     <div class="min-h-screen flex flex-col"
-         x-data="bingoGame({{ $partidaData }}, '{{ $temaUrl }}', '{{ $joinUrl }}')"
+         x-data="bingoGame({{ $partidaData }}, '{{ $temaUrl }}', '{{ $joinUrl }}', {{ $userNameJson }})"
          x-init="init()"
          x-cloak>
 
@@ -156,6 +157,11 @@
                                     class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all text-lg mb-4">
                                 🎲 Sortear!
                             </button>
+                            <button x-on:click="encerrar()"
+                                    x-show="partida.any_bingo_declarado && partida.status !== 'finalizada'"
+                                    class="w-full bg-gradient-to-r from-rose-500 to-red-500 text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all text-lg mb-4">
+                                🛑 Encerrar Partida
+                            </button>
                             <div>
                                 <h4 class="text-xs font-bold text-amber-700 mb-2">📋 Sorteados:</h4>
                                 <div class="grid grid-cols-5 gap-1">
@@ -170,7 +176,7 @@
                         </div>
 
                         {{-- Player card --}}
-                        <div x-show="meuJogador && meuJogador.cartela" class="flex-1 flex flex-col items-center w-full max-w-lg mx-auto px-2 sm:px-0">
+                        <div x-show="partida.status === 'jogando' && meuJogador && meuJogador.cartela" class="flex-1 flex flex-col items-center w-full max-w-lg mx-auto px-2 sm:px-0">
                             {{-- Drawn item display (above card) --}}
                             <div x-show="ultimoSorteado" class="w-full bg-white/90 rounded-2xl p-3 sm:p-4 shadow-lg border-2 border-amber-200 mb-3 text-center bounce-in">
                                 <p class="text-[10px] sm:text-xs font-bold text-amber-600/70 uppercase tracking-wider mb-1">🎯 Sorteado</p>
@@ -234,12 +240,54 @@
                         </div>
 
                         {{-- No card (gestor) --}}
-                        <div x-show="!meuJogador && !eDono" class="flex-1 flex items-center justify-center">
+                        <div x-show="partida.status === 'jogando' && !meuJogador && !eDono" class="flex-1 flex items-center justify-center">
                             <div class="text-center bg-white/90 rounded-3xl p-8 shadow-lg border-2 border-amber-200">
                                 <div class="text-5xl mb-3">⏳</div>
                                 <p class="text-lg font-bold text-amber-800">Aguardando sua cartela...</p>
                             </div>
                         </div>
+
+                        {{-- Resultados --}}
+                        <template x-if="partida.status === 'finalizada' && showResultados">
+                            <div class="flex-1 flex flex-col items-center w-full max-w-lg mx-auto px-2 sm:px-0">
+                                <div class="w-full bg-white/90 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl border-2 border-amber-200">
+                                    <h3 class="text-center font-black text-amber-800 text-xl mb-4">🏆 Resultados</h3>
+                                    <div class="space-y-3">
+                                        <template x-for="(j, idx) in resultadosData" :key="j.id">
+                                            <div class="flex items-center gap-3 p-3 rounded-xl"
+                                                 :class="j.bingo_feito ? 'bg-gradient-to-r from-amber-100 to-amber-50 border border-amber-300' : 'bg-gray-50 border border-gray-200'">
+                                                <div class="w-8 h-8 rounded-full flex items-center justify-center font-black text-sm"
+                                                     :class="j.bingo_feito ? (idx === 0 ? 'bg-amber-400 text-white' : 'bg-amber-200 text-amber-700') : 'bg-gray-200 text-gray-500'">
+                                                    <span x-text="j.bingo_feito ? '#' + j.posicao : '-'"></span>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <p class="font-bold text-amber-900" x-text="j.nome"></p>
+                                                    <p class="text-xs text-amber-600">
+                                                        <span x-text="j.qtd_marcacoes + ' marcações'"></span>
+                                                        <span x-show="j.cartela_completa && !j.bingo_feito" class="text-rose-500"> (cartela completa)</span>
+                                                    </p>
+                                                </div>
+                                                <div x-show="j.bingo_feito" class="text-2xl">🏆</div>
+                                                <div x-show="j.cartela_completa && !j.bingo_feito" class="text-lg">💯</div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div x-show="eDono" class="w-full mt-4 space-y-2">
+                                    <button x-on:click="reiniciar('mesma_cartela')"
+                                            class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all text-lg">
+                                        🔄 Jogar novamente (mesmas cartelas)
+                                    </button>
+                                    <button x-on:click="reiniciar('nova_cartela')"
+                                            class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all text-lg">
+                                        🎲 Jogar novamente (novas cartelas)
+                                    </button>
+                                </div>
+                                <div x-show="!eDono" class="mt-4 text-center">
+                                    <p class="text-amber-600 text-sm">Aguardando o anfitrião reiniciar...</p>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                 </template>
             </div>
@@ -250,7 +298,7 @@
             <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl border-4 border-amber-400 bounce-in">
                 <div class="text-7xl mb-4">🏆</div>
                 <h2 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-500 uppercase">BINGO!</h2>
-                <p class="text-amber-700 mt-2 font-medium" x-text="'🎉 ' + vencedor + ' venceu!'"></p>
+                <p class="text-amber-700 mt-2 font-medium">🎉 <span x-text="vencedor"></span> fez BINGO!</p>
                 <button x-on:click="showBingoModal = false"
                         class="mt-6 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold px-8 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all">
                     🎉 Fechar
@@ -262,12 +310,18 @@
     <style>
         [x-cloak] { display: none !important; }
         .border-3 { border-width: 3px; }
+        .confetti-piece { position: fixed; top: -10px; z-index: 9999; animation: confetti-fall linear forwards; pointer-events: none; }
+        @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+        @keyframes bounce-in { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
+        .bounce-in { animation: bounce-in 0.5s ease-out; }
+        .stamp { animation: stamp-in 0.2s ease-out; }
+        @keyframes stamp-in { 0% { transform: scale(1.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 
     @push('scripts')
     <script>
         document.addEventListener('alpine:init', () => {
-            Alpine.data('bingoGame', (partidaData, temaUrl, joinUrl) => ({
+            Alpine.data('bingoGame', (partidaData, temaUrl, joinUrl, userName) => ({
                 // State
                 token: localStorage.getItem('bingo_token') || '',
                 donoToken: localStorage.getItem('bingo_dono_token') || '',
@@ -280,12 +334,15 @@
                 loading: true,
 
                 // UI
-                joinNome: '',
+                joinNome: userName || '',
                 joinError: '',
                 joinLoading: false,
                 ultimoSorteado: null,
                 vencedor: '',
                 showBingoModal: false,
+                bingoNotificado: false,
+                showResultados: false,
+                resultadosData: [],
                 pollInterval: null,
 
                 init() {
@@ -322,17 +379,24 @@
 
                         this.eDono = data.e_dono || false;
 
+                        if (this.token && !data.meu_jogador && !data.e_dono) {
+                            this.token = '';
+                            localStorage.removeItem('bingo_token');
+                        }
+
                         const sorteados = data.partida.numeros_sorteados || [];
                         this.ultimoSorteado = sorteados.length > 0 ? sorteados[sorteados.length - 1] : null;
 
-                        if (data.partida.status === 'finalizada' && data.jogadores.some(j => j.bingo_feito)) {
-                            const vencedor = data.jogadores.find(j => j.bingo_feito);
-                            if (vencedor && !this.showBingoModal) {
-                                this.vencedor = vencedor.nome;
-                                this.showBingoModal = true;
-                                this.lancarConfete();
-                                this.playSom('bingo');
-                            }
+                        if (data.meu_jogador?.bingo_feito && !this.bingoNotificado) {
+                            this.bingoNotificado = true;
+                            this.vencedor = data.meu_jogador.nome;
+                            this.showBingoModal = true;
+                            this.lancarConfete();
+                            this.playSom('bingo');
+                        }
+
+                        if (data.partida.status === 'finalizada' && !this.showResultados) {
+                            this.carregarResultados();
                         }
                     } catch (e) {
                         console.warn('Poll error:', e);
@@ -431,12 +495,49 @@
                     .then(r => r.ok ? r.json() : r.json().then(e => { throw new Error(e.error); }))
                     .then(data => {
                         this.vencedor = data.vencedor;
+                        this.bingoNotificado = true;
                         this.showBingoModal = true;
-                        this.partida.status = 'finalizada';
                         this.lancarConfete();
                         this.playSom('bingo');
                     })
                     .catch(e => alert(e.message || 'Sua cartela ainda não completou!'));
+                },
+
+                carregarResultados() {
+                    const headers = { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content };
+                    if (this.token) headers['X-Bingo-Token'] = this.token;
+
+                    fetch('{{ route('bingo.resultados', ['codigo' => $partida->codigo]) }}', { headers })
+                        .then(r => r.ok ? r.json() : null)
+                        .then(data => {
+                            if (!data) return;
+                            this.resultadosData = data.jogadores;
+                            this.showResultados = true;
+                        })
+                        .catch(e => console.warn('Resultados error:', e));
+                },
+
+                encerrar() {
+                    fetch('{{ route('bingo.encerrar', ['codigo' => $partida->codigo]) }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'X-Bingo-Token': this.token },
+                    })
+                    .then(r => r.ok ? r.json() : r.json().then(e => { throw new Error(e.error); }))
+                    .then(() => this.fetchEstado())
+                    .catch(e => alert(e.message));
+                },
+
+                reiniciar(tipo) {
+                    fetch('{{ route('bingo.reiniciar', ['codigo' => $partida->codigo]) }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'X-Bingo-Token': this.token },
+                        body: JSON.stringify({ tipo }),
+                    })
+                    .then(r => r.ok ? r.json() : r.json().then(e => { throw new Error(e.error); }))
+                    .then(data => {
+                        window.location.href = '/bingo/' + data.codigo;
+                    })
+                    .catch(e => alert(e.message));
                 },
 
                 estaMarcada(linha, coluna) {

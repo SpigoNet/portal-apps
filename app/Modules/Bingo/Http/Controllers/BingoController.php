@@ -58,7 +58,7 @@ class BingoController extends Controller
         if (! ($validated['modo_gestor'] ?? false)) {
             $jogador = BingoJogador::create([
                 'partida_id' => $partida->id,
-                'nome' => 'Anfitrião',
+                'nome' => $request->user()?->name ?? 'Anfitrião',
                 'token' => $donoToken,
                 'user_id' => $request->user()?->id,
             ]);
@@ -81,8 +81,9 @@ class BingoController extends Controller
         $partida = BingoPartida::where('codigo', $codigo)->firstOrFail();
         $joinUrl = config('app.url').'/bingo/'.$codigo;
         $temaUrl = route('bingo.temas', ['tema' => $partida->tema]);
+        $userName = auth()->check() ? auth()->user()->name : '';
 
-        return view('Bingo::jogo', compact('partida', 'joinUrl', 'temaUrl'));
+        return view('Bingo::jogo', compact('partida', 'joinUrl', 'temaUrl', 'userName'));
     }
 
     public function join(Request $request, string $codigo): JsonResponse
@@ -245,9 +246,17 @@ class BingoController extends Controller
             return response()->json(['error' => 'Token não informado'], 401);
         }
 
+        if ($partida->status !== 'jogando') {
+            return response()->json(['error' => 'Partida não está em andamento'], 422);
+        }
+
         $jogador = BingoJogador::where('partida_id', $partida->id)
             ->where('token', $token)
             ->firstOrFail();
+
+        if ($jogador->bingo_feito) {
+            return response()->json(['error' => 'Você já declarou bingo!'], 422);
+        }
 
         $cartela = $jogador->cartela;
 
@@ -255,12 +264,140 @@ class BingoController extends Controller
             return response()->json(['error' => 'Cartela não completou bingo'], 422);
         }
 
-        $jogador->update(['bingo_feito' => true]);
-        $partida->update(['status' => 'finalizada']);
+        $ultimaPosicao = BingoJogador::where('partida_id', $partida->id)
+            ->where('bingo_feito', true)
+            ->max('posicao');
+
+        $jogador->update([
+            'bingo_feito' => true,
+            'posicao' => ($ultimaPosicao ?? 0) + 1,
+        ]);
 
         return response()->json([
             'vencedor' => $jogador->nome,
-            'status' => 'finalizada',
+            'posicao' => $jogador->posicao,
+        ]);
+    }
+
+    public function resultados(string $codigo): JsonResponse
+    {
+        $partida = BingoPartida::where('codigo', $codigo)->firstOrFail();
+        $temaUrl = route('bingo.temas', ['tema' => $partida->tema]);
+
+        $jogadores = BingoJogador::where('partida_id', $partida->id)
+            ->with('cartela')
+            ->get()
+            ->map(function ($j) {
+                $marcacoes = $j->cartela?->marcacoes ?? [];
+
+                return [
+                    'id' => $j->id,
+                    'nome' => $j->nome,
+                    'bingo_feito' => $j->bingo_feito,
+                    'posicao' => $j->posicao,
+                    'qtd_marcacoes' => count($marcacoes),
+                    'cartela_completa' => $j->cartela?->todasMarcadas() ?? false,
+                    'cartela' => [
+                        'numeros' => $j->cartela?->numeros ?? [],
+                        'marcacoes' => $marcacoes,
+                    ],
+                ];
+            })
+            ->sortByDesc('bingo_feito')
+            ->sortBy(function ($j) {
+                if ($j['bingo_feito']) {
+                    return $j['posicao'];
+                }
+
+                return 999;
+            })
+            ->values();
+
+        return response()->json([
+            'partida' => [
+                'codigo' => $partida->codigo,
+                'tema' => $partida->tema,
+                'status' => $partida->status,
+                'modo_gestor' => $partida->modo_gestor,
+                'numeros_sorteados' => $partida->numeros_sorteados ?? [],
+            ],
+            'jogadores' => $jogadores,
+            'tema_url' => $temaUrl,
+        ]);
+    }
+
+    public function encerrar(Request $request, string $codigo): JsonResponse
+    {
+        $partida = BingoPartida::where('codigo', $codigo)->firstOrFail();
+
+        $token = $request->header('X-Bingo-Token') ?? $request->input('token');
+
+        if (! $token || $token !== $partida->dono_token) {
+            return response()->json(['error' => 'Apenas o anfitrião pode encerrar'], 403);
+        }
+
+        $partida->update(['status' => 'finalizada']);
+
+        return response()->json(['status' => 'finalizada']);
+    }
+
+    public function reiniciar(Request $request, string $codigo): JsonResponse
+    {
+        $partida = BingoPartida::where('codigo', $codigo)->firstOrFail();
+
+        $token = $request->header('X-Bingo-Token') ?? $request->input('token');
+
+        if (! $token || $token !== $partida->dono_token) {
+            return response()->json(['error' => 'Apenas o anfitrião pode reiniciar'], 403);
+        }
+
+        $validated = $request->validate([
+            'tipo' => 'required|in:mesma_cartela,nova_cartela',
+        ]);
+
+        $novaPartida = BingoPartida::create([
+            'codigo' => $this->gerarCodigo(),
+            'tema' => $partida->tema,
+            'status' => 'espera',
+            'modo_gestor' => $partida->modo_gestor,
+            'dono_token' => $partida->dono_token,
+            'user_id' => $partida->user_id,
+            'numeros_sorteados' => [],
+        ]);
+
+        if ($partida->modo_gestor) {
+            return response()->json([
+                'codigo' => $novaPartida->codigo,
+                'dono_token' => $partida->dono_token,
+            ]);
+        }
+
+        $jogadoresOriginais = BingoJogador::where('partida_id', $partida->id)
+            ->with('cartela')
+            ->get();
+
+        foreach ($jogadoresOriginais as $jogador) {
+            $novoJogador = BingoJogador::create([
+                'partida_id' => $novaPartida->id,
+                'nome' => $jogador->nome,
+                'token' => $jogador->token,
+                'user_id' => $jogador->user_id,
+            ]);
+
+            $numeros = $validated['tipo'] === 'mesma_cartela'
+                ? ($jogador->cartela->numeros ?? BingoCartela::gerar())
+                : BingoCartela::gerar();
+
+            BingoCartela::create([
+                'jogador_id' => $novoJogador->id,
+                'numeros' => $numeros,
+                'marcacoes' => [],
+            ]);
+        }
+
+        return response()->json([
+            'codigo' => $novaPartida->codigo,
+            'dono_token' => $partida->dono_token,
         ]);
     }
 
@@ -270,7 +407,20 @@ class BingoController extends Controller
         $temaUrl = route('bingo.temas', ['tema' => $partida->tema]);
 
         $jogadores = BingoJogador::where('partida_id', $partida->id)
-            ->get(['id', 'nome', 'bingo_feito']);
+            ->with('cartela')
+            ->get()
+            ->map(function ($j) {
+                return [
+                    'id' => $j->id,
+                    'nome' => $j->nome,
+                    'bingo_feito' => $j->bingo_feito,
+                    'posicao' => $j->posicao,
+                    'qtd_marcacoes' => count($j->cartela?->marcacoes ?? []),
+                    'cartela_completa' => $j->cartela?->todasMarcadas() ?? false,
+                ];
+            });
+
+        $anyBingoDeclarado = $jogadores->contains('bingo_feito', true);
 
         $data = [
             'partida' => [
@@ -279,6 +429,7 @@ class BingoController extends Controller
                 'status' => $partida->status,
                 'modo_gestor' => $partida->modo_gestor,
                 'numeros_sorteados' => $partida->numeros_sorteados ?? [],
+                'any_bingo_declarado' => $anyBingoDeclarado,
             ],
             'jogadores' => $jogadores,
             'tema_url' => $temaUrl,

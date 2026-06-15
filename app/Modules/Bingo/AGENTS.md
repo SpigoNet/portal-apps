@@ -25,6 +25,9 @@ Multiplayer bingo game with themed sprite sheets. Public access (no auth require
 | POST | `/{codigo}/marcar` | `bingo.marcar` | No |
 | POST | `/{codigo}/declarar-bingo` | `bingo.declarar-bingo` | No |
 | GET | `/{codigo}/estado` | `bingo.estado` | No |
+| GET | `/{codigo}/resultados` | `bingo.resultados` | No |
+| POST | `/{codigo}/encerrar` | `bingo.encerrar` | No |
+| POST | `/{codigo}/reiniciar` | `bingo.reiniciar` | No |
 
 ## Game Flow
 1. **Create match** → choose theme from `temas/*.png`, optionally play along

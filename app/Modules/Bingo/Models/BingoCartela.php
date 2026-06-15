@@ -34,6 +34,11 @@ class BingoCartela extends Model
         return array_chunk($selecionados, 3);
     }
 
+    public function todasMarcadas(): bool
+    {
+        return count($this->marcacoes ?? []) >= 9;
+    }
+
     public function verificarBingo(): bool
     {
         $marcacoes = $this->marcacoes ?? [];

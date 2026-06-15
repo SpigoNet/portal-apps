@@ -16,6 +16,7 @@ class BingoJogador extends Model
         'nome',
         'token',
         'user_id',
+        'posicao',
     ];
 
     public function partida(): BelongsTo

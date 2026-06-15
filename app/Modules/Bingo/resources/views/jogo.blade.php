@@ -366,7 +366,6 @@
                 pollInterval: null,
 
                 init() {
-                    this.eDono = this.donoToken && this.token === this.donoToken;
                     this.fetchEstado().then(() => {
                         this.loading = false;
                         this.gerarQRCode();
@@ -381,8 +380,9 @@
                 },
 
                 async fetchEstado() {
+                    const activeToken = this.token || this.donoToken || '';
                     const headers = { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content };
-                    if (this.token) headers['X-Bingo-Token'] = this.token;
+                    if (activeToken) headers['X-Bingo-Token'] = activeToken;
 
                     try {
                         const resp = await fetch('{{ route('bingo.estado', ['codigo' => $partida->codigo]) }}', { headers });
@@ -399,9 +399,11 @@
 
                         this.eDono = data.e_dono || false;
 
-                        if (this.token && !data.meu_jogador && !data.e_dono) {
+                        if (activeToken && !data.meu_jogador && !data.e_dono) {
                             this.token = '';
+                            this.donoToken = '';
                             localStorage.removeItem('bingo_token');
+                            localStorage.removeItem('bingo_dono_token');
                         }
 
                         const sorteados = data.partida.numeros_sorteados || [];

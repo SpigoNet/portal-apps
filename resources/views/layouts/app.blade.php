@@ -49,8 +49,8 @@
     </div>
     <footer class="text-center py-4 text-on-surface-variant">
         <p class="body-sm">Último deploy:
-            @if(file_exists(storage_path('app/deploy_time.txt')))
-                {{ file_get_contents(storage_path('app/deploy_time.txt')) }}
+            @if(file_exists(storage_path('app/public/deploy_time.txt')))
+                {{ file_get_contents(storage_path('app/public/deploy_time.txt')) }}
             @else
                 Data desconhecida
             @endif

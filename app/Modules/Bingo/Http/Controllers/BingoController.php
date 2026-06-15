@@ -406,32 +406,40 @@ class BingoController extends Controller
             'numeros_sorteados' => [],
         ]);
 
-        if ($partida->modo_gestor) {
-            return response()->json([
-                'codigo' => $novaPartida->codigo,
-                'dono_token' => $partida->dono_token,
-            ]);
-        }
+        if ($validated['tipo'] === 'mesma_cartela' && ! $partida->modo_gestor) {
+            $jogadoresOriginais = BingoJogador::where('partida_id', $partida->id)
+                ->with('cartela')
+                ->get();
 
-        $jogadoresOriginais = BingoJogador::where('partida_id', $partida->id)
-            ->with('cartela')
-            ->get();
+            foreach ($jogadoresOriginais as $jogador) {
+                $novoJogador = BingoJogador::create([
+                    'partida_id' => $novaPartida->id,
+                    'nome' => $jogador->nome,
+                    'token' => $jogador->token,
+                    'user_id' => $jogador->user_id,
+                ]);
 
-        foreach ($jogadoresOriginais as $jogador) {
-            $novoJogador = BingoJogador::create([
+                BingoCartela::create([
+                    'jogador_id' => $novoJogador->id,
+                    'numeros' => $jogador->cartela->numeros ?? BingoCartela::gerar(),
+                    'marcacoes' => [],
+                ]);
+            }
+        } elseif ($validated['tipo'] === 'nova_cartela' && ! $partida->modo_gestor) {
+            $hostOriginal = BingoJogador::where('partida_id', $partida->id)
+                ->where('token', $partida->dono_token)
+                ->first();
+
+            $jogador = BingoJogador::create([
                 'partida_id' => $novaPartida->id,
-                'nome' => $jogador->nome,
-                'token' => $jogador->token,
-                'user_id' => $jogador->user_id,
+                'nome' => $hostOriginal?->nome ?? 'Anfitrião',
+                'token' => $partida->dono_token,
+                'user_id' => $partida->user_id,
             ]);
-
-            $numeros = $validated['tipo'] === 'mesma_cartela'
-                ? ($jogador->cartela->numeros ?? BingoCartela::gerar())
-                : BingoCartela::gerar();
 
             BingoCartela::create([
-                'jogador_id' => $novoJogador->id,
-                'numeros' => $numeros,
+                'jogador_id' => $jogador->id,
+                'numeros' => BingoCartela::gerar(),
                 'marcacoes' => [],
             ]);
         }

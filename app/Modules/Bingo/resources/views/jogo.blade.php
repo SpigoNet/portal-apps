@@ -178,12 +178,12 @@
                         {{-- Player card --}}
                         <div x-show="partida.status === 'jogando' && meuJogador && meuJogador.cartela" class="flex-1 flex flex-col items-center w-full max-w-lg mx-auto px-2 sm:px-0">
                             {{-- Drawn item display (above card) --}}
-                            <div x-show="ultimoSorteado" class="w-full bg-white/90 rounded-2xl p-3 sm:p-4 shadow-lg border-2 border-amber-200 mb-3 text-center bounce-in">
-                                <p class="text-[10px] sm:text-xs font-bold text-amber-600/70 uppercase tracking-wider mb-1">🎯 Sorteado</p>
-                                <div class="flex items-center justify-center gap-3 sm:gap-4">
-                                    <div class="w-12 h-12 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden border-3 sm:border-4 border-amber-400 shadow-lg"
+                            <div x-show="ultimoSorteado" class="w-full bg-white/90 rounded-2xl p-4 sm:p-6 shadow-lg border-2 border-amber-200 mb-3 text-center bounce-in">
+                                <p class="text-xs sm:text-sm font-bold text-amber-600/70 uppercase tracking-wider mb-2">🎯 Sorteado</p>
+                                <div class="flex items-center justify-center gap-4 sm:gap-6">
+                                    <div class="w-16 h-16 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl overflow-hidden border-3 sm:border-4 border-amber-400 shadow-lg"
                                          :style="getSpriteStyle(ultimoSorteado)"></div>
-                                    <span class="text-3xl sm:text-5xl font-black text-amber-600" x-text="String(ultimoSorteado).padStart(2,'0')"></span>
+                                    <span class="text-4xl sm:text-6xl font-black text-amber-600" x-text="String(ultimoSorteado).padStart(2,'0')"></span>
                                 </div>
                             </div>
 
@@ -280,7 +280,7 @@
                                     </button>
                                     <button x-on:click="reiniciar('nova_cartela')"
                                             class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all text-lg">
-                                        🎲 Nova Partida (novas cartelas)
+                                        🎲 Nova Sala (compartilhe o link)
                                     </button>
                                 </div>
                                 <div x-show="!eDono" class="mt-4 text-center">

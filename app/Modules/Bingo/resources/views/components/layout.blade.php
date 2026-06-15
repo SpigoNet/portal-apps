@@ -36,5 +36,6 @@
 </head>
 <body class="font-[Fredoka] antialiased bg-gradient-to-br from-amber-100 via-yellow-50 to-orange-100 min-h-screen">
     {{ $slot }}
+    @stack('scripts')
 </body>
 </html>

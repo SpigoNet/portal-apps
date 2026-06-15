@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Gabarito 5x5 para Artistas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f8fafc;
+    }
+  </style>
+</head>
+<body class="text-slate-800 min-h-screen pb-12">
+
+  <header class="bg-slate-900 text-white py-6 px-4 shadow-md mb-8">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-blue-600 p-2.5 rounded-xl shadow-md">
+          <i data-lucide="layout-grid" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight">Gabarito Técnico 5x5 🎨</h1>
+          <p class="text-slate-400 text-xs">Exporte a grade limpa para guiar o seu ilustrador/artista</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- Painel de Controles -->
+    <section class="lg:col-span-5 bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6 self-start">
+      <div>
+        <h2 class="text-md font-bold text-slate-900 flex items-center gap-2">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4 text-blue-600"></i> Opções de Exportação
+        </h2>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Guias de Centro -->
+        <label class="flex items-center justify-between p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
+          <div>
+            <span class="text-sm font-bold text-slate-700 block">Linhas Guias em Cruz</span>
+            <span class="text-[11px] text-slate-400">Ajuda o artista a centralizar o desenho</span>
+          </div>
+          <input type="checkbox" id="toggle-guides" class="w-4 h-4 accent-blue-600 rounded" checked onchange="updateTemplate()">
+        </label>
+
+        <!-- Cor de Fundo -->
+        <div>
+          <label class="text-xs font-bold text-slate-500 uppercase block mb-2">Cor de fundo do Gabarito</label>
+          <select id="bg-type" onchange="updateTemplate()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm font-medium focus:outline-blue-600">
+            <option value="white">Branco Sólido (Recomendado)</option>
+            <option value="transparent">Transparente (Apenas Linhas e Números)</option>
+            <option value="lightgray">Cinza Claro Técnico</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="pt-6 border-t border-slate-100">
+        <button onclick="downloadTemplatePNG()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm">
+          <i data-lucide="download" class="w-4 h-4"></i> Baixar Imagem do Gabarito
+        </button>
+      </div>
+
+      <!-- Notas Técnicas para o Artista -->
+      <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-4 space-y-2">
+        <span class="text-xs font-bold text-blue-800 uppercase tracking-wider block">Instruções para o Artista:</span>
+        <ul class="text-xs text-blue-900 space-y-1.5 list-disc pl-4">
+          <li>Resolução total: <strong>2000 x 2000 pixels</strong>.</li>
+          <li>Cada célula mede exatamente <strong>400 x 400 pixels</strong>.</li>
+          <li>Os desenhos devem ficar dentro dos limites de cada quadrado.</li>
+          <li>A numeração deve ser removida na versão final, servindo apenas como guia de posição (01 a 25).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Área de Visualização -->
+    <section class="lg:col-span-7 flex flex-col items-center">
+      <div class="w-full max-w-md bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Visualização do Canvas</span>
+          <span class="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">2000x2000px</span>
+        </div>
+        <div class="w-full aspect-square bg-slate-50 border border-slate-300 rounded-lg overflow-hidden shadow-inner relative">
+          <canvas id="template-canvas" class="w-full h-full object-contain block"></canvas>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function drawTemplate(canvas, size = 2000) {
+      const ctx = canvas.getContext('2d');
+      canvas.width = size;
+      canvas.height = size;
+      ctx.clearRect(0, 0, size, size);
+
+      const bgType = document.getElementById('bg-type').value;
+      const showGuides = document.getElementById('toggle-guides').checked;
+      const cellSize = size / 5;
+
+      // 1. Aplica o fundo escolhido
+      if (bgType === 'white') {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, size, size);
+      } else if (bgType === 'lightgray') {
+        ctx.fillStyle = '#f1f5f9';
+        ctx.fillRect(0, 0, size, size);
+      }
+
+      // 2. Renderiza a grade e as marcações
+      for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 5; col++) {
+          const x = col * cellSize;
+          const y = row * cellSize;
+          const number = String((row * 5 + col) + 1).padStart(2, '0');
+
+          // Desenha linhas guias em cruz (Centro de cada célula)
+          if (showGuides) {
+            ctx.save();
+            ctx.strokeStyle = '#cbd5e1'; // Linha cinza bem suave
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 6]); // Linha tracejada profissional
+            
+            // Guia Horizontal
+            ctx.beginPath();
+            ctx.moveTo(x, y + cellSize / 2);
+            ctx.lineTo(x + cellSize, y + cellSize / 2);
+            ctx.stroke();
+
+            // Guia Vertical
+            ctx.beginPath();
+            ctx.moveTo(x + cellSize / 2, y);
+            ctx.lineTo(x + cellSize / 2, y + cellSize);
+            ctx.stroke();
+            ctx.restore();
+          }
+
+          // Desenha as bordas dos blocos (Células)
+          ctx.strokeStyle = '#475569'; // Linha escura sólida
+          ctx.lineWidth = 4;
+          ctx.strokeRect(x, y, cellSize, cellSize);
+
+          // Renderiza o Número da Célula bem grande e centralizado (mas sutil para não atrapalhar)
+          ctx.save();
+          ctx.fillStyle = '#94a3b8'; // Tom neutro para marcação
+          ctx.font = `bold ${cellSize * 0.22}px 'Plus Jakarta Sans', sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          // Move o texto levemente para cima para ficar harmônico se o artista desenhar por baixo
+          ctx.fillText(number, x + cellSize / 2, y + cellSize / 2);
+          ctx.restore();
+        }
+      }
+
+      // Borda externa reforçada
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 8;
+      ctx.strokeRect(0, 0, size, size);
+    }
+
+    function updateTemplate() {
+      const canvas = document.getElementById('template-canvas');
+      drawTemplate(canvas, 1000); // Resolução menor apenas para o preview em tempo real
+    }
+
+    function downloadTemplatePNG() {
+      const downloadCanvas = document.createElement('canvas');
+      drawTemplate(downloadCanvas, 2000); // Gera em 2KB x 2KB reais para o artista
+
+      const link = document.createElement('a');
+      link.download = 'gabarito_grade5x5.png';
+      link.href = downloadCanvas.toDataURL('image/png');
+      link.click();
+    }
+
+    window.onload = function() {
+      updateTemplate();
+      lucide.createIcons();
+    };
+  </script>
+</body>
+</html>

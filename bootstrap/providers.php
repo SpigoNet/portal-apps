@@ -7,6 +7,7 @@ return [
     App\Modules\DspaceForms\DspaceFormsServiceProvider::class,
     App\Modules\TreeTask\TreeTaskServiceProvider::class,
     App\Modules\ANT\ANTServiceProvider::class,
+    App\Modules\Bingo\BingoServiceProvider::class,
     App\Modules\EnvioWhatsapp\EnvioWhatsappServiceProvider::class,
     App\Modules\GestorHoras\GestorHorasServiceProvider::class,
     App\Modules\Metricas\MetricasServiceProvider::class,

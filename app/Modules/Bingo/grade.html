@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Grade 5x5 - Dino Bingo</title>
+  <!-- Tailwind CSS para Estilização de Elite -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap');
+    body {
+      font-family: 'Fredoka', sans-serif;
+      background-color: #f5f5f4;
+    }
+    .grid-preview-container {
+      aspect-ratio: 1 / 1;
+    }
+  </style>
+</head>
+<body class="text-stone-800 min-h-screen pb-12">
+
+  <!-- Cabeçalho -->
+  <header class="bg-gradient-to-r from-amber-600 to-amber-700 text-white py-6 px-4 shadow-md mb-8">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-white text-stone-900 p-2.5 rounded-2xl shadow-md">
+          <i data-lucide="grid-3x3" class="w-8 h-8 text-amber-600"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-black uppercase tracking-wide">Gerador de Imagem 5x5 🦕</h1>
+          <p class="text-amber-100 text-xs">Crie e exporte o arquivo "grade5x5.png" perfeito para o seu Bingo</p>
+        </div>
+      </div>
+      <a href="dino_bingo.html" class="bg-stone-900 hover:bg-stone-800 text-white text-sm font-bold px-4 py-2.5 rounded-xl shadow transition-all flex items-center gap-2">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar ao Jogo
+      </a>
+    </div>
+  </header>
+
+  <!-- Container Principal -->
+  <main class="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- Painel de Customização (Esquerda) -->
+    <section class="lg:col-span-5 bg-white rounded-3xl p-6 shadow-sm border border-stone-200 space-y-6">
+      <div>
+        <h2 class="text-lg font-black text-stone-800 flex items-center gap-2">
+          <i data-lucide="sliders" class="w-5 h-5 text-amber-500"></i> Personalizar Grade
+        </h2>
+        <p class="text-xs text-stone-500 mt-1">Configure o estilo visual antes de baixar a imagem.</p>
+      </div>
+
+      <!-- Escolha do Tema de Cores -->
+      <div class="space-y-3">
+        <label class="text-xs font-bold text-stone-600 uppercase tracking-wider block">Tema de Cores</label>
+        <div class="grid grid-cols-2 gap-2" id="themes-container">
+          <!-- Gerado via JS -->
+        </div>
+      </div>
+
+      <!-- Configurações Extras -->
+      <div class="space-y-4 pt-4 border-t border-stone-100">
+        <label class="text-xs font-bold text-stone-600 uppercase tracking-wider block">Opções Adicionais</label>
+        
+        <!-- Mostrar Números -->
+        <label class="flex items-center justify-between p-3 bg-stone-50 rounded-xl cursor-pointer hover:bg-stone-100 transition-all">
+          <div class="flex items-center gap-2.5">
+            <i data-lucide="binary" class="w-5 h-5 text-stone-500"></i>
+            <div>
+              <span class="text-sm font-bold text-stone-700 block">Exibir Números (01-25)</span>
+              <span class="text-[10px] text-stone-400">Ajuda a conferir as dezenas visualmente</span>
+            </div>
+          </div>
+          <input type="checkbox" id="toggle-numbers" class="w-5 h-5 accent-amber-600 rounded cursor-pointer" checked onchange="updatePreview()">
+        </label>
+
+        <!-- Detalhes Pré-históricos -->
+        <label class="flex items-center justify-between p-3 bg-stone-50 rounded-xl cursor-pointer hover:bg-stone-100 transition-all">
+          <div class="flex items-center gap-2.5">
+            <i data-lucide="sparkles" class="w-5 h-5 text-stone-500"></i>
+            <div>
+              <span class="text-sm font-bold text-stone-700 block">Decorações de Fundo</span>
+              <span class="text-[10px] text-stone-400">Insere nuvens, pegadas e vulcões sutis</span>
+            </div>
+          </div>
+          <input type="checkbox" id="toggle-decors" class="w-5 h-5 accent-amber-600 rounded cursor-pointer" checked onchange="updatePreview()">
+        </label>
+      </div>
+
+      <!-- Botão de Download Principal -->
+      <div class="pt-6 border-t border-stone-100">
+        <button onclick="downloadGridPNG()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-3 text-md">
+          <i data-lucide="download" class="w-6 h-6"></i> BAIXAR "grade5x5.png"
+        </button>
+        <p class="text-center text-[10px] text-stone-400 mt-2.5">
+          Guarde esta imagem na mesma pasta do seu jogo para carregar automaticamente.
+        </p>
+      </div>
+    </section>
+
+    <!-- Visualização em Tempo Real (Direita) -->
+    <section class="lg:col-span-7 flex flex-col items-center">
+      <div class="w-full max-w-xl bg-white rounded-3xl p-5 shadow-sm border border-stone-200">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-bold text-stone-500 uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="eye" class="w-4 h-4"></i> Pré-visualização Simétrica
+          </h3>
+          <span class="text-[10px] bg-stone-100 text-stone-600 px-2.5 py-1 rounded-full font-bold">2000 x 2000 px</span>
+        </div>
+
+        <!-- Grade de Exibição -->
+        <div class="grid-preview-container w-full border-4 border-stone-800 rounded-2xl overflow-hidden shadow-inner bg-stone-100 relative">
+          <canvas id="preview-canvas" class="w-full h-full object-contain block"></canvas>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // --- DADOS DOS DINOSSAUROS (Caminhos de vetores SVG transformados em coordenadas de 0 a 100) ---
+    const dinoPaths = {
+      sauropod: "M 20,75 C 35,75 40,70 42,55 C 44,40 40,15 48,10 C 53,5 60,7 58,18 C 56,28 50,40 52,55 C 54,70 65,68 75,70 C 80,71 80,77 73,77 C 65,77 60,76 55,77 C 50,78 50,85 45,85 C 42,85 42,77 38,77 C 33,77 33,85 28,85 C 25,85 25,75 20,75 Z",
+      trex: "M 25,80 C 35,80 40,75 42,60 C 44,45 35,40 35,30 C 35,15 48,10 62,10 C 72,10 77,20 75,30 C 72,35 65,37 62,37 C 65,41 68,41 66,47 C 61,50 54,47 52,55 C 50,63 58,70 58,80 C 58,85 53,85 51,80 C 49,75 44,75 42,80 C 40,85 35,85 33,80 C 31,75 26,80 25,80 Z",
+      stego: "M 15,70 C 25,70 30,65 35,50 C 45,30 65,30 75,45 C 85,55 90,60 90,70 C 90,75 80,73 75,80 C 72,85 68,85 66,80 C 62,75 58,75 56,80 C 52,85 48,85 46,80 C 42,75 35,75 30,80 C 25,85 20,85 15,70 Z",
+      tricera: "M 15,75 C 25,75 32,70 36,55 C 40,40 55,38 60,38 C 60,25 72,18 82,18 C 85,32 78,45 72,55 C 70,60 72,68 62,70 C 52,72 48,75 42,75 C 38,75 38,83 33,83 C 30,83 30,75 15,75 Z",
+      pterodactyl: "M 10,40 C 30,40 40,25 50,45 C 60,25 70,40 90,40 C 75,50 65,45 55,55 C 53,65 52,75 50,75 C 48,75 47,65 45,55 C 35,45 25,50 10,40 Z"
+    };
+
+    // Temas de cores refinados
+    const themes = [
+      {
+        id: "safari",
+        name: "Vale Verdejante",
+        previewClass: "bg-emerald-500",
+        backgrounds: ["#022c22", "#064e3b", "#0f766e", "#115e59", "#134e4a"],
+        dinoColors: ["#34d399", "#a7f3d0", "#6ee7b7", "#fef08a", "#fde047"]
+      },
+      {
+        id: "volcanic",
+        name: "Era do Fogo",
+        previewClass: "bg-amber-600",
+        backgrounds: ["#450a0a", "#7f1d1d", "#9a3412", "#7c2d12", "#3b0764"],
+        dinoColors: ["#fb923c", "#fca5a5", "#fecdd3", "#fde047", "#f97316"]
+      },
+      {
+        id: "candy",
+        name: "Vale Doce",
+        previewClass: "bg-pink-400",
+        backgrounds: ["#4a044e", "#3b0764", "#0369a1", "#4d7c0f", "#831843"],
+        dinoColors: ["#f472b6", "#fbcfe8", "#c084fc", "#93c5fd", "#fda4af"]
+      },
+      {
+        id: "neon",
+        name: "Neon Noturno",
+        previewClass: "bg-indigo-900",
+        backgrounds: ["#0f172a", "#1e1b4b", "#020617", "#050515", "#180025"],
+        dinoColors: ["#38bdf8", "#c084fc", "#2dd4bf", "#f43f5e", "#a855f7"]
+      },
+      {
+        id: "monochrome",
+        name: "Fóssil Antigo",
+        previewClass: "bg-stone-600",
+        backgrounds: ["#1c1917", "#292524", "#44403c", "#57534e", "#1c1c1c"],
+        dinoColors: ["#d6d3d1", "#e7e5e4", "#f5f5f4", "#a8a29e", "#ffffff"]
+      }
+    ];
+
+    let currentTheme = themes[0];
+
+    // --- RENDERIZADOR DE GRADE NO CANVAS ---
+    function drawGrid(canvas, size = 2000) {
+      const ctx = canvas.getContext('2d');
+      canvas.width = size;
+      canvas.height = size;
+      ctx.clearRect(0, 0, size, size);
+
+      const cellSize = size / 5;
+      const showNumbers = document.getElementById('toggle-numbers').checked;
+      const showDecors = document.getElementById('toggle-decors').checked;
+
+      // Lista de tipos de dinos para iterar
+      const dinoTypes = ['sauropod', 'trex', 'stego', 'tricera', 'pterodactyl'];
+
+      for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 5; col++) {
+          const index = row * 5 + col;
+          const number = index + 1;
+
+          const x = col * cellSize;
+          const y = row * cellSize;
+
+          // 1. Cor de Fundo da Célula
+          const bgCol = currentTheme.backgrounds[index % currentTheme.backgrounds.length];
+          ctx.fillStyle = bgCol;
+          ctx.fillRect(x, y, cellSize, cellSize);
+
+          // 2. Decorações sutis de fundo (se habilitado)
+          if (showDecors) {
+            ctx.save();
+            ctx.globalAlpha = 0.08;
+            ctx.fillStyle = "#ffffff";
+            
+            // Desenha pequenas formas geométricas ou estrelas no background
+            if (number % 3 === 0) {
+              // Estrela/Sol simples
+              ctx.beginPath();
+              ctx.arc(x + cellSize * 0.25, y + cellSize * 0.25, cellSize * 0.1, 0, Math.PI * 2);
+              ctx.fill();
+            } else if (number % 3 === 1) {
+              // Nuvens estilizadas
+              ctx.beginPath();
+              ctx.arc(x + cellSize * 0.75, y + cellSize * 0.3, cellSize * 0.08, 0, Math.PI * 2);
+              ctx.arc(x + cellSize * 0.82, y + cellSize * 0.3, cellSize * 0.06, 0, Math.PI * 2);
+              ctx.fill();
+            } else {
+              // Montanha/vulcão sutil no fundo
+              ctx.beginPath();
+              ctx.moveTo(x + cellSize * 0.2, y + cellSize * 0.8);
+              ctx.lineTo(x + cellSize * 0.5, y + cellSize * 0.45);
+              ctx.lineTo(x + cellSize * 0.8, y + cellSize * 0.8);
+              ctx.fill();
+            }
+            ctx.restore();
+          }
+
+          // 3. Desenho de Dinossauro Simétrico
+          ctx.save();
+          
+          // Seleciona tipo de dino e cores baseados no index
+          const dinoType = dinoTypes[index % dinoTypes.length];
+          const dinoColor = currentTheme.dinoColors[(index + 2) % currentTheme.dinoColors.length];
+          
+          // Translações para centralizar e escalonar o dino dentro do bloco de 400x400
+          ctx.translate(x + cellSize / 2, y + cellSize / 2);
+          
+          // Escala e orientação do Dinossauro
+          const flip = number % 2 === 0 ? -1 : 1;
+          const scaleFactor = 2.4; // Ajuste perfeito de tamanho do Dino
+          ctx.scale(flip * scaleFactor, scaleFactor);
+          
+          // Rotaciona levemente para dar dinamismo simétrico
+          const angle = ((number % 5) - 2) * 3 * Math.PI / 180; // Entre -6 e +6 graus
+          ctx.rotate(angle);
+
+          // Desenha o caminho SVG do Dinossauro
+          const p = new Path2D(dinoPaths[dinoType]);
+          ctx.fillStyle = dinoColor;
+          
+          // Alinha o centro do dino de 100x100 à origem (0,0)
+          ctx.translate(-50, -50);
+          ctx.fill(p);
+          ctx.restore();
+
+          // 4. Exibição de Números Discretos se habilitado
+          if (showNumbers) {
+            ctx.save();
+            ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+            ctx.font = `black ${cellSize * 0.14}px 'Fredoka', sans-serif`;
+            ctx.textAlign = "right";
+            ctx.fillText(String(number).padStart(2, '0'), x + cellSize - 15, y + cellSize - 15);
+            ctx.restore();
+          }
+
+          // 5. Linhas divisórias internas (Sutileza e Alinhamento)
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+          ctx.lineWidth = 4;
+          ctx.strokeRect(x, y, cellSize, cellSize);
+        }
+      }
+
+      // Moldura externa preta sólida
+      ctx.strokeStyle = "#1c1917";
+      ctx.lineWidth = 16;
+      ctx.strokeRect(0, 0, size, size);
+    }
+
+    // --- ATUALIZADORES DE TELA ---
+    function updatePreview() {
+      const canvas = document.getElementById('preview-canvas');
+      // Renderiza com tamanho um pouco menor (800px) para máxima performance de render do preview
+      drawGrid(canvas, 1000);
+    }
+
+    function selectTheme(themeId) {
+      currentTheme = themes.find(t => t.id === themeId);
+      
+      // Atualiza bordas de seleção visuais nos botões
+      themes.forEach(t => {
+        const btn = document.getElementById(`btn-theme-${t.id}`);
+        if (t.id === themeId) {
+          btn.classList.add('ring-4', 'ring-amber-500', 'border-amber-600');
+        } else {
+          btn.classList.remove('ring-4', 'ring-amber-500', 'border-amber-600');
+        }
+      });
+
+      updatePreview();
+    }
+
+    // --- DOWNLOAD AUTOMÁTICO DO PNG ---
+    function downloadGridPNG() {
+      // Cria um canvas em background na resolução máxima (2000x2000)
+      const downloadCanvas = document.createElement('canvas');
+      drawGrid(downloadCanvas, 2000);
+
+      // Gatilho de download nativo do browser
+      const link = document.createElement('a');
+      link.download = 'grade5x5.png';
+      link.href = downloadCanvas.toDataURL('image/png');
+      link.click();
+    }
+
+    // --- CONSTRUÇÃO DE INTERFACE ---
+    function init() {
+      const themesContainer = document.getElementById('themes-container');
+      themesContainer.innerHTML = '';
+
+      themes.forEach(theme => {
+        const btn = document.createElement('button');
+        btn.id = `btn-theme-${theme.id}`;
+        btn.className = `flex items-center gap-3 p-3 rounded-2xl border border-stone-200 hover:bg-stone-50 transition-all text-left w-full`;
+        btn.onclick = () => selectTheme(theme.id);
+        
+        btn.innerHTML = `
+          <div class="w-8 h-8 rounded-xl ${theme.previewClass} shadow-inner flex-shrink-0"></div>
+          <div>
+            <span class="text-xs font-bold block text-stone-700">${theme.name}</span>
+            <span class="text-[9px] text-stone-400">Paleta de 5 tons</span>
+          </div>
+        `;
+        
+        themesContainer.appendChild(btn);
+      });
+
+      // Seleciona Safari por padrão
+      selectTheme('safari');
+      lucide.createIcons();
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

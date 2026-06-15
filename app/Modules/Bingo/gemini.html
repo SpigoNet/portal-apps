@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dino Bingo - Cartelas Interativas</title>
+  <!-- Tailwind CSS para Estilização Premium -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons para Ícones Elegantes -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap');
+    
+    body {
+      font-family: 'Fredoka', sans-serif;
+      background-color: #f4f1ea;
+    }
+
+    /* Animação suave para carimbo de marcação */
+    .stamp-enter {
+      animation: stampEffect 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes stampEffect {
+      0% {
+        transform: scale(3) rotate(-15deg);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(0.9) rotate(12deg);
+        opacity: 0.9;
+      }
+    }
+
+    /* Estilos especiais de impressão A4 */
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-area {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 20px !important;
+        width: 100% !important;
+        padding: 0 !important;
+      }
+      .card-box {
+        border: 3px solid #4b5563 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      /* Oculta os carimbos virtuais na impressão para poder jogar fisicamente */
+      .stamp-overlay {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="text-stone-800 min-h-screen pb-12">
+
+  <!-- Canvas de Confetes para o Grande Vencedor -->
+  <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+  <!-- Cabeçalho (Ocultado na Impressão) -->
+  <header class="bg-gradient-to-r from-emerald-800 via-green-700 to-teal-800 text-white py-6 px-4 shadow-lg mb-8 no-print">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-amber-500 p-2.5 rounded-2xl shadow-inner">
+          <svg class="w-10 h-10 text-stone-900" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-3xl font-black tracking-wide uppercase">Dino Bingo! 🦖</h1>
+          <p class="text-green-100 text-sm">Diversão pré-histórica em 4 cartelas personalizadas</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-600 text-stone-900 font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm">
+          <i data-lucide="printer" class="w-4 h-4"></i> Imprimir Cartelas
+        </button>
+        <button onclick="resetAllMarkers()" class="bg-stone-800 hover:bg-stone-900 text-white font-bold px-4 py-2.5 rounded-xl shadow-md transition-all flex items-center gap-2 text-sm">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Limpar Tudo
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container Principal -->
+  <main class="max-w-7xl mx-auto px-4">
+    
+    <!-- Painel de Gerenciamento de Imagem e Configuração (Ocultado na Impressão) -->
+    <section class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200 mb-8 no-print">
+      <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-emerald-800">
+        <i data-lucide="image" class="w-5 h-5"></i> Configuração da Imagem da Grade (grade5x5.png)
+      </h2>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+        <!-- Explicação / Status -->
+        <div class="space-y-2">
+          <p class="text-sm text-stone-600">
+            Este Bingo utiliza uma grade de 5x5 dinossauros. Por segurança local dos navegadores, você pode carregar seu arquivo <code class="bg-stone-100 px-1.5 py-0.5 rounded font-mono text-xs">grade5x5.png</code> diretamente aqui.
+          </p>
+          <div id="status-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            Usando Dinossauros Virtuais (Fallback)
+          </div>
+        </div>
+
+        <!-- Dropzone de Arquivo -->
+        <div class="border-2 border-dashed border-stone-300 hover:border-emerald-500 rounded-2xl p-4 transition-colors bg-stone-50 cursor-pointer relative" id="dropzone">
+          <input type="file" id="image-loader" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
+          <div class="text-center space-y-1">
+            <i data-lucide="upload-cloud" class="w-8 h-8 text-stone-400 mx-auto"></i>
+            <p class="text-xs font-bold text-stone-700">Selecione ou Arraste o arquivo "grade5x5.png"</p>
+            <p class="text-[10px] text-stone-400">Ativa o recorte automático 5x5 da imagem</p>
+          </div>
+        </div>
+
+        <!-- Seletor Rápido de Modo de Jogo -->
+        <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-stone-500 block">Modo Visual</span>
+          <div class="flex gap-2">
+            <button onclick="setVisualMode(false)" id="btn-mode-virtual" class="flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-white shadow-sm">
+              Dinossauros Virtuais
+            </button>
+            <button onclick="setVisualMode(true)" id="btn-mode-custom" class="flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all bg-stone-200 text-stone-700 hover:bg-stone-300">
+              Grade 5x5 Local
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Layout Dividido: Sorteador à Esquerda (no-print) e Cartelas à Direita -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- Sorteador Inteligente (Ocultado na Impressão) -->
+      <section class="lg:col-span-4 bg-white rounded-3xl p-6 shadow-sm border border-stone-200 space-y-6 no-print">
+        <div class="border-b border-stone-100 pb-4">
+          <h3 class="text-xl font-bold flex items-center gap-2 text-stone-800">
+            <i data-lucide="dices" class="w-5 h-5 text-amber-500"></i> Globo de Sorteio
+          </h3>
+          <p class="text-xs text-stone-500">Gerencie a partida sorteando as pedras (1 a 25)</p>
+        </div>
+
+        <!-- Tela Principal de Sorteio -->
+        <div class="bg-gradient-to-b from-stone-50 to-stone-100 rounded-2xl p-6 text-center border border-stone-200 relative overflow-hidden">
+          <div id="draw-display" class="w-28 h-28 mx-auto rounded-full bg-white shadow-md flex items-center justify-center text-4xl font-black text-emerald-800 border-4 border-stone-200 mb-4 relative z-10">
+            ?
+          </div>
+          <div id="draw-dino-preview" class="w-20 h-20 mx-auto hidden items-center justify-center bg-white rounded-xl shadow-inner border border-stone-200 mb-4 overflow-hidden relative z-10">
+            <!-- Render dinâmico do Dino Sorteado -->
+          </div>
+          <p id="draw-label" class="text-sm font-bold text-stone-500 mb-4">Nenhum dinossauro sorteado ainda</p>
+          
+          <div class="flex gap-2 justify-center">
+            <button onclick="drawNextDino()" class="bg-amber-500 hover:bg-amber-600 text-stone-900 font-black px-5 py-3 rounded-xl transition-all shadow flex items-center gap-2 text-sm">
+              <i data-lucide="play" class="w-4 h-4"></i> Sortear Dino
+            </button>
+            <button onclick="resetDraw()" class="bg-stone-200 hover:bg-stone-300 text-stone-700 font-bold px-4 py-3 rounded-xl transition-all text-sm">
+              Limpar Globo
+            </button>
+          </div>
+        </div>
+
+        <!-- Grade de Histórico Rápido (1-25) -->
+        <div>
+          <h4 class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2 flex justify-between">
+            <span>Dinos Sorteados</span>
+            <span id="draw-count">0 / 25</span>
+          </h4>
+          <div class="grid grid-cols-5 gap-1.5" id="history-grid">
+            <!-- Gerado via Javascript (1-25) -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Cartelas de Bingo -->
+      <section class="lg:col-span-8 print-area grid grid-cols-1 md:grid-cols-2 gap-6" id="bingo-cards-container">
+        <!-- As 4 Cartelas serão injetadas dinamicamente aqui -->
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Confirmação de BINGO Modal overlay (Ocultado na Impressão) -->
+  <div id="bingo-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden no-print">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center shadow-2xl border-4 border-amber-400 transform scale-95 transition-transform duration-300" id="modal-content">
+      <div class="text-6xl mb-4">🏆</div>
+      <h2 class="text-3xl font-black text-emerald-800 uppercase tracking-wide">BINGO! 🎉</h2>
+      <p id="modal-text" class="text-stone-600 mt-2 font-medium">Uma cartela completou todos os dinossauros!</p>
+      
+      <!-- Preview do Card vencedor -->
+      <div class="my-6 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 inline-block">
+        <span id="winner-card-name" class="font-bold text-lg text-emerald-800">Cartela</span>
+      </div>
+
+      <div class="flex gap-3 justify-center">
+        <button onclick="closeBingoModal()" class="bg-stone-900 hover:bg-stone-800 text-white font-bold px-6 py-2.5 rounded-xl transition-all text-sm">
+          Continuar Jogando
+        </button>
+        <button onclick="resetAllMarkers(); closeBingoModal();" class="bg-amber-500 hover:bg-amber-600 text-stone-900 font-black px-6 py-2.5 rounded-xl transition-all text-sm">
+          Nova Partida
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- ESTADO GLOBAL DO APLICATIVO ---
+    const state = {
+      imageLoaded: false,
+      imageUrl: 'grade5x5.png', // Fallback automático se estiver na mesma pasta
+      useCustomImage: false,    // Inicia usando virtual para garantir renderização imediata
+      markedCells: {},          // Mapeamento de marcações: { "cardIdx-row-col": true }
+      drawnNumbers: [],         // Números sorteados
+      lastDrawn: null,
+      bingosDeclared: {}        // Evita disparar múltiplos alertas para o mesmo bingo
+    };
+
+    // Definição estrita das 4 cartelas solicitadas pelo usuário (Todas agora no formato 3x3!)
+    const cardsDefinition = [
+      {
+        id: 1,
+        title: "Cartela 1 - Triássico",
+        colorClass: "from-emerald-700 to-emerald-950",
+        badgeColor: "bg-emerald-100 text-emerald-800",
+        borderColor: "border-emerald-600",
+        rows: [
+          [9, 17, 18],
+          [19, 16, 20],
+          [2, 21, 15]
+        ]
+      },
+      {
+        id: 2,
+        title: "Cartela 2 - Cretáceo",
+        colorClass: "from-amber-700 to-amber-950",
+        badgeColor: "bg-amber-100 text-amber-800",
+        borderColor: "border-amber-600",
+        rows: [
+          [10, 11, 12],
+          [13, 14, 5],
+          [15, 16, 7] // Terceira linha adicionada com sucesso
+        ]
+      },
+      {
+        id: 3,
+        title: "Cartela 3 - Jurássico",
+        colorClass: "from-sky-700 to-sky-950",
+        badgeColor: "bg-sky-100 text-sky-800",
+        borderColor: "border-sky-600",
+        rows: [
+          [1, 2, 3],
+          [4, 5, 6],
+          [7, 8, 9]
+        ]
+      },
+      {
+        id: 4,
+        title: "Cartela 4 - Pterossauros",
+        colorClass: "from-purple-700 to-purple-950",
+        badgeColor: "bg-purple-100 text-purple-800",
+        borderColor: "border-purple-600",
+        rows: [
+          [19, 17, 22],
+          [4, 23, 24],
+          [25, 6, 3]
+        ]
+      }
+    ];
+
+    // Vetores de Dinossauros em SVG para Fallback de alta fidelidade
+    const fallbackDinos = [
+      // Sauropod (Long Neck)
+      `<svg viewBox="0 0 100 100" class="w-2/3 h-2/3 text-white opacity-90 drop-shadow" fill="currentColor"><path d="M20,75 C35,75 40,70 42,55 C44,40 40,15 48,10 C53,5 60,7 58,18 C56,28 50,40 52,55 C54,70 65,68 75,70 C80,71 80,77 73,77 C65,77 60,76 55,77 C50,78 50,85 45,85 C42,85 42,77 38,77 C33,77 33,85 28,85 C25,85 25,75 20,75 Z"/></svg>`,
+      // T-Rex / Carnivore
+      `<svg viewBox="0 0 100 100" class="w-2/3 h-2/3 text-white opacity-90 drop-shadow" fill="currentColor"><path d="M25,80 C35,80 40,75 42,60 C44,45 35,40 35,30 C35,15 48,10 62,10 C72,10 77,20 75,30 C72,35 65,37 62,37 C65,41 68,41 66,47 C61,50 54,47 52,55 C50,63 58,70 58,80 C58,85 53,85 51,80 C49,75 44,75 42,80 C40,85 35,85 33,80 C31,75 26,80 25,80 Z"/></svg>`,
+      // Stegosaurus
+      `<svg viewBox="0 0 100 100" class="w-2/3 h-2/3 text-white opacity-90 drop-shadow" fill="currentColor"><path d="M15,70 C25,70 30,65 35,50 C45,30 65,30 75,45 C85,55 90,60 90,70 C90,75 80,73 75,80 C72,85 68,85 66,80 C62,75 58,75 56,80 C52,85 48,85 46,80 C42,75 35,75 30,80 C25,85 20,85 15,70 Z"/><path d="M30,42 L35,28 L44,38 Z M48,32 L55,18 L62,32 Z M66,36 L72,24 L78,40 Z" fill="#f59e0b" opacity="0.8"/></svg>`,
+      // Triceratops
+      `<svg viewBox="0 0 100 100" class="w-2/3 h-2/3 text-white opacity-90 drop-shadow" fill="currentColor"><path d="M15,75 C25,75 32,70 36,55 C40,40 55,38 60,38 C60,25 72,18 82,18 C85,32 78,45 72,55 C70,60 72,68 62,70 C52,72 48,75 42,75 C38,75 38,83 33,83 C30,83 30,75 15,75 Z"/><path d="M54,32 L46,20 L52,36 Z M68,28 L68,12 L72,30 Z" fill="#ef4444" opacity="0.8"/></svg>`,
+      // Pterodactyl
+      `<svg viewBox="0 0 100 100" class="w-2/3 h-2/3 text-white opacity-90 drop-shadow" fill="currentColor"><path d="M10,40 C30,40 40,25 50,45 C60,25 70,40 90,40 C75,50 65,45 55,55 C53,65 52,75 50,75 C48,75 47,65 45,55 C35,45 25,50 10,40 Z"/></svg>`
+    ];
+
+    const fallbackGradients = [
+      "from-emerald-400 to-teal-600",
+      "from-amber-400 to-orange-500",
+      "from-cyan-400 to-blue-600",
+      "from-purple-400 to-indigo-600",
+      "from-rose-400 to-red-500"
+    ];
+
+    // --- SINTETIZADOR DE EFEITOS SONOROS (Web Audio API) ---
+    function playAudioTone(type) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+
+        if (type === 'mark') {
+          // Tom agradável de marcação
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(450, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.1);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.15);
+        } else if (type === 'unmark') {
+          // Tom descendente simples para desmarcar
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.1);
+          gain.gain.setValueAtTime(0.1, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.12);
+        } else if (type === 'bingo') {
+          // Pequena fanfarra triunfante
+          const notes = [261.63, 329.63, 392.00, 523.25]; // Acorde C Maior
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + (idx * 0.08));
+            gain.gain.setValueAtTime(0.08, ctx.currentTime + (idx * 0.08));
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (idx * 0.08) + 0.4);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(ctx.currentTime + (idx * 0.08));
+            osc.stop(ctx.currentTime + (idx * 0.08) + 0.4);
+          });
+        }
+      } catch (err) {
+        console.warn('Áudio não habilitado ou bloqueado pelo browser.');
+      }
+    }
+
+    // --- ENGENHARIA DE CONFETES NATIVA (Canvas) ---
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#10b981', '#f59e0b', '#06b6d4', '#ec4899', '#8b5cf6', '#ef4444'];
+
+      for (let i = 0; i < 150; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          radius: Math.random() * 5 + 4,
+          speed: Math.random() * 3 + 2,
+          density: Math.random() * canvas.height,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 5,
+          tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+          tiltAngle: 0
+        });
+      }
+
+      let animationId;
+      function update() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+
+        particles.forEach((p, idx) => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += p.speed;
+          p.x += Math.sin(p.tiltAngle);
+          p.tilt = Math.sin(p.tiltAngle - idx / 3) * 12;
+
+          if (p.y < canvas.height) active = true;
+
+          ctx.beginPath();
+          ctx.lineWidth = p.radius;
+          ctx.strokeStyle = p.color;
+          ctx.moveTo(p.x + p.tilt + p.radius / 2, p.y);
+          ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.radius / 2);
+          ctx.stroke();
+        });
+
+        if (active) {
+          animationId = requestAnimationFrame(update);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          cancelAnimationFrame(animationId);
+        }
+      }
+      update();
+    }
+
+    // --- CARREGADOR DE IMAGEM PERSONALIZADA (Bypass CORS) ---
+    document.getElementById('image-loader').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          state.imageUrl = event.target.result;
+          state.imageLoaded = true;
+          setVisualMode(true);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function setVisualMode(useCustom) {
+      state.useCustomImage = useCustom;
+      
+      const badge = document.getElementById('status-badge');
+      const btnVirtual = document.getElementById('btn-mode-virtual');
+      const btnCustom = document.getElementById('btn-mode-custom');
+
+      if (useCustom) {
+        badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800";
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Grade 5x5 Ativa`;
+        btnCustom.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-white shadow-sm";
+        btnVirtual.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all bg-stone-200 text-stone-700 hover:bg-stone-300";
+      } else {
+        badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800";
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Dinossauros Virtuais`;
+        btnVirtual.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all bg-emerald-600 text-white shadow-sm";
+        btnCustom.className = "flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all bg-stone-200 text-stone-700 hover:bg-stone-300";
+      }
+
+      renderAllCards();
+      updateSorteadorDisplay();
+    }
+
+    // --- MÓDULO DE CÁLCULO E RENDER DE RECORTE CSS ---
+    // Uma grade 5x5 de 1 a 25.
+    // O elemento N (1-indexed) mapeia para Coluna e Linha.
+    function getSpritePosition(number) {
+      const index = number - 1; // 0-indexed
+      const col = index % 5;
+      const row = Math.floor(index / 5);
+      
+      // Multiplica colunas e linhas por 25% (distribuição linear 0%, 25%, 50%, 75%, 100%)
+      const posX = col * 25;
+      const posY = row * 25;
+      return { posX, posY };
+    }
+
+    // Gera o estilo inline CSS para visualização em sprite
+    function getSpriteStyle(number) {
+      if (!state.useCustomImage) return '';
+      const { posX, posY } = getSpritePosition(number);
+      return `background-image: url('${state.imageUrl}'); background-size: 500% 500%; background-position: ${posX}% ${posY}%;`;
+    }
+
+    // Obtém o SVG Dinossauro correspondente à célula de Fallback
+    function getFallbackSvgMarkup(number) {
+      const baseIndex = (number - 1) % fallbackDinos.length;
+      const gradIndex = Math.floor((number - 1) / 5) % fallbackGradients.length;
+      
+      return `
+        <div class="w-full h-full bg-gradient-to-br ${fallbackGradients[gradIndex]} flex items-center justify-center relative">
+          ${fallbackDinos[baseIndex]}
+        </div>
+      `;
+    }
+
+    // --- INTERATIVIDADE: MARCAR/DESMARCAR CÉLULA ---
+    function toggleCell(cardIdx, rIdx, cIdx) {
+      const key = `${cardIdx}-${rIdx}-${cIdx}`;
+      const isMarked = !state.markedCells[key];
+      
+      state.markedCells[key] = isMarked;
+      
+      if (isMarked) {
+        playAudioTone('mark');
+      } else {
+        playAudioTone('unmark');
+      }
+
+      renderAllCards();
+      checkWinningConditions();
+    }
+
+    // Limpa todas as marcações manuais das cartelas
+    function resetAllMarkers() {
+      state.markedCells = {};
+      state.bingosDeclared = {};
+      renderAllCards();
+    }
+
+    // --- VERIFICAÇÃO AUTOMÁTICA DE BINGO ---
+    function checkWinningConditions() {
+      cardsDefinition.forEach((card, cardIndex) => {
+        // Se já disparou o bingo para esta cartela nesta sessão, ignora para evitar spam
+        if (state.bingosDeclared[cardIndex]) return;
+
+        let allMarked = true;
+        
+        card.rows.forEach((row, rIdx) => {
+          row.forEach((_, cIdx) => {
+            const key = `${cardIndex}-${rIdx}-${cIdx}`;
+            if (!state.markedCells[key]) {
+              allMarked = false;
+            }
+          });
+        });
+
+        if (allMarked) {
+          state.bingosDeclared[cardIndex] = true;
+          triggerBingoWin(card);
+        }
+      });
+    }
+
+    // Triga a celebração do BINGO ganho!
+    function triggerBingoWin(card) {
+      playAudioTone('bingo');
+      launchConfetti();
+      
+      document.getElementById('winner-card-name').innerText = card.title;
+      document.getElementById('modal-text').innerText = `A ${card.title} completou todas as marcações com maestria! 🦖✨`;
+      
+      const modal = document.getElementById('bingo-modal');
+      const content = document.getElementById('modal-content');
+      
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        content.classList.remove('scale-95');
+        content.classList.add('scale-100');
+      }, 50);
+    }
+
+    function closeBingoModal() {
+      const modal = document.getElementById('bingo-modal');
+      const content = document.getElementById('modal-content');
+      content.classList.remove('scale-100');
+      content.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 150);
+    }
+
+    // --- MOTOR DE RENDERIZAÇÃO DAS CARTELAS ---
+    function renderAllCards() {
+      const container = document.getElementById('bingo-cards-container');
+      container.innerHTML = '';
+
+      cardsDefinition.forEach((card, cardIndex) => {
+        // Criando a embalagem da cartela
+        const cardBox = document.createElement('div');
+        cardBox.className = `card-box bg-white rounded-3xl overflow-hidden shadow-md border-2 ${card.borderColor} flex flex-col justify-between`;
+        
+        // Cabeçalho da cartela estilizado por era pré-histórica
+        const header = document.createElement('div');
+        header.className = `bg-gradient-to-r ${card.colorClass} p-4 text-white flex items-center justify-between no-print`;
+        header.innerHTML = `
+          <div>
+            <h4 class="font-bold tracking-wide text-md uppercase">${card.title}</h4>
+            <p class="text-[10px] text-white/70">${card.rows.length === 2 ? 'Formato 3x2' : 'Formato 3x3'}</p>
+          </div>
+          <button onclick="resetSingleCardMarkers(${cardIndex})" class="bg-white/15 hover:bg-white/25 transition-all text-[11px] font-bold px-2 py-1 rounded-lg flex items-center gap-1">
+            <i data-lucide="rotate-ccw" class="w-3 h-3"></i> Limpar
+          </button>
+        `;
+        cardBox.appendChild(header);
+
+        // Header de impressão limpo
+        const printHeader = document.createElement('div');
+        printHeader.className = `hidden print:flex justify-between items-center border-b border-stone-300 p-3 bg-stone-100`;
+        printHeader.innerHTML = `
+          <h4 class="font-bold text-md text-stone-900">${card.title}</h4>
+          <span class="text-xs border border-stone-400 px-2 py-0.5 rounded-full font-bold">Dino Bingo</span>
+        `;
+        cardBox.appendChild(printHeader);
+
+        // Grid das células do bingo
+        const gridBody = document.createElement('div');
+        gridBody.className = "p-4 bg-stone-50/50 flex-1 flex flex-col justify-center";
+        
+        // Configura grid dependendo da quantidade de linhas da cartela (3x3 ou 3x2)
+        const gridCols = document.createElement('div');
+        gridCols.className = `grid grid-cols-3 gap-3 md:gap-4`;
+
+        card.rows.forEach((row, rIdx) => {
+          row.forEach((num, cIdx) => {
+            const cellKey = `${cardIndex}-${rIdx}-${cIdx}`;
+            const isMarked = !!state.markedCells[cellKey];
+            
+            // Célula individual do bingo
+            const cell = document.createElement('button');
+            cell.className = `aspect-square relative rounded-2xl border-2 border-stone-200 bg-white overflow-hidden cursor-pointer select-none shadow-sm hover:shadow-md transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center`;
+            cell.setAttribute('onclick', `toggleCell(${cardIndex}, ${rIdx}, ${cIdx})`);
+
+            // 1. Renderização de Dino (Customizado via Grade ou Fallback Virtual)
+            if (state.useCustomImage) {
+              const bgDiv = document.createElement('div');
+              bgDiv.className = "absolute inset-0 bg-no-repeat";
+              bgDiv.setAttribute('style', getSpriteStyle(num));
+              cell.appendChild(bgDiv);
+            } else {
+              cell.innerHTML = getFallbackSvgMarkup(num);
+            }
+
+            // 2. Badge de identificação do Número (01 - 25)
+            const numBadge = document.createElement('span');
+            numBadge.className = `absolute bottom-1 right-1 px-1.5 py-0.5 text-[10px] font-black rounded-lg shadow ${card.badgeColor} border border-white/20 z-10`;
+            numBadge.innerText = String(num).padStart(2, '0');
+            cell.appendChild(numBadge);
+
+            // 3. Sobreposição de Carimbo clássico de Bingo se estiver marcado
+            if (isMarked) {
+              const stampOverlay = document.createElement('div');
+              stampOverlay.className = "absolute inset-0 flex items-center justify-center bg-red-600/10 backdrop-blur-[0.5px] stamp-enter stamp-overlay z-20";
+              stampOverlay.innerHTML = `
+                <div class="w-10/12 h-10/12 border-4 border-red-500 border-dashed rounded-full flex flex-col items-center justify-center bg-red-500/15 transform rotate-12">
+                  <svg viewBox="0 0 100 100" class="w-2/3 h-2/3 text-red-600 opacity-90" fill="currentColor">
+                    <path d="M50,90 C45,90 35,70 35,55 C35,45 42,35 50,35 C58,35 65,45 65,55 C65,70 55,90 50,90 Z" opacity="0.3"/>
+                    <path d="M50,75 C45,75 30,60 30,45 C30,30 40,20 50,20 C60,20 70,30 70,45 C70,60 55,75 50,75 Z M50,45 A10,10 0 1,0 50,45.1 Z" />
+                  </svg>
+                  <span class="text-[7px] font-black tracking-widest text-red-600 leading-none">PEGO</span>
+                </div>
+              `;
+              cell.appendChild(stampOverlay);
+            }
+
+            gridCols.appendChild(cell);
+          });
+        });
+
+        gridBody.appendChild(gridCols);
+        cardBox.appendChild(gridBody);
+
+        // Rodapé discreto para impressão
+        const printFooter = document.createElement('div');
+        printFooter.className = `hidden print:block text-center text-[10px] text-stone-400 py-1.5 bg-stone-50 border-t border-stone-200`;
+        printFooter.innerHTML = `Impresso para Diversão física. Utilize feijões ou lápis para jogar!`;
+        cardBox.appendChild(printFooter);
+
+        container.appendChild(cardBox);
+      });
+
+      // Recarrega ícones recém-adicionados no DOM
+      lucide.createIcons();
+    }
+
+    // Limpa apenas as marcações de uma cartela específica
+    function resetSingleCardMarkers(cardIdx) {
+      const prefix = `${cardIdx}-`;
+      Object.keys(state.markedCells).forEach(key => {
+        if (key.startsWith(prefix)) {
+          delete state.markedCells[key];
+        }
+      });
+      delete state.bingosDeclared[cardIdx];
+      playAudioTone('unmark');
+      renderAllCards();
+    }
+
+
+    // --- SITEMA DE GLOBO DO SORTEADOR DE BINGO ---
+    function drawNextDino() {
+      if (state.drawnNumbers.length >= 25) {
+        alert("Todos os 25 dinossauros já foram sorteados!");
+        return;
+      }
+
+      // Cria pool de números restantes
+      const available = [];
+      for (let i = 1; i <= 25; i++) {
+        if (!state.drawnNumbers.includes(i)) {
+          available.push(i);
+        }
+      }
+
+      // Seleção aleatória pura
+      const randomIndex = Math.floor(Math.random() * available.length);
+      const chosen = available[randomIndex];
+      
+      state.drawnNumbers.push(chosen);
+      state.lastDrawn = chosen;
+
+      playAudioTone('mark');
+      updateSorteadorDisplay();
+    }
+
+    function resetDraw() {
+      state.drawnNumbers = [];
+      state.lastDrawn = null;
+      updateSorteadorDisplay();
+    }
+
+    function updateSorteadorDisplay() {
+      const display = document.getElementById('draw-display');
+      const preview = document.getElementById('draw-dino-preview');
+      const label = document.getElementById('draw-label');
+      const countLabel = document.getElementById('draw-count');
+
+      countLabel.innerText = `${state.drawnNumbers.length} / 25`;
+
+      if (state.lastDrawn) {
+        display.innerText = String(state.lastDrawn).padStart(2, '0');
+        display.classList.remove('text-emerald-800');
+        display.classList.add('text-amber-500');
+        
+        label.innerText = `Dinossauro Sorteado!`;
+        preview.className = "w-20 h-20 mx-auto flex items-center justify-center bg-white rounded-xl shadow-inner border border-stone-200 mb-4 overflow-hidden relative";
+        
+        if (state.useCustomImage) {
+          preview.innerHTML = `<div class="absolute inset-0 bg-no-repeat" style="${getSpriteStyle(state.lastDrawn)}"></div>`;
+        } else {
+          preview.innerHTML = getFallbackSvgMarkup(state.lastDrawn);
+        }
+      } else {
+        display.innerText = "?";
+        display.classList.remove('text-amber-500');
+        display.classList.add('text-emerald-800');
+        label.innerText = "Nenhum dinossauro sorteado ainda";
+        preview.className = "w-20 h-20 mx-auto hidden";
+        preview.innerHTML = "";
+      }
+
+      renderHistoryGrid();
+    }
+
+    function renderHistoryGrid() {
+      const container = document.getElementById('history-grid');
+      container.innerHTML = '';
+
+      for (let i = 1; i <= 25; i++) {
+        const isDrawn = state.drawnNumbers.includes(i);
+        const cell = document.createElement('div');
+        cell.className = `aspect-square rounded-lg flex flex-col items-center justify-center border text-[11px] font-black transition-all ${
+          isDrawn 
+            ? 'bg-amber-100 text-amber-800 border-amber-300 ring-2 ring-amber-400 scale-105' 
+            : 'bg-stone-50 text-stone-300 border-stone-200'
+        }`;
+        
+        // Pequena miniatura do dino sorteado no histórico
+        if (isDrawn) {
+          cell.innerHTML = `
+            <span class="leading-none text-xs">${String(i).padStart(2, '0')}</span>
+          `;
+        } else {
+          cell.innerHTML = `<span>${String(i).padStart(2, '0')}</span>`;
+        }
+
+        container.appendChild(cell);
+      }
+    }
+
+
+    // --- INICIALIZAÇÃO DO APLICATIVO ---
+    window.onload = function() {
+      // 1. Tenta pré-carregar a imagem local
+      const testImg = new Image();
+      testImg.src = state.imageUrl;
+      testImg.onload = function() {
+        // Se a imagem carregar com sucesso localmente, ativa automaticamente o modo customizado
+        state.imageLoaded = true;
+        setVisualMode(true);
+      };
+      testImg.onerror = function() {
+        // Falha silenciosa se não houver o arquivo na pasta, usando o modo virtual (fallback seguro)
+        setVisualMode(false);
+      };
+
+      // 2. Renderização das Cartelas e Painéis de Interface
+      renderAllCards();
+      updateSorteadorDisplay();
+
+      // Configuração para Drag and Drop de arquivo
+      const dropzone = document.getElementById('dropzone');
+      
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('border-emerald-500', 'bg-emerald-50/50');
+      });
+
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('border-emerald-500', 'bg-emerald-50/50');
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('border-emerald-500', 'bg-emerald-50/50');
+        
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            state.imageUrl = event.target.result;
+            state.imageLoaded = true;
+            setVisualMode(true);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

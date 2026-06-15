@@ -15,6 +15,22 @@
          x-init="init()"
          x-cloak>
 
+        {{-- Mensagem Toast --}}
+        <div x-show="showMensagemToast && ultimaMensagemToast"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 -translate-y-4"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="ease-in duration-300"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-4"
+             class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-white/95 backdrop-blur rounded-2xl px-5 py-3 shadow-xl border-2 border-amber-300 flex items-center gap-3 max-w-xs sm:max-w-sm">
+            <span class="text-xl" x-text="ultimaMensagemToast?.emoji"></span>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-bold text-amber-800 truncate" x-text="ultimaMensagemToast?.nome"></p>
+                <p class="text-sm text-amber-700 truncate" x-text="ultimaMensagemToast?.texto"></p>
+            </div>
+        </div>
+
         {{-- LOADING --}}
         <div x-show="loading" class="flex-1 flex items-center justify-center">
             <div class="text-center">
@@ -397,6 +413,8 @@
                     { emoji: '😤', texto: 'Vamo que vamo!' },
                 ],
                 pollInterval: null,
+                showMensagemToast: false,
+                ultimaMensagemToast: null,
 
                 init() {
                     this.fetchEstado().then(() => {
@@ -450,7 +468,15 @@
                             this.playSom('bingo');
                         }
 
-                        this.mensagens = data.mensagens || [];
+                        const novasMensagens = data.mensagens || [];
+
+                        if (novasMensagens.length > this.mensagens.length) {
+                            this.ultimaMensagemToast = novasMensagens[novasMensagens.length - 1];
+                            this.showMensagemToast = true;
+                            setTimeout(() => { this.showMensagemToast = false; }, 2500);
+                        }
+
+                        this.mensagens = novasMensagens;
 
                         if (data.partida.status === 'finalizada' && !this.showResultados) {
                             this.carregarResultados();

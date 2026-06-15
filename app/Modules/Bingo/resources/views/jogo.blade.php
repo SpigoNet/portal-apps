@@ -254,10 +254,10 @@
                                 </div>
                             {{-- Messages --}}
                             <div class="w-full max-w-md mt-3 bg-white/80 rounded-2xl p-3 shadow border border-amber-200">
-                                <div class="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+                                <div class="flex flex-wrap gap-1.5">
                                     <template x-for="f in frases" :key="f.emoji + f.texto">
                                         <button x-on:click="enviarMensagem(f.texto, f.emoji)"
-                                                class="flex-shrink-0 text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1.5 rounded-full font-medium transition-colors whitespace-nowrap">
+                                                class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1.5 rounded-full font-medium transition-colors">
                                             <span x-text="f.emoji"></span>
                                             <span x-text="f.texto"></span>
                                         </button>

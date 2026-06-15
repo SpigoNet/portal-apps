@@ -469,15 +469,19 @@ class BingoController extends Controller
         }
 
         $validated = $request->validate([
-            'texto' => 'required|string|max:100',
-            'emoji' => 'required|string|max:10',
+            'texto' => 'nullable|string|max:100',
+            'emoji' => 'nullable|string|max:10',
         ]);
+
+        if (empty($validated['texto']) && empty($validated['emoji'])) {
+            return response()->json(['error' => 'Informe um texto ou emoji'], 422);
+        }
 
         $mensagens = $partida->mensagens ?? [];
         $mensagens[] = [
             'nome' => $jogador->nome,
-            'texto' => $validated['texto'],
-            'emoji' => $validated['emoji'],
+            'texto' => $validated['texto'] ?? '',
+            'emoji' => $validated['emoji'] ?? '',
             'created_at' => now()->toIso8601String(),
         ];
 

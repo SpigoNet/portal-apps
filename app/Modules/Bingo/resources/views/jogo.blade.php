@@ -24,11 +24,14 @@
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 -translate-y-4"
              class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] bg-white/95 backdrop-blur rounded-2xl px-5 py-3 shadow-xl border-2 border-amber-300 flex items-center gap-3 max-w-xs sm:max-w-sm">
-            <span class="text-xl" x-text="ultimaMensagemToast?.emoji"></span>
-            <div class="flex-1 min-w-0">
+            <span x-show="ultimaMensagemToast?.emoji" x-text="ultimaMensagemToast?.emoji"
+                  :class="ultimaMensagemToast?.texto ? 'text-xl' : 'text-4xl'"></span>
+            <div class="flex-1 min-w-0" x-show="ultimaMensagemToast?.texto">
                 <p class="text-xs font-bold text-amber-800 truncate" x-text="ultimaMensagemToast?.nome"></p>
                 <p class="text-sm text-amber-700 truncate" x-text="ultimaMensagemToast?.texto"></p>
             </div>
+            <p x-show="!ultimaMensagemToast?.texto && ultimaMensagemToast?.emoji"
+               class="text-xs font-bold text-amber-800 truncate" x-text="ultimaMensagemToast?.nome"></p>
         </div>
 
         {{-- LOADING --}}
@@ -256,10 +259,11 @@
                             <div class="w-full max-w-md mt-3 bg-white/80 rounded-2xl p-3 shadow border border-amber-200">
                                 <div class="flex flex-wrap gap-1.5">
                                     <template x-for="f in frases" :key="f.emoji + f.texto">
-                                        <button x-on:click="enviarMensagem(f.texto, f.emoji)"
-                                                class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1.5 rounded-full font-medium transition-colors">
-                                            <span x-text="f.emoji"></span>
-                                            <span x-text="f.texto"></span>
+                                        <button x-on:click="enviarMensagem(f.texto || '', f.emoji || '')"
+                                                class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1.5 rounded-full font-medium transition-colors"
+                                                :class="f.emoji && !f.texto ? 'px-3' : ''">
+                                            <span x-show="f.emoji" x-text="f.emoji" :class="f.texto ? '' : 'text-lg'"></span>
+                                            <span x-show="f.texto" x-text="f.texto"></span>
                                         </button>
                                     </template>
                                 </div>
@@ -267,7 +271,8 @@
                                     <template x-for="(msg, i) in mensagens" :key="i">
                                         <div class="text-xs text-amber-700 flex items-start gap-1.5">
                                             <span class="font-bold whitespace-nowrap" x-text="msg.nome + ':'"></span>
-                                            <span x-text="msg.emoji + ' ' + msg.texto"></span>
+                                            <span x-show="msg.emoji" x-text="msg.emoji"></span>
+                                            <span x-show="msg.texto" x-text="msg.texto"></span>
                                         </div>
                                     </template>
                                     <p x-show="mensagens.length === 0" class="text-[10px] text-amber-400 italic text-center">Nenhuma mensagem ainda...</p>
@@ -403,14 +408,22 @@
                 resultadosData: [],
                 mensagens: [],
                 frases: [
-                    { emoji: '🍀', texto: 'Manda a boa!' },
-                    { emoji: '🙌', texto: 'Vai vir!' },
-                    { emoji: '💪', texto: 'Foco!' },
-                    { emoji: '🎯', texto: 'Quase lá!' },
-                    { emoji: '🔥', texto: 'Tá quente!' },
-                    { emoji: '✨', texto: 'Bora!' },
-                    { emoji: '🏆', texto: 'É hoje!' },
-                    { emoji: '😤', texto: 'Vamo que vamo!' },
+                    { texto: 'Manda a boa!' },
+                    { emoji: '🍀' },
+                    { texto: 'Vai vir!' },
+                    { emoji: '🙌' },
+                    { texto: 'Foco!' },
+                    { emoji: '💪' },
+                    { texto: 'Quase lá!' },
+                    { emoji: '🎯' },
+                    { texto: 'Tá quente!' },
+                    { emoji: '🔥' },
+                    { texto: 'Bora!' },
+                    { emoji: '✨' },
+                    { texto: 'É hoje!' },
+                    { emoji: '🏆' },
+                    { texto: 'Vamo que vamo!' },
+                    { emoji: '😤' },
                 ],
                 pollInterval: null,
                 showMensagemToast: false,

@@ -25,4 +25,5 @@ Route::prefix('bingo')->name('bingo.')->group(function () {
     Route::get('/{codigo}/resultados', [BingoController::class, 'resultados'])->name('resultados');
     Route::post('/{codigo}/encerrar', [BingoController::class, 'encerrar'])->name('encerrar');
     Route::post('/{codigo}/reiniciar', [BingoController::class, 'reiniciar'])->name('reiniciar');
+    Route::post('/{codigo}/resetar', [BingoController::class, 'resetar'])->name('resetar');
 });

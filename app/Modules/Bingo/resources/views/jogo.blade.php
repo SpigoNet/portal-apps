@@ -274,13 +274,13 @@
                                     </div>
                                 </div>
                                 <div x-show="eDono" class="w-full mt-4 space-y-2">
-                                    <button x-on:click="reiniciar('mesma_cartela')"
+                                    <button x-on:click="resetar()"
                                             class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all text-lg">
-                                        🔄 Jogar novamente (mesmas cartelas)
+                                        🔄 Reiniciar Partida
                                     </button>
                                     <button x-on:click="reiniciar('nova_cartela')"
                                             class="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all text-lg">
-                                        🎲 Jogar novamente (novas cartelas)
+                                        🎲 Nova Partida (novas cartelas)
                                     </button>
                                 </div>
                                 <div x-show="!eDono" class="mt-4 text-center">
@@ -419,6 +419,8 @@
 
                         if (data.partida.status === 'finalizada' && !this.showResultados) {
                             this.carregarResultados();
+                        } else if (data.partida.status !== 'finalizada') {
+                            this.showResultados = false;
                         }
                     } catch (e) {
                         console.warn('Poll error:', e);
@@ -549,6 +551,16 @@
 
                 encerrar() {
                     fetch('{{ route('bingo.encerrar', ['codigo' => $partida->codigo]) }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'X-Bingo-Token': this.token },
+                    })
+                    .then(r => r.ok ? r.json() : r.json().then(e => { throw new Error(e.error); }))
+                    .then(() => this.fetchEstado())
+                    .catch(e => alert(e.message));
+                },
+
+                resetar() {
+                    fetch('{{ route('bingo.resetar', ['codigo' => $partida->codigo]) }}', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'X-Bingo-Token': this.token },
                     })

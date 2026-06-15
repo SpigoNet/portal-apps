@@ -341,6 +341,41 @@ class BingoController extends Controller
         return response()->json(['status' => 'finalizada']);
     }
 
+    public function resetar(Request $request, string $codigo): JsonResponse
+    {
+        $partida = BingoPartida::where('codigo', $codigo)->firstOrFail();
+
+        $token = $request->header('X-Bingo-Token') ?? $request->input('token');
+
+        if (! $token || $token !== $partida->dono_token) {
+            return response()->json(['error' => 'Apenas o anfitrião pode reiniciar'], 403);
+        }
+
+        if ($partida->status !== 'finalizada') {
+            return response()->json(['error' => 'Partida não está finalizada'], 422);
+        }
+
+        $partida->update([
+            'status' => 'espera',
+            'numeros_sorteados' => [],
+        ]);
+
+        BingoJogador::where('partida_id', $partida->id)->update([
+            'bingo_feito' => false,
+            'posicao' => null,
+        ]);
+
+        $jogadores = BingoJogador::where('partida_id', $partida->id)->with('cartela')->get();
+
+        foreach ($jogadores as $jogador) {
+            if ($jogador->cartela) {
+                $jogador->cartela->update(['marcacoes' => []]);
+            }
+        }
+
+        return response()->json(['status' => 'espera']);
+    }
+
     public function reiniciar(Request $request, string $codigo): JsonResponse
     {
         $partida = BingoPartida::where('codigo', $codigo)->firstOrFail();

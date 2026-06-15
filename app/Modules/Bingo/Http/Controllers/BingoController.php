@@ -261,7 +261,7 @@ class BingoController extends Controller
         $cartela = $jogador->cartela;
 
         if (! $cartela->verificarBingo()) {
-            return response()->json(['error' => 'Cartela não completou bingo'], 422);
+            return response()->json(['error' => 'Cartela não completou bingo', 'comeu_bronha' => true], 422);
         }
 
         $ultimaPosicao = BingoJogador::where('partida_id', $partida->id)

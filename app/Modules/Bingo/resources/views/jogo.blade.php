@@ -305,6 +305,23 @@
                 </button>
             </div>
         </div>
+
+        {{-- BRONHA MODAL --}}
+        <div x-show="showBronhaModal"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-50"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-50"
+             class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl border-4 border-red-400 shake">
+                <div class="text-7xl mb-4">😤</div>
+                <h2 class="text-3xl font-black text-red-500 uppercase tracking-wide">COMEU BRONHA!</h2>
+                <p class="text-red-400 mt-2 font-medium">Sua cartela ainda não completou uma linha...</p>
+                <p class="text-xs text-red-300 mt-1">Tente novamente!</p>
+            </div>
+        </div>
     </div>
 
     <style>
@@ -316,6 +333,8 @@
         .bounce-in { animation: bounce-in 0.5s ease-out; }
         .stamp { animation: stamp-in 0.2s ease-out; }
         @keyframes stamp-in { 0% { transform: scale(1.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .shake { animation: shake 0.5s ease-in-out; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 50%, 90% { transform: translateX(-6px); } 30%, 70% { transform: translateX(6px); } }
     </style>
 
     @push('scripts')
@@ -342,6 +361,7 @@
                 showBingoModal: false,
                 bingoNotificado: false,
                 showResultados: false,
+                showBronhaModal: false,
                 resultadosData: [],
                 pollInterval: null,
 
@@ -492,7 +512,7 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'X-Bingo-Token': this.token },
                     })
-                    .then(r => r.ok ? r.json() : r.json().then(e => { throw new Error(e.error); }))
+                    .then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(e)))
                     .then(data => {
                         this.vencedor = data.vencedor;
                         this.bingoNotificado = true;
@@ -500,7 +520,15 @@
                         this.lancarConfete();
                         this.playSom('bingo');
                     })
-                    .catch(e => alert(e.message || 'Sua cartela ainda não completou!'));
+                    .catch(e => {
+                        if (e.comeu_bronha) {
+                            this.showBronhaModal = true;
+                            this.playSom('bronha');
+                            setTimeout(() => { this.showBronhaModal = false; }, 2500);
+                        } else {
+                            alert(e.error || 'Erro ao declarar bingo');
+                        }
+                    });
                 },
 
                 carregarResultados() {
@@ -608,6 +636,16 @@
                                 o.start(ctx.currentTime + i * 0.1);
                                 o.stop(ctx.currentTime + i * 0.1 + 0.4);
                             });
+                        } else if (tipo === 'bronha') {
+                            const o = ctx.createOscillator();
+                            const g = ctx.createGain();
+                            o.type = 'square';
+                            o.frequency.setValueAtTime(150, ctx.currentTime);
+                            o.frequency.setValueAtTime(100, ctx.currentTime + 0.4);
+                            g.gain.setValueAtTime(0.08, ctx.currentTime);
+                            g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+                            o.connect(g); g.connect(ctx.destination);
+                            o.start(); o.stop(ctx.currentTime + 0.6);
                         }
                         setTimeout(() => ctx.close(), 500);
                     } catch(e) { console.warn('Audio error'); }

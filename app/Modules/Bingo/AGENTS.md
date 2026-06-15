@@ -1,6 +1,6 @@
 # Bingo Module — Agentic Guidelines
 
-## Purpose
+## Purpose 
 Multiplayer bingo game with themed sprite sheets. Public access (no auth required to play). Supports QRCode joining, real-time polling, and child-friendly visuals.
 
 ## Structure

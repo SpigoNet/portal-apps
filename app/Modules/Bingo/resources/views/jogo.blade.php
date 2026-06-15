@@ -243,20 +243,9 @@
                                 </button>
                             </div>
 
-                            {{-- Player list --}}
-                            <div class="w-full max-w-md mt-4 bg-white/80 rounded-2xl p-4 shadow border border-amber-200">
-                                <p class="text-xs font-bold text-amber-700 mb-2">👥 Jogadores</p>
-                                <div class="flex flex-wrap gap-2">
-                                    <template x-for="j in jogadores" :key="j.id">
-                                        <span class="text-sm bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium"
-                                              :class="{'bg-emerald-100 text-emerald-800': j.bingo_feito}">
-                                            <span x-text="j.nome"></span>
-                                            <span x-show="j.bingo_feito">🏆</span>
-                                        </span>
-                                    </template>
-                                </div>
                             {{-- Messages --}}
-                            <div class="w-full max-w-md mt-3 bg-white/80 rounded-2xl p-3 shadow border border-amber-200">
+                            <div class="w-full max-w-md mt-4 bg-white/80 rounded-2xl p-3 shadow border border-amber-200">
+                                <p class="text-xs font-bold text-amber-700 mb-2">💬 Mensagens</p>
                                 <div class="flex flex-wrap gap-1.5">
                                     <template x-for="f in frases" :key="f.emoji + f.texto">
                                         <button x-on:click="enviarMensagem(f.texto || '', f.emoji || '')"
@@ -276,6 +265,20 @@
                                         </div>
                                     </template>
                                     <p x-show="mensagens.length === 0" class="text-[10px] text-amber-400 italic text-center">Nenhuma mensagem ainda...</p>
+                                </div>
+                            </div>
+
+                            {{-- Player list --}}
+                            <div class="w-full max-w-md mt-3 bg-white/80 rounded-2xl p-4 shadow border border-amber-200">
+                                <p class="text-xs font-bold text-amber-700 mb-2">👥 Jogadores</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <template x-for="j in jogadores" :key="j.id">
+                                        <span class="text-sm bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium"
+                                              :class="{'bg-emerald-100 text-emerald-800': j.bingo_feito}">
+                                            <span x-text="j.nome"></span>
+                                            <span x-show="j.bingo_feito">🏆</span>
+                                        </span>
+                                    </template>
                                 </div>
                             </div>
                         </div>

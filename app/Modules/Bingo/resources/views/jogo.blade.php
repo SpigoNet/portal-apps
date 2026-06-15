@@ -523,6 +523,7 @@
                         this.showBingoModal = true;
                         this.lancarConfete();
                         this.playSom('bingo');
+                        this.fetchEstado();
                     })
                     .catch(e => {
                         if (e.comeu_bronha) {

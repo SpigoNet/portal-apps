@@ -268,10 +268,16 @@ class BingoController extends Controller
             ->where('bingo_feito', true)
             ->max('posicao');
 
+        $isPrimeiro = $ultimaPosicao === null;
+
         $jogador->update([
             'bingo_feito' => true,
             'posicao' => ($ultimaPosicao ?? 0) + 1,
         ]);
+
+        if ($isPrimeiro) {
+            $partida->update(['status' => 'finalizada']);
+        }
 
         return response()->json([
             'vencedor' => $jogador->nome,

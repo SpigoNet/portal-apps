@@ -450,6 +450,44 @@ class BingoController extends Controller
         ]);
     }
 
+    public function enviarMensagem(Request $request, string $codigo): JsonResponse
+    {
+        $partida = BingoPartida::where('codigo', $codigo)->firstOrFail();
+
+        $token = $request->header('X-Bingo-Token') ?? $request->input('token');
+
+        if (! $token) {
+            return response()->json(['error' => 'Token não informado'], 401);
+        }
+
+        $jogador = BingoJogador::where('partida_id', $partida->id)
+            ->where('token', $token)
+            ->first();
+
+        if (! $jogador) {
+            return response()->json(['error' => 'Jogador não encontrado'], 404);
+        }
+
+        $validated = $request->validate([
+            'texto' => 'required|string|max:100',
+            'emoji' => 'required|string|max:10',
+        ]);
+
+        $mensagens = $partida->mensagens ?? [];
+        $mensagens[] = [
+            'nome' => $jogador->nome,
+            'texto' => $validated['texto'],
+            'emoji' => $validated['emoji'],
+            'created_at' => now()->toIso8601String(),
+        ];
+
+        $mensagens = array_slice($mensagens, -20);
+
+        $partida->update(['mensagens' => $mensagens]);
+
+        return response()->json(['mensagens' => $mensagens]);
+    }
+
     public function estado(string $codigo): JsonResponse
     {
         $partida = BingoPartida::where('codigo', $codigo)->firstOrFail();
@@ -482,6 +520,7 @@ class BingoController extends Controller
             ],
             'jogadores' => $jogadores,
             'tema_url' => $temaUrl,
+            'mensagens' => $partida->mensagens ?? [],
         ];
 
         $token = request()->header('X-Bingo-Token') ?? request()->input('token');

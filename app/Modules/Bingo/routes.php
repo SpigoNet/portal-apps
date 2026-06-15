@@ -20,6 +20,7 @@ Route::prefix('bingo')->name('bingo.')->group(function () {
     Route::post('/{codigo}/iniciar', [BingoController::class, 'iniciar'])->name('iniciar');
     Route::post('/{codigo}/sortear', [BingoController::class, 'sortear'])->name('sortear');
     Route::post('/{codigo}/marcar', [BingoController::class, 'marcar'])->name('marcar');
+    Route::post('/{codigo}/mensagem', [BingoController::class, 'enviarMensagem'])->name('mensagem');
     Route::post('/{codigo}/declarar-bingo', [BingoController::class, 'declararBingo'])->name('declarar-bingo');
     Route::get('/{codigo}/estado', [BingoController::class, 'estado'])->name('estado');
     Route::get('/{codigo}/resultados', [BingoController::class, 'resultados'])->name('resultados');

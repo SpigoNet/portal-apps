@@ -181,9 +181,9 @@
                             <div x-show="ultimoSorteado" class="w-full bg-white/90 rounded-2xl p-4 sm:p-6 shadow-lg border-2 border-amber-200 mb-3 text-center bounce-in">
                                 <p class="text-xs sm:text-sm font-bold text-amber-600/70 uppercase tracking-wider mb-2">🎯 Sorteado</p>
                                 <div class="flex items-center justify-center gap-4 sm:gap-6">
-                                    <div class="w-16 h-16 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl overflow-hidden border-3 sm:border-4 border-amber-400 shadow-lg"
+                                    <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-xl sm:rounded-2xl overflow-hidden border-3 sm:border-4 border-amber-400 shadow-lg"
                                          :style="getSpriteStyle(ultimoSorteado)"></div>
-                                    <span class="text-4xl sm:text-6xl font-black text-amber-600" x-text="String(ultimoSorteado).padStart(2,'0')"></span>
+                                    <span class="text-5xl sm:text-6xl font-black text-amber-600" x-text="String(ultimoSorteado).padStart(2,'0')"></span>
                                 </div>
                             </div>
 
@@ -235,6 +235,26 @@
                                             <span x-show="j.bingo_feito">🏆</span>
                                         </span>
                                     </template>
+                                </div>
+                            {{-- Messages --}}
+                            <div class="w-full max-w-md mt-3 bg-white/80 rounded-2xl p-3 shadow border border-amber-200">
+                                <div class="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+                                    <template x-for="f in frases" :key="f.emoji + f.texto">
+                                        <button x-on:click="enviarMensagem(f.texto, f.emoji)"
+                                                class="flex-shrink-0 text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1.5 rounded-full font-medium transition-colors whitespace-nowrap">
+                                            <span x-text="f.emoji"></span>
+                                            <span x-text="f.texto"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                                <div class="mt-2 max-h-20 overflow-y-auto space-y-0.5">
+                                    <template x-for="(msg, i) in mensagens" :key="i">
+                                        <div class="text-xs text-amber-700 flex items-start gap-1.5">
+                                            <span class="font-bold whitespace-nowrap" x-text="msg.nome + ':'"></span>
+                                            <span x-text="msg.emoji + ' ' + msg.texto"></span>
+                                        </div>
+                                    </template>
+                                    <p x-show="mensagens.length === 0" class="text-[10px] text-amber-400 italic text-center">Nenhuma mensagem ainda...</p>
                                 </div>
                             </div>
                         </div>
@@ -335,6 +355,8 @@
         @keyframes stamp-in { 0% { transform: scale(1.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .shake { animation: shake 0.5s ease-in-out; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 50%, 90% { transform: translateX(-6px); } 30%, 70% { transform: translateX(6px); } }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 
     @push('scripts')
@@ -363,6 +385,17 @@
                 showResultados: false,
                 showBronhaModal: false,
                 resultadosData: [],
+                mensagens: [],
+                frases: [
+                    { emoji: '🍀', texto: 'Manda a boa!' },
+                    { emoji: '🙌', texto: 'Vai vir!' },
+                    { emoji: '💪', texto: 'Foco!' },
+                    { emoji: '🎯', texto: 'Quase lá!' },
+                    { emoji: '🔥', texto: 'Tá quente!' },
+                    { emoji: '✨', texto: 'Bora!' },
+                    { emoji: '🏆', texto: 'É hoje!' },
+                    { emoji: '😤', texto: 'Vamo que vamo!' },
+                ],
                 pollInterval: null,
 
                 init() {
@@ -416,6 +449,8 @@
                             this.lancarConfete();
                             this.playSom('bingo');
                         }
+
+                        this.mensagens = data.mensagens || [];
 
                         if (data.partida.status === 'finalizada' && !this.showResultados) {
                             this.carregarResultados();
@@ -558,6 +593,20 @@
                     .then(r => r.ok ? r.json() : r.json().then(e => { throw new Error(e.error); }))
                     .then(() => this.fetchEstado())
                     .catch(e => alert(e.message));
+                },
+
+                enviarMensagem(texto, emoji) {
+                    if (!this.token) return;
+                    fetch('{{ route('bingo.mensagem', ['codigo' => $partida->codigo]) }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'X-Bingo-Token': this.token },
+                        body: JSON.stringify({ texto, emoji }),
+                    })
+                    .then(r => r.ok ? r.json() : null)
+                    .then(data => {
+                        if (data) this.mensagens = data.mensagens;
+                    })
+                    .catch(e => console.warn(e));
                 },
 
                 resetar() {

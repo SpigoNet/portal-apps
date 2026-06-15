@@ -19,11 +19,13 @@ class BingoPartida extends Model
         'dono_token',
         'user_id',
         'numeros_sorteados',
+        'mensagens',
     ];
 
     protected $casts = [
         'modo_gestor' => 'boolean',
         'numeros_sorteados' => 'array',
+        'mensagens' => 'array',
     ];
 
     public function dono(): BelongsTo

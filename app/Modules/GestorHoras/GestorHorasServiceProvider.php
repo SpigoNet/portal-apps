@@ -17,6 +17,11 @@ class GestorHorasServiceProvider extends ServiceProvider
         Route::middleware('web')
             ->group(__DIR__ . '/routes.php');
 
+        // Carrega as rotas de API do módulo
+        Route::middleware('api')
+            ->prefix('api')
+            ->group(__DIR__ . '/api.php');
+
         // --- DEFINIÇÃO DE PERMISSÕES (GATES) ---
 
         // 1. Admin: Pode gerenciar clientes e usuários

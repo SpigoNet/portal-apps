@@ -496,4 +496,41 @@ class ApontamentoController extends Controller
 
         return response()->json(['success' => true, 'mensagem' => 'Descrição salva com sucesso!']);
     }
+
+    public function adicionarTextoDescricao(Request $request)
+    {
+        Gate::authorize('gh.operacional');
+
+        $validated = $request->validate([
+            'texto' => 'required|string',
+        ]);
+
+        $apontamento = Apontamento::where('user_id', auth()->id())
+            ->where('apontamento_ativo', 1)
+            ->first();
+
+        if (! $apontamento) {
+            return response()->json(['erro' => 'Nenhum apontamento ativo encontrado.'], 422);
+        }
+
+        $texto = trim($validated['texto']);
+        if ($texto === '') {
+            return response()->json(['erro' => 'O texto informado é inválido.'], 422);
+        }
+
+        $descricaoAtual = trim((string) $apontamento->descricao);
+        $descricaoAtualizada = $descricaoAtual === ''
+            ? $texto
+            : $descricaoAtual."\n".$texto;
+
+        $apontamento->update([
+            'descricao' => $descricaoAtualizada,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'mensagem' => 'Texto adicionado com sucesso!',
+            'descricao' => $descricaoAtualizada,
+        ]);
+    }
 }

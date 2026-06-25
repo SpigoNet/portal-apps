@@ -10,6 +10,7 @@ Route::get('/acompanhamento/{token}', [ContratoController::class, 'publicView'])
 
 Route::middleware(['web', 'auth'])
     ->prefix('gestor-horas')
+    ->middleware('auth:sanctum')
     ->name('gestor-horas.')
     ->middleware(RegistrarAcesso::class . ':GestorHoras')
     ->group(function () {
@@ -30,6 +31,7 @@ Route::middleware(['web', 'auth'])
         Route::get('/mobile/apontamento', [ApontamentoController::class, 'mobileTimer'])->name('mobile.timer');
         Route::post('/mobile/apontamento/iniciar', [ApontamentoController::class, 'iniciarTimer'])->name('mobile.start');
         Route::post('/mobile/apontamento/salvar-descricao', [ApontamentoController::class, 'salvarDescricao'])->name('mobile.save-desc');
+        Route::post('/mobile/apontamento/adicionar-texto', [ApontamentoController::class, 'adicionarTextoDescricao'])->name('mobile.add-text');
         Route::post('/mobile/apontamento/finalizar', [ApontamentoController::class, 'finalizarTimer'])->name('mobile.finish');
 
         Route::get('/contrato/{id}', [ContratoController::class, 'show'])->name('show');

@@ -3,8 +3,15 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Modules\Alfred\Models\ConsumoAgua;
+use App\Modules\Alfred\Models\LogDiaRuim;
+use App\Modules\Alfred\Models\Medicamento;
+use App\Modules\Alfred\Models\Rotina;
+use App\Modules\Alfred\Models\UserProfile;
 use App\Modules\GestorHoras\Models\Cliente;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -22,9 +29,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'google_id',  // Adicionado
-        'microsoft_id', // Adicionado
-        'avatar',     // Adicionado
+        'google_id',
+        'microsoft_id',
+        'avatar',
         'whatsapp_phone',
         'whatsapp_apikey',
     ];
@@ -81,5 +88,60 @@ class User extends Authenticatable
             ->where('user_id', $this->id)
             ->where('semestre', $semestreAtual)
             ->exists();
+    }
+
+    public function profile(): HasOne
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+    public function medicamentos(): HasMany
+    {
+        return $this->hasMany(Medicamento::class);
+    }
+
+    public function consumoAgua(): HasMany
+    {
+        return $this->hasMany(ConsumoAgua::class);
+    }
+
+    public function logsDiaRuim(): HasMany
+    {
+        return $this->hasMany(LogDiaRuim::class);
+    }
+
+    public function rotinas(): HasMany
+    {
+        return $this->hasMany(Rotina::class);
+    }
+
+    public function getTreettaskUrl(): string
+    {
+        return $this->profile?->treetask_url ?? config('services.treetask.url', 'https://apps.spigo.net');
+    }
+
+    public function getTreettaskUserId(): string
+    {
+        return $this->profile?->treetask_user_id ?? config('services.treetask.user_id', '1');
+    }
+
+    public function getTreettaskToken(): string
+    {
+        return $this->profile?->treetask_token ?? config('services.treetask.token', '');
+    }
+
+    public function getMetaAguaMl(): int
+    {
+        return $this->profile?->meta_agua_ml ?? 2500;
+    }
+
+    public function getEnergiaAtual(): string
+    {
+        return $this->profile?->energia_atual ?? 'media';
+    }
+
+    public function isModoDiaRuim(): bool
+    {
+        return $this->profile?->modo_dia_ruim ?? false;
     }
 }

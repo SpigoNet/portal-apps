@@ -47,4 +47,19 @@ return [
         'tenant' => env('MICROSOFT_TENANT_ID', 'common'),
     ],
 
+    'treetask' => [
+        'url' => env('TREETASK_API_URL', 'https://apps.spigo.net'),
+        'version' => env('TREETASK_API_VERSION', 'v1'),
+        'user_id' => env('TREETASK_USER_ID', '1'),
+        'token' => env('TREETASK_TOKEN', ''),
+        'timeout' => env('TREETASK_TIMEOUT', 30),
+    ],
+
+    'evolution' => [
+        'base_uri' => env('EVOLUTION_API_URL', ''),
+        'token' => env('EVOLUTION_API_TOKEN', ''),
+        'instance' => env('EVOLUTION_API_INSTANCE', 'Baileys'),
+        'timeout' => env('EVOLUTION_API_TIMEOUT', 15),
+    ],
+
 ];

@@ -10,7 +10,7 @@ class RotinaController
 {
     public function gerenciar()
     {
-        $rotinas = Rotina::orderBy('prioridade', 'desc')->get();
+        $rotinas = Rotina::doUsuario(auth()->id())->orderBy('prioridade', 'desc')->get();
 
         return view('Alfred::rotinas.manage', compact('rotinas'));
     }
@@ -22,8 +22,8 @@ class RotinaController
         $dataAmanha = (clone $dataSelecionada)->addDay();
         $dataOntem = (clone $dataSelecionada)->subDay();
 
-        $rotinasHoje = Rotina::todasHoje(null, $dataSelecionada);
-        $rotinasAmanha = Rotina::todasHoje(null, $dataAmanha);
+        $rotinasHoje = Rotina::todasHoje(auth()->id(), $dataSelecionada);
+        $rotinasAmanha = Rotina::todasHoje(auth()->id(), $dataAmanha);
 
         $pendentesHoje = $rotinasHoje->where('executada_hoje', false)->where('pulada_hoje', false);
 
@@ -243,9 +243,8 @@ class RotinaController
         $data = $request->input('data') ? \Carbon\Carbon::parse($request->input('data')) : now();
         $visualizacao = in_array($visualizacao, ['dia', 'semana', 'mes']) ? $visualizacao : 'mes';
 
-        $rotinas = Rotina::ativas()->get();
-
         $userId = auth()->id();
+        $rotinas = Rotina::ativas()->doUsuario($userId)->get();
         $medicamentosPorDia = RegistroMedicamento::where('user_id', $userId)
             ->select('data')
             ->selectRaw('COUNT(*) as total')

@@ -56,10 +56,10 @@ return [
     ],
 
     'evolution' => [
-        'base_uri' => env('EVOLUTION_API_URL', ''),
-        'token' => env('EVOLUTION_API_TOKEN', ''),
-        'instance' => env('EVOLUTION_API_INSTANCE', 'Baileys'),
-        'timeout' => env('EVOLUTION_API_TIMEOUT', 15),
+        'base_uri' => env('WHATSAPP_API_URL', 'http://192.168.15.10:8099'),
+        'token' => env('WHATSAPP_API_TOKEN', ''),
+        'instance' => env('WHATSAPP_API_INSTANCE', 'Baileys'),
+        'timeout' => env('WHATSAPP_API_TIMEOUT', 15),
     ],
 
 ];

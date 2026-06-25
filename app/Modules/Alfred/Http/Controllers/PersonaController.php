@@ -127,7 +127,7 @@ class PersonaController
 
             $details = 'Erro: '.($result['error'] ?? 'unknown').' | status: '.($result['status'] ?? 'n/a').' | body: '.($result['body'] ?? 'n/a');
 
-            return redirect()->back()->with('error', 'Falha ao enviar mensagem: '.config('services.evolution.base_uri', '').' '.config('services.evolution.instance', '').' '.$details);
+            return redirect()->back()->with('error', 'Falha ao enviar mensagem: '.config('services.evolution.base_uri', '').' '.$details);
         }
 
         return redirect()->back()->with('error', 'Falha inesperada ao enviar a mensagem');

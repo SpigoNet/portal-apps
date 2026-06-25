@@ -30,6 +30,13 @@ class Medicamento extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function resolveRouteBinding($value, $field = null): ?Model
+    {
+        return $this->where($field ?? $this->getRouteKeyName(), $value)
+            ->where('user_id', auth()->id())
+            ->first();
+    }
+
     public function scopeBaixoEstoque($query)
     {
         return $query->whereColumn('estoque_atual', '<=', 'ponto_recompra');

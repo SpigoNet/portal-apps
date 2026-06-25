@@ -12,8 +12,8 @@ class MedicamentoController
 {
     public function index()
     {
-        $medicamentos = Medicamento::all();
-        $alertas = Medicamento::baixoEstoque()->get();
+        $medicamentos = Medicamento::doUsuario(auth()->id())->get();
+        $alertas = Medicamento::baixoEstoque()->doUsuario(auth()->id())->get();
 
         $medicamentosTomadosHoje = RegistroMedicamento::medicamentosTomadosHoje()
             ->pluck('medicamento_id')

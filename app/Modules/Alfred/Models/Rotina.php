@@ -34,6 +34,13 @@ class Rotina extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function resolveRouteBinding($value, $field = null): ?Model
+    {
+        return $this->where($field ?? $this->getRouteKeyName(), $value)
+            ->where('user_id', auth()->id())
+            ->first();
+    }
+
     public function execucoes()
     {
         return $this->hasMany(RotinaExecucao::class, 'rotina_id');

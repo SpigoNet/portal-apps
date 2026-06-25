@@ -11,8 +11,9 @@ class HidratacaoController
 {
     public function index()
     {
-        $progresso = ConsumoAgua::progressoHoje();
-        $historicoHoje = ConsumoAgua::hoje()->get();
+        $userId = auth()->id();
+        $progresso = ConsumoAgua::progressoHoje($userId);
+        $historicoHoje = ConsumoAgua::hoje()->doUsuario($userId)->get();
 
         return view('Alfred::hidratacao.index', compact('progresso', 'historicoHoje'));
     }

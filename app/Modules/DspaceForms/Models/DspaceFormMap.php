@@ -5,7 +5,6 @@ namespace App\Modules\DspaceForms\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-
 class DspaceFormMap extends Model
 {
     use HasFactory;
@@ -14,6 +13,6 @@ class DspaceFormMap extends Model
         'map_type',
         'map_key',
         'submission_name',
+        'xml_configuration_id',
     ];
 }
-

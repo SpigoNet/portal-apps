@@ -11,7 +11,8 @@ class DspaceValuePairsList extends Model
     use HasFactory;
 
     protected $table = 'dspace_value_pairs_lists';
-    protected $fillable = ['name', 'dc_term'];
+
+    protected $fillable = ['name', 'dc_term', 'xml_configuration_id'];
 
     public function pairs(): HasMany
     {

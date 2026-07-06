@@ -9,11 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class DspaceForm extends Model
 {
     use HasFactory;
-    protected $fillable = ['name'];
+
+    protected $fillable = ['name', 'xml_configuration_id'];
 
     public function rows(): HasMany
     {
         return $this->hasMany(DspaceFormRow::class, 'form_id')->orderBy('order');
     }
 }
-

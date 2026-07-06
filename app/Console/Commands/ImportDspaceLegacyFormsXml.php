@@ -3,13 +3,13 @@
 namespace App\Console\Commands;
 
 use App\Console\Commands\Concerns\ImportsVocabularies;
-use App\Modules\DspaceForms\Models\SubmissionProcess;
-use Illuminate\Console\Command;
+use App\Modules\DspaceForms\Models\DspaceForm;
 use App\Modules\DspaceForms\Models\DspaceFormMap;
 use App\Modules\DspaceForms\Models\DspaceValuePairsList;
-use App\Modules\DspaceForms\Models\DspaceValuePair;
-use App\Modules\DspaceForms\Models\DspaceForm;
+use App\Modules\DspaceForms\Models\SubmissionProcess;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ImportDspaceLegacyFormsXml extends Command
 {
@@ -22,17 +22,18 @@ class ImportDspaceLegacyFormsXml extends Command
     public function handle()
     {
         $filePath = $this->argument('file');
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             $this->error("Arquivo não encontrado: {$filePath}");
+
             return 1;
         }
 
         $this->info("Iniciando importação e conversão de {$filePath}...");
 
         try {
-            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            Schema::disableForeignKeyConstraints();
 
-            $this->info("Limpando tabelas antigas...");
+            $this->info('Limpando tabelas antigas...');
             DB::table('dspace_form_maps')->truncate();
             DB::table('dspace_relation_fields')->truncate();
             DB::table('dspace_form_fields')->truncate();
@@ -43,17 +44,17 @@ class ImportDspaceLegacyFormsXml extends Command
             DB::table('submission_steps')->truncate();
             DB::table('submission_processes')->truncate();
 
-            $xml = simplexml_load_file($filePath, "SimpleXMLElement", LIBXML_NOCDATA);
+            $xml = simplexml_load_file($filePath, 'SimpleXMLElement', LIBXML_NOCDATA);
             $vocabularyPath = $this->option('vocabulary-path');
             $importedVocabularies = [];
 
             // 1. Importa <form-map> e cria processos de submissão
-            $this->info("Importando <form-map> e criando processos de submissão...");
+            $this->info('Importando <form-map> e criando processos de submissão...');
             if (isset($xml->{'form-map'})) {
                 foreach ($xml->{'form-map'}->{'name-map'} as $map) {
                     $attributes = $map->attributes();
-                    $handle = (string)$attributes['collection-handle'];
-                    $formName = (string)$attributes['form-name'];
+                    $handle = (string) $attributes['collection-handle'];
+                    $formName = (string) $attributes['form-name'];
 
                     if (trim($handle) !== '') {
                         DspaceFormMap::updateOrCreate(
@@ -63,7 +64,7 @@ class ImportDspaceLegacyFormsXml extends Command
                     }
 
                     // Cria o processo de submissão correspondente
-                    if ($formName !== 'default' && !SubmissionProcess::where('name', $formName)->exists()) {
+                    if ($formName !== 'default' && ! SubmissionProcess::where('name', $formName)->exists()) {
                         SubmissionProcess::create(['name' => $formName]);
                         $this->line(" -> Processo de submissão '{$formName}' criado.");
                     }
@@ -71,10 +72,10 @@ class ImportDspaceLegacyFormsXml extends Command
             }
 
             // 2. Importa <form-definitions> e cria os passos do processo
-            $this->info("Importando e convertendo <form-definitions>...");
-            if(isset($xml->{'form-definitions'})) {
+            $this->info('Importando e convertendo <form-definitions>...');
+            if (isset($xml->{'form-definitions'})) {
                 foreach ($xml->{'form-definitions'}->form as $legacyFormNode) {
-                    $legacyFormName = (string)$legacyFormNode['name'];
+                    $legacyFormName = (string) $legacyFormNode['name'];
                     $process = SubmissionProcess::where('name', $legacyFormName)->first();
                     $steps = [];
 
@@ -83,11 +84,11 @@ class ImportDspaceLegacyFormsXml extends Command
                     }
 
                     foreach ($legacyFormNode->page as $pageNode) {
-                        $pageNumber = (string)$pageNode['number'];
-                        $newFormName = $legacyFormName . '-' . $pageNumber;
+                        $pageNumber = (string) $pageNode['number'];
+                        $newFormName = $legacyFormName.'-'.$pageNumber;
 
                         if ($process) {
-                            $steps[] = ['step_id' => $newFormName . 'Form', 'order' => count($steps)];
+                            $steps[] = ['step_id' => $newFormName.'Form', 'order' => count($steps)];
                         }
 
                         $form = DspaceForm::create(['name' => $newFormName]);
@@ -101,7 +102,7 @@ class ImportDspaceLegacyFormsXml extends Command
 
                             $row->fields()->create($fieldData);
 
-                            if (!empty($fieldData['vocabulary']) && $vocabularyPath) {
+                            if (! empty($fieldData['vocabulary']) && $vocabularyPath) {
                                 $this->importVocabulary($fieldData['vocabulary'], $vocabularyPath, $importedVocabularies);
                             }
                         }
@@ -117,12 +118,12 @@ class ImportDspaceLegacyFormsXml extends Command
             }
 
             // 3. Importa <form-value-pairs>
-            $this->info("Importando <form-value-pairs>...");
-            if(isset($xml->{'form-value-pairs'})) {
+            $this->info('Importando <form-value-pairs>...');
+            if (isset($xml->{'form-value-pairs'})) {
                 foreach ($xml->{'form-value-pairs'}->{'value-pairs'} as $listNode) {
                     $attributes = $listNode->attributes();
-                    $listName = (string)$attributes['value-pairs-name'];
-                    $dcTerm = (string)$attributes['dc-term'];
+                    $listName = (string) $attributes['value-pairs-name'];
+                    $dcTerm = (string) $attributes['dc-term'];
 
                     $list = DspaceValuePairsList::create([
                         'name' => $listName,
@@ -132,8 +133,8 @@ class ImportDspaceLegacyFormsXml extends Command
                     $pairOrder = 0;
                     foreach ($listNode->pair as $pairNode) {
                         $list->pairs()->create([
-                            'displayed_value' => (string)$pairNode->{'displayed-value'},
-                            'stored_value' => (string)$pairNode->{'stored-value'},
+                            'displayed_value' => (string) $pairNode->{'displayed-value'},
+                            'stored_value' => (string) $pairNode->{'stored-value'},
                             'order' => $pairOrder++,
                         ]);
                     }
@@ -141,27 +142,28 @@ class ImportDspaceLegacyFormsXml extends Command
             }
 
         } finally {
-            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            Schema::enableForeignKeyConstraints();
         }
 
-        $this->info("Importação e conversão concluídas com sucesso!");
+        $this->info('Importação e conversão concluídas com sucesso!');
+
         return 0;
     }
 
     private function convertLegacyField(\SimpleXMLElement $fieldNode): array
     {
         $fieldData = [
-            'dc_schema' => (string)$fieldNode->{'dc-schema'},
-            'dc_element' => (string)$fieldNode->{'dc-element'},
-            'dc_qualifier' => (string)$fieldNode->{'dc-qualifier'} ?: null,
-            'repeatable' => (string)$fieldNode->repeatable === 'true',
-            'label' => (string)$fieldNode->label,
-            'input_type' => (string)$fieldNode->{'input-type'},
-            'hint' => (string)$fieldNode->hint,
-            'required' => (string)$fieldNode->required ?: null,
-            'value_pairs_name' => (string)($fieldNode->{'input-type'}['value-pairs-name']) ?: null,
-            'vocabulary' => (string)$fieldNode->vocabulary ?: null,
-            'vocabulary_closed' => isset($fieldNode->vocabulary['closed']) && (string)$fieldNode->vocabulary['closed'] === 'true',
+            'dc_schema' => (string) $fieldNode->{'dc-schema'},
+            'dc_element' => (string) $fieldNode->{'dc-element'},
+            'dc_qualifier' => (string) $fieldNode->{'dc-qualifier'} ?: null,
+            'repeatable' => (string) $fieldNode->repeatable === 'true',
+            'label' => (string) $fieldNode->label,
+            'input_type' => (string) $fieldNode->{'input-type'},
+            'hint' => (string) $fieldNode->hint,
+            'required' => (string) $fieldNode->required ?: null,
+            'value_pairs_name' => (string) ($fieldNode->{'input-type'}['value-pairs-name']) ?: null,
+            'vocabulary' => (string) $fieldNode->vocabulary ?: null,
+            'vocabulary_closed' => isset($fieldNode->vocabulary['closed']) && (string) $fieldNode->vocabulary['closed'] === 'true',
         ];
 
         // Regra 1: Simplificar input-type
@@ -170,7 +172,7 @@ class ImportDspaceLegacyFormsXml extends Command
         }
 
         // Regra 2: Converter dropdowns para vocabulários
-        $metadata = "{$fieldData['dc_schema']}.{$fieldData['dc_element']}" . ($fieldData['dc_qualifier'] ? ".{$fieldData['dc_qualifier']}" : "");
+        $metadata = "{$fieldData['dc_schema']}.{$fieldData['dc_element']}".($fieldData['dc_qualifier'] ? ".{$fieldData['dc_qualifier']}" : '');
         $vocabMap = [
             'dc.description.sponsorship' => 'cursos',
             'dc.publisher' => 'instituicoes',
@@ -186,4 +188,3 @@ class ImportDspaceLegacyFormsXml extends Command
         return $fieldData;
     }
 }
-

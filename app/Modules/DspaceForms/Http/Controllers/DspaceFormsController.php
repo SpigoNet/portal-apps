@@ -6,21 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Modules\DspaceForms\Models\DspaceEmailTemplate;
 use App\Modules\DspaceForms\Models\DspaceForm;
 use App\Modules\DspaceForms\Models\DspaceFormMap;
-// NOVO: Para duplicação
-
-// NOVO: Para duplicação
-
-// NOVO: Para duplicação
 use App\Modules\DspaceForms\Models\DspaceValuePairsList;
 use App\Modules\DspaceForms\Models\DspaceXmlConfiguration;
-// NOVO
 use App\Modules\DspaceForms\Models\SubmissionProcess;
 use App\Modules\DspaceForms\Models\SubmissionStep;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-// NOVO
 use Illuminate\Support\Facades\Storage;
-// NOVO
 use ZipArchive;
 
 class DspaceFormsController extends Controller
@@ -187,6 +179,82 @@ class DspaceFormsController extends Controller
 
         return redirect()->route('dspace-forms.index')
             ->with('success', 'Configuração criada com sucesso.');
+    }
+
+    // --- MÉTODOS DE IMPORTAÇÃO ---
+
+    public function showImportForm(Request $request)
+    {
+        $config = $this->requireConfig($request);
+        if ($config instanceof \Illuminate\Http\RedirectResponse) {
+            return $config;
+        }
+
+        return view('DspaceForms::import', compact('config'));
+    }
+
+    public function importXml(Request $request, DspaceLegacyFormsImporter $importer)
+    {
+        $config = $this->requireConfig($request);
+        if ($config instanceof \Illuminate\Http\RedirectResponse) {
+            return $config;
+        }
+
+        $request->validate([
+            'xml_file' => 'required|file|mimes:xml|max:10240',
+        ], [
+            'xml_file.required' => 'Selecione um arquivo XML.',
+            'xml_file.mimes' => 'O arquivo deve ser XML.',
+            'xml_file.max' => 'O arquivo deve ter no máximo 10MB.',
+        ]);
+
+        $path = $request->file('xml_file')->store('dspace-imports');
+        $fullPath = storage_path('app/'.$path);
+
+        $vocabularyPath = null;
+        if ($request->hasFile('vocabulary_file')) {
+            $request->validate([
+                'vocabulary_file' => 'file|mimes:zip|max:20480',
+            ]);
+
+            $zipPath = $request->file('vocabulary_file')->store('dspace-imports');
+            $zipFullPath = storage_path('app/'.$zipPath);
+            $extractPath = storage_path('app/dspace-imports/vocab-'.uniqid());
+
+            $zip = new \ZipArchive;
+            if ($zip->open($zipFullPath) === true) {
+                $zip->extractTo($extractPath);
+                $zip->close();
+                $vocabularyPath = $extractPath;
+            }
+        }
+
+        try {
+            $importer->import($config, $fullPath, $vocabularyPath);
+
+            return redirect()->route('dspace-forms.index')
+                ->with('success', 'XML importado com sucesso para a configuração "'.$config->name.'".');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erro ao importar: '.$e->getMessage());
+        } finally {
+            unlink($fullPath);
+            if ($vocabularyPath) {
+                $this->rmdirRecursive($vocabularyPath);
+            }
+        }
+    }
+
+    private function rmdirRecursive(string $dir): void
+    {
+        if (! is_dir($dir)) {
+            return;
+        }
+        $items = array_diff(scandir($dir), ['.', '..']);
+        foreach ($items as $item) {
+            $path = $dir.'/'.$item;
+            is_dir($path) ? $this->rmdirRecursive($path) : unlink($path);
+        }
+        rmdir($dir);
     }
 
     // --- MÉTODOS DE EXPORTAÇÃO (FILTRADOS) ---

@@ -26,6 +26,9 @@ Route::middleware(['web'])
 
         Route::get('/export', [DspaceFormsController::class, 'exportAllAsZip'])->name('export.zip');
 
+        Route::get('/import', [DspaceFormsController::class, 'showImportForm'])->name('import.form');
+        Route::post('/import', [DspaceFormsController::class, 'importXml'])->name('import.process');
+
         Route::prefix('value-pairs')->controller(DspaceValuePairsListController::class)->name('value-pairs.')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/{list}/edit', 'edit')->name('edit');

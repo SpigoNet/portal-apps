@@ -20,6 +20,9 @@ $configId = Auth::check() ? session('dspace_config_id_' . Auth::id()) : null;
             <x-dropdown-link :href="route('dspace-forms.value-pairs.index')">
                 Listas de Valores
             </x-dropdown-link>
+            <x-dropdown-link :href="route('dspace-forms.import.form')">
+                Importar XML
+            </x-dropdown-link>
         </x-slot>
     </x-dropdown>
 

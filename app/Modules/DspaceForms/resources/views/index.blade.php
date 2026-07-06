@@ -61,6 +61,9 @@
                                             </button>
                                         </form>
                                         @if($isSelected)
+                                            <a href="{{ route('dspace-forms.import.form') }}" class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 mr-3">
+                                                <i class="fa-solid fa-upload mr-1"></i> Importar XML
+                                            </a>
                                             <a href="{{ route('dspace-forms.export.zip') }}" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">
                                                 <i class="fa-solid fa-download mr-1"></i> Exportar ZIP
                                             </a>

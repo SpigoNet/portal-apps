@@ -10,85 +10,59 @@
         </div>
     </x-slot>
 
-    <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Configurações</h3>
-            
-            @if($allConfigurations->isEmpty())
-                <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
-                    <p class="text-yellow-800 dark:text-yellow-200">Nenhuma configuração encontrada. Crie uma nova configuração para começar.</p>
-                </div>
-            @else
-                <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nome</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Descrição</th>
-                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            @foreach($allConfigurations as $configItem)
-                                @php
-                                    $isSelected = isset($stats['config_id']) && $stats['config_id'] == $configItem->id;
-                                @endphp
-                                <tr class="{{ $isSelected ? 'bg-indigo-50 dark:bg-indigo-900/20' : '' }}">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            @if($isSelected)
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-200 mr-2">
-                                                    <i class="fa-solid fa-check mr-1"></i> Ativa
-                                                </span>
-                                            @endif
-                                            <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $configItem->name }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $configItem->description ?? '-' }}</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        @if(!$isSelected)
-                                            <a href="{{ route('dspace-forms.select-config', ['configId' => $configItem->id]) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 mr-3">
-                                                <i class="fa-solid fa-check mr-1"></i> Selecionar
-                                            </a>
-                                        @endif
-                                        <form method="POST" action="{{ route('dspace-forms.configurations.duplicate', $configItem->id) }}" class="inline mr-3">
-                                            @csrf
-                                            <button type="submit" onclick="event.preventDefault(); if(confirm('Duplicar configuração &quot;{{ $configItem->name }}&quot;?')) { this.closest('form').submit(); }" 
-                                                class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200" title="Duplicar">
-                                                <i class="fa-solid fa-copy mr-1"></i> Duplicar
-                                            </button>
-                                        </form>
-                                        @if($isSelected)
-                                            <a href="{{ route('dspace-forms.import.form') }}" class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 mr-3">
-                                                <i class="fa-solid fa-upload mr-1"></i> Importar XML
-                                            </a>
-                                            <a href="{{ route('dspace-forms.export.zip') }}" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300">
-                                                <i class="fa-solid fa-download mr-1"></i> Exportar ZIP
-                                            </a>
-                                        @endif
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @endif
-
-            @if(!isset($stats['config_id']) && !$allConfigurations->isEmpty())
-                <div class="mt-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                    <p class="text-yellow-800 dark:text-yellow-200 text-sm">Selecione uma configuração acima para começar a editar.</p>
-                </div>
-            @endif
-        </div>
-    </div>
-
     @if(isset($stats['config_id']))
-        <div class="py-2">
+        <div class="py-6">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 rounded-lg p-4 mb-6">
+                    <div class="flex items-center justify-between flex-wrap gap-4">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-gear text-indigo-600 dark:text-indigo-400 text-xl"></i>
+                            <div>
+                                <span class="text-xs text-indigo-600 dark:text-indigo-400 font-medium uppercase tracking-wider">Configuração Ativa</span>
+                                <p class="text-lg font-bold text-indigo-900 dark:text-indigo-100">{{ $config->name }}</p>
+                            </div>
+                        </div>
 
+                        <div class="flex items-center gap-2">
+                            @if($allConfigurations->count() > 1)
+                                <div class="relative" x-data="{ open: false }">
+                                    <button @click="open = !open" class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-md border border-indigo-300 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300 bg-white dark:bg-indigo-900 hover:bg-indigo-100 dark:hover:bg-indigo-800 transition">
+                                        <i class="fa-solid fa-arrow-right-arrow-left mr-2"></i>
+                                        Trocar
+                                    </button>
+                                    <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg border dark:border-gray-700 z-50">
+                                        <div class="py-1">
+                                            @foreach($allConfigurations as $cfg)
+                                                @if($cfg->id !== $stats['config_id'])
+                                                    <a href="{{ route('dspace-forms.select-config', $cfg->id) }}"
+                                                       class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                                                        <span class="font-medium">{{ $cfg->name }}</span>
+                                                        @if($cfg->description)
+                                                            <span class="block text-xs text-gray-500">{{ $cfg->description }}</span>
+                                                        @endif
+                                                    </a>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <a href="{{ route('dspace-forms.import.form') }}"
+                               class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-md border border-yellow-300 dark:border-yellow-600 text-yellow-700 dark:text-yellow-300 bg-white dark:bg-yellow-900 hover:bg-yellow-100 dark:hover:bg-yellow-800 transition">
+                                <i class="fa-solid fa-upload mr-2"></i>
+                                Importar XML
+                            </a>
+                            <a href="{{ route('dspace-forms.export.zip') }}"
+                               class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-md border border-green-300 dark:border-green-600 text-green-700 dark:text-green-300 bg-white dark:bg-green-900 hover:bg-green-100 dark:hover:bg-green-800 transition">
+                                <i class="fa-solid fa-download mr-2"></i>
+                                Exportar ZIP
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6 text-gray-900 dark:text-gray-100">
                             <div class="flex items-center">
@@ -160,8 +134,40 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
+            </div>
+        </div>
+    @else
+        <div class="py-6">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                @if($allConfigurations->isEmpty())
+                    <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
+                        <p class="text-yellow-800 dark:text-yellow-200">Nenhuma configuração encontrada. Crie uma nova configuração para começar.</p>
+                    </div>
+                @else
+                    <div class="text-center mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Selecione uma Configuração</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Escolha uma configuração abaixo para gerenciar seus formulários DSpace.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @foreach($allConfigurations as $configItem)
+                            <div class="border dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-semibold text-lg">{{ $configItem->name }}</h4>
+                                        @if($configItem->description)
+                                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $configItem->description }}</p>
+                                        @endif
+                                    </div>
+                                    <a href="{{ route('dspace-forms.select-config', $configItem->id) }}"
+                                       class="inline-flex items-center px-3 py-1.5 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 transition">
+                                        Selecionar
+                                    </a>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </div>
     @endif

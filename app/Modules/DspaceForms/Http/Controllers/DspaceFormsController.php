@@ -38,13 +38,11 @@ class DspaceFormsController extends Controller
             }
         }
 
-        if (! $configId && $allConfigurations->count() > 1) {
-            return view('DspaceForms::selection', compact('allConfigurations'));
-        }
-
         if (! $configId && $allConfigurations->isNotEmpty()) {
-            $configId = $allConfigurations->first()->id;
-            $this->setConfigId($request, $configId);
+            if ($allConfigurations->count() === 1) {
+                $configId = $allConfigurations->first()->id;
+                $this->setConfigId($request, $configId);
+            }
         }
 
         if ($configId) {
@@ -62,7 +60,7 @@ class DspaceFormsController extends Controller
             return view('DspaceForms::index', compact('stats', 'allConfigurations', 'config'));
         }
 
-        return view('DspaceForms::selection', compact('allConfigurations'));
+        return view('DspaceForms::index', compact('allConfigurations'));
     }
 
     public function selectConfig(Request $request, int $configId)

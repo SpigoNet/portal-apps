@@ -65,10 +65,11 @@ class DspaceFormsController extends Controller
 
     public function selectConfig(Request $request, int $configId)
     {
-        $config = DspaceXmlConfiguration::findOrFail($configId);
+        $config = DspaceXmlConfiguration::find($configId);
 
-        if ($config->user_id !== Auth::id()) {
-            abort(403, 'Acesso não autorizado.');
+        if (! $config || $config->user_id !== Auth::id()) {
+            return redirect()->route('dspace-forms.index')
+                ->with('error', 'Configuração não encontrada.');
         }
 
         $this->setConfigId($request, $configId);

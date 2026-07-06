@@ -50,6 +50,17 @@
                                                class="block px-4 py-2 text-sm text-green-600 dark:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
                                                 <i class="fa-solid fa-plus mr-2"></i>Nova Configuração
                                             </a>
+                                            @foreach($allConfigurations as $cfg)
+                                                @if($cfg->id === $stats['config_id'])
+                                                    <form method="POST" action="{{ route('dspace-forms.configurations.duplicate', $cfg->id) }}" class="block">
+                                                        @csrf
+                                                        <button type="submit" onclick="return confirm('Duplicar configuração &quot;{{ $cfg->name }}&quot;?')"
+                                                                class="w-full text-left px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                                                            <i class="fa-solid fa-copy mr-2"></i>Duplicar Atual
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            @endforeach
                                         </div>
                                     </div>
                                 </div>

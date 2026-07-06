@@ -185,9 +185,20 @@ class DspaceFormsController extends Controller
 
     public function showImportForm(Request $request)
     {
-        $config = $this->requireConfig($request);
-        if ($config instanceof \Illuminate\Http\RedirectResponse) {
-            return $config;
+        $configId = $this->getConfigId($request);
+
+        if (! $configId) {
+            return redirect()->route('dspace-forms.index')
+                ->with('error', 'Selecione ou crie uma configuração primeiro.');
+        }
+
+        $config = DspaceXmlConfiguration::find($configId);
+
+        if (! $config || $config->user_id !== Auth::id()) {
+            $this->clearConfigId($request);
+
+            return redirect()->route('dspace-forms.index')
+                ->with('error', 'Configuração não encontrada. Selecione ou crie uma nova.');
         }
 
         return view('DspaceForms::import', compact('config'));

@@ -10,7 +10,7 @@ use App\Modules\DspaceForms\Http\Controllers\DspaceValuePairsListController;
 use App\Modules\Metricas\Http\Middleware\RegistrarAcesso;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['web', 'auth'])
+Route::middleware(['web'])
     ->prefix('dspace-forms-editor')
     ->name('dspace-forms.')
     ->middleware(RegistrarAcesso::class.':DspaceForms')

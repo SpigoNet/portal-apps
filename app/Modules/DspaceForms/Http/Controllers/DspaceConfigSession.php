@@ -39,7 +39,10 @@ trait DspaceConfigSession
         $config = DspaceXmlConfiguration::find($configId);
 
         if (! $config || $config->user_id !== Auth::id()) {
-            abort(403, 'Acesso não autorizado à configuração.');
+            $this->clearConfigId($request);
+
+            return redirect()->route('dspace-forms.index')
+                ->with('error', 'Configuração não encontrada. Selecione ou crie uma nova.');
         }
 
         return $config;

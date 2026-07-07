@@ -10,6 +10,7 @@ use App\Modules\DspaceForms\Models\DspaceValuePairsList;
 use App\Modules\DspaceForms\Models\DspaceXmlConfiguration;
 use App\Modules\DspaceForms\Models\SubmissionProcess;
 use App\Modules\DspaceForms\Models\SubmissionStep;
+use App\Services\DspaceLegacyFormsImporter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;

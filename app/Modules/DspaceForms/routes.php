@@ -10,10 +10,9 @@ use App\Modules\DspaceForms\Http\Controllers\DspaceValuePairsListController;
 use App\Modules\Metricas\Http\Middleware\RegistrarAcesso;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['web'])
+Route::middleware(['web', 'auth', RegistrarAcesso::class.':DspaceForms'])
     ->prefix('dspace-forms-editor')
     ->name('dspace-forms.')
-    ->middleware(RegistrarAcesso::class.':DspaceForms')
     ->group(function () {
         Route::get('/', [DspaceFormsController::class, 'index'])->name('index');
 

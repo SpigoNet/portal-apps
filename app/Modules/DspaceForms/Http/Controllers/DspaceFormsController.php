@@ -248,7 +248,12 @@ class DspaceFormsController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Erro ao importar: '.$e->getMessage());
         } finally {
-            unlink($fullPath);
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
+            }
+            if (isset($zipFullPath) && file_exists($zipFullPath)) {
+                unlink($zipFullPath);
+            }
             if ($vocabularyPath) {
                 $this->rmdirRecursive($vocabularyPath);
             }

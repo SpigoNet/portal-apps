@@ -246,6 +246,12 @@ class DspaceFormsController extends Controller
             return redirect()->route('dspace-forms.index')
                 ->with('success', 'XML importado com sucesso para a configuração "'.$config->name.'".');
         } catch (\Exception $e) {
+            Log::error('Erro ao importar XML.', [
+                'config_id' => $config->id,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return back()->with('error', 'Erro ao importar: '.$e->getMessage());
         } finally {
             if (file_exists($fullPath)) {
@@ -391,6 +397,11 @@ class DspaceFormsController extends Controller
         $zipPath = storage_path('app/'.$zipFileName);
 
         if ($zip->open($zipPath, ZipArchive::CREATE) !== true) {
+            Log::error('Falha ao criar arquivo ZIP para exportação.', [
+                'config_id' => $configId,
+                'zip_path' => $zipPath,
+            ]);
+
             return back()->with('error', 'Não foi possível criar o arquivo ZIP.');
         }
 

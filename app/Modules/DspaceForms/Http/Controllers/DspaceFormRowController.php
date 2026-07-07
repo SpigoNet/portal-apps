@@ -7,6 +7,7 @@ use App\Modules\DspaceForms\Models\DspaceForm;
 use App\Modules\DspaceForms\Models\DspaceFormRow;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 
 class DspaceFormRowController extends Controller
@@ -46,10 +47,18 @@ class DspaceFormRowController extends Controller
             });
 
             DB::commit();
+
             return Redirect::route('dspace-forms.forms.edit', $form)->with('success', 'Linha e campos associados excluídos com sucesso.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return Redirect::back()->with('error', 'Erro ao excluir a linha: ' . $e->getMessage());
+            Log::error('Erro ao excluir linha.', [
+                'form_id' => $form->id,
+                'row_id' => $row->id,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return Redirect::back()->with('error', 'Erro ao excluir a linha: '.$e->getMessage());
         }
     }
 
@@ -86,10 +95,18 @@ class DspaceFormRowController extends Controller
                 $targetRow->update(['order' => $newTargetOrder]);
 
                 DB::commit();
+
                 return Redirect::route('dspace-forms.forms.edit', $form)->with('success', 'Linha movida com sucesso.');
             } catch (\Exception $e) {
                 DB::rollBack();
-                return Redirect::back()->with('error', 'Erro ao mover a linha: ' . $e->getMessage());
+                Log::error('Erro ao mover linha.', [
+                    'form_id' => $form->id,
+                    'row_id' => $row->id,
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+
+                return Redirect::back()->with('error', 'Erro ao mover a linha: '.$e->getMessage());
             }
         }
 

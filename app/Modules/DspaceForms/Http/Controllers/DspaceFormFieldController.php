@@ -3,9 +3,9 @@
 namespace App\Modules\DspaceForms\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\DspaceForms\Models\DspaceFormRow;
-use App\Modules\DspaceForms\Models\DspaceFormField;
 use App\Modules\DspaceForms\Models\DspaceForm;
+use App\Modules\DspaceForms\Models\DspaceFormField;
+use App\Modules\DspaceForms\Models\DspaceFormRow;
 use App\Modules\DspaceForms\Models\DspaceValuePairsList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -43,13 +43,13 @@ class DspaceFormFieldController extends Controller
         $listSelection = $request->input('list_selection');
         $vocabularyClosed = $request->boolean('vocabulary_closed');
 
-// 2. Reseta os campos antigos (garantir que apenas um seja preenchido)
+        // 2. Reseta os campos antigos (garantir que apenas um seja preenchido)
         $validated['value_pairs_name'] = null;
         $validated['vocabulary'] = null;
         $validated['vocabulary_closed'] = false;
 
-// 3. Processa a nova seleção
-        if (!empty($listSelection)) {
+        // 3. Processa a nova seleção
+        if (! empty($listSelection)) {
             [$type, $name] = explode(':', $listSelection, 2);
 
             if ($type === 'simple') {
@@ -85,13 +85,13 @@ class DspaceFormFieldController extends Controller
         $listSelection = $request->input('list_selection');
         $vocabularyClosed = $request->boolean('vocabulary_closed');
 
-// 2. Reseta os campos antigos (garantir que apenas um seja preenchido)
+        // 2. Reseta os campos antigos (garantir que apenas um seja preenchido)
         $validated['value_pairs_name'] = null;
         $validated['vocabulary'] = null;
         $validated['vocabulary_closed'] = false;
 
-// 3. Processa a nova seleção
-        if (!empty($listSelection)) {
+        // 3. Processa a nova seleção
+        if (! empty($listSelection)) {
             [$type, $name] = explode(':', $listSelection, 2);
 
             if ($type === 'simple') {
@@ -125,7 +125,6 @@ class DspaceFormFieldController extends Controller
         $row->fields()->orderBy('order')->get()->each(function ($f, $index) {
             $f->update(['order' => $index + 1]);
         });
-
 
         return Redirect::route('dspace-forms.forms.edit', $form)->with('success', 'Campo excluído com sucesso.');
     }
@@ -163,10 +162,19 @@ class DspaceFormFieldController extends Controller
                 $targetField->update(['order' => $newTargetOrder]);
 
                 DB::commit();
+
                 return Redirect::route('dspace-forms.forms.edit', $form)->with('success', 'Campo movido com sucesso.');
             } catch (\Exception $e) {
                 DB::rollBack();
-                return Redirect::back()->with('error', 'Erro ao mover o campo: ' . $e->getMessage());
+                Log::error('Erro ao mover campo.', [
+                    'form_id' => $form->id,
+                    'row_id' => $row->id,
+                    'field_id' => $field->id,
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+
+                return Redirect::back()->with('error', 'Erro ao mover o campo: '.$e->getMessage());
             }
         }
 

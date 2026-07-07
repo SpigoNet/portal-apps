@@ -9,6 +9,7 @@ use App\Modules\DspaceForms\Models\DspaceFormRow;
 use App\Modules\DspaceForms\Models\DspaceValuePairsList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 
 class DspaceFormFieldController extends Controller

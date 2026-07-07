@@ -13,6 +13,7 @@ use App\Modules\DspaceForms\Models\SubmissionStep;
 use App\Services\DspaceLegacyFormsImporter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use ZipArchive;
 

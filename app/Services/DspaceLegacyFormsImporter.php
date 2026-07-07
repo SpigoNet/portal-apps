@@ -8,6 +8,7 @@ use App\Modules\DspaceForms\Models\DspaceValuePairsList;
 use App\Modules\DspaceForms\Models\DspaceXmlConfiguration;
 use App\Modules\DspaceForms\Models\SubmissionProcess;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DspaceLegacyFormsImporter
 {
@@ -20,7 +21,7 @@ class DspaceLegacyFormsImporter
         DB::transaction(function () use ($configId, $filePath, $vocabularyPath) {
             $this->clearConfigData($configId);
 
-            $xml = simplexml_load_file($filePath, 'SimpleXMLElement', LIBXML_NOCDATA);
+            $xml = $this->loadXmlFile($filePath);
 
             if (isset($xml->{'form-map'})) {
                 $this->importFormMap($configId, $xml);
@@ -170,7 +171,7 @@ class DspaceLegacyFormsImporter
 
         $list->pairs()->delete();
 
-        $xml = simplexml_load_file($filePath);
+        $xml = $this->loadXmlFile($filePath);
         $order = 0;
         $this->processNode($xml, $order, $list->id);
 
@@ -198,6 +199,29 @@ class DspaceLegacyFormsImporter
                 }
             }
         }
+    }
+
+    private function loadXmlFile(string $filePath): \SimpleXMLElement
+    {
+        $content = file_get_contents($filePath);
+
+        if ($content === false) {
+            throw new \RuntimeException("Failed to read file: {$filePath}");
+        }
+
+        $content = preg_replace('/<!DOCTYPE[^>]*>/', '', $content);
+
+        $xml = simplexml_load_string($content, 'SimpleXMLElement', LIBXML_NOCDATA);
+
+        if ($xml === false) {
+            $errors = libxml_get_errors();
+            libxml_clear_errors();
+            $message = 'Failed to parse XML: '.implode('; ', array_map(fn ($e) => trim($e->message), $errors));
+            Log::error($message, ['file' => $filePath]);
+            throw new \RuntimeException($message);
+        }
+
+        return $xml;
     }
 
     private function convertLegacyField(\SimpleXMLElement $fieldNode): array

@@ -38,7 +38,7 @@ trait DspaceConfigSession
 
         $config = DspaceXmlConfiguration::find($configId);
 
-        if (! $config || $config->user_id !== Auth::id()) {
+        if (! $config || (int) $config->user_id !== (int) Auth::id()) {
             $this->clearConfigId($request);
 
             return redirect()->route('dspace-forms.index')
@@ -58,7 +58,7 @@ trait DspaceConfigSession
 
         $config = DspaceXmlConfiguration::find($configId);
 
-        if (! $config || $config->user_id !== Auth::id()) {
+        if (! $config || (int) $config->user_id !== (int) Auth::id()) {
             return null;
         }
 

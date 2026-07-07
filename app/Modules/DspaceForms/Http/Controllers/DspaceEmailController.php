@@ -27,7 +27,7 @@ class DspaceEmailController extends Controller
 
     public function edit(DspaceEmailTemplate $template)
     {
-        if ($template->configuration->user_id !== Auth::id()) {
+        if ((int) $template->configuration->user_id !== (int) Auth::id()) {
             abort(403);
         }
 
@@ -36,7 +36,7 @@ class DspaceEmailController extends Controller
 
     public function update(Request $request, DspaceEmailTemplate $template)
     {
-        if ($template->configuration->user_id !== Auth::id()) {
+        if ((int) $template->configuration->user_id !== (int) Auth::id()) {
             abort(403);
         }
 

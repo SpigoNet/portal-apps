@@ -33,7 +33,7 @@ class DspaceFormsController extends Controller
         if ($configId) {
             $config = DspaceXmlConfiguration::find($configId);
 
-            if (! $config || $config->user_id !== Auth::id()) {
+            if (! $config || (int) $config->user_id !== (int) Auth::id()) {
                 $configId = null;
                 $this->clearConfigId($request);
             }
@@ -68,7 +68,7 @@ class DspaceFormsController extends Controller
     {
         $config = DspaceXmlConfiguration::find($configId);
 
-        if (! $config || $config->user_id !== Auth::id()) {
+        if (! $config || (int) $config->user_id !== (int) Auth::id()) {
             return redirect()->route('dspace-forms.index')
                 ->with('error', 'Configuração não encontrada.');
         }
@@ -194,7 +194,7 @@ class DspaceFormsController extends Controller
 
         $config = DspaceXmlConfiguration::find($configId);
 
-        if (! $config || $config->user_id !== Auth::id()) {
+        if (! $config || (int) $config->user_id !== (int) Auth::id()) {
             $this->clearConfigId($request);
 
             return redirect()->route('dspace-forms.index')
@@ -275,7 +275,7 @@ class DspaceFormsController extends Controller
      */
     public function duplicate(Request $request, DspaceXmlConfiguration $configuration)
     {
-        if ($configuration->user_id !== Auth::id()) {
+        if ((int) $configuration->user_id !== (int) Auth::id()) {
             return back()->with('error', 'Acesso não autorizado para duplicar esta configuração.');
         }
 

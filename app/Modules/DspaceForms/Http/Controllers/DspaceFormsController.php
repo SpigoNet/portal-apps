@@ -221,7 +221,7 @@ class DspaceFormsController extends Controller
         ]);
 
         $path = $request->file('xml_file')->store('dspace-imports');
-        $fullPath = storage_path('app/'.$path);
+        $fullPath = \Storage::disk('local')->path($path);
 
         $vocabularyPath = null;
         if ($request->hasFile('vocabulary_file')) {
@@ -230,8 +230,8 @@ class DspaceFormsController extends Controller
             ]);
 
             $zipPath = $request->file('vocabulary_file')->store('dspace-imports');
-            $zipFullPath = storage_path('app/'.$zipPath);
-            $extractPath = storage_path('app/dspace-imports/vocab-'.uniqid());
+            $zipFullPath = \Storage::disk('local')->path($zipPath);
+            $extractPath = \Storage::disk('local')->path('dspace-imports/vocab-'.uniqid());
 
             $zip = new \ZipArchive;
             if ($zip->open($zipFullPath) === true) {

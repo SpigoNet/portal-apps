@@ -238,9 +238,13 @@
 
     <!-- Selected sum overlay -->
     <div id="selected-sum-overlay" class="hidden fixed bottom-6 right-6 z-50">
-        <div class="mithril-theme-surface px-4 py-3 rounded-xl shadow-lg text-sm flex flex-col items-end gap-1">
+        <div class="mithril-theme-surface px-4 py-3 rounded-xl shadow-lg text-sm flex flex-col items-end gap-0.5">
             <div class="text-slate-400 text-xs" id="selected-count">0 selecionado(s)</div>
-            <div class="text-white font-bold text-lg" id="selected-sum">R$ 0,00</div>
+            <div class="flex flex-col items-end gap-0.5 mt-1">
+                <div class="text-emerald-400 font-semibold text-sm" id="selected-credits">Créditos: R$ 0,00</div>
+                <div class="text-rose-400 font-semibold text-sm" id="selected-debits">Débitos: R$ 0,00</div>
+                <div class="text-white font-bold text-lg border-t border-white/10 pt-1 w-full text-right" id="selected-sum">R$ 0,00</div>
+            </div>
         </div>
     </div>
 
@@ -253,7 +257,7 @@
             display: none;
         }
         #selected-sum-overlay .mithril-theme-surface {
-            min-width: 180px;
+            min-width: 220px;
         }
     </style>
 
@@ -368,14 +372,24 @@
 
             function updateOverlay() {
                 const selected = rows.filter(r => r.classList.contains('selected-row'));
+                const creditsEl = document.getElementById('selected-credits');
+                const debitsEl = document.getElementById('selected-debits');
                 if (selected.length === 0) {
                     overlay.classList.add('hidden');
                     selectedSumEl.textContent = formatCurrency(0);
                     selectedCountEl.textContent = '0 selecionado(s)';
                     return;
                 }
-                const sum = selected.reduce((acc, r) => acc + parseFloat(r.dataset.valor || 0), 0);
-                selectedSumEl.textContent = formatCurrency(sum);
+                let credits = 0, debits = 0;
+                selected.forEach(r => {
+                    const v = parseFloat(r.dataset.valor || 0);
+                    if (v > 0) credits += v;
+                    else debits += v;
+                });
+                const total = credits + debits;
+                creditsEl.textContent = 'Créditos: ' + formatCurrency(credits);
+                debitsEl.textContent = 'Débitos: ' + formatCurrency(debits);
+                selectedSumEl.textContent = formatCurrency(total);
                 selectedCountEl.textContent = selected.length + ' selecionado(s)';
                 overlay.classList.remove('hidden');
             }

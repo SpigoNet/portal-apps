@@ -125,6 +125,27 @@ class PreTransacaoAcoesController extends Controller
     }
 
     /**
+     * Estornar: desfaz uma efetivação apagando a transação e retrocedendo a parcela
+     */
+    public function estornar(Request $request, $id)
+    {
+        $transacao = Transacao::findOrFail($id);
+        $pt = $transacao->preTransacao;
+
+        if ($pt && $pt->tipo === 'parcelada' && $pt->parcela_atual > 0) {
+            $pt->decrement('parcela_atual');
+        }
+
+        $transacao->delete();
+
+        return redirect()->route('mithril.lancamentos.index', [
+            'mes' => $request->input('mes', now()->month),
+            'ano' => $request->input('ano', now()->year),
+            'conta_id' => $request->input('conta_id'),
+        ])->with('success', 'Transação estornada com sucesso.');
+    }
+
+    /**
      * Passo 2: Efetivar (O Pagamento Real)
      */
     public function efetivar(Request $request, $id)

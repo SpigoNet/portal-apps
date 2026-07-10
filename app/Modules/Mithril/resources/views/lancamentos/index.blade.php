@@ -237,10 +237,26 @@
                                                     </a>
                                                 @endif
                                             @else
-                                            <div
-                                                class="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full elf-title text-[8px] flex items-center gap-1 border border-emerald-500/20">
-                                                <i class="fa-solid fa-check-double text-[8px]"></i>
-                                                Efetivado
+                                            <div class="flex items-center gap-2">
+                                                <div
+                                                    class="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full elf-title text-[8px] flex items-center gap-1 border border-emerald-500/20">
+                                                    <i class="fa-solid fa-check-double text-[8px]"></i>
+                                                    Efetivado
+                                                </div>
+                                                <form
+                                                    action="{{ route('mithril.transacoes.estornar', ['id' => $item->id]) }}"
+                                                    method="POST" class="inline">
+                                                    @csrf
+                                                    <input type="hidden" name="mes" value="{{ $mes }}">
+                                                    <input type="hidden" name="ano" value="{{ $ano }}">
+                                                    <input type="hidden" name="conta_id" value="{{ $contaId }}">
+                                                    <button type="submit"
+                                                        class="p-2 bg-rose-500/20 text-rose-400 rounded-lg hover:bg-rose-500 hover:text-white transition shadow-lg border border-rose-500/20"
+                                                        title="Estornar (desfazer efetivação)"
+                                                        onclick="return confirm('Tem certeza que deseja estornar esta transação?')">
+                                                        <i class="fa-solid fa-rotate-left text-xs"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         @endif
                                     </div>

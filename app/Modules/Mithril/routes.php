@@ -29,6 +29,7 @@ Route::prefix('mithril')
         Route::post('/pre-transacao/{id}/confirmar', [PreTransacaoAcoesController::class, 'confirmar'])->name('pre-transacoes.confirmar');
         Route::post('/pre-transacao/{id}/efetivar', [PreTransacaoAcoesController::class, 'efetivar'])->name('pre-transacoes.efetivar');
         Route::post('/pre-transacao/{id}/paguei-agora', [PreTransacaoAcoesController::class, 'pagueiAgora'])->name('pre-transacoes.paguei-agora');
+        Route::post('/transacao/{id}/estornar', [PreTransacaoAcoesController::class, 'estornar'])->name('transacoes.estornar');
 
         Route::get('/fechamentos', [FechamentoController::class, 'index'])->name('fechamentos.index');
         Route::post('/fechamentos', [FechamentoController::class, 'store'])->name('fechamentos.store');

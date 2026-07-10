@@ -594,7 +594,23 @@
                 });
             });
 
-            // (toggle handlers already attached above)
+            // Toggle Ocultar Efetivados
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function () {
+                    const isHidden = table.getAttribute('data-hide-efetivados') === 'true';
+                    const newVal = isHidden ? 'false' : 'true';
+                    table.setAttribute('data-hide-efetivados', newVal);
+
+                    const icon = toggleBtn.querySelector('i');
+                    if (newVal === 'true') {
+                        toggleBtn.innerHTML = '<i class="fa-solid fa-eye mr-2"></i> Mostrar Efetivados';
+                        toggleBtn.title = 'Mostrar lançamentos já efetivados';
+                    } else {
+                        toggleBtn.innerHTML = '<i class="fa-solid fa-eye-slash mr-2"></i> Ocultar Efetivados';
+                        toggleBtn.title = 'Oculta/mostra lançamentos já efetivados';
+                    }
+                });
+            }
         });
     </script>
 

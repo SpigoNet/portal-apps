@@ -239,7 +239,12 @@
     <!-- Selected sum overlay -->
     <div id="selected-sum-overlay" class="hidden fixed bottom-6 right-6 z-50">
         <div class="mithril-theme-surface px-4 py-3 rounded-xl shadow-lg text-sm flex flex-col items-end gap-0.5">
-            <div class="text-slate-400 text-xs" id="selected-count">0 selecionado(s)</div>
+            <div class="flex items-center gap-2">
+                <div class="text-slate-400 text-xs" id="selected-count">0 selecionado(s)</div>
+                <button type="button" id="clear-selection-btn" class="text-slate-600 hover:text-slate-300 transition text-xs" title="Limpar seleção">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
             <div class="flex flex-col items-end gap-0.5 mt-1">
                 <div class="text-emerald-400 font-semibold text-sm" id="selected-credits">Créditos: R$ 0,00</div>
                 <div class="text-rose-400 font-semibold text-sm" id="selected-debits">Débitos: R$ 0,00</div>
@@ -401,6 +406,12 @@
                     r.classList.toggle('selected-row');
                     updateOverlay();
                 });
+            });
+
+            // Clear selection button
+            document.getElementById('clear-selection-btn').addEventListener('click', function () {
+                rows.forEach(r => r.classList.remove('selected-row'));
+                updateOverlay();
             });
 
             // Prevent action buttons from selecting the row

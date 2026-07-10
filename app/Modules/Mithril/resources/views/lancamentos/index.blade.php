@@ -177,6 +177,20 @@
                                     <div class="flex justify-center items-center gap-2">
                                             @if ($item->tipo === 'projetado')
                                                 @if ($item->status === 'pendente')
+                                                    <form
+                                                        action="{{ route('mithril.pre-transacoes.paguei-agora', ['id' => $item->pre_transacao_id]) }}"
+                                                        method="POST" class="inline">
+                                                        @csrf
+                                                        <input type="hidden" name="valor" value="{{ $item->valor }}">
+                                                        <input type="hidden" name="mes" value="{{ $mes }}">
+                                                        <input type="hidden" name="ano" value="{{ $ano }}">
+                                                        <input type="hidden" name="conta_id" value="{{ $contaId }}">
+                                                        <button type="submit"
+                                                            class="p-2 bg-violet-500/20 text-violet-300 rounded-lg hover:bg-violet-500 hover:text-white transition shadow-lg border border-violet-500/20"
+                                                            title="Paguei agora (confirma e efetiva na data atual)">
+                                                            <i class="fa-solid fa-bolt text-xs"></i>
+                                                        </button>
+                                                    </form>
                                                     <a href="{{ route('mithril.pre-transacoes.form-confirmar', ['id' => $item->pre_transacao_id, 'mes' => $mes, 'ano' => $ano, 'conta_id' => $contaId]) }}"
                                                         class="p-2 bg-amber-500/20 text-amber-400 rounded-lg hover:bg-amber-500 hover:text-white transition shadow-lg border border-amber-500/20 js-open-confirm"
                                                         title="Confirmar Valor"
@@ -186,6 +200,20 @@
                                                         <i class="fa-solid fa-pen-to-square text-xs"></i>
                                                     </a>
                                                 @elseif($item->status === 'confirmado')
+                                                    <form
+                                                        action="{{ route('mithril.pre-transacoes.paguei-agora', ['id' => $item->pre_transacao_id]) }}"
+                                                        method="POST" class="inline">
+                                                        @csrf
+                                                        <input type="hidden" name="valor" value="{{ $item->valor }}">
+                                                        <input type="hidden" name="mes" value="{{ $mes }}">
+                                                        <input type="hidden" name="ano" value="{{ $ano }}">
+                                                        <input type="hidden" name="conta_id" value="{{ $contaId }}">
+                                                        <button type="submit"
+                                                            class="p-2 bg-violet-500/20 text-violet-300 rounded-lg hover:bg-violet-500 hover:text-white transition shadow-lg border border-violet-500/20"
+                                                            title="Paguei agora (efetiva na data atual)">
+                                                            <i class="fa-solid fa-bolt text-xs"></i>
+                                                        </button>
+                                                    </form>
                                                     <form
                                                         action="{{ route('mithril.pre-transacoes.efetivar', ['id' => $item->pre_transacao_id]) }}"
                                                         method="POST" class="inline">

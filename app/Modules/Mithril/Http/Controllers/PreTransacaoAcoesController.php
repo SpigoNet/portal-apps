@@ -66,8 +66,62 @@ class PreTransacaoAcoesController extends Controller
         return redirect()->route('mithril.lancamentos.index', [
             'mes' => $request->mes,
             'ano' => $request->ano,
-            'conta_id' => $request->conta_id // <--- O segredo está aqui
+            'conta_id' => $request->conta_id, // <--- O segredo está aqui
         ])->with('success', 'Fatura confirmada e valor atualizado.');
+    }
+
+    /**
+     * Atalho: Confirmar + Efetivar num click só, sempre com data atual
+     */
+    public function pagueiAgora(Request $request, $id)
+    {
+        $pt = PreTransacao::findOrFail($id);
+
+        $hoje = now();
+        $mes = $request->input('mes', $hoje->month);
+        $ano = $request->input('ano', $hoje->year);
+
+        // 1. Confirma com a data de hoje
+        $pt->valor_parcela = $request->input('valor', $pt->valor_parcela);
+        $pt->dia_vencimento = (int) $hoje->format('d');
+        $pt->data_ultima_acao = $hoje->format('Y-m-d');
+        $pt->save();
+
+        // 2. Efetiva (cria a transação real)
+        $transacao = Transacao::create([
+            'user_id' => auth()->id(),
+            'conta_id' => $pt->conta_id,
+            'pre_transacao_id' => $pt->id,
+            'descricao' => $pt->descricao,
+            'valor' => $pt->valor_parcela,
+            'data_efetiva' => $hoje->format('Y-m-d'),
+        ]);
+
+        if ($pt->tipo === 'parcelada') {
+            $pt->increment('parcela_atual');
+        }
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'data' => [
+                    'transacao' => [
+                        'id' => $transacao->id,
+                        'descricao' => $transacao->descricao,
+                        'valor' => (float) $transacao->valor,
+                        'data_efetiva' => $transacao->data_efetiva?->format('Y-m-d'),
+                    ],
+                    'pre_transacao_id' => $pt->id,
+                    'parcela_atual' => $pt->parcela_atual,
+                ],
+                'message' => 'Pagamento registado com sucesso!',
+            ], 201);
+        }
+
+        return redirect()->route('mithril.lancamentos.index', [
+            'mes' => $mes,
+            'ano' => $ano,
+            'conta_id' => $request->input('conta_id'),
+        ])->with('success', 'Pagamento registado com sucesso!');
     }
 
     /**
@@ -115,7 +169,7 @@ class PreTransacaoAcoesController extends Controller
         return redirect()->route('mithril.lancamentos.index', [
             'mes' => $mes,
             'ano' => $ano,
-            'conta_id' => $request->input('conta_id') // <--- Mantém o filtro
+            'conta_id' => $request->input('conta_id'), // <--- Mantém o filtro
         ])->with('success', 'Pagamento registado com sucesso!');
     }
 }

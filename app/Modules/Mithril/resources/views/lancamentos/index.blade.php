@@ -56,12 +56,12 @@
                         </select>
                     </div>
 
-                    <button type="submit" class="btn-elf text-white bg-mithril-primary/20 px-4 py-1.5 rounded-full">
+                    <button type="submit" class="btn-elf text-white bg-mithril-primary/20 px-4 py-1.5 rounded-lg">
                         <i class="fa-solid fa-filter mr-2"></i>
                         Filtrar
                     </button>
                     
-                    <button type="button" id="toggle-efetivados-btn" class="btn-elf text-white bg-black/20 px-4 py-1.5 rounded-full"
+                    <button type="button" id="toggle-efetivados-btn" class="btn-elf text-white bg-black/20 px-4 py-1.5 rounded-lg"
                         title="Oculta/mostra lançamentos já efetivados">
                         <i class="fa-solid fa-eye-slash mr-2"></i>
                         Ocultar Efetivados

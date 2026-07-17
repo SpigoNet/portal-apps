@@ -21,7 +21,7 @@
             <thead>
                 <tr style="text-align:left; color:var(--text-muted); font-size:0.9rem;">
                     <th style="padding:10px 8px; border-bottom:1px solid #eee;">Persona</th>
-                    <th style="padding:10px 8px; border-bottom:1px solid #eee;">Mensagem</th>
+                    <th style="padding:10px 8px; border-bottom:1px solid #eee;">Instrução</th>
                     <th style="padding:10px 8px; border-bottom:1px solid #eee; width:100px;">Intervalo</th>
                     <th style="padding:10px 8px; border-bottom:1px solid #eee; width:120px;">Horário</th>
                     <th style="padding:10px 8px; border-bottom:1px solid #eee; width:80px;">Ativo</th>

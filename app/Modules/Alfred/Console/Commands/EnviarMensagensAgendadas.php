@@ -4,6 +4,7 @@ namespace App\Modules\Alfred\Console\Commands;
 
 use App\Modules\Alfred\Models\Agendamento;
 use App\Modules\Alfred\Services\EvolutionApiService;
+use App\Modules\Alfred\Services\MensagemPersonaService;
 use Illuminate\Console\Command;
 
 class EnviarMensagensAgendadas extends Command
@@ -12,7 +13,7 @@ class EnviarMensagensAgendadas extends Command
 
     protected $description = 'Envia mensagens agendadas via WhatsApp pelas personas configuradas';
 
-    public function handle(EvolutionApiService $evo): int
+    public function handle(EvolutionApiService $evo, MensagemPersonaService $mensagemPersonaService): int
     {
         $agendamentos = Agendamento::with('persona')
             ->where('ativa', true)
@@ -41,12 +42,7 @@ class EnviarMensagensAgendadas extends Command
                 continue;
             }
 
-            $mensagem = $agendamento->mensagem;
-
-            $greeting = $persona->personality['greetings'][0] ?? '';
-            if ($greeting !== '') {
-                $mensagem = $greeting."\n".$mensagem;
-            }
+            $mensagem = $mensagemPersonaService->gerarMensagem($persona, (string) $agendamento->mensagem);
 
             $resultado = $evo->sendTextToGroup($persona->whatsapp_group_jid, $mensagem);
 

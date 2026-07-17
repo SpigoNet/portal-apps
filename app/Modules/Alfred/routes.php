@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\Alfred\Http\Controllers\AdminController;
+use App\Modules\Alfred\Http\Controllers\AgendamentoController;
 use App\Modules\Alfred\Http\Controllers\DashboardController;
 use App\Modules\Alfred\Http\Controllers\DiaRuimController;
 use App\Modules\Alfred\Http\Controllers\HidratacaoController;
@@ -34,6 +35,15 @@ Route::prefix('alfred')
             Route::put('/personas/{persona}', [PersonaController::class, 'update'])->name('personas.update');
             Route::delete('/personas/{persona}', [PersonaController::class, 'destroy'])->name('personas.destroy');
             Route::post('/personas/{persona}/send-test', [PersonaController::class, 'sendTestMessage'])->name('personas.send-test');
+
+            Route::get('/agendamentos', [AgendamentoController::class, 'index'])->name('agendamentos.index');
+            Route::get('/agendamentos/criar', [AgendamentoController::class, 'create'])->name('agendamentos.create');
+            Route::post('/agendamentos', [AgendamentoController::class, 'store'])->name('agendamentos.store');
+            Route::get('/agendamentos/{agendamento}/editar', [AgendamentoController::class, 'edit'])->name('agendamentos.edit');
+            Route::put('/agendamentos/{agendamento}', [AgendamentoController::class, 'update'])->name('agendamentos.update');
+            Route::delete('/agendamentos/{agendamento}', [AgendamentoController::class, 'destroy'])->name('agendamentos.destroy');
+            Route::post('/agendamentos/{agendamento}/toggle', [AgendamentoController::class, 'toggle'])->name('agendamentos.toggle');
+            Route::post('/agendamentos/{agendamento}/send-test', [AgendamentoController::class, 'sendTest'])->name('agendamentos.send-test');
         });
 
         Route::get('/tarefas', [TarefaController::class, 'index'])->name('tarefas.index');

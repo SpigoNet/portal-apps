@@ -8,3 +8,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('treetask:daily-motivation')->dailyAt('08:00');
+Schedule::command('alfred:enviar-mensagens-agendadas')->everyMinute();

@@ -37,6 +37,12 @@
             <div style="font-size: 1.125rem; font-weight: 600; color: var(--text-primary);">Personas</div>
             <div style="font-size: 0.875rem; color: var(--text-muted);">Gerencie personagens que interagem via WhatsApp</div>
         </a>
+
+        <a href="{{ route('alfred.admin.agendamentos.index') }}" class="card" style="display: block; padding: 20px; text-decoration: none; border-left: 4px solid var(--accent-orange);">
+            <div style="font-size: 2rem; margin-bottom: 8px;">⏰</div>
+            <div style="font-size: 1.125rem; font-weight: 600; color: var(--text-primary);">Agendamentos</div>
+            <div style="font-size: 0.875rem; color: var(--text-muted);">Mensagens periódicas via WhatsApp por persona</div>
+        </a>
     </div>
 </div>
 @endsection

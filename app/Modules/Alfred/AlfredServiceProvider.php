@@ -2,6 +2,7 @@
 
 namespace App\Modules\Alfred;
 
+use App\Modules\Alfred\Console\Commands\EnviarMensagensAgendadas;
 use App\Modules\Alfred\Console\Commands\RelatorioManha;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -23,6 +24,7 @@ class AlfredServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->commands([
+            EnviarMensagensAgendadas::class,
             RelatorioManha::class,
         ]);
     }

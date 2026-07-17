@@ -61,7 +61,12 @@ class MensagemPersonaService
 
     private function fallbackMensagem(Persona $persona, string $instrucao): string
     {
-        $greetings = $persona->personality['greetings'] ?? [];
+        $personality = $persona->personality;
+        if (! is_array($personality)) {
+            $personality = [];
+        }
+
+        $greetings = $personality['greetings'] ?? [];
         if (! is_array($greetings)) {
             $greetings = [];
         }

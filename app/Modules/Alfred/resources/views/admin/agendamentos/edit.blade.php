@@ -24,8 +24,9 @@
         </div>
 
         <div class="form-group">
-            <label for="mensagem">Mensagem</label>
+            <label for="mensagem">Instrução para gerar a mensagem</label>
             <textarea name="mensagem" id="mensagem" class="form-control" rows="4" required>{{ old('mensagem', $agendamento->mensagem) }}</textarea>
+            <small style="color:var(--text-muted);">A IA usa esta instrução e o perfil da persona para montar o texto final enviado.</small>
         </div>
 
         <div class="form-group">

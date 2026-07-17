@@ -26,8 +26,9 @@
         </div>
 
         <div class="form-group">
-            <label for="mensagem">Mensagem</label>
-            <textarea name="mensagem" id="mensagem" class="form-control" rows="4" required placeholder="Ex: Hora de beber água! Cuidado com o corpo, tá?">{{ old('mensagem') }}</textarea>
+            <label for="mensagem">Instrução para gerar a mensagem</label>
+            <textarea name="mensagem" id="mensagem" class="form-control" rows="4" required placeholder="Ex: Lembrar de beber água com carinho e tom animado.">{{ old('mensagem') }}</textarea>
+            <small style="color:var(--text-muted);">Esse texto é uma intenção. A mensagem final será criada pela IA no estilo da persona selecionada.</small>
             @error('mensagem')
                 <small style="color:var(--accent-red);">{{ $message }}</small>
             @enderror

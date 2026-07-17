@@ -41,6 +41,11 @@
 - **Prefix:** `/admin`
 - **Key Note:** Manages global AI providers used by other modules.
 
+### Alfred
+- **Purpose:** Personal assistant / self-care dashboard (routines, medications, hydration, energy, TreeTask tasks).
+- **Prefix:** `/alfred`
+- **Key Note:** Self-contained layout with inline CSS (no Tailwind). WhatsApp notifications via Evolution API. See `app/Modules/Alfred/AGENTS.md`.
+
 ### ANT (Academic Notification Tool)
 - **Purpose:** Academic management (Subjects, Professors, Assignments, Exams).
 - **Prefix:** `/ant`

@@ -19,7 +19,7 @@ class MensagemPersonaService
 
         $personality = $persona->personality ?? [];
         $personalityJson = json_encode($personality, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        if (! is_string($personalityJson)) {
+        if ($personalityJson === false) {
             $personalityJson = '{}';
         }
 
@@ -47,6 +47,7 @@ class MensagemPersonaService
                 return $this->fallbackMensagem($persona, $instrucao);
             }
 
+            // Campo de agendamento usa limite de 2000 caracteres; mantemos o texto final no mesmo tamanho.
             return mb_substr($textoGerado, 0, 2000);
         } catch (\Throwable $e) {
             Log::warning('Falha ao gerar mensagem com IA para persona', [
@@ -60,7 +61,12 @@ class MensagemPersonaService
 
     private function fallbackMensagem(Persona $persona, string $instrucao): string
     {
-        $greeting = trim((string) ($persona->personality['greetings'][0] ?? ''));
+        $greetings = $persona->personality['greetings'] ?? [];
+        if (! is_array($greetings)) {
+            $greetings = [];
+        }
+
+        $greeting = trim((string) ($greetings[0] ?? ''));
 
         if ($greeting !== '') {
             return mb_substr($greeting."\n".$instrucao, 0, 2000);

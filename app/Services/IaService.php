@@ -26,10 +26,11 @@ class IaService
         // Se não houver um usuário logado (ex: cron), pegamos o padrão do sistema.
         try {
             $aiProviderService = new AiProviderService;
-            $driverName = $aiProviderService->getDriverForUser(null);
-            $key = $aiProviderService->getApiKeyForUser(null);
-            $url = $aiProviderService->getBaseUrlForUser(null);
-            $model = $aiProviderService->getModelForUser(null);
+            $textProvider = $aiProviderService->getTextToTextProvider(null);
+            $driverName = $aiProviderService->getDriverForProvider($textProvider);
+            $key = $aiProviderService->getApiKeyForProvider($textProvider);
+            $url = $aiProviderService->getBaseUrlForProvider($textProvider);
+            $model = $textProvider?->model ?? null;
         } catch (\Throwable $exception) {
             // Mantém fallback padrão quando as tabelas/configurações de IA não existem.
         }

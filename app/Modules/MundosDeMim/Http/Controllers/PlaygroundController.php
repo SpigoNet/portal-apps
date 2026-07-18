@@ -13,6 +13,7 @@ use App\Services\AI\Drivers\AirForceDriver;
 use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\LmStudioDriver;
+use App\Services\AI\Drivers\OllamaDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use App\Services\AI\Drivers\PollinationImageEditDriver;
 use Illuminate\Http\Request;
@@ -306,6 +307,7 @@ class PlaygroundController extends Controller
             'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
             'gemini' => new GeminiDriver($apiKey, $model, $baseUrl),
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
+            'ollama' => new OllamaDriver($model, $apiKey, $baseUrl),
             'pollination_image_edit' => new PollinationImageEditDriver($model, $apiKey, $baseUrl),
             default => new PollinationDriver($model, $apiKey, $baseUrl),
         };
@@ -318,6 +320,7 @@ class PlaygroundController extends Controller
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
             'gemini' => new GeminiDriver($apiKey, $model, $baseUrl),
             'lm_studio' => new LmStudioDriver($baseUrl),
+            'ollama' => new OllamaDriver($model, $apiKey, $baseUrl),
             default => new PollinationDriver($model, $apiKey, $baseUrl),
         };
     }

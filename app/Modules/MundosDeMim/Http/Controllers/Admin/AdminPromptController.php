@@ -9,6 +9,7 @@ use App\Modules\MundosDeMim\Models\Theme;
 use App\Services\AI\Drivers\AirForceDriver;
 use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
+use App\Services\AI\Drivers\OllamaDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use App\Services\AI\Drivers\PollinationImageEditDriver;
 use Illuminate\Http\Request;
@@ -21,12 +22,14 @@ class AdminPromptController extends Controller
     public function create($theme_id)
     {
         $theme = Theme::findOrFail($theme_id);
+
         return view('MundosDeMim::admin.prompts.create', compact('theme'));
     }
 
     public function store(Request $request)
     {
-        $this->savePrompt($request, new Prompt());
+        $this->savePrompt($request, new Prompt);
+
         return redirect()->route('mundos-de-mim.admin.themes.edit', $request->theme_id)
             ->with('success', 'Prompt criado com sucesso!');
     }
@@ -35,6 +38,7 @@ class AdminPromptController extends Controller
     {
         // Carrega o prompt com seus requisitos para a view
         $prompt = Prompt::with('requirements')->findOrFail($id);
+
         return view('MundosDeMim::admin.prompts.edit', compact('prompt'));
     }
 
@@ -50,6 +54,7 @@ class AdminPromptController extends Controller
     public function destroy($id)
     {
         Prompt::findOrFail($id)->delete();
+
         return back()->with('success', 'Prompt removido.');
     }
 
@@ -124,7 +129,7 @@ class AdminPromptController extends Controller
 
         if ($request->has('requirements')) {
             foreach ($request->requirements as $req) {
-                if (!empty($req['key'])) {
+                if (! empty($req['key'])) {
                     $prompt->requirements()->create([
                         'requirement_key' => $req['key'],
                         'operator' => $req['operator'] ?? '=',
@@ -141,6 +146,7 @@ class AdminPromptController extends Controller
             'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
             'gemini' => new GeminiDriver($apiKey, $model, $baseUrl),
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
+            'ollama' => new OllamaDriver($model, $apiKey, $baseUrl),
             'pollination_image_edit' => new PollinationImageEditDriver($model, $apiKey, $baseUrl),
             default => new PollinationDriver($model, $apiKey, $baseUrl),
         };

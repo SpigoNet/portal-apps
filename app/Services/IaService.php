@@ -2,12 +2,13 @@
 
 namespace App\Services;
 
-use App\Services\AI\AiDriverInterface;
-use App\Services\AI\Drivers\PollinationDriver;
-use App\Services\AI\Drivers\LmStudioDriver;
-use App\Services\AI\Drivers\GeminiDriver;
 use App\Modules\Admin\Services\AiProviderService;
 use App\Modules\ANT\Models\AntConfiguracao;
+use App\Services\AI\AiDriverInterface;
+use App\Services\AI\Drivers\GeminiDriver;
+use App\Services\AI\Drivers\LmStudioDriver;
+use App\Services\AI\Drivers\OllamaDriver;
+use App\Services\AI\Drivers\PollinationDriver;
 use Illuminate\Support\Facades\Schema;
 
 class IaService
@@ -24,7 +25,7 @@ class IaService
         // Tenta pegar o driver do sistema centralizado (Admin)
         // Se não houver um usuário logado (ex: cron), pegamos o padrão do sistema.
         try {
-            $aiProviderService = new AiProviderService();
+            $aiProviderService = new AiProviderService;
             $driverName = $aiProviderService->getDriverForUser(null);
             $key = $aiProviderService->getApiKeyForUser(null);
             $url = $aiProviderService->getBaseUrlForUser(null);
@@ -40,11 +41,11 @@ class IaService
 
         // Fallback para AntConfiguracao se o Admin não tiver nada (compatibilidade)
         if ($driverName === 'pollination' && empty($key)) {
-             if ($config) {
-                 $driverName = $config->ia_driver ?? 'pollination';
-                 $url = $config->ia_url ?? $url;
-                 $key = $config->ia_key ?? $key;
-             }
+            if ($config) {
+                $driverName = $config->ia_driver ?? 'pollination';
+                $url = $config->ia_url ?? $url;
+                $key = $config->ia_key ?? $key;
+            }
         }
 
         switch ($driverName) {
@@ -54,6 +55,10 @@ class IaService
 
             case 'lm_studio':
                 $this->driver = new LmStudioDriver($url);
+                break;
+
+            case 'ollama':
+                $this->driver = new OllamaDriver($model, $key, $url);
                 break;
 
             case 'pollination':

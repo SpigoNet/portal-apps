@@ -4,12 +4,13 @@ namespace App\Modules\MundosDeMim\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Admin\Services\AiProviderService;
-use App\Modules\MundosDeMim\Models\Theme;
 use App\Modules\MundosDeMim\Models\Prompt;
+use App\Modules\MundosDeMim\Models\Theme;
 use App\Services\AI\Drivers\AirForceDriver;
 use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\LmStudioDriver;
+use App\Services\AI\Drivers\OllamaDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -27,7 +28,7 @@ class PromptImporterController extends Controller
         $rawPrompt = $request->input('raw_prompt');
 
         // 1. Construção do Prompt de Sistema (A "Inteligência")
-        $systemInstruction = <<<EOT
+        $systemInstruction = <<<'EOT'
 Você é um especialista em engenharia de prompt para o sistema "Mundos de Mim".
 Sua tarefa é converter prompts brutos de geração de imagem (Midjourney/Stable Diffusion) para o nosso formato de template dinâmico.
 
@@ -66,7 +67,7 @@ EOT;
         try {
             $messages = [
                 ['role' => 'system', 'content' => $systemInstruction],
-                ['role' => 'user', 'content' => "Prompt Original: " . $rawPrompt]
+                ['role' => 'user', 'content' => 'Prompt Original: '.$rawPrompt],
             ];
 
             // Usa explicitamente o modelo padrão global text->text configurado no módulo Admin.
@@ -84,18 +85,18 @@ EOT;
 
             $aiResponse = $driver->generateText($messages, []);
 
-            Log::debug("Resposta da IA: " . $aiResponse);
+            Log::debug('Resposta da IA: '.$aiResponse);
             // Limpeza básica caso a IA retorne ```json ... ```
             $jsonString = preg_replace('/^```json\s*|\s*```$/', '', $aiResponse);
             $data = json_decode($jsonString, true);
 
             // Fallback se o JSON falhar
-            if (!$data) {
-                throw new \Exception("Falha ao interpretar resposta da IA.");
+            if (! $data) {
+                throw new \Exception('Falha ao interpretar resposta da IA.');
             }
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Erro na IA: ' . $e->getMessage());
+            return back()->with('error', 'Erro na IA: '.$e->getMessage());
         }
 
         // 3. Processamento dos Dados para a View
@@ -142,7 +143,7 @@ EOT;
                 'name' => $request->new_theme_name,
                 'slug' => Str::slug($request->new_theme_name),
                 'age_rating' => 'teen',
-                'is_seasonal' => false
+                'is_seasonal' => false,
             ]);
         } else {
             $theme = Theme::findOrFail($request->theme_id);
@@ -150,7 +151,7 @@ EOT;
 
         $prompt = Prompt::create([
             'theme_id' => $theme->id,
-            'prompt_text' => $request->final_prompt
+            'prompt_text' => $request->final_prompt,
         ]);
 
         if ($request->has('requirements')) {
@@ -159,7 +160,7 @@ EOT;
                     $prompt->requirements()->create([
                         'requirement_key' => $req['key'],
                         'operator' => '=',
-                        'requirement_value' => $req['value']
+                        'requirement_value' => $req['value'],
                     ]);
                 }
             }
@@ -176,6 +177,7 @@ EOT;
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
             'gemini' => new GeminiDriver($apiKey),
             'lm_studio' => new LmStudioDriver($baseUrl),
+            'ollama' => new OllamaDriver($model, $apiKey, $baseUrl),
             default => new PollinationDriver($model, $apiKey, $baseUrl),
         };
     }

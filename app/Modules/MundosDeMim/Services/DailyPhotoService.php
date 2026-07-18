@@ -10,6 +10,7 @@ use App\Services\AI\Drivers\AirForceDriver;
 use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\LmStudioDriver;
+use App\Services\AI\Drivers\OllamaDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use App\Services\AI\Drivers\PollinationImageEditDriver;
 use Illuminate\Support\Facades\Log;
@@ -248,6 +249,7 @@ class DailyPhotoService
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
             'gemini' => new GeminiDriver($apiKey, $model, $baseUrl),
             'lm_studio' => new LmStudioDriver($baseUrl),
+            'ollama' => new OllamaDriver($model, $apiKey, $baseUrl),
             default => new PollinationDriver($model, $apiKey, $baseUrl),
         };
     }

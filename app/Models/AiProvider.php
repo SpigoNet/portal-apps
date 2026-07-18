@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AiProvider extends Model
 {
@@ -111,6 +111,8 @@ class AiProvider extends Model
             str_contains($haystack, 'airforce') => 'airforce',
             str_contains($haystack, 'kdjingpai') => 'kdjingpai',
             str_contains($haystack, 'gemini') => 'gemini',
+            str_contains($haystack, 'ollama'),
+            str_contains($haystack, 'localhost:11434') => 'ollama',
             str_contains($haystack, 'lm studio'),
             str_contains($haystack, 'lmstudio'),
             str_contains($haystack, 'localhost:1234') => 'lm_studio',

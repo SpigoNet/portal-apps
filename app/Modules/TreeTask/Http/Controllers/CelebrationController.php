@@ -4,7 +4,6 @@ namespace App\Modules\TreeTask\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\TreeTask\Models\Tarefa;
-use Illuminate\Http\Request;
 
 class CelebrationController extends Controller
 {
@@ -22,7 +21,7 @@ class CelebrationController extends Controller
         $sugestoes = Tarefa::where('id_fase', $tarefa->id_fase)
             ->where('id_tarefa', '!=', $id) // Exclui a própria tarefa
             ->where('status', '!=', 'Concluído')
-            ->orderByRaw("FIELD(prioridade, 'Urgente', 'Alta', 'Média', 'Baixa')")
+            ->orderByRaw("CASE \"prioridade\" WHEN 'Urgente' THEN 1 WHEN 'Alta' THEN 2 WHEN 'Média' THEN 3 WHEN 'Baixa' THEN 4 ELSE 5 END")
             ->orderBy('ordem', 'asc')
             ->take(10) // Limita a quantidade para não poluir a tela
             ->get();

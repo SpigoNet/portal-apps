@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Modules\Admin\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Admin\Models\AIProvedor;
 use App\Modules\Admin\Models\AIModelo;
 use App\Modules\Admin\Models\AIModeloPadrao;
+use App\Modules\Admin\Models\AIProvedor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -14,6 +15,7 @@ class AIProvedorController extends Controller
     {
         $provedores = AIProvedor::withCount('modelos')->get();
         $modelosPadrao = AIModeloPadrao::with('modelo.provedor')->get();
+
         return view('Admin::ai.index', compact('provedores', 'modelosPadrao'));
     }
 
@@ -71,6 +73,7 @@ class AIProvedorController extends Controller
     public function destroy(AIProvedor $provedor)
     {
         $provedor->delete();
+
         return redirect()->route('admin.ai.provedores.index')->with('success', 'Provedor removido com sucesso!');
     }
 
@@ -84,8 +87,12 @@ class AIProvedorController extends Controller
             $response = Http::get($provedor->url_json_modelos);
             $data = $response->json();
 
-            // Normalização: Alguns retornam lista direta, outros dentro de 'data'
-            $modelsList = isset($data['data']) ? $data['data'] : $data;
+            // Normalização: Alguns retornam lista direta, outros dentro de 'data' ou 'models' (Gemini)
+            $modelsList = $data['data'] ?? $data['models'] ?? $data;
+
+            if (! is_array($modelsList) || ! array_is_list($modelsList)) {
+                return back()->with('error', 'Formato de JSON não reconhecido. Chave de lista de modelos não encontrada.');
+            }
 
             foreach ($modelsList as $item) {
                 $this->processModel($provedor, $item);
@@ -102,6 +109,11 @@ class AIProvedorController extends Controller
         $externalId = $item['id'] ?? $item['name'] ?? null;
         if (! $externalId) {
             return;
+        }
+
+        // Gemini retorna "models/gemini-2.5-flash" — remover o prefixo "models/"
+        if (str_starts_with((string) $externalId, 'models/')) {
+            $externalId = substr($externalId, 7);
         }
 
         $input = $item['input_modalities']
@@ -121,10 +133,16 @@ class AIProvedorController extends Controller
             })->toArray();
         }
 
+        // displayName (Gemini) > name > id
+        $nome = $item['displayName'] ?? $item['name'] ?? $item['id'];
+        if (str_starts_with((string) $nome, 'models/')) {
+            $nome = substr($nome, 7);
+        }
+
         AIModelo::updateOrCreate(
             ['ai_provedor_id' => $provedor->id, 'modelo_id_externo' => $externalId],
             [
-                'nome' => $item['name'] ?? $item['id'],
+                'nome' => $nome,
                 'descricao' => $item['description'] ?? ($item['owned_by'] ?? ''),
                 'input_types' => array_values((array) $input),
                 'output_types' => array_values((array) $output),

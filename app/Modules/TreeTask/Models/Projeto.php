@@ -2,13 +2,13 @@
 
 namespace App\Modules\TreeTask\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\User; // Assumindo que o model User está aqui
-use App\Modules\TreeTask\Models\Anexo;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Model; // Assumindo que o model User está aqui
 
 class Projeto extends Model
 {
     protected $table = 'treetask_projetos';
+
     protected $primaryKey = 'id_projeto';
 
     protected $fillable = [
@@ -18,7 +18,11 @@ class Projeto extends Model
         'id_user_owner',
         'data_inicio',
         'data_prevista_termino',
-        'data_conclusao_real'
+        'data_conclusao_real',
+    ];
+
+    protected $casts = [
+        'id_user_owner' => 'integer',
     ];
 
     // Relacionamento: Projeto tem muitas fases
@@ -32,5 +36,4 @@ class Projeto extends Model
     {
         return $this->belongsTo(User::class, 'id_user_owner', 'id');
     }
-
 }

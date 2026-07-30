@@ -15,5 +15,7 @@ Route::prefix('bolao')->name('bolao.')->group(function () {
     Route::middleware('auth')->group(function () {
         Route::post('/start', [BolaoController::class, 'start'])->name('start');
         Route::post('/end/{id}', [BolaoController::class, 'end'])->name('end');
+        Route::get('/admin', [BolaoController::class, 'admin'])->name('admin');
+        Route::post('/admin/end/{id}', [BolaoController::class, 'forceEnd'])->name('admin.end');
     });
 });

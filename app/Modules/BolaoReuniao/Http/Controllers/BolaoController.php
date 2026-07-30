@@ -76,6 +76,27 @@ class BolaoController extends Controller
             abort(403, 'Apenas o criador da reunião pode encerrá-la.');
         }
 
+        $this->closeMeeting($meeting);
+
+        return redirect()->route('bolao.results', $id);
+    }
+
+    public function admin()
+    {
+        $activeMeeting = BolaoMeeting::where('status', 'open')->latest()->first();
+        return view('BolaoReuniao::admin', compact('activeMeeting'));
+    }
+
+    public function forceEnd($id)
+    {
+        $meeting = BolaoMeeting::findOrFail($id);
+        $this->closeMeeting($meeting);
+
+        return redirect()->route('bolao.results', $id);
+    }
+
+    private function closeMeeting(BolaoMeeting $meeting): void
+    {
         $now = now();
         $meeting->update([
             'status' => 'closed',
@@ -90,8 +111,6 @@ class BolaoController extends Controller
             $diff = abs($actualSeconds - $guessSeconds);
             $guess->update(['diff_seconds' => $diff]);
         }
-
-        return redirect()->route('bolao.results', $id);
     }
 
     public function results($id)

@@ -47,7 +47,6 @@ class BolaoController extends Controller
 
     public function storeGuess(Request $request)
     {
-        
         $request->validate([
             'meeting_id' => 'required|exists:bolao_meetings,id',
             'name' => [
@@ -63,6 +62,13 @@ class BolaoController extends Controller
         ]);
 
         $guess = BolaoGuess::create($request->all());
+
+        return redirect()->route('bolao.thank-you', $guess->id);
+    }
+
+    public function thankYou($id)
+    {
+        $guess = BolaoGuess::with('meeting')->findOrFail($id);
         $meeting = $guess->meeting;
 
         return view('BolaoReuniao::thank_you', compact('meeting'));

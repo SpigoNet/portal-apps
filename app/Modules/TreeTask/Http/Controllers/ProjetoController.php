@@ -35,7 +35,7 @@ class ProjetoController extends Controller
         // Define o dono como o usuário logado e status padrão
         $data = array_merge($validated, [
             'id_user_owner' => auth()->id(),
-            'status' => 'Planejamento'
+            'status' => 'Planejamento',
         ]);
 
         Projeto::create($data);
@@ -46,10 +46,11 @@ class ProjetoController extends Controller
 
     public function show($id)
     {
-        $projeto = Projeto::with(['fases' => function($q) {
+        $projeto = Projeto::with(['fases' => function ($q) {
             $q->orderBy('ordem', 'asc'); // Ordena fases
-        }, 'fases.tarefas' => function($q) {
-            $q->orderBy('ordem', 'asc'); // Ordena tarefas na fase
+        }, 'fases.tarefas' => function ($q) {
+            $q->orderByRaw("CASE WHEN status = 'Concluído' THEN 1 ELSE 0 END ASC")
+                ->orderBy('ordem', 'asc');
         }, 'fases.tarefas.responsavel'])
             ->findOrFail($id);
 

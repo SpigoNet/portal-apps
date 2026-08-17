@@ -8,6 +8,7 @@ use App\Modules\Alfred\Models\LogDiaRuim;
 use App\Modules\Alfred\Models\Medicamento;
 use App\Modules\Alfred\Models\Rotina;
 use App\Modules\Alfred\Models\UserProfile;
+use App\Modules\ANT\Services\SemestreService;
 use App\Modules\GestorHoras\Models\Cliente;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -81,8 +82,7 @@ class User extends Authenticatable
 
     public function isProfessor(): bool
     {
-        $config = \App\Modules\ANT\Models\AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y').'-'.(date('m') > 6 ? '2' : '1');
+        $semestreAtual = SemestreService::getCurrent();
 
         return \Illuminate\Support\Facades\DB::table('ant_professor_materia')
             ->where('user_id', $this->id)

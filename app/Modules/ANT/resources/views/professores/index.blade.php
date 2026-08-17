@@ -8,6 +8,17 @@
                 </h2>
                 <p class="text-sm text-gray-500 mt-1">Olá, Prof. {{ explode(' ', $user->name)[0] }}!</p>
             </div>
+            <div class="mt-3 md:mt-0 flex items-center gap-2">
+                <label for="semestre-select" class="text-sm text-gray-600">Semestre:</label>
+                <select id="semestre-select" onchange="window.location.href=this.value"
+                    class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                    @foreach(\App\Modules\ANT\Services\SemestreService::getAvailable() as $sem)
+                        <option value="{{ route('ant.professor.semestre', $sem) }}" {{ $sem === $semestreAtual ? 'selected' : '' }}>
+                            {{ $sem }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
         </div>
     </x-slot>
 

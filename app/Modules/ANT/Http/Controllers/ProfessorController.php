@@ -3,23 +3,37 @@
 namespace App\Modules\ANT\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Modules\ANT\Models\AntAluno;
 use App\Modules\ANT\Models\AntConfiguracao;
 use App\Modules\ANT\Models\AntMateria;
-use App\Modules\ANT\Models\AntTrabalho;
-use App\Modules\ANT\Models\AntAluno;
-use App\Modules\ANT\Models\AntTipoTrabalho;
 use App\Modules\ANT\Models\AntPeso;
+use App\Modules\ANT\Models\AntTipoTrabalho;
+use App\Modules\ANT\Models\AntTrabalho;
+use App\Modules\ANT\Services\SemestreService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ProfessorController extends Controller
 {
+    public function setSemestre(Request $request, string $semestre)
+    {
+        $available = SemestreService::getAvailable();
+        if (! in_array($semestre, $available)) {
+            abort(404, 'Semestre não encontrado.');
+        }
+
+        session(['ant_semestre_professor' => $semestre]);
+
+        return redirect()->route('ant.professor.index')
+            ->with('success', "Visualizando semestre {$semestre}.");
+    }
+
     // Dashboard do Professor
     public function index()
     {
         $user = auth()->user();
+        $semestreAtual = SemestreService::getForUser($user);
         $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
         $isAdmin = $config ? $config->isAdmin($user->email) : false;
 
         // Verifica se é professor de fato
@@ -28,17 +42,17 @@ class ProfessorController extends Controller
             ->where('semestre', $semestreAtual)
             ->exists();
 
-        if (!$isProfessor && !$isAdmin) {
+        if (! $isProfessor && ! $isAdmin) {
             return redirect()->route('ant.home');
         }
 
         // Busca matérias e contadores
-        $materiasProfessor = AntMateria::whereHas('professores', function($q) use ($user, $semestreAtual) {
+        $materiasProfessor = AntMateria::whereHas('professores', function ($q) use ($user, $semestreAtual) {
             $q->where('user_id', $user->id)->where('semestre', $semestreAtual);
         })
-            ->with(['trabalhos' => function($q) use ($semestreAtual) {
+            ->with(['trabalhos' => function ($q) use ($semestreAtual) {
                 $q->where('semestre', $semestreAtual)
-                    ->withCount(['entregas as pendentes_count' => function($query) {
+                    ->withCount(['entregas as pendentes_count' => function ($query) {
                         $query->whereNull('nota');
                     }]);
             }])
@@ -63,17 +77,17 @@ class ProfessorController extends Controller
 
         // (Opcional: Permitir se for Admin também)
 
-        if (!$ehProfessorDestaMateria) {
+        if (! $ehProfessorDestaMateria) {
             abort(403, 'Acesso negado a esta disciplina.');
         }
 
         // Busca todos os alunos matriculados nesta matéria para montar a lista completa
         // Mesmo quem não entregou deve aparecer na lista
-        $alunos = AntAluno::whereHas('materias', function($q) use ($trabalho) {
+        $alunos = AntAluno::whereHas('materias', function ($q) use ($trabalho) {
             $q->where('ant_materias.id', $trabalho->materia_id)
                 ->where('ant_aluno_materia.semestre', $trabalho->semestre);
         })
-            ->with(['entregas' => function($q) use ($trabalho) {
+            ->with(['entregas' => function ($q) use ($trabalho) {
                 $q->where('trabalho_id', $trabalho->id);
             }])
             // Se for prova, carregamos a resposta para ver a nota automática
@@ -86,11 +100,13 @@ class ProfessorController extends Controller
         $entregues = 0;
         $corrigidos = 0;
 
-        foreach($alunos as $aluno) {
+        foreach ($alunos as $aluno) {
             $entrega = $aluno->entregas->first();
             if ($entrega) {
                 $entregues++;
-                if ($entrega->nota !== null) $corrigidos++;
+                if ($entrega->nota !== null) {
+                    $corrigidos++;
+                }
             }
         }
 
@@ -100,8 +116,7 @@ class ProfessorController extends Controller
     public function boletim($idMateria)
     {
         $user = auth()->user();
-        $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $semestreAtual = SemestreService::getForUser($user);
 
         $materia = AntMateria::findOrFail($idMateria);
 
@@ -112,7 +127,7 @@ class ProfessorController extends Controller
             ->where('semestre', $semestreAtual)
             ->exists();
 
-        if (!$ehProfessorDestaMateria) {
+        if (! $ehProfessorDestaMateria) {
             abort(403, 'Acesso negado a esta disciplina.');
         }
 
@@ -128,14 +143,14 @@ class ProfessorController extends Controller
         $trabalhos = AntTrabalho::where('materia_id', $idMateria)
             ->where('semestre', $semestreAtual)
             ->whereNotNull('peso_id') // Apenas trabalhos que valem nota
-            ->with(['entregas' => function($q) {
+            ->with(['entregas' => function ($q) {
                 // Seleciona apenas as entregas que têm nota atribuída
                 $q->whereNotNull('nota')->select('trabalho_id', 'aluno_ra', 'nota');
             }])
             ->get();
 
         // 3. Alunos matriculados
-        $alunos = AntAluno::whereHas('materias', function($q) use ($idMateria, $semestreAtual) {
+        $alunos = AntAluno::whereHas('materias', function ($q) use ($idMateria, $semestreAtual) {
             $q->where('ant_materias.id', $idMateria)
                 ->where('ant_aluno_materia.semestre', $semestreAtual);
         })
@@ -201,12 +216,12 @@ class ProfessorController extends Controller
 
         return view('ANT::professores.boletim', compact('materia', 'semestreAtual', 'gruposNome', 'dadosBoletim', 'pesoTotal'));
     }
+
     // Formulário de Editar Trabalho
     public function edit($id)
     {
         $user = auth()->user();
-        $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $semestreAtual = SemestreService::getForUser($user);
 
         $trabalho = AntTrabalho::findOrFail($id);
 
@@ -215,11 +230,11 @@ class ProfessorController extends Controller
             ->where('materia_id', $trabalho->materia_id)
             ->exists();
 
-        if (!$ehProfessor) {
+        if (! $ehProfessor) {
             abort(403, 'Você não tem permissão para editar trabalhos desta disciplina.');
         }
 
-        $materias = AntMateria::whereHas('professores', function($q) use ($user, $semestreAtual) {
+        $materias = AntMateria::whereHas('professores', function ($q) use ($user, $semestreAtual) {
             $q->where('user_id', $user->id)->where('semestre', $semestreAtual);
         })->get();
 
@@ -255,7 +270,7 @@ class ProfessorController extends Controller
             ->where('materia_id', $trabalho->materia_id)
             ->exists();
 
-        if (!$ehProfessor) {
+        if (! $ehProfessor) {
             abort(403, 'Você não tem permissão para editar trabalhos desta disciplina.');
         }
 
@@ -266,7 +281,7 @@ class ProfessorController extends Controller
                 ->where('materia_id', $request->materia_id)
                 ->exists();
 
-            if (!$ehProfessorNovaMateria) {
+            if (! $ehProfessorNovaMateria) {
                 abort(403, 'Você não tem permissão para mover este trabalho para a disciplina selecionada.');
             }
         }
@@ -292,12 +307,11 @@ class ProfessorController extends Controller
     public function create()
     {
         $user = auth()->user();
-        $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $semestreAtual = SemestreService::getForUser($user);
 
         // 1. Busca as Matérias que o professor leciona neste semestre
         // Precisamos delas para o Select
-        $materias = AntMateria::whereHas('professores', function($q) use ($user, $semestreAtual) {
+        $materias = AntMateria::whereHas('professores', function ($q) use ($user, $semestreAtual) {
             $q->where('user_id', $user->id)->where('semestre', $semestreAtual);
         })->get();
 
@@ -333,17 +347,14 @@ class ProfessorController extends Controller
             'dicas_correcao' => 'nullable|string',
         ]);
 
-        $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
-
-        // Segurança: Verificar se o professor realmente dá aula dessa matéria
+        $semestreAtual = SemestreService::getCurrent();
         $ehProfessor = DB::table('ant_professor_materia')
             ->where('user_id', auth()->id())
             ->where('materia_id', $request->materia_id)
             ->where('semestre', $semestreAtual)
             ->exists();
 
-        if (!$ehProfessor) {
+        if (! $ehProfessor) {
             abort(403, 'Você não tem permissão para criar trabalhos nesta disciplina.');
         }
 

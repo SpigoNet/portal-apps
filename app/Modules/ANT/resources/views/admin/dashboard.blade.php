@@ -8,7 +8,39 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     Você está logado como Administrador do Módulo.
-                    <br><br>
+
+                    {{-- Card: Semestre Corrente --}}
+                    <div class="mt-6 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h3 class="text-sm font-bold text-indigo-800 uppercase">Semestre Corrente</h3>
+                                <p class="text-2xl font-bold text-indigo-700">{{ $semestreAtual }}</p>
+                            </div>
+                            <form action="{{ route('ant.admin.semestre.update') }}" method="POST" class="flex items-end gap-3">
+                                @csrf
+                                @method('PUT')
+                                <div>
+                                    <label for="semestre_atual" class="block text-xs font-medium text-gray-600 mb-1">Alterar para:</label>
+                                    <input type="text" name="semestre_atual" id="semestre_atual"
+                                        value="{{ $semestreAtual }}"
+                                        placeholder="Ex: 2026-1"
+                                        list="semestres-existente"
+                                        class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm w-36"
+                                        required>
+                                    <datalist id="semestres-existente">
+                                        @foreach($semestresDisponiveis as $sem)
+                                            <option value="{{ $sem }}">
+                                        @endforeach
+                                    </datalist>
+                                </div>
+                                <button type="submit"
+                                    class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors">
+                                    Atualizar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
                         <!-- Card: Novo Trabalho -->
                         <a href="{{ route('ant.professor.create') }}"

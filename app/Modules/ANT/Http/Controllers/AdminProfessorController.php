@@ -3,11 +3,11 @@
 namespace App\Modules\ANT\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Modules\ANT\Models\AntMateria;
-use App\Modules\ANT\Models\AntConfiguracao;
+use App\Modules\ANT\Services\SemestreService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminProfessorController extends Controller
 {
@@ -40,8 +40,7 @@ class AdminProfessorController extends Controller
         $materias = AntMateria::orderBy('nome')->get();
 
         // Sugere o semestre atual
-        $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $semestreAtual = SemestreService::getCurrent();
 
         return view('ANT::admin.professores.create', compact('users', 'materias', 'semestreAtual'));
     }
@@ -98,6 +97,7 @@ class AdminProfessorController extends Controller
     public function destroy($id)
     {
         DB::table('ant_professor_materia')->where('id', $id)->delete();
+
         return back()->with('success', 'Vínculo removido.');
     }
 }

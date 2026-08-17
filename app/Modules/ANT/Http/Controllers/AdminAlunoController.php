@@ -3,11 +3,11 @@
 namespace App\Modules\ANT\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\ANT\Models\AntAluno;
+use App\Modules\ANT\Models\AntMateria;
+use App\Modules\ANT\Services\SemestreService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Modules\ANT\Models\AntMateria;
-use App\Modules\ANT\Models\AntAluno;
-use App\Modules\ANT\Models\AntConfiguracao;
 
 class AdminAlunoController extends Controller
 {
@@ -16,8 +16,7 @@ class AdminAlunoController extends Controller
         $materias = AntMateria::orderBy('nome')->get();
 
         // Configuração padrão
-        $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $semestreAtual = SemestreService::getCurrent();
 
         // Filtros da Requisição (ou padrão)
         $filtroSemestre = $request->input('semestre', $semestreAtual);
@@ -53,14 +52,14 @@ class AdminAlunoController extends Controller
 
         return back()->with('success', 'Matrícula removida com sucesso.');
     }
+
     // Tela de Importação
     public function importar()
     {
         $materias = AntMateria::orderBy('nome')->get();
 
         // Pega semestre atual para sugerir
-        $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $semestreAtual = SemestreService::getCurrent();
 
         return view('ANT::admin.alunos.importar', compact('materias', 'semestreAtual'));
     }
@@ -84,7 +83,9 @@ class AdminAlunoController extends Controller
         try {
             foreach ($linhas as $linha) {
                 $linha = trim($linha);
-                if (empty($linha)) continue;
+                if (empty($linha)) {
+                    continue;
+                }
 
                 // Tenta extrair RA e Nome
                 // Padrão aceito: "NUMEROS [separador opcional] NOME"
@@ -113,7 +114,7 @@ class AdminAlunoController extends Controller
                         ->where('semestre', $request->semestre)
                         ->exists();
 
-                    if (!$vinculoExiste) {
+                    if (! $vinculoExiste) {
                         DB::table('ant_aluno_materia')->insert([
                             'aluno_ra' => $ra,
                             'materia_id' => $request->materia_id,
@@ -133,11 +134,13 @@ class AdminAlunoController extends Controller
             DB::commit();
 
             $msg = "Processo concluído! $importados novos alunos cadastrados e $matriculados novas matrículas realizadas.";
+
             return back()->with('success', $msg)->with('detalhes_erros', $erros);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Erro ao importar: ' . $e->getMessage())->withInput();
+
+            return back()->with('error', 'Erro ao importar: '.$e->getMessage())->withInput();
         }
     }
 }

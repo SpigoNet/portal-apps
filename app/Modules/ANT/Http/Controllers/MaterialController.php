@@ -4,9 +4,9 @@ namespace App\Modules\ANT\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\ANT\Models\AntAluno;
-use App\Modules\ANT\Models\AntConfiguracao;
 use App\Modules\ANT\Models\AntMateria;
 use App\Modules\ANT\Models\AntMaterial;
+use App\Modules\ANT\Services\SemestreService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -20,8 +20,7 @@ class MaterialController extends Controller
     public function index($idMateria)
     {
         $user = auth()->user();
-        $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $semestreAtual = SemestreService::getCurrent();
 
         $materia = AntMateria::findOrFail($idMateria);
 
@@ -31,15 +30,15 @@ class MaterialController extends Controller
             ->where('semestre', $semestreAtual)
             ->exists();
 
-        if (!$ehProfessor) {
+        if (! $ehProfessor) {
             $aluno = AntAluno::where('user_id', $user->id)->first();
-            if (!$aluno) {
+            if (! $aluno) {
                 abort(403, 'Acesso negado.');
             }
             $matriculado = $aluno->materias()
                 ->where('ant_materias.id', $idMateria)
                 ->exists();
-            if (!$matriculado) {
+            if (! $matriculado) {
                 abort(403, 'Você não está matriculado nesta disciplina.');
             }
         }
@@ -63,8 +62,7 @@ class MaterialController extends Controller
     public function create($idMateria)
     {
         $user = auth()->user();
-        $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $semestreAtual = SemestreService::getCurrent();
 
         $materia = AntMateria::findOrFail($idMateria);
 
@@ -74,7 +72,7 @@ class MaterialController extends Controller
             ->where('semestre', $semestreAtual)
             ->exists();
 
-        if (!$ehProfessor) {
+        if (! $ehProfessor) {
             abort(403, 'Apenas professores podem publicar materiais.');
         }
 
@@ -87,8 +85,7 @@ class MaterialController extends Controller
     public function store(Request $request, $idMateria)
     {
         $user = auth()->user();
-        $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $semestreAtual = SemestreService::getCurrent();
 
         $materia = AntMateria::findOrFail($idMateria);
 
@@ -98,18 +95,18 @@ class MaterialController extends Controller
             ->where('semestre', $semestreAtual)
             ->exists();
 
-        if (!$ehProfessor) {
+        if (! $ehProfessor) {
             abort(403, 'Apenas professores podem publicar materiais.');
         }
 
         $request->validate([
-            'titulo'    => 'required|string|max:255',
+            'titulo' => 'required|string|max:255',
             'descricao' => 'nullable|string',
             'data_aula' => 'required|date',
-            'arquivos'  => 'nullable|array',
+            'arquivos' => 'nullable|array',
             'arquivos.*' => 'required|file|max:51200',
-            'videos'    => 'nullable|array',
-            'videos.*'  => 'nullable|url|max:500',
+            'videos' => 'nullable|array',
+            'videos.*' => 'nullable|url|max:500',
         ]);
 
         $caminhos = [];
@@ -118,12 +115,12 @@ class MaterialController extends Controller
             $targetPath = "ant/materiais/{$semestreAtual}/{$materia->nome_curto}/{$request->data_aula}";
 
             try {
-                if (!Storage::disk('public')->exists($targetPath)) {
+                if (! Storage::disk('public')->exists($targetPath)) {
                     Storage::disk('public')->makeDirectory($targetPath);
                 }
             } catch (\Exception $e) {
                 \Log::error('Material Directory Creation Failed', [
-                    'path'  => $targetPath,
+                    'path' => $targetPath,
                     'error' => $e->getMessage(),
                 ]);
             }
@@ -136,19 +133,19 @@ class MaterialController extends Controller
         }
 
         $videos = collect($request->input('videos', []))
-            ->filter(fn($v) => !empty(trim($v)))
+            ->filter(fn ($v) => ! empty(trim($v)))
             ->values()
             ->all();
 
         AntMaterial::create([
             'materia_id' => $idMateria,
-            'user_id'    => $user->id,
-            'semestre'   => $semestreAtual,
-            'data_aula'  => $request->data_aula,
-            'titulo'     => $request->titulo,
-            'descricao'  => $request->descricao,
-            'arquivos'   => !empty($caminhos) ? json_encode($caminhos) : null,
-            'videos'     => !empty($videos) ? json_encode($videos) : null,
+            'user_id' => $user->id,
+            'semestre' => $semestreAtual,
+            'data_aula' => $request->data_aula,
+            'titulo' => $request->titulo,
+            'descricao' => $request->descricao,
+            'arquivos' => ! empty($caminhos) ? json_encode($caminhos) : null,
+            'videos' => ! empty($videos) ? json_encode($videos) : null,
         ]);
 
         return redirect()->route('ant.materiais.index', $idMateria)
@@ -161,8 +158,7 @@ class MaterialController extends Controller
     public function edit($id)
     {
         $user = auth()->user();
-        $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $semestreAtual = SemestreService::getCurrent();
 
         $material = AntMaterial::findOrFail($id);
         $materia = $material->materia;
@@ -173,12 +169,12 @@ class MaterialController extends Controller
             ->where('semestre', $semestreAtual)
             ->exists();
 
-        if (!$ehProfessor) {
+        if (! $ehProfessor) {
             abort(403, 'Apenas professores podem editar materiais.');
         }
 
         $arquivosExistentes = json_decode($material->arquivos, true) ?? [];
-        $videosExistentes   = json_decode($material->videos, true) ?? [];
+        $videosExistentes = json_decode($material->videos, true) ?? [];
 
         return view('ANT::materiais.edit', compact('material', 'materia', 'semestreAtual', 'arquivosExistentes', 'videosExistentes'));
     }
@@ -189,11 +185,10 @@ class MaterialController extends Controller
     public function update(Request $request, $id)
     {
         $user = auth()->user();
-        $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $semestreAtual = SemestreService::getCurrent();
 
         $material = AntMaterial::findOrFail($id);
-        $materia  = $material->materia;
+        $materia = $material->materia;
 
         $ehProfessor = DB::table('ant_professor_materia')
             ->where('user_id', $user->id)
@@ -201,20 +196,20 @@ class MaterialController extends Controller
             ->where('semestre', $semestreAtual)
             ->exists();
 
-        if (!$ehProfessor) {
+        if (! $ehProfessor) {
             abort(403, 'Apenas professores podem editar materiais.');
         }
 
         $request->validate([
-            'titulo'           => 'required|string|max:255',
-            'descricao'        => 'nullable|string',
-            'data_aula'        => 'required|date',
-            'novos_arquivos'   => 'nullable|array',
+            'titulo' => 'required|string|max:255',
+            'descricao' => 'nullable|string',
+            'data_aula' => 'required|date',
+            'novos_arquivos' => 'nullable|array',
             'novos_arquivos.*' => 'required|file|max:51200',
             'remover_arquivos' => 'nullable|array',
             'remover_arquivos.*' => 'nullable|string',
-            'videos'           => 'nullable|array',
-            'videos.*'         => 'nullable|url|max:500',
+            'videos' => 'nullable|array',
+            'videos.*' => 'nullable|url|max:500',
         ]);
 
         // Arquivos: mantém os existentes menos os marcados para remoção
@@ -228,7 +223,7 @@ class MaterialController extends Controller
                 }
             } catch (\Exception $e) {
                 \Log::error('Material Delete Failed', [
-                    'path'  => $caminho,
+                    'path' => $caminho,
                     'error' => $e->getMessage(),
                 ]);
             }
@@ -241,12 +236,12 @@ class MaterialController extends Controller
             $targetPath = "ant/materiais/{$semestreAtual}/{$materia->nome_curto}/{$request->data_aula}";
 
             try {
-                if (!Storage::disk('public')->exists($targetPath)) {
+                if (! Storage::disk('public')->exists($targetPath)) {
                     Storage::disk('public')->makeDirectory($targetPath);
                 }
             } catch (\Exception $e) {
                 \Log::error('Material Directory Creation Failed', [
-                    'path'  => $targetPath,
+                    'path' => $targetPath,
                     'error' => $e->getMessage(),
                 ]);
             }
@@ -259,16 +254,16 @@ class MaterialController extends Controller
         }
 
         $videos = collect($request->input('videos', []))
-            ->filter(fn($v) => !empty(trim($v)))
+            ->filter(fn ($v) => ! empty(trim($v)))
             ->values()
             ->all();
 
         $material->update([
             'data_aula' => $request->data_aula,
-            'titulo'    => $request->titulo,
+            'titulo' => $request->titulo,
             'descricao' => $request->descricao,
-            'arquivos'  => !empty($arquivosAtuais) ? json_encode($arquivosAtuais) : null,
-            'videos'    => !empty($videos) ? json_encode($videos) : null,
+            'arquivos' => ! empty($arquivosAtuais) ? json_encode($arquivosAtuais) : null,
+            'videos' => ! empty($videos) ? json_encode($videos) : null,
         ]);
 
         return redirect()->route('ant.materiais.index', $material->materia_id)
@@ -281,8 +276,7 @@ class MaterialController extends Controller
     public function destroy($id)
     {
         $user = auth()->user();
-        $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $semestreAtual = SemestreService::getCurrent();
 
         $material = AntMaterial::findOrFail($id);
 
@@ -292,7 +286,7 @@ class MaterialController extends Controller
             ->where('semestre', $semestreAtual)
             ->exists();
 
-        if (!$ehProfessor) {
+        if (! $ehProfessor) {
             abort(403, 'Apenas professores podem remover materiais.');
         }
 
@@ -304,7 +298,7 @@ class MaterialController extends Controller
                 }
             } catch (\Exception $e) {
                 \Log::error('Material Delete Failed', [
-                    'path'  => $caminho,
+                    'path' => $caminho,
                     'error' => $e->getMessage(),
                 ]);
             }

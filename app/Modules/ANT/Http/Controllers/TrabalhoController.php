@@ -3,11 +3,11 @@
 namespace App\Modules\ANT\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use App\Modules\ANT\Models\AntTrabalho;
-use App\Modules\ANT\Models\AntEntrega;
 use App\Modules\ANT\Models\AntAluno;
+use App\Modules\ANT\Models\AntEntrega;
+use App\Modules\ANT\Models\AntTrabalho;
+use App\Modules\ANT\Services\SemestreService;
+use Illuminate\Http\Request;
 
 class TrabalhoController extends Controller
 {
@@ -28,7 +28,7 @@ class TrabalhoController extends Controller
             'entregas' => function ($q) use ($aluno) {
                 // CORREÇÃO: Filtra pela coluna 'aluno_ra' em vez de 'aluno_id'
                 $q->where('aluno_ra', $aluno->ra);
-            }
+            },
         ])->findOrFail($id);
 
         // Verificação de Segurança: O aluno pertence à matéria?
@@ -37,7 +37,7 @@ class TrabalhoController extends Controller
             ->where('ant_materias.id', $trabalho->materia_id)
             ->exists();
 
-        if (!$matriculado) {
+        if (! $matriculado) {
             abort(403, 'Você não está matriculado nesta disciplina.');
         }
 
@@ -67,7 +67,7 @@ class TrabalhoController extends Controller
             'comentario_aluno' => 'nullable|string',
             'arquivos.*' => 'nullable|file|max:102400',
             'link' => 'nullable|url',
-            'integrantes' => 'nullable|array' // Valida o array de RAs
+            'integrantes' => 'nullable|array', // Valida o array de RAs
         ]);
 
         // 1. Lista de RAs para entregar (Líder + Integrantes)
@@ -97,7 +97,7 @@ class TrabalhoController extends Controller
         // 2. Processamento de Arquivos (FAZ UMA ÚNICA VEZ)
         $tiposPermitidos = $trabalho->getAllowedExtensions();
         $ehLink = in_array('LINK', $tiposPermitidos);
-        $extensoesArquivo = array_values(array_filter($tiposPermitidos, fn($e) => $e !== 'LINK'));
+        $extensoesArquivo = array_values(array_filter($tiposPermitidos, fn ($e) => $e !== 'LINK'));
         $caminhos = [];
 
         if ($ehLink && $request->filled('link')) {
@@ -107,7 +107,7 @@ class TrabalhoController extends Controller
         if ($request->hasFile('arquivos')) {
             foreach ($request->file('arquivos') as $arquivo) {
                 $extensaoDoArquivo = strtoupper($arquivo->getClientOriginalExtension());
-                if (!empty($extensoesArquivo) && !in_array($extensaoDoArquivo, $extensoesArquivo)) {
+                if (! empty($extensoesArquivo) && ! in_array($extensaoDoArquivo, $extensoesArquivo)) {
                     return back()->withErrors(['arquivos' => "Extensão inválida: .{$extensaoDoArquivo}"]);
                 }
 
@@ -117,7 +117,7 @@ class TrabalhoController extends Controller
 
                 try {
                     // Cria a estrutura de diretórios se não existir
-                    if (!\Storage::disk('public')->exists($targetPath)) {
+                    if (! \Storage::disk('public')->exists($targetPath)) {
                         \Storage::disk('public')->makeDirectory($targetPath);
                     }
 
@@ -133,11 +133,11 @@ class TrabalhoController extends Controller
                         'file' => $fileName,
                         'target_path' => $targetPath,
                         'error' => $e->getMessage(),
-                        'exception_type' => class_basename($e)
+                        'exception_type' => class_basename($e),
                     ]);
-                    
+
                     return back()->withErrors([
-                        'arquivos' => "Erro ao fazer upload do arquivo: {$fileName}. Tente novamente ou contate o suporte."
+                        'arquivos' => "Erro ao fazer upload do arquivo: {$fileName}. Tente novamente ou contate o suporte.",
                     ])->withInput();
                 }
             }
@@ -155,11 +155,11 @@ class TrabalhoController extends Controller
             AntEntrega::updateOrCreate(
                 [
                     'trabalho_id' => $trabalho->id,
-                    'aluno_ra' => $ra
+                    'aluno_ra' => $ra,
                 ],
                 [
                     'arquivos' => $jsonArquivos, // Mesmo caminho para todos
-                    'comentario_aluno' => $request->comentario_aluno . ($ra === $alunoLider->ra ? " (Enviado pelo Líder)" : " (Enviado via Grupo por {$alunoLider->nome})"),
+                    'comentario_aluno' => $request->comentario_aluno.($ra === $alunoLider->ra ? ' (Enviado pelo Líder)' : " (Enviado via Grupo por {$alunoLider->nome})"),
                     'data_entrega' => now(),
                 ]
             );
@@ -174,6 +174,7 @@ class TrabalhoController extends Controller
         $materiaId = $request->query('materia_id');
         $user = auth()->user();
         $alunoLogado = AntAluno::where('user_id', $user->id)->firstOrFail();
+        $semestreAtual = SemestreService::getCurrent();
 
         if (strlen($termo) < 3) {
             return response()->json([]);
@@ -181,14 +182,15 @@ class TrabalhoController extends Controller
 
         // Busca alunos que:
         // 1. Tenham nome ou RA parecido com o termo
-        // 2. Estejam matriculados NA MESMA MATÉRIA que o trabalho exige
+        // 2. Estejam matriculados NA MESMA MATÉRIA no MESMO SEMESTRE
         // 3. NÃO sejam o próprio aluno logado
         $alunos = AntAluno::where(function ($q) use ($termo) {
             $q->where('nome', 'like', "%{$termo}%")
                 ->orWhere('ra', 'like', "%{$termo}%");
         })
-            ->whereHas('materias', function ($q) use ($materiaId) {
-                $q->where('ant_materias.id', $materiaId);
+            ->whereHas('materias', function ($q) use ($materiaId, $semestreAtual) {
+                $q->where('ant_materias.id', $materiaId)
+                    ->wherePivot('semestre', $semestreAtual);
             })
             ->where('id', '!=', $alunoLogado->id)
             ->take(10)

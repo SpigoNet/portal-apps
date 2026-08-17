@@ -4,6 +4,7 @@ use App\Modules\ANT\Http\Controllers\AdminAlunoController;
 use App\Modules\ANT\Http\Controllers\AdminMateriaController;
 use App\Modules\ANT\Http\Controllers\AdminProfessorController;
 use App\Modules\ANT\Http\Controllers\AntAdminController;
+use App\Modules\ANT\Http\Controllers\AntHomeController;
 use App\Modules\ANT\Http\Controllers\AuthController;
 use App\Modules\ANT\Http\Controllers\CorrecaoController;
 use App\Modules\ANT\Http\Controllers\DiagnosticController;
@@ -14,7 +15,6 @@ use App\Modules\ANT\Http\Controllers\ProvaController;
 use App\Modules\ANT\Http\Controllers\TrabalhoController;
 use App\Modules\Metricas\Http\Middleware\RegistrarAcesso;
 use Illuminate\Support\Facades\Route;
-use App\Modules\ANT\Http\Controllers\AntHomeController;
 
 // Rotas de Autenticação do Módulo ANT
 Route::prefix('ant')->name('ant.')->middleware('web')->group(function () {
@@ -33,7 +33,7 @@ Route::prefix('ant')->name('ant.')->middleware('web')->group(function () {
 // Grupo Principal com Prefixo 'ant' e Middleware de Autenticação
 Route::prefix('ant')
     ->middleware(['web', 'auth'])
-    ->middleware(RegistrarAcesso::class . ':ANT')
+    ->middleware(RegistrarAcesso::class.':ANT')
     ->group(function () {
 
         // Rota Inicial (Dashboard)
@@ -64,6 +64,7 @@ Route::prefix('ant')
         Route::prefix('professor')->group(function () {
             // Dashboard
             Route::get('/', [ProfessorController::class, 'index'])->name('ant.professor.index');
+            Route::get('/semestre/{semestre}', [ProfessorController::class, 'setSemestre'])->name('ant.professor.semestre');
             Route::get('/novo-trabalho', [ProfessorController::class, 'create'])->name('ant.professor.create');
             Route::post('/novo-trabalho', [ProfessorController::class, 'store'])->name('ant.professor.store');
             // Lista de Entregas de um Trabalho
@@ -72,7 +73,6 @@ Route::prefix('ant')
             Route::put('/trabalho/{id}', [ProfessorController::class, 'update'])->name('ant.professor.trabalho.update');
 
             Route::get('/materia/{idMateria}/boletim', [ProfessorController::class, 'boletim'])->name('ant.professor.boletim');
-
 
             Route::get('/pesos', [PesoController::class, 'create'])->name('ant.pesos.create');
             Route::post('/pesos', [PesoController::class, 'store'])->name('ant.pesos.store');
@@ -88,12 +88,12 @@ Route::prefix('ant')
             Route::delete('/material/{id}', [MaterialController::class, 'destroy'])->name('ant.materiais.destroy');
         });
 
-
-
-
         Route::prefix('admin')->group(function () {
             // Dashboard Admin (Já existia)
             Route::get('/', [AntAdminController::class, 'index'])->name('ant.admin.home');
+
+            // Gerenciamento de Semestre
+            Route::put('/semestre', [AntAdminController::class, 'updateSemestre'])->name('ant.admin.semestre.update');
 
             // CRUD de Matérias
             Route::resource('materias', AdminMateriaController::class)->names([

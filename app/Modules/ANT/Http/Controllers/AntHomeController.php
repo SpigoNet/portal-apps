@@ -3,13 +3,14 @@
 namespace App\Modules\ANT\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Modules\ANT\Models\AntAluno;
 use App\Modules\ANT\Models\AntConfiguracao;
 use App\Modules\ANT\Models\AntMateria;
-use App\Modules\ANT\Models\AntPeso; // Adicione esta linha
+use App\Modules\ANT\Models\AntPeso;
 use App\Modules\ANT\Models\AntTrabalho;
+use App\Modules\ANT\Services\SemestreService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AntHomeController extends Controller
 {
@@ -20,8 +21,7 @@ class AntHomeController extends Controller
         // 1. Carregar Configurações (Semestre e Admins)
         $config = AntConfiguracao::first();
 
-        // Fallback se não houver config criada ainda
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $semestreAtual = SemestreService::getCurrent();
 
         if (is_null($user)) {
             return redirect()->route('register');
@@ -50,9 +50,9 @@ class AntHomeController extends Controller
                             ->withCount([
                                 'entregas as pendentes_count' => function ($query) {
                                     $query->whereNull('nota');
-                                }
+                                },
                             ]);
-                    }
+                    },
                 ])
                 ->get();
 
@@ -65,7 +65,7 @@ class AntHomeController extends Controller
         // ---------------------------------------------------------
         $aluno = AntAluno::where('user_id', $user->id)->first();
 
-        if (!$aluno) {
+        if (! $aluno) {
             return redirect()->route('ant.vincular_ra');
         }
 
@@ -78,10 +78,10 @@ class AntHomeController extends Controller
                         ->with([
                             'entregas' => function ($q) use ($aluno) {
                                 $q->where('aluno_ra', $aluno->ra);
-                            }
+                            },
                         ])
                         ->orderBy('prazo', 'asc');
-                }
+                },
             ])
             ->get();
 
@@ -100,7 +100,7 @@ class AntHomeController extends Controller
         // Busca o aluno pelo RA informado
         $aluno = AntAluno::where('ra', $request->ra)->first();
 
-        if (!$aluno) {
+        if (! $aluno) {
             return back()->withErrors(['ra' => 'RA não encontrado na base de dados.']);
         }
 
@@ -118,8 +118,7 @@ class AntHomeController extends Controller
     public function boletim($idMateria)
     {
         $user = auth()->user();
-        $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
+        $semestreAtual = SemestreService::getCurrent();
 
         $aluno = AntAluno::where('user_id', $user->id)->firstOrFail();
 
@@ -131,7 +130,7 @@ class AntHomeController extends Controller
             ->wherePivot('semestre', $semestreAtual)
             ->exists();
 
-        if (!$isMatriculado) {
+        if (! $isMatriculado) {
             abort(403, 'Você não está matriculado nesta disciplina neste semestre.');
         }
 
@@ -153,7 +152,7 @@ class AntHomeController extends Controller
                     $q->where('aluno_ra', $aluno->ra)
                         ->whereNotNull('nota')
                         ->select('trabalho_id', 'aluno_ra', 'nota');
-                }
+                },
             ])
             ->get();
 

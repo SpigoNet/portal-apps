@@ -3,11 +3,12 @@
 namespace App\Modules\ANT\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Modules\ANT\Models\AntConfiguracao;
 use App\Modules\ANT\Models\AntMateria;
 use App\Modules\ANT\Models\AntPeso;
+use App\Modules\ANT\Services\SemestreService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PesoController extends Controller
 {
@@ -17,8 +18,8 @@ class PesoController extends Controller
     public function create()
     {
         $user = auth()->user();
+        $semestreAtual = SemestreService::getForUser($user);
         $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
         $isAdmin = $config ? $config->isAdmin($user->email) : false;
 
         // 1. Busca Matérias
@@ -59,11 +60,11 @@ class PesoController extends Controller
             'valor' => 'required|numeric|min:0|max:100', // Valor total desse grupo (ex: 10.0)
         ]);
 
+        $semestreAtual = SemestreService::getCurrent();
         $config = AntConfiguracao::first();
-        $semestreAtual = $config->semestre_atual ?? date('Y') . '-' . (date('m') > 6 ? '2' : '1');
         $isAdmin = $config ? $config->isAdmin(auth()->user()->email) : false;
 
-        if (!$isAdmin) {
+        if (! $isAdmin) {
             // Segurança: Verifica se é professor da matéria
             $ehProfessor = DB::table('ant_professor_materia')
                 ->where('user_id', auth()->id())
@@ -71,7 +72,7 @@ class PesoController extends Controller
                 ->where('semestre', $semestreAtual)
                 ->exists();
 
-            if (!$ehProfessor) {
+            if (! $ehProfessor) {
                 abort(403, 'Acesso negado a esta disciplina.');
             }
         }
@@ -91,7 +92,7 @@ class PesoController extends Controller
             'semestre' => $semestreAtual,
             'materia_id' => $request->materia_id,
             'grupo' => $request->grupo,
-            'valor' => $request->valor
+            'valor' => $request->valor,
         ]);
 
         return redirect()->route('ant.pesos.create')
@@ -107,6 +108,7 @@ class PesoController extends Controller
         // Se tiver, o banco pode bloquear (Foreign Key) ou podemos avisar
         try {
             $peso->delete();
+
             return back()->with('success', 'Grupo de notas removido.');
         } catch (\Exception $e) {
             return back()->withErrors(['erro' => 'Não é possível remover este grupo pois já existem trabalhos vinculados a ele.']);

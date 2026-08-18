@@ -31,7 +31,7 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Semestre Letivo</label>
                                 <input type="text" name="semestre" value="{{ $semestreAtual }}" required
                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-gray-50 font-bold">
-                                <p class="text-xs text-gray-500 mt-1">Ex: 2025-2</p>
+                                <p class="text-xs text-gray-500 mt-1">Ex: 2025/2</p>
                             </div>
 
                             <div>

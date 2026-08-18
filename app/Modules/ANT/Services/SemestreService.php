@@ -15,7 +15,16 @@ class SemestreService
     {
         $config = AntConfiguracao::first();
 
-        return $config->semestre_atual ?? date('Y').'-'.(date('m') > 6 ? '2' : '1');
+        return $config->semestre_atual ?? date('Y').'/'.(date('m') > 6 ? '2' : '1');
+    }
+
+    /**
+     * Normaliza o formato do semestre para o padrão correto (ano/semestre).
+     * Aceita hífen ou ponto como separador (ex: 2026-1, 2026.1) e converte para 2026/1.
+     */
+    public static function normalize(string $semestre): string
+    {
+        return preg_replace('/[-\.]/', '/', trim($semestre));
     }
 
     /**

@@ -69,9 +69,11 @@ class AdminAlunoController extends Controller
     {
         $request->validate([
             'materia_id' => 'required|exists:ant_materias,id',
-            'semestre' => 'required|string|max:10',
+            'semestre' => 'required|string|max:10', // Ex: 2025/2
             'lista_alunos' => 'required|string',
         ]);
+
+        $request->merge(['semestre' => SemestreService::normalize($request->semestre)]);
 
         $linhas = explode("\n", $request->lista_alunos);
         $importados = 0;

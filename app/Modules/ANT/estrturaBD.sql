@@ -21,7 +21,7 @@ create table spigo594_apps.ant_configuracoes
 (
     id             bigint unsigned auto_increment
         primary key,
-    semestre_atual varchar(6)                        not null comment 'Ex: 2025-2',
+    semestre_atual varchar(6)                        not null comment 'Ex: 2025/2',
     admins         text                              null,
     prompt_agente  text                              null comment 'Prompt do sistema/persona da IA',
     ia_driver      varchar(50) default 'pollination' not null comment 'pollination | lm_studio',

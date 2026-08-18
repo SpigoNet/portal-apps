@@ -165,7 +165,7 @@ app/Modules/ANT/
 | `descricao` | text | Enunciado |
 | `dicas_correcao` | text | Critérios de correção (usados pela IA) |
 | `prazo` | datetime | Data limite de entrega |
-| `semestre` | string | Ex: "2026.1" |
+| `semestre` | string | Ex: "2026/1" |
 | `maximo_alunos` | integer | Máximo de integrantes no grupo |
 
 ### `AntEntrega`

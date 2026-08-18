@@ -30,10 +30,10 @@ class AntAdminController extends Controller
         }
 
         $request->validate([
-            'semestre_atual' => 'required|string|max:6|regex:/^\d{4}-[12]$/',
+            'semestre_atual' => 'required|string|max:6|regex:/^\d{4}[\/-][12]$/',
         ]);
 
-        SemestreService::setCurrent($request->semestre_atual);
+        SemestreService::setCurrent(str_replace('-', '/', $request->semestre_atual));
 
         return redirect()->route('ant.admin.home')
             ->with('success', "Semestre alterado para {$request->semestre_atual} com sucesso!");

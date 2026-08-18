@@ -50,13 +50,15 @@ class AdminProfessorController extends Controller
         $request->validate([
             'tipo_vinculo' => 'required|in:existente,novo',
             'materia_id' => 'required|exists:ant_materias,id',
-            'semestre' => 'required|string|max:6', // Ex: 2025-2
+            'semestre' => 'required|string|max:6', // Ex: 2025/2
             // Validação condicional
             'user_id' => 'required_if:tipo_vinculo,existente|nullable|exists:users,id',
             'new_name' => 'required_if:tipo_vinculo,novo|nullable|string|max:255',
             'new_email' => 'required_if:tipo_vinculo,novo|nullable|email|unique:users,email',
             'new_password' => 'required_if:tipo_vinculo,novo|nullable|string|min:6',
         ]);
+
+        $request->merge(['semestre' => SemestreService::normalize($request->semestre)]);
 
         if ($request->tipo_vinculo === 'novo') {
             $user = User::create([

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Modules\ANT\Models\AntAluno;
 use App\Modules\ANT\Models\AntEntrega;
 use App\Modules\ANT\Models\AntTrabalho;
-use App\Modules\ANT\Services\SemestreService;
 use Illuminate\Http\Request;
 
 class TrabalhoController extends Controller
@@ -174,7 +173,6 @@ class TrabalhoController extends Controller
         $materiaId = $request->query('materia_id');
         $user = auth()->user();
         $alunoLogado = AntAluno::where('user_id', $user->id)->firstOrFail();
-        $semestreAtual = SemestreService::getCurrent();
 
         if (strlen($termo) < 3) {
             return response()->json([]);
@@ -188,9 +186,8 @@ class TrabalhoController extends Controller
             $q->where('nome', 'like', "%{$termo}%")
                 ->orWhere('ra', 'like', "%{$termo}%");
         })
-            ->whereHas('materias', function ($q) use ($materiaId, $semestreAtual) {
-                $q->where('ant_materias.id', $materiaId)
-                    ->wherePivot('semestre', $semestreAtual);
+            ->whereHas('materias', function ($q) use ($materiaId) {
+                $q->where('ant_materias.id', $materiaId);
             })
             ->where('id', '!=', $alunoLogado->id)
             ->take(10)

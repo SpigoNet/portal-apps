@@ -9,6 +9,22 @@
                 <div class="p-6 bg-white border-b border-gray-200">
                     Você está logado como Administrador do Módulo.
 
+                    @if (session('success'))
+                        <div class="mt-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if ($errors->any())
+                        <div class="mt-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded">
+                            <ul class="list-disc pl-5">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     {{-- Card: Semestre Corrente --}}
                     <div class="mt-6 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -21,9 +37,9 @@
                                 @method('PUT')
                                 <div>
                                     <label for="semestre_atual" class="block text-xs font-medium text-gray-600 mb-1">Alterar para:</label>
-                                    <input type="text" name="semestre_atual" id="semestre_atual"
+                                    <input type="text" name="semestre_atual" id="semestreAtual"
                                         value="{{ $semestreAtual }}"
-                                        placeholder="Ex: 2026-1"
+                                        placeholder="Ex: 2026/1"
                                         list="semestres-existente"
                                         class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm w-36"
                                         required>

@@ -3,7 +3,6 @@
 namespace App\Modules\ANT\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\ANT\Models\AntConfiguracao;
 use App\Modules\ANT\Services\SemestreService;
 use Illuminate\Http\Request;
 
@@ -11,7 +10,7 @@ class AntAdminController extends Controller
 {
     public function index()
     {
-        $config = AntConfiguracao::first();
+        $config = SemestreService::getConfig();
         if (! $config || ! $config->isAdmin(auth()->user()->email)) {
             abort(403, 'Acesso não autorizado.');
         }
@@ -24,7 +23,7 @@ class AntAdminController extends Controller
 
     public function updateSemestre(Request $request)
     {
-        $config = AntConfiguracao::first();
+        $config = SemestreService::getConfig();
         if (! $config || ! $config->isAdmin(auth()->user()->email)) {
             abort(403, 'Acesso não autorizado.');
         }

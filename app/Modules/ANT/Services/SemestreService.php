@@ -9,11 +9,25 @@ use Illuminate\Support\Facades\DB;
 class SemestreService
 {
     /**
+     * Retorna a configuração canônica.
+     * Prioriza a linha que contém a lista de admins (evitando perder acesso)
+     * e garante determinismo no PostgreSQL (first() sem ORDER BY é arbitrário).
+     */
+    private static function config(): ?AntConfiguracao
+    {
+        return AntConfiguracao::whereNotNull('admins')
+            ->where('admins', '<>', '')
+            ->orderBy('id')
+            ->first()
+            ?? AntConfiguracao::orderBy('id')->first();
+    }
+
+    /**
      * Retorna o semestre corrente configurado no banco.
      */
     public static function getCurrent(): string
     {
-        $config = AntConfiguracao::first();
+        $config = self::config();
 
         return $config->semestre_atual ?? date('Y').'/'.(date('m') > 6 ? '2' : '1');
     }
@@ -49,12 +63,13 @@ class SemestreService
      */
     public static function setCurrent(string $semestre): void
     {
-        $config = AntConfiguracao::first();
+        $config = self::config();
 
         if ($config) {
-            $config->update(['semestre_atual' => $semestre]);
+            // Atualiza todas as linhas para manter consistência (evita linhas duplicadas divergentes)
+            AntConfiguracao::query()->update(['semestre_atual' => $semestre]);
         } else {
-            AntConfiguracao::create(['semestre_atual' => $semestre]);
+            $config = AntConfiguracao::create(['semestre_atual' => $semestre]);
         }
     }
 
@@ -90,6 +105,6 @@ class SemestreService
      */
     public static function getConfig(): ?AntConfiguracao
     {
-        return AntConfiguracao::first();
+        return self::config();
     }
 }

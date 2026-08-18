@@ -31,3 +31,4 @@ Homestead.json
 auth.json
 /.idea
 /draft
+docker-compose.yml

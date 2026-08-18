@@ -157,7 +157,7 @@
                                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                                onkeyup="buscarColegas(this.value, {{ $trabalho->materia_id }})">
 
-                                        <div id="lista-sugestoes" class="absolute z-10 w-full bg-white shadow-lg border border-gray-200 rounded-md mt-1 hidden max-h-40 overflow-y-auto"></div>
+                                        <div id="lista-sugestoes" class="absolute z-10 w-full bg-white shadow-lg border border-gray-200 rounded-md mt-1 hidden max-h-40 overflow-y-auto text-gray-800"></div>
                                     </div>
 
                                     <div id="container-integrantes" class="mt-3 space-y-2">

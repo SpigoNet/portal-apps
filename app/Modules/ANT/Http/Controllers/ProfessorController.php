@@ -303,6 +303,30 @@ class ProfessorController extends Controller
         return redirect()->route('ant.professor.trabalho', $trabalho->id)->with('success', 'Trabalho atualizado com sucesso!');
     }
 
+    // Alterar apenas a data de entrega (prazo) do trabalho
+    public function updatePrazo(Request $request, $id)
+    {
+        $trabalho = AntTrabalho::findOrFail($id);
+
+        $ehProfessor = DB::table('ant_professor_materia')
+            ->where('user_id', auth()->id())
+            ->where('materia_id', $trabalho->materia_id)
+            ->exists();
+
+        if (! $ehProfessor) {
+            abort(403, 'Você não tem permissão para editar este trabalho.');
+        }
+
+        $request->validate([
+            'prazo' => 'required|date',
+        ]);
+
+        $trabalho->update(['prazo' => $request->prazo]);
+
+        return redirect()->route('ant.professor.trabalho', $trabalho->id)
+            ->with('success', 'Data de entrega atualizada com sucesso!');
+    }
+
     // Formulário de Novo Trabalho
     public function create()
     {

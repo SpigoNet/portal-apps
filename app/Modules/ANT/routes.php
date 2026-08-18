@@ -7,7 +7,6 @@ use App\Modules\ANT\Http\Controllers\AntAdminController;
 use App\Modules\ANT\Http\Controllers\AntHomeController;
 use App\Modules\ANT\Http\Controllers\AuthController;
 use App\Modules\ANT\Http\Controllers\CorrecaoController;
-use App\Modules\ANT\Http\Controllers\DiagnosticController;
 use App\Modules\ANT\Http\Controllers\MaterialController;
 use App\Modules\ANT\Http\Controllers\PesoController;
 use App\Modules\ANT\Http\Controllers\ProfessorController;
@@ -39,9 +38,6 @@ Route::prefix('ant')
         // Rota Inicial (Dashboard)
         Route::get('/', [AntHomeController::class, 'index'])->name('ant.home');
 
-        // Rota de Diagnóstico SFTP
-        Route::get('/diagnostico', [DiagnosticController::class, 'index'])->name('ant.diagnostic');
-
         // -- Rotas de Vínculo de RA (Para primeiro acesso do aluno) --
         Route::get('/vincular-ra', [AntHomeController::class, 'vincularRaView'])->name('ant.vincular_ra');
         Route::post('/vincular-ra', [AntHomeController::class, 'vincularRaStore'])->name('ant.vincular_ra.store');
@@ -71,6 +67,7 @@ Route::prefix('ant')
             Route::get('/trabalho/{id}', [ProfessorController::class, 'trabalho'])->name('ant.professor.trabalho');
             Route::get('/trabalho/{id}/editar', [ProfessorController::class, 'edit'])->name('ant.professor.trabalho.edit');
             Route::put('/trabalho/{id}', [ProfessorController::class, 'update'])->name('ant.professor.trabalho.update');
+            Route::put('/trabalho/{id}/prazo', [ProfessorController::class, 'updatePrazo'])->name('ant.professor.trabalho.prazo');
 
             Route::get('/materia/{idMateria}/boletim', [ProfessorController::class, 'boletim'])->name('ant.professor.boletim');
 

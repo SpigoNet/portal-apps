@@ -45,6 +45,9 @@ RUN echo "opcache.memory_consumption=192" >> $PHP_INI_DIR/conf.d/docker-php-ext-
 # 5. Definir diretório de trabalho e copiar código do projeto
 WORKDIR /var/www/html
 COPY . .
+# Remove o arquivo "hot" do Vite (criado por `npm run dev`); se presente,
+# o Laravel injeta o servidor de desenvolvimento (127.0.0.1:5173) em produção.
+RUN rm -f public/hot
 
 # 6. Copiar os assets de frontend já compilados no Estágio 1
 COPY --from=frontend-builder /app/public/build ./public/build
@@ -52,7 +55,11 @@ COPY --from=frontend-builder /app/public/build ./public/build
 # 7. Instalar dependências do Composer (PHP) otimizadas para produção
 ENV COMPOSER_ALLOW_SUPERUSER=1
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+RUN composer install --no-dev --optimize-autoloader --no-scripts \
+    # Removemos qualquer cache de provedores stalos do contexto de build.
+    # A descoberta de pacotes (package:discover) é feita em runtime pelo Laravel,
+    # evitando boot com banco indisponível durante o build.
+    && rm -f bootstrap/cache/*.php
 
 # 8. Ajustar permissões cruciais do Laravel para o usuário do Apache (www-data)
 RUN chown -R www-data:www-data /var/www/html \

@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+    /* O plugin @tailwindcss/forms define fundo branco nos inputs, mas o tema
+       escuro herda text-on-surface (claro). Garantir texto escuro legível. */
+    input, select, textarea {
+        color: #0d141d;
+    }
+}
+
 @layer utilities {
     /* Ajuste para Tabelas Responsivas no Mobile */
     @media (max-width: 768px) {

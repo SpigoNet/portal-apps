@@ -29,7 +29,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div class="bg-white p-4 rounded shadow border-l-4 border-gray-500">
                     <span class="block text-gray-500 text-xs uppercase">Total Alunos</span>
-                    <span class="text-2xl font-bold">{{ $totalAlunos }}</span>
+                    <span class="text-2xl font-bold text-gray-900">{{ $totalAlunos }}</span>
                 </div>
                 <div class="bg-white p-4 rounded shadow border-l-4 border-blue-500">
                     <span class="block text-gray-500 text-xs uppercase">Entregues</span>
@@ -43,6 +43,27 @@
                     <span class="block text-gray-500 text-xs uppercase">Corrigidos</span>
                     <span class="text-2xl font-bold text-green-600">{{ $corrigidos }}</span>
                 </div>
+            </div>
+
+            <div class="bg-white p-4 rounded shadow border-l-4 border-indigo-500 mb-6">
+                <form action="{{ route('ant.professor.trabalho.prazo', $trabalho->id) }}" method="POST" class="flex flex-wrap items-end gap-3">
+                    @csrf
+                    @method('PUT')
+                    <div>
+                        <label for="prazo" class="block text-xs font-medium text-gray-600 mb-1">Data de Entrega (Prazo)</label>
+                        <input type="date" name="prazo" id="prazo"
+                               value="{{ $trabalho->prazo->format('Y-m-d') }}"
+                               class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                               required>
+                    </div>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors">
+                        Alterar Data
+                    </button>
+                    <span class="text-sm text-gray-500">Atual: {{ $trabalho->prazo->format('d/m/Y') }}</span>
+                    @error('prazo')
+                        <span class="text-sm text-red-600">{{ $message }}</span>
+                    @enderror
+                </form>
             </div>
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">

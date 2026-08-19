@@ -48,6 +48,8 @@ COPY . .
 # Remove o arquivo "hot" do Vite (criado por `npm run dev`); se presente,
 # o Laravel injeta o servidor de desenvolvimento (127.0.0.1:5173) em produção.
 RUN rm -f public/hot
+# Cria o symlink de storage público (necessário para servir uploads em /storage/...)
+RUN ln -sfn ../storage/app/public public/storage
 
 # 6. Copiar os assets de frontend já compilados no Estágio 1
 COPY --from=frontend-builder /app/public/build ./public/build

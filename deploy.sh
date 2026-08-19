@@ -77,6 +77,15 @@ echo "[5/5] Buildando e reiniciando containers..."
 # Garante que nenhum public/hot (servidor de dev) do destino entre no contexto de build
 remote_cmd "rm -f $REMOTE_BASE/public/hot"
 remote_cmd "cd $REMOTE_BASE && docker compose down && docker compose up -d --build"
+
+# Ajusta permissões do storage montado (bind mount criado como root no host;
+# o Apache roda como www-data e precisa de escrita para os uploads)
+echo "     Ajustando permissões de storage (uploads)..."
+remote_cmd "cd $REMOTE_BASE && docker compose exec -T -u root spigo-portal-app sh -c 'mkdir -p /var/www/html/storage/app/public && chown -R www-data:www-data /var/www/html/storage/app/public && chmod -R 775 /var/www/html/storage/app/public'"
+
+# Garante o symlink public/storage -> storage/app/public (servir downloads via /storage/...)
+remote_cmd "cd $REMOTE_BASE && docker compose exec -T spigo-portal-app ln -sfn ../storage/app/public public/storage"
+
 remote_cmd "rm -rf $REMOTE_BASE.bak"
 echo "     Deploy concluído!"
 

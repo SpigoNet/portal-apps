@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('treetask:daily-motivation')->dailyAt('08:00');
 Schedule::command('alfred:enviar-mensagens-agendadas')->everyMinute();
+Schedule::command('pidgey:enviar-agendados')->everyMinute();

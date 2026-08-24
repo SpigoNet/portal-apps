@@ -8,15 +8,9 @@
     <a href="{{ route('alfred.admin.index') }}" class="btn btn-secondary">← Voltar</a>
 
     <div style="margin-top: 16px; display:flex; gap:12px; align-items:center; justify-content:space-between;">
-        <form action="{{ route('alfred.admin.personas.store') }}" method="post" style="display:flex; gap:8px; align-items:center;">
-            @csrf
-            <input type="text" name="name" placeholder="Nome (ex: Chopper)" required class="form-control" style="width:220px;">
-            <input type="text" name="slug" placeholder="slug (ex: chopper)" required class="form-control" style="width:160px;">
-            <input type="text" name="whatsapp_group_jid" placeholder="120363427048537280 ou 120363427048537280@g.us" class="form-control" style="width:320px;">
-            <button class="btn btn-primary">Criar</button>
-        </form>
+        <a href="{{ route('alfred.admin.personas.create') }}" class="btn btn-primary">Nova Persona</a>
 
-        <div style="text-align:right; color:var(--text-muted);">Dica: informe o grupo como número ou com sufixo <code>@g.us</code></div>
+        <div style="text-align:right; color:var(--text-muted);">Dica: defina o canal (WhatsApp ou Telegram) e os dados do bot por persona.</div>
     </div>
 
     <div style="margin-top:20px; overflow:auto;">
@@ -26,7 +20,8 @@
                 <th style="padding:10px 8px; border-bottom:1px solid #eee; width:60px;">ID</th>
                 <th style="padding:10px 8px; border-bottom:1px solid #eee;">Nome</th>
                 <th style="padding:10px 8px; border-bottom:1px solid #eee; width:160px;">Slug</th>
-                <th style="padding:10px 8px; border-bottom:1px solid #eee; width:260px;">Grupo WhatsApp</th>
+                <th style="padding:10px 8px; border-bottom:1px solid #eee; width:120px;">Canal</th>
+                <th style="padding:10px 8px; border-bottom:1px solid #eee; width:240px;">Grupo WhatsApp</th>
                 <th style="padding:10px 8px; border-bottom:1px solid #eee; width:90px;">Ativo</th>
                 <th style="padding:10px 8px; border-bottom:1px solid #eee; width:260px;">Ações</th>
             </tr>
@@ -37,6 +32,7 @@
                 <td style="padding:10px 8px; vertical-align:middle;">{{ $p->id }}</td>
                 <td style="padding:10px 8px; vertical-align:middle; font-weight:600;">{{ $p->name }}</td>
                 <td style="padding:10px 8px; vertical-align:middle; color:var(--text-muted);">{{ $p->slug }}</td>
+                <td style="padding:10px 8px; vertical-align:middle;">{{ $p->canal === 'telegram' ? 'Telegram' : 'WhatsApp' }}</td>
                 <td style="padding:10px 8px; vertical-align:middle; font-family:monospace; color:#333;">
                     @if($p->whatsapp_group_jid)
                         {{ Str::limit($p->whatsapp_group_jid, 30) }}

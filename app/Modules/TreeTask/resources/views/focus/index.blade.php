@@ -30,12 +30,42 @@
                             {{ $focoTotal->titulo }}
                         </h1>
 
-                        <div class="prose max-w-none text-gray-600 text-lg mb-8 bg-gray-50 p-6 rounded-lg text-left border-l-4 border-indigo-400">
-                            @if(function_exists('clean'))
-                                {!! clean($focoTotal->descricao) !!}
-                            @else
-                                {!! nl2br(e($focoTotal->descricao)) !!}
-                            @endif
+                        <div class="mb-8 text-left">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Descrição</span>
+                                <button type="button" data-btn-editar-desc
+                                    onclick="document.getElementById('editor-descricao').classList.remove('hidden'); this.classList.add('hidden');"
+                                    class="text-sm text-indigo-600 hover:text-indigo-800 underline font-medium">
+                                    ✏️ Editar descrição
+                                </button>
+                            </div>
+
+                            <div id="visual-descricao" class="prose max-w-none text-gray-600 text-lg bg-gray-50 p-6 rounded-lg border-l-4 border-indigo-400">
+                                @if(function_exists('clean'))
+                                    {!! clean($focoTotal->descricao) !!}
+                                @else
+                                    {!! nl2br(e($focoTotal->descricao)) !!}
+                                @endif
+                            </div>
+
+                            <div id="editor-descricao" class="hidden bg-gray-50 p-6 rounded-lg border-l-4 border-indigo-400">
+                                <form action="{{ route('treetask.tarefas.updateDescricao', $focoTotal->id_tarefa) }}" method="POST">
+                                    @csrf
+                                    @method('PATCH')
+                                    <textarea name="descricao" rows="14" placeholder="Elabore a descrição da tarefa..."
+                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg text-gray-700 leading-relaxed">{{ old('descricao', $focoTotal->descricao) }}</textarea>
+                                    <div class="flex justify-end gap-3 mt-4">
+                                        <button type="button"
+                                            onclick="document.getElementById('editor-descricao').classList.add('hidden'); document.querySelector('[data-btn-editar-desc]').classList.remove('hidden');"
+                                            class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-200 font-medium">
+                                            Cancelar
+                                        </button>
+                                        <button type="submit" class="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">
+                                            Salvar descrição
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
 
                         <div id="ai-strategy-area" class="mb-8 hidden bg-gray-900 text-green-400 p-4 rounded-lg text-left font-mono text-sm shadow-inner">
@@ -123,6 +153,52 @@
                     <h3 class="text-2xl font-bold text-gray-700">O que vamos construir agora?</h3>
                     <p class="text-gray-500">Escolha um bloco para iniciar.</p>
                 </div>
+
+                <form method="GET" action="{{ route('treetask.focus.index') }}" class="mb-6 bg-white rounded-xl shadow p-4 flex flex-wrap gap-4 items-end">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Projeto</label>
+                        <select name="projeto" onchange="this.form.submit()" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">Todos os projetos</option>
+                            @foreach($projetos as $p)
+                                <option value="{{ $p->id_projeto }}" {{ request('projeto') == $p->id_projeto ? 'selected' : '' }}>{{ $p->nome }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Prioridade</label>
+                        <select name="prioridade" onchange="this.form.submit()" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">Todas</option>
+                            @foreach($prioridades as $pr)
+                                <option value="{{ $pr }}" {{ request('prioridade') == $pr ? 'selected' : '' }}>{{ $pr }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Status</label>
+                        <select name="status" onchange="this.form.submit()" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="todos" {{ $statusFiltro == 'todos' ? 'selected' : '' }}>A Fazer / Planejamento</option>
+                            <option value="A Fazer" {{ $statusFiltro == 'A Fazer' ? 'selected' : '' }}>A Fazer</option>
+                            <option value="Planejamento" {{ $statusFiltro == 'Planejamento' ? 'selected' : '' }}>Planejamento</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Ordenar por</label>
+                        <select name="ordenar" onchange="this.form.submit()" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="prioridade" {{ $ordenar == 'prioridade' ? 'selected' : '' }}>Prioridade</option>
+                            <option value="vencimento" {{ $ordenar == 'vencimento' ? 'selected' : '' }}>Vencimento</option>
+                            <option value="ordem" {{ $ordenar == 'ordem' ? 'selected' : '' }}>Ordem definida</option>
+                        </select>
+                    </div>
+
+                    @if($filtrosAtivos)
+                        <a href="{{ route('treetask.focus.index') }}" class="ml-auto text-sm text-gray-500 hover:text-red-500 underline self-center">
+                            Limpar filtros
+                        </a>
+                    @endif
+                </form>
 
                 <div class="space-y-4">
                     @forelse($aFazer as $tarefa)

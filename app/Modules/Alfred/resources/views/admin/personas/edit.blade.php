@@ -22,9 +22,32 @@
         </div>
 
         <div class="form-group">
+            <label>Canal de envio</label>
+            <select name="canal" class="form-control" required>
+                <option value="whatsapp" {{ old('canal', $persona->canal ?? 'whatsapp') == 'whatsapp' ? 'selected' : '' }}>WhatsApp</option>
+                <option value="telegram" {{ old('canal', $persona->canal ?? 'whatsapp') == 'telegram' ? 'selected' : '' }}>Telegram</option>
+            </select>
+        </div>
+
+        <div class="form-group">
             <label>WhatsApp Group JID</label>
             <input type="text" name="whatsapp_group_jid" value="{{ old('whatsapp_group_jid', $persona->whatsapp_group_jid) }}" class="form-control">
         </div>
+
+        <fieldset style="border:1px solid #eee; padding:12px 16px; border-radius:6px; margin-bottom:16px;">
+            <legend style="font-weight:600; padding:0 6px;">Configurações do Bot Telegram</legend>
+
+            <div class="form-group">
+                <label>Token do Bot</label>
+                <input type="text" name="telegram_token" value="{{ old('telegram_token', $persona->telegram_token) }}" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label>Chat ID</label>
+                <input type="text" name="telegram_chat_id" value="{{ old('telegram_chat_id', $persona->telegram_chat_id) }}" class="form-control">
+                <small style="color:var(--text-muted);">ID do chat, grupo ou canal onde a mensagem será enviada.</small>
+            </div>
+        </fieldset>
 
         <div class="form-group">
             <label>Personality (JSON)</label>

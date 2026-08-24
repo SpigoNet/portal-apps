@@ -4,8 +4,8 @@ namespace App\Modules\Alfred\Http\Controllers;
 
 use App\Modules\Alfred\Models\Agendamento;
 use App\Modules\Alfred\Models\Persona;
-use App\Modules\Alfred\Services\EvolutionApiService;
 use App\Modules\Alfred\Services\MensagemPersonaService;
+use App\Modules\Alfred\Services\PersonaEnvioService;
 use Illuminate\Http\Request;
 
 class AgendamentoController
@@ -87,17 +87,17 @@ class AgendamentoController
         return redirect()->back()->with('success', "Agendamento {$status}");
     }
 
-    public function sendTest(Agendamento $agendamento, EvolutionApiService $evo, MensagemPersonaService $mensagemPersonaService)
+    public function sendTest(Agendamento $agendamento, PersonaEnvioService $envio, MensagemPersonaService $mensagemPersonaService)
     {
         $persona = $agendamento->persona;
 
-        if (! $persona || ! $persona->whatsapp_group_jid) {
-            return redirect()->back()->with('error', 'Persona sem grupo WhatsApp configurado');
+        if (! $persona) {
+            return redirect()->back()->with('error', 'Agendamento sem persona configurada');
         }
 
         $mensagem = $mensagemPersonaService->gerarMensagem($persona, (string) $agendamento->mensagem);
 
-        $resultado = $evo->sendTextToGroup($persona->whatsapp_group_jid, $mensagem);
+        $resultado = $envio->enviar($persona, $mensagem);
 
         if ($resultado['ok']) {
             return redirect()->back()->with('success', "Mensagem enviada via {$persona->name} (status {$resultado['status']})");

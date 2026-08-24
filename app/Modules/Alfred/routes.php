@@ -29,6 +29,7 @@ Route::prefix('alfred')
             Route::get('/configuracoes', [AdminController::class, 'configuracoes'])->name('configuracoes');
             Route::post('/configuracoes', [AdminController::class, 'updateConfiguracoes'])->name('configuracoes.update');
             Route::get('/personas', [PersonaController::class, 'index'])->name('personas.index');
+            Route::get('/personas/criar', [PersonaController::class, 'create'])->name('personas.create');
             Route::post('/personas', [PersonaController::class, 'store'])->name('personas.store');
             Route::get('/personas/{persona}', [PersonaController::class, 'show'])->name('personas.show');
             Route::get('/personas/{persona}/edit', [PersonaController::class, 'edit'])->name('personas.edit');

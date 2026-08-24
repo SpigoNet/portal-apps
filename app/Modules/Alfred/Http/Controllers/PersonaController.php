@@ -3,7 +3,7 @@
 namespace App\Modules\Alfred\Http\Controllers;
 
 use App\Modules\Alfred\Models\Persona;
-use App\Modules\Alfred\Services\EvolutionApiService;
+use App\Modules\Alfred\Services\PersonaEnvioService;
 use Illuminate\Http\Request;
 
 class PersonaController
@@ -11,6 +11,11 @@ class PersonaController
     public function index()
     {
         return view('Alfred::admin.personas.index', ['personas' => Persona::all()]);
+    }
+
+    public function create()
+    {
+        return view('Alfred::admin.personas.create');
     }
 
     public function show(Persona $persona)
@@ -23,7 +28,10 @@ class PersonaController
         $data = $request->validate([
             'name' => 'required|string',
             'slug' => 'required|string|unique:alfred_personas,slug',
+            'canal' => 'required|in:whatsapp,telegram',
             'whatsapp_group_jid' => 'nullable|string',
+            'telegram_token' => 'nullable|string',
+            'telegram_chat_id' => 'nullable|string',
             'personality' => 'nullable|string',
             'metadata' => 'nullable|string',
         ]);
@@ -57,7 +65,10 @@ class PersonaController
         $data = $request->validate([
             'name' => 'required|string',
             'slug' => 'required|string|unique:alfred_personas,slug,'.$persona->id,
+            'canal' => 'required|in:whatsapp,telegram',
             'whatsapp_group_jid' => 'nullable|string',
+            'telegram_token' => 'nullable|string',
+            'telegram_chat_id' => 'nullable|string',
             'personality' => 'nullable|string',
             'metadata' => 'nullable|string',
             'active' => 'nullable|boolean',
@@ -114,11 +125,11 @@ class PersonaController
         return $clean;
     }
 
-    public function sendTestMessage(Persona $persona, EvolutionApiService $evo)
+    public function sendTestMessage(Persona $persona, PersonaEnvioService $envio)
     {
         $message = ($persona->personality['greetings'][0] ?? "Oi, sou {$persona->name}!");
 
-        $result = $evo->sendTextToGroup($persona->whatsapp_group_jid ?? '', $message);
+        $result = $envio->enviar($persona, $message);
 
         if (is_array($result)) {
             if ($result['ok']) {
@@ -127,7 +138,7 @@ class PersonaController
 
             $details = 'Erro: '.($result['error'] ?? 'unknown').' | status: '.($result['status'] ?? 'n/a').' | body: '.($result['body'] ?? 'n/a');
 
-            return redirect()->back()->with('error', 'Falha ao enviar mensagem: '.config('services.evolution.base_uri', '').' '.$details);
+            return redirect()->back()->with('error', 'Falha ao enviar mensagem: '.$details);
         }
 
         return redirect()->back()->with('error', 'Falha inesperada ao enviar a mensagem');

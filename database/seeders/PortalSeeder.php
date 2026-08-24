@@ -46,5 +46,18 @@ class PortalSeeder extends Seeder
         // 3. Vincula o App de Admin ao Usuário Admin
         // O método syncWithoutDetaching evita duplicatas na tabela pivot
         $adminUser->portalApps()->syncWithoutDetaching($adminApp->id);
+
+        // 4. App do Pidgey (mensageiro de personas)
+        PortalApp::firstOrCreate(
+            ['start_link' => '/pidgey'],
+            [
+                'id' => 12,
+                'title' => 'Pidgey',
+                'description' => 'Agendador de mensagens disparadas pelas personas no Telegram.',
+                'icon' => 'fa-solid fa-dove',
+                'visibility' => 'public',
+                'package_id' => $package->id,
+            ]
+        );
     }
 }

@@ -87,6 +87,7 @@ Route::middleware(['web', 'auth'])
         Route::get('/tarefas/{id}/editar', [TarefaController::class, 'edit'])->name('tarefas.edit');
         Route::put('/tarefas/{id}', [TarefaController::class, 'update'])->name('tarefas.update');
         Route::patch('/tarefas/{id}/status', [TarefaController::class, 'updateStatus'])->name('tarefas.updateStatus');
+        Route::patch('/tarefas/{id}/descricao', [TarefaController::class, 'updateDescricao'])->name('tarefas.updateDescricao');
 
         // Rotas de Anexos
         Route::post('/tarefas/{id}/anexos', [AnexoController::class, 'store'])->name('anexos.store');

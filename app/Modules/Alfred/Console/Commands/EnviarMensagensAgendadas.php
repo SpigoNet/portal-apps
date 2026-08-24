@@ -3,17 +3,17 @@
 namespace App\Modules\Alfred\Console\Commands;
 
 use App\Modules\Alfred\Models\Agendamento;
-use App\Modules\Alfred\Services\EvolutionApiService;
 use App\Modules\Alfred\Services\MensagemPersonaService;
+use App\Modules\Alfred\Services\PersonaEnvioService;
 use Illuminate\Console\Command;
 
 class EnviarMensagensAgendadas extends Command
 {
     protected $signature = 'alfred:enviar-mensagens-agendadas';
 
-    protected $description = 'Envia mensagens agendadas via WhatsApp pelas personas configuradas';
+    protected $description = 'Envia mensagens agendadas (WhatsApp ou Telegram) pelas personas configuradas';
 
-    public function handle(EvolutionApiService $evo, MensagemPersonaService $mensagemPersonaService): int
+    public function handle(PersonaEnvioService $envio, MensagemPersonaService $mensagemPersonaService): int
     {
         $agendamentos = Agendamento::with('persona')
             ->where('ativa', true)
@@ -35,8 +35,8 @@ class EnviarMensagensAgendadas extends Command
 
             $persona = $agendamento->persona;
 
-            if (! $persona || ! $persona->whatsapp_group_jid) {
-                $this->warn("Agendamento #{$agendamento->id}: persona sem grupo WhatsApp. Pulando.");
+            if (! $persona) {
+                $this->warn("Agendamento #{$agendamento->id}: sem persona. Pulando.");
                 $erros++;
 
                 continue;
@@ -44,11 +44,11 @@ class EnviarMensagensAgendadas extends Command
 
             $mensagem = $mensagemPersonaService->gerarMensagem($persona, (string) $agendamento->mensagem);
 
-            $resultado = $evo->sendTextToGroup($persona->whatsapp_group_jid, $mensagem);
+            $resultado = $envio->enviar($persona, $mensagem);
 
             if ($resultado['ok']) {
                 $agendamento->marcarEnviado();
-                $this->info("Agendamento #{$agendamento->id} enviado via {$persona->name} (status {$resultado['status']})");
+                $this->info("Agendamento #{$agendamento->id} enviado via {$persona->name} ({$persona->canal}, status {$resultado['status']})");
                 $enviados++;
             } else {
                 $this->error("Agendamento #{$agendamento->id} falhou: {$resultado['error']}");

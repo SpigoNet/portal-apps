@@ -5,7 +5,7 @@ namespace App\Modules\Alfred\Http\Controllers;
 use App\Modules\Alfred\Models\Medicamento;
 use App\Modules\Alfred\Models\Persona;
 use App\Modules\Alfred\Models\RegistroMedicamento;
-use App\Modules\Alfred\Services\EvolutionApiService;
+use App\Modules\Alfred\Services\PersonaEnvioService;
 use Illuminate\Http\Request;
 
 class MedicamentoController
@@ -70,7 +70,7 @@ class MedicamentoController
             ->with('success', 'Medicamento removido com sucesso!');
     }
 
-    public function tomar(Medicamento $medicamento, Request $request)
+    public function tomar(Medicamento $medicamento, Request $request, PersonaEnvioService $envio)
     {
         $data = $request->input('data');
 
@@ -100,12 +100,11 @@ class MedicamentoController
 
         try {
             $chopper = Persona::where('slug', 'chopper')->where('active', true)->first();
-            if ($chopper && $chopper->whatsapp_group_jid) {
-                $evo = new EvolutionApiService;
+            if ($chopper) {
                 $greeting = $chopper->personality['greetings'][0] ?? 'Oi!';
                 $text = $greeting."\n";
                 $text .= "Registro: tomou o medicamento {$medicamento->nome}.";
-                $evo->sendTextToGroup($chopper->whatsapp_group_jid, $text);
+                $envio->enviar($chopper, $text);
             }
         } catch (\Throwable $e) {
             //

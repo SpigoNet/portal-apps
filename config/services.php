@@ -62,4 +62,13 @@ return [
         'timeout' => env('WHATSAPP_API_TIMEOUT', 15),
     ],
 
+    'ollama' => [
+        'base_uri' => env('OLLAMA_URL', 'http://192.168.15.10:11434'),
+        'model' => env('OLLAMA_MODEL', 'llama3'),
+    ],
+
+    'pidgey' => [
+        'financeiro_user_id' => env('PIDGEY_FINANCEIRO_USER_ID', 1),
+    ],
+
 ];

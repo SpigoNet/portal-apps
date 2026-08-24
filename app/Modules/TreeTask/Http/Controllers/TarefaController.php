@@ -114,6 +114,27 @@ class TarefaController extends Controller
         return redirect()->route('treetask.show', $tarefa->fase->id_projeto)
             ->with('success', 'Tarefa atualizada com sucesso.');
     }
+
+    /**
+     * Atualiza apenas a descrição da tarefa (Edição rápida no Modo Foco).
+     */
+    public function updateDescricao(Request $request, $id)
+    {
+        $tarefa = Tarefa::with('fase.projeto')->findOrFail($id);
+
+        if ($tarefa->fase->projeto->id_user_owner !== auth()->id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'descricao' => 'nullable|string',
+        ]);
+
+        $tarefa->update($validated);
+
+        return redirect()->route('treetask.focus.index')
+            ->with('success', 'Descrição atualizada com sucesso.');
+    }
     /**
      * Atualiza apenas o status da tarefa (Ação Rápida)
      */

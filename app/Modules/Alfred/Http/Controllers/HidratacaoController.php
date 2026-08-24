@@ -4,7 +4,7 @@ namespace App\Modules\Alfred\Http\Controllers;
 
 use App\Modules\Alfred\Models\ConsumoAgua;
 use App\Modules\Alfred\Models\Persona;
-use App\Modules\Alfred\Services\EvolutionApiService;
+use App\Modules\Alfred\Services\PersonaEnvioService;
 use Illuminate\Http\Request;
 
 class HidratacaoController
@@ -18,7 +18,7 @@ class HidratacaoController
         return view('Alfred::hidratacao.index', compact('progresso', 'historicoHoje'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, PersonaEnvioService $envio)
     {
         $validated = $request->validate([
             'quantidade_ml' => 'required|integer|min:1',
@@ -38,11 +38,10 @@ class HidratacaoController
 
         try {
             $chopper = Persona::where('slug', 'chopper')->where('active', true)->first();
-            if ($chopper && $chopper->whatsapp_group_jid) {
-                $evo = new EvolutionApiService;
+            if ($chopper) {
                 $text = ($chopper->personality['greetings'][0] ?? "Oi! Sou {$chopper->name}.")."\n";
                 $text .= "Registro de hidratação: {$validated['quantidade_ml']}ml.";
-                $evo->sendTextToGroup($chopper->whatsapp_group_jid, $text);
+                $envio->enviar($chopper, $text);
             }
         } catch (\Throwable $e) {
             //

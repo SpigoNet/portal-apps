@@ -18,4 +18,5 @@ return [
     App\Modules\ComfyQueue\ComfyQueueServiceProvider::class,
     App\Modules\VocabularioControlado\VocabularioControladoServiceProvider::class,
     App\Modules\Alfred\AlfredServiceProvider::class,
+    App\Modules\Pidgey\PidgeyServiceProvider::class,
 ];

@@ -9,7 +9,7 @@
                 </div>
             @endif
 
-            {{ $slot }}
+            @yield('content')
         </div>
     </div>
 </x-app-layout>

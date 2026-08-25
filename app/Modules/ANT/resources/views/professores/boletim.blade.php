@@ -67,6 +67,9 @@
                                             <div class="text-xs text-gray-500 mt-0.5" title="Valor que este grupo adiciona à Nota Final">
                                                 (<span class="{{ $mediaCorClass }} font-bold">{{ number_format($notaPonderada, 2) }}</span> Ponderado)
                                             </div>
+                                            @if(!empty($notasGrupo['extra']))
+                                                <div class="text-[10px] text-gray-400 mt-0.5 leading-tight">{{ $notasGrupo['extra'] }}</div>
+                                            @endif
                                         @else
                                             <span class="text-gray-300">-</span>
                                         @endif

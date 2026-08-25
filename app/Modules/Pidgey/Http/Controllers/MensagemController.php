@@ -2,6 +2,7 @@
 
 namespace App\Modules\Pidgey\Http\Controllers;
 
+use App\Models\AiModel;
 use App\Modules\Alfred\Models\Persona;
 use App\Modules\Pidgey\Services\EnvioService;
 use App\Modules\Pidgey\Services\InterpretadorPersonaService;
@@ -31,6 +32,7 @@ class MensagemController
             'mensagem' => 'required|string',
             'canal' => 'sometimes|in:telegram,whatsapp,email',
             'interpretar' => 'sometimes|boolean',
+            'ai_model_id' => 'sometimes|nullable|exists:ai_modelos,id',
         ]);
 
         $persona = Persona::query()
@@ -42,11 +44,17 @@ class MensagemController
             return response()->json(['ok' => false, 'error' => 'Persona não encontrada'], 404);
         }
 
+        $aiModel = ! empty($data['ai_model_id'])
+            ? AiModel::find($data['ai_model_id'])
+            : null;
+
         $result = $this->envio->enviar(
             $persona,
             $data['mensagem'],
             $data['canal'] ?? null,
-            ! empty($data['interpretar'])
+            ! empty($data['interpretar']),
+            [],
+            $aiModel
         );
 
         if (! $result['ok']) {
@@ -81,6 +89,7 @@ class MensagemController
             'ano' => 'sometimes|integer',
             'canal' => 'sometimes|in:telegram,whatsapp,email',
             'interpretar' => 'sometimes|boolean',
+            'ai_model_id' => 'sometimes|nullable|exists:ai_modelos,id',
         ]);
 
         $slug = $data['persona'] ?? 'nami';
@@ -92,6 +101,10 @@ class MensagemController
         if (! $persona instanceof Persona) {
             return response()->json(['ok' => false, 'error' => 'Persona não encontrada'], 404);
         }
+
+        $aiModel = ! empty($data['ai_model_id'])
+            ? AiModel::find($data['ai_model_id'])
+            : null;
 
         $mes = (int) ($data['mes'] ?? now()->month);
         $ano = (int) ($data['ano'] ?? now()->year);
@@ -111,14 +124,16 @@ class MensagemController
         $interpretar = $data['interpretar'] ?? true;
         $mensagemFinal = $relatorio;
         if ($interpretar) {
-            $mensagemFinal = $this->interpretador->resumirFinanceiro($persona, $relatorio, $vermelho);
+            $mensagemFinal = $this->interpretador->resumirFinanceiro($persona, $relatorio, $vermelho, $aiModel);
         }
 
         $result = $this->envio->enviar(
             $persona,
             $mensagemFinal,
             $data['canal'] ?? null,
-            false
+            false,
+            [],
+            $aiModel
         );
 
         if (! $result['ok']) {

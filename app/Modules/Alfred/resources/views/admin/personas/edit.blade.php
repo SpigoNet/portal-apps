@@ -68,6 +68,44 @@
         </div>
     </form>
 
+    @if($persona->canal === 'telegram')
+    <fieldset style="border:1px solid #eee; padding:12px 16px; border-radius:6px; margin-top:24px;">
+        <legend style="font-weight:600; padding:0 6px;">Webhook do Telegram (respostas via Pidgey)</legend>
+
+        <p style="color:var(--text-muted); margin-top:0;">
+            Configure o bot para enviar as mensagens recebidas ao gerenciador de webhook do módulo Pidgey,
+            que gera uma resposta como a persona. O endereço padrão já inclui o slug da persona.
+        </p>
+
+        <div class="form-group">
+            <label>Endereço do Webhook</label>
+            <input type="text" name="telegram_webhook_url" value="{{ old('telegram_webhook_url', $webhookPadrao) }}" class="form-control" readonly
+                   onclick="this.removeAttribute('readonly'); this.select();">
+            <small style="color:var(--text-muted);">Padrão do módulo Pidgey com o parâmetro da persona ({{ $persona->slug }}). Clique para editar se precisar de uma URL customizada.</small>
+        </div>
+
+        @if($webhookInfo)
+        <div class="form-group">
+            <label>Status atual</label>
+            <pre style="background:#f6f6f6;padding:8px;border-radius:4px;white-space:pre-wrap;">{{ json_encode($webhookInfo, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+        </div>
+        @endif
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <form action="{{ route('alfred.admin.personas.configure-webhook', $persona) }}" method="post">
+                @csrf
+                <input type="hidden" name="telegram_webhook_url" value="{{ $webhookPadrao }}">
+                <button class="btn btn-primary">Configurar Webhook</button>
+            </form>
+
+            <form action="{{ route('alfred.admin.personas.clear-webhook', $persona) }}" method="post" onsubmit="return confirm('Remover o webhook do Telegram desta persona?');">
+                @csrf
+                <button class="btn btn-outline-danger">Remover Webhook</button>
+            </form>
+        </div>
+    </fieldset>
+    @endif
+
     <div style="margin-top:12px;">
         <form action="{{ route('alfred.admin.personas.destroy', $persona) }}" method="post" onsubmit="return confirm('Remover persona?');">
             @csrf

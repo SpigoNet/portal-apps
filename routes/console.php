@@ -7,6 +7,6 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('treetask:daily-motivation')->dailyAt('08:00');
+// Schedule::command('treetask:daily-motivation')->dailyAt('08:00'); // esquema antigo de WhatsApp desativado
 Schedule::command('alfred:enviar-mensagens-agendadas')->everyMinute();
 Schedule::command('pidgey:enviar-agendados')->everyMinute();

@@ -2,7 +2,6 @@
 
 namespace App\Modules\Pidgey\Console\Commands;
 
-use App\Modules\Alfred\Models\Persona;
 use App\Modules\Pidgey\Models\Agendamento;
 use App\Modules\Pidgey\Services\EnvioService;
 use Illuminate\Console\Command;
@@ -32,21 +31,7 @@ class EnviarAgendados extends Command
         $erros = 0;
 
         foreach ($agendamentos as $agendamento) {
-            $persona = Persona::query()->where('slug', $agendamento->persona_slug)->first();
-
-            if (! $persona) {
-                $this->warn("Agendamento #{$agendamento->id}: persona '{$agendamento->persona_slug}' não encontrada. Pulando.");
-                $erros++;
-
-                continue;
-            }
-
-            $resultado = $envio->enviar(
-                $persona,
-                $agendamento->mensagem,
-                $agendamento->canal,
-                (bool) $agendamento->interpretar
-            );
+            $resultado = $envio->enviarAgendamento($agendamento);
 
             if (! $resultado['ok']) {
                 $this->error("Agendamento #{$agendamento->id} falhou: {$resultado['error']}");
@@ -55,16 +40,9 @@ class EnviarAgendados extends Command
                 continue;
             }
 
-            if ($agendamento->frequencia === 'una_vez') {
-                $agendamento->ativo = false;
-                $agendamento->proxima_execucao = null;
-            } else {
-                $agendamento->proxima_execucao = $agendamento->calcularProximaExecucao(now());
-            }
+            $agendamento->atualizarAposEnvio();
 
-            $agendamento->save();
-
-            $this->info("Agendamento #{$agendamento->id} enviado via {$persona->slug} (status {$resultado['status']})");
+            $this->info("Agendamento #{$agendamento->id} enviado via {$agendamento->persona_slug} (status {$resultado['status']})");
             $enviados++;
         }
 

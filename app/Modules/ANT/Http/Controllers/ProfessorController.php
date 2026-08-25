@@ -4,7 +4,11 @@ namespace App\Modules\ANT\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\ANT\Models\AntAluno;
+use App\Modules\ANT\Models\AntApresentacao;
+use App\Modules\ANT\Models\AntApresentacaoAgendamento;
+use App\Modules\ANT\Models\AntApresentacaoApresentador;
 use App\Modules\ANT\Models\AntConfiguracao;
+use App\Modules\ANT\Models\AntEstrela;
 use App\Modules\ANT\Models\AntMateria;
 use App\Modules\ANT\Models\AntPeso;
 use App\Modules\ANT\Models\AntTipoTrabalho;
@@ -157,52 +161,93 @@ class ProfessorController extends Controller
             ->orderBy('nome')
             ->get();
 
+        // 3.5 Apresentações (avaliação individual + participação/estrelas)
+        $apresentacoes = AntApresentacao::where('materia_id', $idMateria)
+            ->where('semestre', $semestreAtual)
+            ->get();
+
+        $aprPorPesoApresentacao = $apresentacoes->whereNotNull('peso_apresentacao_id')
+            ->keyBy('peso_apresentacao_id');
+        $aprPorPesoParticipacao = $apresentacoes->whereNotNull('peso_participacao_id')
+            ->keyBy('peso_participacao_id');
+
+        $agendamentoIds = AntApresentacaoAgendamento::whereIn('apresentacao_id', $apresentacoes->pluck('id'))->pluck('id');
+
+        $notasApresentacaoByAluno = AntApresentacaoApresentador::whereIn('agendamento_id', $agendamentoIds)
+            ->whereNotNull('nota')
+            ->get()
+            ->groupBy('aluno_ra')
+            ->map(fn ($itens) => $itens->avg('nota'));
+
+        $estrelasByAluno = AntEstrela::where('materia_id', $idMateria)
+            ->where('semestre', $semestreAtual)
+            ->get()
+            ->groupBy('aluno_ra')
+            ->map->count();
+        $maxEstrelas = $estrelasByAluno->max() ?? 0;
+
         // 4. Cálculo da Média Final Ponderada por aluno
         $dadosBoletim = [];
         $pesoTotal = $pesos->sum('valor'); // Total teórico (Ex: 10 ou 100)
 
         foreach ($alunos as $aluno) {
-            $notasPorGrupo = $gruposNome->mapWithKeys(function ($nome, $pesoId) {
-                // Inicializa estrutura para cada grupo de peso
-                return [$pesoId => ['totalNotas' => 0, 'somaNotas' => 0, 'mediaGrupo' => 0, 'notaPonderada' => 0]];
-            })->toArray();
-
             $alunoRa = $aluno->ra;
             $notaPonderadaTotal = 0;
+            $notasPorGrupo = [];
 
-            // A. Coletar Notas dos Trabalhos e somar dentro de seus grupos
-            foreach ($trabalhos as $trabalho) {
-                $pesoId = $trabalho->peso_id;
-
-                if (isset($notasPorGrupo[$pesoId])) {
-                    // Busca a entrega do aluno para este trabalho
-                    $entrega = $trabalho->entregas->where('aluno_ra', $alunoRa)->first();
-
-                    if ($entrega && $entrega->nota !== null) {
-                        // Soma todas as notas (0-10) que compõem este grupo
-                        $notasPorGrupo[$pesoId]['somaNotas'] += $entrega->nota;
-                        $notasPorGrupo[$pesoId]['totalNotas']++;
-                    }
-                }
-            }
-
-            // B. Calcular Média Ponderada
             foreach ($pesos as $peso) {
                 $pesoId = $peso->id;
-                $valorPeso = $peso->valor; // Valor total do grupo (Ex: 10.0)
-                $dadosGrupo = $notasPorGrupo[$pesoId];
-
+                $valorPeso = $peso->valor;
+                $totalNotas = 0;
                 $mediaGrupo = 0;
-                if ($dadosGrupo['totalNotas'] > 0) {
-                    // Média aritmética das notas (0-10) de todos os trabalhos do grupo
-                    $mediaGrupo = $dadosGrupo['somaNotas'] / $dadosGrupo['totalNotas'];
+                $notaPonderada = 0;
+                $extra = '';
+
+                if (isset($aprPorPesoApresentacao[$pesoId])) {
+                    // Nota da avaliação da apresentação (média das notas individuais 0-10)
+                    if ($notasApresentacaoByAluno->has($alunoRa)) {
+                        $mediaGrupo = (float) $notasApresentacaoByAluno->get($alunoRa);
+                        $notaPonderada = ($mediaGrupo / 10.0) * $valorPeso;
+                        $totalNotas = 1;
+                        $extra = 'Avaliação da apresentação';
+                    }
+                } elseif (isset($aprPorPesoParticipacao[$pesoId])) {
+                    // Participação: normalizado pelo máximo de estrelas da turma
+                    $estrelasAluno = $estrelasByAluno->get($alunoRa, 0);
+                    if ($maxEstrelas > 0) {
+                        $mediaGrupo = ($estrelasAluno / $maxEstrelas) * 10;
+                        $notaPonderada = ($estrelasAluno / $maxEstrelas) * $valorPeso;
+                    }
+                    $totalNotas = $estrelasAluno > 0 ? 1 : 0;
+                    $extra = "{$estrelasAluno} estrela(s) / máx {$maxEstrelas}";
+                } else {
+                    // Trabalho tradicional
+                    $somaNotas = 0;
+                    $cnt = 0;
+                    foreach ($trabalhos as $trabalho) {
+                        if ($trabalho->peso_id != $pesoId) {
+                            continue;
+                        }
+                        $entrega = $trabalho->entregas->where('aluno_ra', $alunoRa)->first();
+                        if ($entrega && $entrega->nota !== null) {
+                            $somaNotas += $entrega->nota;
+                            $cnt++;
+                        }
+                    }
+                    if ($cnt > 0) {
+                        $mediaGrupo = $somaNotas / $cnt;
+                        $notaPonderada = ($mediaGrupo / 10.0) * $valorPeso;
+                    }
+                    $totalNotas = $cnt;
                 }
 
-                // Normaliza e pondera: (Média do Grupo / 10) * Valor do Peso do Grupo
-                $notaPonderada = ($mediaGrupo / 10.0) * $valorPeso;
-
-                $notasPorGrupo[$pesoId]['mediaGrupo'] = $mediaGrupo;
-                $notasPorGrupo[$pesoId]['notaPonderada'] = $notaPonderada;
+                $notasPorGrupo[$pesoId] = [
+                    'totalNotas' => $totalNotas,
+                    'somaNotas' => 0,
+                    'mediaGrupo' => $mediaGrupo,
+                    'notaPonderada' => $notaPonderada,
+                    'extra' => $extra,
+                ];
                 $notaPonderadaTotal += $notaPonderada;
             }
 

@@ -5,6 +5,8 @@ use App\Modules\ANT\Http\Controllers\AdminMateriaController;
 use App\Modules\ANT\Http\Controllers\AdminProfessorController;
 use App\Modules\ANT\Http\Controllers\AntAdminController;
 use App\Modules\ANT\Http\Controllers\AntHomeController;
+use App\Modules\ANT\Http\Controllers\ApresentacaoAlunoController;
+use App\Modules\ANT\Http\Controllers\ApresentacaoController;
 use App\Modules\ANT\Http\Controllers\AuthController;
 use App\Modules\ANT\Http\Controllers\CorrecaoController;
 use App\Modules\ANT\Http\Controllers\MaterialController;
@@ -48,6 +50,13 @@ Route::prefix('ant')
         Route::get('/trabalho/{id}', [TrabalhoController::class, 'show'])->name('ant.trabalhos.show');
         // Rota para enviar o formulário
         Route::post('/trabalho/{id}', [TrabalhoController::class, 'store'])->name('ant.trabalhos.store');
+
+        // Apresentações (aluno: ver suas apresentações e enviar entrega)
+        Route::get('/apresentacoes', [ApresentacaoAlunoController::class, 'index'])->name('ant.apresentacoes.aluno.index');
+        Route::get('/apresentacao/{agendamentoId}', [ApresentacaoAlunoController::class, 'show'])->name('ant.apresentacoes.aluno.show');
+        Route::post('/apresentacao/{agendamentoId}/entregar', [ApresentacaoAlunoController::class, 'entregar'])->name('ant.apresentacoes.aluno.entregar');
+        Route::get('/apresentacoes/rank', [ApresentacaoAlunoController::class, 'rankIndex'])->name('ant.apresentacoes.aluno.rank.index');
+        Route::get('/apresentacoes/rank/{materiaId}', [ApresentacaoAlunoController::class, 'rank'])->name('ant.apresentacoes.aluno.rank');
         Route::get('/boletim/{idMateria}', [AntHomeController::class, 'boletim'])->name('ant.aluno.boletim');
         Route::get('/prova/{idTrabalho}/resultado', [ProvaController::class, 'resultado'])->name('ant.prova.resultado');
 
@@ -70,6 +79,16 @@ Route::prefix('ant')
             Route::put('/trabalho/{id}/prazo', [ProfessorController::class, 'updatePrazo'])->name('ant.professor.trabalho.prazo');
 
             Route::get('/materia/{idMateria}/boletim', [ProfessorController::class, 'boletim'])->name('ant.professor.boletim');
+
+            // Apresentações (nova atividade com calendário, avaliação individual e estrelas)
+            Route::get('/apresentacoes', [ApresentacaoController::class, 'index'])->name('ant.professor.apresentacoes.index');
+            Route::get('/apresentacoes/novo', [ApresentacaoController::class, 'create'])->name('ant.professor.apresentacoes.create');
+            Route::post('/apresentacoes', [ApresentacaoController::class, 'store'])->name('ant.professor.apresentacoes.store');
+            Route::get('/apresentacoes/{id}', [ApresentacaoController::class, 'show'])->name('ant.professor.apresentacoes.show');
+            Route::post('/apresentacoes/{id}/agendamento', [ApresentacaoController::class, 'storeAgendamento'])->name('ant.professor.apresentacoes.agendamento.store');
+            Route::post('/apresentacoes/{id}/agendamento/{agendamentoId}/avaliar', [ApresentacaoController::class, 'avaliar'])->name('ant.professor.apresentacoes.avaliar');
+            Route::post('/apresentacoes/{id}/agendamento/{agendamentoId}/estrelas', [ApresentacaoController::class, 'salvarEstrelas'])->name('ant.professor.apresentacoes.estrelas');
+            Route::get('/materia/{idMateria}/rank', [ApresentacaoController::class, 'rank'])->name('ant.professor.apresentacoes.rank');
 
             Route::get('/pesos', [PesoController::class, 'create'])->name('ant.pesos.create');
             Route::post('/pesos', [PesoController::class, 'store'])->name('ant.pesos.store');

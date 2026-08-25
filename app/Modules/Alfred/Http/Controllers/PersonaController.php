@@ -4,6 +4,7 @@ namespace App\Modules\Alfred\Http\Controllers;
 
 use App\Modules\Alfred\Models\Persona;
 use App\Modules\Alfred\Services\PersonaEnvioService;
+use App\Modules\Alfred\Services\TelegramWebhookService;
 use Illuminate\Http\Request;
 
 class PersonaController
@@ -18,9 +19,13 @@ class PersonaController
         return view('Alfred::admin.personas.create');
     }
 
-    public function show(Persona $persona)
+    public function show(Persona $persona, TelegramWebhookService $webhook)
     {
-        return view('Alfred::admin.personas.show', ['persona' => $persona]);
+        return view('Alfred::admin.personas.show', [
+            'persona' => $persona,
+            'webhookInfo' => $this->obterInfoWebhook($persona, $webhook),
+            'webhookPadrao' => $webhook->endpointPadrao($persona->slug),
+        ]);
     }
 
     public function store(Request $request)
@@ -55,9 +60,13 @@ class PersonaController
         return redirect()->route('alfred.admin.personas.index')->with('success', 'Persona criada');
     }
 
-    public function edit(Persona $persona)
+    public function edit(Persona $persona, TelegramWebhookService $webhook)
     {
-        return view('Alfred::admin.personas.edit', ['persona' => $persona]);
+        return view('Alfred::admin.personas.edit', [
+            'persona' => $persona,
+            'webhookInfo' => $this->obterInfoWebhook($persona, $webhook),
+            'webhookPadrao' => $webhook->endpointPadrao($persona->slug),
+        ]);
     }
 
     public function update(Request $request, Persona $persona)
@@ -142,5 +151,52 @@ class PersonaController
         }
 
         return redirect()->back()->with('error', 'Falha inesperada ao enviar a mensagem');
+    }
+
+    public function configureWebhook(Request $request, Persona $persona, TelegramWebhookService $webhook)
+    {
+        if ($persona->canal !== 'telegram' || empty($persona->telegram_token)) {
+            return redirect()->back()->with('error', 'A persona precisa usar o canal Telegram e ter um token configurado.');
+        }
+
+        $url = $request->input('telegram_webhook_url') ?: $webhook->endpointPadrao($persona->slug);
+
+        $result = $webhook->configurar($persona->telegram_token, $url);
+
+        if ($result['ok']) {
+            return redirect()->back()->with('success', 'Webhook do Telegram configurado para: '.$url);
+        }
+
+        $details = ($result['error'] ?? 'unknown').' | status: '.($result['status'] ?? 'n/a').' | body: '.($result['body'] ?? 'n/a');
+
+        return redirect()->back()->with('error', 'Falha ao configurar webhook: '.$details);
+    }
+
+    public function clearWebhook(Persona $persona, TelegramWebhookService $webhook)
+    {
+        if (empty($persona->telegram_token)) {
+            return redirect()->back()->with('error', 'A persona não possui token do Telegram configurado.');
+        }
+
+        $result = $webhook->remover($persona->telegram_token);
+
+        if ($result['ok']) {
+            return redirect()->back()->with('success', 'Webhook do Telegram removido.');
+        }
+
+        $details = ($result['error'] ?? 'unknown').' | status: '.($result['status'] ?? 'n/a').' | body: '.($result['body'] ?? 'n/a');
+
+        return redirect()->back()->with('error', 'Falha ao remover webhook: '.$details);
+    }
+
+    private function obterInfoWebhook(Persona $persona, TelegramWebhookService $webhook): ?array
+    {
+        if ($persona->canal !== 'telegram' || empty($persona->telegram_token)) {
+            return null;
+        }
+
+        $result = $webhook->info($persona->telegram_token);
+
+        return $result['ok'] ? $result['info'] : null;
     }
 }

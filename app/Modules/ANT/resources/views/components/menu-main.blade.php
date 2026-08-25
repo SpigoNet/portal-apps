@@ -11,7 +11,15 @@
     </x-dropdown-link>
 @endif
 
-{{-- Link para Painel do Aluno (Todos podem ver, pois admins/professores podem querer ver suas "aulas" como alunos) --}}
-<x-dropdown-link :href="route('ant.home')">
-    Minhas Aulas
-</x-dropdown-link>
+{{-- Link para Painel do Aluno (apenas não-professores, evita duplicar com o Painel Professor) --}}
+@unless(auth()->user()->isProfessor())
+    <x-dropdown-link :href="route('ant.home')">
+        Minhas Aulas
+    </x-dropdown-link>
+@endunless
+
+@if(auth()->user()->isProfessor() || (isset($isAdmin) && $isAdmin))
+    <x-dropdown-link :href="route('ant.professor.apresentacoes.index')">
+        Apresentações (Professor)
+    </x-dropdown-link>
+@endif

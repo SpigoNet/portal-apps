@@ -36,6 +36,8 @@ Route::prefix('alfred')
             Route::put('/personas/{persona}', [PersonaController::class, 'update'])->name('personas.update');
             Route::delete('/personas/{persona}', [PersonaController::class, 'destroy'])->name('personas.destroy');
             Route::post('/personas/{persona}/send-test', [PersonaController::class, 'sendTestMessage'])->name('personas.send-test');
+            Route::post('/personas/{persona}/configure-webhook', [PersonaController::class, 'configureWebhook'])->name('personas.configure-webhook');
+            Route::post('/personas/{persona}/clear-webhook', [PersonaController::class, 'clearWebhook'])->name('personas.clear-webhook');
 
             Route::get('/agendamentos', [AgendamentoController::class, 'index'])->name('agendamentos.index');
             Route::get('/agendamentos/criar', [AgendamentoController::class, 'create'])->name('agendamentos.create');

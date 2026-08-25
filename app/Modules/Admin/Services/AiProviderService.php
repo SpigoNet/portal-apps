@@ -7,6 +7,13 @@ use App\Models\AiModelDefault;
 use App\Models\AiProvider;
 use App\Models\AiUserModelDefault;
 use App\Models\User;
+use App\Services\AI\AiDriverInterface;
+use App\Services\AI\Drivers\AirForceDriver;
+use App\Services\AI\Drivers\GeminiDriver;
+use App\Services\AI\Drivers\KdjingpaiDriver;
+use App\Services\AI\Drivers\LmStudioDriver;
+use App\Services\AI\Drivers\OllamaDriver;
+use App\Services\AI\Drivers\PollinationDriver;
 use Illuminate\Database\Eloquent\Collection;
 
 class AiProviderService
@@ -177,5 +184,30 @@ class AiProviderService
     public function getTextToTextProvider(?User $user = null): ?AiModel
     {
         return $this->getModelForUserEntity($user, 'text', 'text');
+    }
+
+    /**
+     * Instancia o driver de texto apropriado para o modelo informado,
+     * resolvendo provedor, chave de API, base URL e nome do modelo.
+     */
+    public function createTextDriver(?AiModel $model): ?AiDriverInterface
+    {
+        if (! $model) {
+            return null;
+        }
+
+        $driverName = $this->getDriverForProvider($model);
+        $apiKey = $this->getApiKeyForProvider($model);
+        $baseUrl = $this->getBaseUrlForProvider($model);
+        $modelName = $model->model;
+
+        return match ($driverName) {
+            'airforce' => new AirForceDriver($modelName, $apiKey, $baseUrl),
+            'kdjingpai' => new KdjingpaiDriver($modelName, $apiKey, $baseUrl),
+            'gemini' => new GeminiDriver($apiKey, $modelName, $baseUrl),
+            'lm_studio' => new LmStudioDriver($baseUrl),
+            'ollama' => new OllamaDriver($modelName, $apiKey, $baseUrl),
+            default => new PollinationDriver($modelName, $apiKey, $baseUrl),
+        };
     }
 }

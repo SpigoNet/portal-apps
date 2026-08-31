@@ -78,9 +78,14 @@ remote_cmd "cd $REMOTE_BASE && docker compose exec -T $CONTAINER php artisan opt
 echo "     Código aplicado!"
 
 # 5. Rodar migrations
-echo "[5/5] Rodando migrations..."
+echo "[5/6] Rodando migrations..."
 remote_cmd "cd $REMOTE_BASE && docker compose exec -T $CONTAINER php artisan migrate --force"
 echo "     Migrations concluídas!"
+
+# 6. Registrar data/hora do deploy (lido no rodapé do layout)
+echo "[6/6] Registrando data do deploy..."
+remote_cmd "cd $REMOTE_BASE && docker compose exec -T -u root $CONTAINER sh -c 'mkdir -p /var/www/html/storage/app/public && date \"+%d/%m/%Y %H:%M:%S\" > /var/www/html/storage/app/public/deploy_time.txt'"
+echo "     Deploy registrado!"
 
 echo ""
 echo "=========================================="

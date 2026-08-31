@@ -1,4 +1,6 @@
 <x-ANT::layout>
+    <style>[x-cloak]{display:none!important;}</style>
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             <a href="{{ route('ant.professor.apresentacoes.index') }}" class="text-gray-500 hover:text-gray-900">Apresentações</a>
@@ -73,16 +75,23 @@
                 @php
                     $estrelasAtuais = $agendamento->estrelas->pluck('aluno_ra')->all();
                 @endphp
-                <div class="bg-white shadow-sm sm:rounded-lg p-6">
+                <div class="bg-white shadow-sm sm:rounded-lg p-6" x-data="{ open: false }">
                     <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-3">
                         <div>
                             <span class="font-bold text-gray-900">{{ \Carbon\Carbon::parse($agendamento->data)->format('d/m/Y') }}</span>
                             <span class="ml-2 text-gray-600">{{ $agendamento->tema }}</span>
                         </div>
-                        <span class="text-xs text-gray-400">{{ $agendamento->apresentadores->count() }} apresentador(es)</span>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-gray-400">{{ $agendamento->apresentadores->count() }} apresentador(es)</span>
+                            <button type="button" @click="open = !open"
+                                class="text-indigo-600 hover:text-indigo-900 text-sm font-semibold">
+                                <span x-show="!open">Mostrar notas</span>
+                                <span x-show="open" x-cloak>Ocultar notas</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div x-show="open" x-cloak class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {{-- Avaliação dos apresentadores --}}
                         <div>
                             <h4 class="font-semibold text-gray-700 mb-2">Avaliação dos apresentadores (nota 0-10)</h4>

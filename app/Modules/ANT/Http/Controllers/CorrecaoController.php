@@ -4,11 +4,11 @@ namespace App\Modules\ANT\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\ANT\Models\AntConfiguracao;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log; // Garante que a classe Log está importada
-use Illuminate\Support\Facades\Storage;
 use App\Modules\ANT\Models\AntEntrega;
-use App\Services\IaService;
+use App\Services\IaService; // Garante que a classe Log está importada
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class CorrecaoController extends Controller
 {
@@ -29,7 +29,7 @@ class CorrecaoController extends Controller
 
         // Decodifica JSON. Se falhar (arquivos antigos mal formatados), tenta usar como string única
         $arquivos = json_decode($entrega->arquivos, true);
-        if (!is_array($arquivos)) {
+        if (! is_array($arquivos)) {
             // Fallback para casos raros onde a conversão falhou ou é string pura
             $arquivos = $entrega->arquivos ? [$arquivos] : [];
         }
@@ -48,14 +48,13 @@ class CorrecaoController extends Controller
         }
         // -----------------------------------------------------------------------------
 
-
         // Lógica de visualização (Mantida a correção anterior)
         if (empty($arquivos)) {
             $dadosVisualizacao = [
                 'tipo' => 'texto',
                 'conteudo' => "O aluno não anexou nenhum arquivo a esta entrega.\n\nUtilize o painel lateral para atribuir a nota e fornecer o feedback.",
                 'linguagem' => 'txt',
-                'url' => '#'
+                'url' => '#',
             ];
         } else {
             $caminhoArquivo = $arquivos[$fileIndex] ?? $arquivos[0];
@@ -64,7 +63,7 @@ class CorrecaoController extends Controller
             $dadosVisualizacao = [
                 'tipo' => 'download',
                 'conteudo' => null,
-                'url' => null
+                'url' => null,
             ];
 
             $urlPublica = $this->getPublicUrl($caminhoArquivo);
@@ -90,7 +89,7 @@ class CorrecaoController extends Controller
                 if (file_exists($pathFisico)) {
                     $dadosVisualizacao['conteudo'] = file_get_contents($pathFisico);
                 } else {
-                    $dadosVisualizacao['conteudo'] = "Erro: Arquivo não encontrado no servidor.\nCaminho: " . $pathFisico;
+                    $dadosVisualizacao['conteudo'] = "Erro: Arquivo não encontrado no servidor.\nCaminho: ".$pathFisico;
                 }
                 $dadosVisualizacao['linguagem'] = $extensao;
 
@@ -112,7 +111,7 @@ class CorrecaoController extends Controller
                     $unityUrl = null;
                     foreach ($allExtractedFiles as $f) {
                         if (basename($f) === 'index.html') {
-                            $unityUrl = Storage::url($f);
+                            $unityUrl = $this->publicStorageUrl($f);
                             break;
                         }
                     }
@@ -152,7 +151,7 @@ class CorrecaoController extends Controller
         $request->validate([
             'nota' => 'nullable|numeric|min:0|max:10',
             'comentario_professor' => 'nullable|string',
-            'action' => 'nullable|string' // Para identificar qual botão foi clicado
+            'action' => 'nullable|string', // Para identificar qual botão foi clicado
         ]);
 
         $entregaOriginal = AntEntrega::findOrFail($idEntrega);
@@ -161,7 +160,7 @@ class CorrecaoController extends Controller
         if (empty($entregaOriginal->arquivos) || $entregaOriginal->arquivos == '[]') {
             $entregaOriginal->update([
                 'nota' => $request->nota,
-                'comentario_professor' => $request->comentario_professor
+                'comentario_professor' => $request->comentario_professor,
             ]);
             $afetados = 1;
         } else {
@@ -169,13 +168,13 @@ class CorrecaoController extends Controller
                 ->where('arquivos', $entregaOriginal->arquivos)
                 ->update([
                     'nota' => $request->nota,
-                    'comentario_professor' => $request->comentario_professor
+                    'comentario_professor' => $request->comentario_professor,
                 ]);
         }
 
         $msg = $afetados > 1
             ? "Correção salva e replicada para os {$afetados} integrantes do grupo!"
-            : "Correção salva com sucesso.";
+            : 'Correção salva com sucesso.';
 
         // --- NOVA LÓGICA: Salvar e Ir para o Próximo ---
         if ($request->action === 'salvar_proximo') {
@@ -188,11 +187,11 @@ class CorrecaoController extends Controller
 
             if ($proximaEntrega) {
                 return redirect()->route('ant.correcao.edit', $proximaEntrega->id)
-                    ->with('success', $msg . ' Carregando próximo aluno pendente...');
+                    ->with('success', $msg.' Carregando próximo aluno pendente...');
             } else {
                 // Se não achar ninguém, volta para a lista geral do trabalho
                 return redirect()->route('ant.professor.trabalho', $entregaOriginal->trabalho_id)
-                    ->with('success', $msg . ' Parabéns! Você concluiu todas as correções deste trabalho.');
+                    ->with('success', $msg.' Parabéns! Você concluiu todas as correções deste trabalho.');
             }
         }
         // ------------------------------------------------
@@ -207,18 +206,28 @@ class CorrecaoController extends Controller
         if (str_starts_with($path, '/files/')) {
             // URL Externa do sistema legado
             // Ex: /files/2020/arquivo.pdf -> https://spigo.net/trabalhos/files/2020/arquivo.pdf
-            return 'https://spigo.net/trabalhos' . $path;
+            return 'https://spigo.net/trabalhos'.$path;
         }
 
         // 2. Arquivos Novos (Storage local do Laravel)
-        return Storage::disk('public')->url($path);
+        return $this->publicStorageUrl($path);
+    }
+
+    /**
+     * Gera a URL pública de um arquivo do disco "public" usando o protocolo
+     * (HTTP/HTTPS) da requisição atual. Evita dependência do APP_URL e previne
+     * erros de Mixed Content quando a página é servida via HTTPS.
+     */
+    private function publicStorageUrl(string $path): string
+    {
+        return rtrim(request()->root(), '/').'/storage/'.ltrim($path, '/');
     }
 
     private function getPhysicalPath($path)
     {
         // 1. VERIFICAÇÃO DE LEGADO
         if (str_starts_with($path, '/files/')) {
-            return '/home2/spigo594/public_html/trabalhos' . $path;
+            return '/home2/spigo594/public_html/trabalhos'.$path;
         }
 
         // 2. Arquivos Novos (Storage Local)
@@ -234,7 +243,7 @@ class CorrecaoController extends Controller
 
     private function setRecursivePermissions($path)
     {
-        if (!is_dir($path)) {
+        if (! is_dir($path)) {
             return;
         }
 
@@ -267,12 +276,13 @@ class CorrecaoController extends Controller
         // Aumenta o limite de memória e tempo de execução para evitar Broken Pipe/Timeout em descompressão
         ini_set('memory_limit', '512M');
         ini_set('max_execution_time', 120);
-        Log::info("BROTLI DEBUG: Limites de memória e tempo aumentados via ini_set.");
+        Log::info('BROTLI DEBUG: Limites de memória e tempo aumentados via ini_set.');
         // --- FIM DA MUDANÇA ---
 
         // Se já extraiu (cache), retorna o caminho relativo para montar a URL depois
-        if (Storage::disk('public')->exists($extractPath . '/index.html')) {
-            Log::info("BROTLI DEBUG: Arquivo index.html encontrado no cache. Pulando extração.");
+        if (Storage::disk('public')->exists($extractPath.'/index.html')) {
+            Log::info('BROTLI DEBUG: Arquivo index.html encontrado no cache. Pulando extração.');
+
             return $extractPath;
         }
         // ... (restante do código permanece igual)
@@ -281,8 +291,9 @@ class CorrecaoController extends Controller
         $fullZipPath = $this->getPhysicalPath($caminhoZip);
         Log::info("BROTLI DEBUG: Caminho físico do ZIP: {$fullZipPath}");
 
-        if (!file_exists($fullZipPath)) {
+        if (! file_exists($fullZipPath)) {
             Log::error("BROTLI DEBUG: ZIP não encontrado em: {$fullZipPath}");
+
             return null;
         }
 
@@ -290,7 +301,7 @@ class CorrecaoController extends Controller
         $destination = Storage::disk('public')->path($extractPath);
 
         $zip = new \ZipArchive;
-        if ($zip->open($fullZipPath) === TRUE) {
+        if ($zip->open($fullZipPath) === true) {
             Log::info("BROTLI DEBUG: ZIP aberto com sucesso. Iniciando extração para: {$destination}");
             $zip->extractTo($destination);
             $zip->close();
@@ -302,7 +313,7 @@ class CorrecaoController extends Controller
             // 2. Lógica de Descompressão via função nativa/biblioteca (vdechenaux/brotli)
             $files = Storage::disk('public')->allFiles($extractPath);
             $decompression_function_exists = function_exists('brotli_uncompress');
-            Log::info("BROTLI DEBUG: brotli_uncompress function_exists: " . ($decompression_function_exists ? 'TRUE' : 'FALSE'));
+            Log::info('BROTLI DEBUG: brotli_uncompress function_exists: '.($decompression_function_exists ? 'TRUE' : 'FALSE'));
 
             // Limite de 20 MB para o arquivo comprimido (20 * 1024 * 1024 bytes)
             $MAX_COMPRESSED_SIZE = 20971520;
@@ -315,6 +326,7 @@ class CorrecaoController extends Controller
                 if (basename($file) === '.htaccess') {
                     Storage::disk('public')->delete($file);
                     Log::info("BROTLI DEBUG: Limpeza de .htaccess em: {$file}");
+
                     continue;
                 }
 
@@ -326,15 +338,14 @@ class CorrecaoController extends Controller
                     if ($fileSize > $MAX_COMPRESSED_SIZE) {
                         Log::error("BROTLI DEBUG: ARQUIVO MUITO GRANDE ({$fileSize} bytes)! Ignorando descompressão para evitar 'Broken pipe'.");
                         // Força fallback e continua
-                    }
-                    elseif ($decompression_function_exists) {
+                    } elseif ($decompression_function_exists) {
                         // O problema do Broken Pipe ocorre aqui:
                         $compressedData = file_get_contents($fullFilePath);
 
                         try {
                             $uncompressedData = brotli_uncompress($compressedData);
                         } catch (\Throwable $e) {
-                            Log::error("BROTLI DEBUG: ERRO CRÍTICO (Broken Pipe/Timeout) em brotli_uncompress! Mensagem: " . $e->getMessage());
+                            Log::error('BROTLI DEBUG: ERRO CRÍTICO (Broken Pipe/Timeout) em brotli_uncompress! Mensagem: '.$e->getMessage());
                         }
                     }
 
@@ -345,7 +356,7 @@ class CorrecaoController extends Controller
                     } else {
                         // Último recurso: remove o .br e espera que o arquivo não comprimido estivesse no zip
                         Storage::disk('public')->delete($file);
-                        Log::error("BROTLI DEBUG: FALHA na descompressão (função indisponível/retornou false/null). Arquivo .br removido (Fallback).");
+                        Log::error('BROTLI DEBUG: FALHA na descompressão (função indisponível/retornou false/null). Arquivo .br removido (Fallback).');
                     }
                 }
                 // Limpeza de Gzip (opcionalmente pode adicionar lógica de descompressão Gzip aqui, se necessário)
@@ -359,15 +370,17 @@ class CorrecaoController extends Controller
             $files = Storage::disk('public')->allFiles($extractPath);
             foreach ($files as $file) {
                 if (basename($file) === 'index.html') {
-                    Log::info("BROTLI DEBUG: index.html encontrado em: " . dirname($file));
+                    Log::info('BROTLI DEBUG: index.html encontrado em: '.dirname($file));
+
                     return dirname($file);
                 }
             }
-            Log::error("BROTLI DEBUG: index.html não encontrado no diretório de extração!");
+            Log::error('BROTLI DEBUG: index.html não encontrado no diretório de extração!');
 
             return $extractPath;
         } else {
-            Log::error("BROTLI DEBUG: FALHA ao abrir o arquivo ZIP para extração.");
+            Log::error('BROTLI DEBUG: FALHA ao abrir o arquivo ZIP para extração.');
+
             return null;
         }
     }
@@ -381,7 +394,7 @@ class CorrecaoController extends Controller
         // 1. Preparar Conteúdo do Aluno
         // Vamos ler todos os arquivos de TEXTO que o aluno enviou e concatenar
         $arquivos = json_decode($entrega->arquivos, true) ?? [];
-        $conteudoAluno = "";
+        $conteudoAluno = '';
         $arquivosLidos = 0;
 
         foreach ($arquivos as $arq) {
@@ -390,12 +403,12 @@ class CorrecaoController extends Controller
             if (in_array($ext, ['txt', 'sql', 'php', 'js', 'css', 'html', 'java', 'py', 'cs', 'json', 'md'])) {
                 $path = $this->getPhysicalPath($arq);
                 if (file_exists($path)) {
-                    $conteudoAluno .= "\n--- Arquivo: " . basename($arq) . " ---\n";
+                    $conteudoAluno .= "\n--- Arquivo: ".basename($arq)." ---\n";
                     $conteudoAluno .= file_get_contents($path);
                     $arquivosLidos++;
                 }
             } else {
-                $conteudoAluno .= "\n--- Arquivo: " . basename($arq) . " (Conteúdo binário/não lido) ---\n";
+                $conteudoAluno .= "\n--- Arquivo: ".basename($arq)." (Conteúdo binário/não lido) ---\n";
             }
         }
 
@@ -405,7 +418,7 @@ class CorrecaoController extends Controller
 
         // 2. Montar o Prompt
         $systemPrompt = $config->prompt_agente ??
-            "Você é um professor universitário experiente e justo. Avalie o trabalho do aluno com base na descrição e dicas fornecidas. Retorne estritamente um JSON.";
+            'Você é um professor universitário experiente e justo. Avalie o trabalho do aluno com base na descrição e dicas fornecidas. Retorne estritamente um JSON.';
 
         $userPrompt = <<<EOT
 CONTEXTO DA AVALIAÇÃO:
@@ -434,16 +447,16 @@ Responda APENAS o JSON, sem markdown (```json) ou texto adicional.
 EOT;
 
         // 3. Chamar o Serviço
-        $service = new IaService();
+        $service = new IaService;
         $respostaIa = $service->generateText([
             ['role' => 'system', 'content' => $systemPrompt],
-            ['role' => 'user', 'content' => $userPrompt]
+            ['role' => 'user', 'content' => $userPrompt],
         ], [
             'jsonMode' => true, // O Pollination/OpenAI suporta json_object mode se o modelo permitir
-            'temperature' => 1
+            'temperature' => 1,
         ]);
 
-        if (!$respostaIa) {
+        if (! $respostaIa) {
             return response()->json(['error' => 'A IA não retornou uma resposta válida.'], 500);
         }
 
@@ -452,7 +465,8 @@ EOT;
         $dados = json_decode($jsonLimpo, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            Log::error("Erro JSON IA: " . $respostaIa);
+            Log::error('Erro JSON IA: '.$respostaIa);
+
             return response()->json(['error' => 'Falha ao processar o JSON da IA.', 'raw' => $respostaIa], 500);
         }
 

@@ -80,6 +80,10 @@ Route::prefix('ant')
 
             Route::get('/materia/{idMateria}/boletim', [ProfessorController::class, 'boletim'])->name('ant.professor.boletim');
 
+            // Lista de alunos (com filtros) e reset de senha
+            Route::get('/alunos', [ProfessorController::class, 'alunos'])->name('ant.professor.alunos');
+            Route::post('/resetar-senha-aluno', [ProfessorController::class, 'resetarSenhaAluno'])->name('ant.professor.resetar_senha_aluno');
+
             // Apresentações (nova atividade com calendário, avaliação individual e estrelas)
             Route::get('/apresentacoes', [ApresentacaoController::class, 'index'])->name('ant.professor.apresentacoes.index');
             Route::get('/apresentacoes/novo', [ApresentacaoController::class, 'create'])->name('ant.professor.apresentacoes.create');

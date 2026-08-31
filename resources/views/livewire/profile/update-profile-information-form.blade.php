@@ -1,8 +1,10 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Volt\Component;
 
@@ -12,20 +14,15 @@ new class extends Component
 
     public string $email = '';
 
-    // Novos campos
-    public string $whatsapp_phone = '';
-
-    public string $whatsapp_apikey = '';
-
     public string $apiToken = '';
+
+    public ?UploadedFile $avatar_file = null;
 
     public function mount(): void
     {
         $user = Auth::user();
         $this->name = $user->name;
         $this->email = $user->email;
-        $this->whatsapp_phone = $user->whatsapp_phone ?? '';
-        $this->whatsapp_apikey = $user->whatsapp_apikey ?? '';
         $this->apiToken = md5($user->email.$user->password);
     }
 
@@ -36,8 +33,7 @@ new class extends Component
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
-            'whatsapp_phone' => ['nullable', 'string', 'max:20'],
-            'whatsapp_apikey' => ['nullable', 'string', 'max:20'],
+            'avatar_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ]);
 
         $user->fill($validated);
@@ -46,14 +42,19 @@ new class extends Component
             $user->email_verified_at = null;
         }
 
+        if ($this->avatar_file && ! $user->google_id) {
+            if ($user->avatar && str_starts_with($user->avatar, '/storage/')) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $user->avatar));
+            }
+
+            $path = Storage::disk('public')->putFile('avatars', $this->avatar_file);
+            $user->avatar = Storage::disk('public')->url($path);
+            $this->avatar_file = null;
+        }
+
         $user->save();
 
         $this->dispatch('profile-updated', name: $user->name);
-
-        // Opcional: Enviar msg de teste ao salvar se tiver preenchido
-        if ($user->wasChanged('whatsapp_apikey') && ! empty($user->whatsapp_apikey)) {
-            send_whatsapp_user($user, 'Configuração de WhatsApp salva com sucesso no Portal Spigo!');
-        }
     }
 
     public function sendVerification(): void
@@ -113,39 +114,41 @@ new class extends Component
 
         <div class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                <i class="fab fa-whatsapp text-green-500 mr-2"></i> Configuração de Notificações WhatsApp
+                <i class="fas fa-camera text-spigo-lime mr-2"></i> Foto do Perfil
             </h3>
 
-            <div
-                class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-6 text-sm text-blue-700 dark:text-blue-300">
-                <p class="font-bold mb-2">Você precisa obter uma ApiKey do bot antes de usar:</p>
-                <ol class="list-decimal ml-5 space-y-1">
-                    <li>Adicione o número <strong>+34 644 87 21 57</strong> aos seus contatos (Nomeie como "CallMeBot").
-                    </li>
-                    <li>Envie a mensagem: <code
-                            class="bg-blue-100 dark:bg-blue-800 px-1 py-0.5 rounded">I allow callmebot to send me messages</code>
-                        para este contato via WhatsApp.</li>
-                    <li>Aguarde a mensagem: "API Activated for your phone number. Your APIKEY is 123123".</li>
-                    <li>Insira seu número e a APIKEY recebida nos campos abaixo.</li>
-                </ol>
-                <p class="mt-2 text-xs opacity-75">Nota: Se não receber em 2 minutos, tente novamente após 24h.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <x-input-label for="whatsapp_phone" :value="__('Seu WhatsApp (com código país)')" />
-                    <x-text-input wire:model="whatsapp_phone" id="whatsapp_phone" name="whatsapp_phone" type="text"
-                        class="mt-1 block w-full" placeholder="Ex: 5519999999999" />
-                    <x-input-error class="mt-2" :messages="$errors->get('whatsapp_phone')" />
+            @if (!auth()->user()->google_id)
+                <div class="flex items-center gap-6">
+                    <div class="shrink-0">
+                        @if (auth()->user()->avatar)
+                            <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}"
+                                class="h-20 w-20 rounded-full object-cover border border-gray-300 dark:border-gray-600">
+                        @else
+                            <div
+                                class="h-20 w-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 text-2xl">
+                                {{ substr(auth()->user()->name, 0, 1) }}
+                            </div>
+                        @endif
+                    </div>
+                    <div class="flex-1">
+                        <x-input-label for="avatar_file" :value="__('Enviar imagem (JPG, PNG, GIF, WEBP - máx 2MB)')" />
+                        <input wire:model="avatar_file" id="avatar_file" name="avatar_file" type="file" accept="image/*"
+                            class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-spigo-lime/10 file:text-spigo-lime hover:file:bg-spigo-lime/20" />
+                        <x-input-error class="mt-2" :messages="$errors->get('avatar_file')" />
+                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            Envie uma imagem para usar como foto do perfil.
+                        </p>
+                    </div>
                 </div>
-
-                <div>
-                    <x-input-label for="whatsapp_apikey" :value="__('Sua API Key (CallMeBot)')" />
-                    <x-text-input wire:model="whatsapp_apikey" id="whatsapp_apikey" name="whatsapp_apikey" type="text"
-                        class="mt-1 block w-full" placeholder="Ex: 123123" />
-                    <x-input-error class="mt-2" :messages="$errors->get('whatsapp_apikey')" />
-                </div>
-            </div>
+            @else
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Sua foto de perfil é sincronizada automaticamente com sua conta Google.
+                </p>
+                @if (auth()->user()->avatar)
+                    <img src="{{ auth()->user()->avatar }}" alt="{{ auth()->user()->name }}"
+                        class="mt-3 h-20 w-20 rounded-full object-cover border border-gray-300 dark:border-gray-600">
+                @endif
+            @endif
         </div>
 
         <div class="flex items-center gap-4">

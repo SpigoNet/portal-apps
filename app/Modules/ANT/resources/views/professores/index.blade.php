@@ -55,6 +55,21 @@
                         <span class="block text-xs text-gray-500">Divisão de notas</span>
                     </div>
                 </a>
+
+                <a href="{{ route('ant.professor.alunos') }}"
+                    class="flex items-center p-3 bg-white rounded-lg shadow-sm hover:shadow border border-amber-100 group transition-all">
+                    <div class="p-2 bg-amber-50 rounded-full group-hover:bg-amber-100 text-amber-600 mr-3">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-bold text-gray-700 group-hover:text-amber-700">Resetar Senha de
+                            Aluno</span>
+                        <span class="block text-xs text-gray-500">Lista e filtros</span>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
@@ -88,7 +103,7 @@
                                 <ul class="space-y-2">
                                     @foreach($materia->trabalhos as $trabalho)
                                         <li class="flex justify-between items-center text-sm p-2 hover:bg-gray-50 rounded">
-                                            <span class="truncate w-1/2" title="{{ $trabalho->nome }}">{{ $trabalho->nome }}</span>
+                                            <span class="truncate w-1/2 text-gray-900 font-medium" title="{{ $trabalho->nome }}">{{ $trabalho->nome }}</span>
 
                                             @if($trabalho->pendentes_count > 0)
                                                 <span class="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs font-bold">

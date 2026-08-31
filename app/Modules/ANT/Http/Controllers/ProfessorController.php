@@ -3,6 +3,7 @@
 namespace App\Modules\ANT\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Modules\ANT\Models\AntAluno;
 use App\Modules\ANT\Models\AntApresentacao;
 use App\Modules\ANT\Models\AntApresentacaoAgendamento;
@@ -16,6 +17,7 @@ use App\Modules\ANT\Models\AntTrabalho;
 use App\Modules\ANT\Services\SemestreService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class ProfessorController extends Controller
 {
@@ -370,6 +372,58 @@ class ProfessorController extends Controller
 
         return redirect()->route('ant.professor.trabalho', $trabalho->id)
             ->with('success', 'Data de entrega atualizada com sucesso!');
+    }
+
+    // Lista de alunos do professor (com filtros por RA e e-mail) para diagnóstico de vínculo
+    public function alunos(Request $request)
+    {
+        $user = auth()->user();
+        $semestreAtual = SemestreService::getForUser($user);
+
+        $materiaIds = AntMateria::whereHas('professores', function ($q) use ($user, $semestreAtual) {
+            $q->where('user_id', $user->id)->where('semestre', $semestreAtual);
+        })->pluck('id');
+
+        $ra = $request->input('ra');
+        $email = $request->input('email');
+
+        $alunos = AntAluno::query()
+            ->distinct()
+            ->select('ant_alunos.*')
+            ->join('ant_aluno_materia', 'ant_aluno_materia.aluno_ra', '=', 'ant_alunos.ra')
+            ->whereIn('ant_aluno_materia.materia_id', $materiaIds)
+            ->where('ant_aluno_materia.semestre', $semestreAtual)
+            ->with('user')
+            ->when($ra, fn ($q) => $q->where('ant_alunos.ra', 'like', '%'.$ra.'%'))
+            ->when($email, fn ($q) => $q->whereHas('user', fn ($q2) => $q2->where('email', 'like', '%'.$email.'%')))
+            ->orderBy('ant_alunos.nome')
+            ->get();
+
+        return view('ANT::professores.alunos', compact('alunos', 'semestreAtual', 'ra', 'email'));
+    }
+
+    // Resetar a senha de um aluno para uma senha específica
+    public function resetarSenhaAluno(Request $request)
+    {
+        $request->validate([
+            'ra' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:6'],
+        ]);
+
+        $aluno = AntAluno::where('ra', $request->ra)->first();
+
+        if (! $aluno) {
+            return back()->with('error', 'Aluno com RA informado não foi encontrado.');
+        }
+
+        if (! $aluno->user_id) {
+            return back()->with('error', "O aluno {$aluno->nome} ainda não vinculou sua conta e não possui senha para redefinir.");
+        }
+
+        $user = User::findOrFail($aluno->user_id);
+        $user->update(['password' => Hash::make($request->password)]);
+
+        return back()->with('success', "Senha do aluno {$aluno->nome} redefinida com sucesso.");
     }
 
     // Formulário de Novo Trabalho

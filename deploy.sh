@@ -89,6 +89,11 @@ remote_cmd "cd $REMOTE_BASE && docker compose exec -T spigo-portal-app ln -sfn .
 remote_cmd "rm -rf $REMOTE_BASE.bak"
 echo "     Deploy concluído!"
 
+# Registra data/hora do deploy (lido no rodapé do layout)
+echo "     Registrando data do deploy..."
+remote_cmd "cd $REMOTE_BASE && docker compose exec -T -u root spigo-portal-app sh -c 'mkdir -p /var/www/html/storage/app/public && date \"+%d/%m/%Y %H:%M:%S\" > /var/www/html/storage/app/public/deploy_time.txt'"
+echo "     Deploy registrado!"
+
 echo ""
 echo "=========================================="
 echo "  DEPLOY CONCLUÍDO!"

@@ -103,6 +103,7 @@ class MangaSyncService
     public function syncChapterData(int $mangaId, ?ProviderName $preferred = null): int
     {
         $manga = Manga::findOrFail($mangaId);
+        $lastException = null;
 
         foreach ($this->orderedProviders($preferred) as $providerName) {
             $externalId = $manga->getExternalId($providerName->value);
@@ -116,17 +117,21 @@ class MangaSyncService
             try {
                 $chapters = $this->resolver->resolve($providerName)->getChapters($externalId);
 
-                $this->syncLogRepository->record(
-                    manga: $manga,
-                    provider: $providerName,
-                    operation: SyncOperation::Capitulos,
-                    status: 'sucesso',
-                    startedAt: $startedAt,
-                    finishedAt: now(),
-                );
+                if (! empty($chapters)) {
+                    $this->syncLogRepository->record(
+                        manga: $manga,
+                        provider: $providerName,
+                        operation: SyncOperation::Capitulos,
+                        status: 'sucesso',
+                        startedAt: $startedAt,
+                        finishedAt: now(),
+                    );
 
-                return $this->capituloRepository->syncChapters($manga, $chapters, $providerName->value);
+                    return $this->capituloRepository->syncChapters($manga, $chapters, $providerName->value);
+                }
             } catch (ProviderUnavailableException|ProviderMalformedResponseException $exception) {
+                $lastException = $exception;
+
                 $this->syncLogRepository->record(
                     manga: $manga,
                     provider: $providerName,
@@ -143,7 +148,129 @@ class MangaSyncService
             }
         }
 
-        throw new YomiSyncException('Falha ao sincronizar capítulos em todos os provedores');
+        // Tenta buscar feed de capítulos no MangaDex
+        if ($manga->getExternalId(ProviderName::MangaDex->value) === null) {
+            $candidateTitles = array_values(array_unique(array_filter([
+                $manga->titulo,
+                $manga->titulo_original,
+                ...$manga->titulos()->pluck('titulo')->all(),
+            ])));
+
+            foreach ($candidateTitles as $candidateTitle) {
+                try {
+                    $dexResults = $this->resolver->resolve(ProviderName::MangaDex)->search($candidateTitle, 1);
+                    if (! empty($dexResults)) {
+                        $first = $dexResults[0];
+                        $dexId = $first->externalIds[0]['external_id'] ?? null;
+                        if ($dexId !== null) {
+                            $manga->externalIds()->firstOrCreate(
+                                ['provider' => ProviderName::MangaDex->value],
+                                ['external_id' => $dexId],
+                            );
+                            break;
+                        }
+                    }
+                } catch (Throwable) {
+                    // Tenta próximo título
+                }
+            }
+        }
+
+        $dexId = $manga->getExternalId(ProviderName::MangaDex->value);
+        if ($dexId !== null) {
+            try {
+                $dexChapters = $this->resolver->resolve(ProviderName::MangaDex)->getChapters($dexId);
+                if (! empty($dexChapters)) {
+                    $this->syncLogRepository->record(
+                        manga: $manga,
+                        provider: ProviderName::MangaDex,
+                        operation: SyncOperation::Capitulos,
+                        status: 'sucesso',
+                        startedAt: now(),
+                        finishedAt: now(),
+                    );
+
+                    return $this->capituloRepository->syncChapters($manga, $dexChapters, ProviderName::MangaDex->value);
+                }
+            } catch (Throwable $e) {
+                $lastException = $e;
+            }
+        }
+
+        // Tenta buscar capítulos no Kitsu se MangaDex não resolveu
+        if ($manga->getExternalId(ProviderName::Kitsu->value) === null) {
+            $candidateTitles = array_values(array_unique(array_filter([
+                $manga->titulo,
+                $manga->titulo_original,
+                ...$manga->titulos()->pluck('titulo')->all(),
+            ])));
+
+            foreach ($candidateTitles as $candidateTitle) {
+                try {
+                    $kitsuResults = $this->resolver->resolve(ProviderName::Kitsu)->search($candidateTitle, 1);
+                    if (! empty($kitsuResults)) {
+                        $firstKitsu = $kitsuResults[0];
+                        $kitsuId = $firstKitsu->externalIds[0]['external_id'] ?? null;
+                        if ($kitsuId !== null) {
+                            $manga->externalIds()->firstOrCreate(
+                                ['provider' => ProviderName::Kitsu->value],
+                                ['external_id' => $kitsuId],
+                            );
+                            if ($firstKitsu->chapters !== null && $firstKitsu->chapters > ($manga->capitulos_conhecidos ?? 0)) {
+                                $manga->update(['capitulos_conhecidos' => $firstKitsu->chapters]);
+                            }
+                            break;
+                        }
+                    }
+                } catch (Throwable) {
+                    // Tenta próximo título
+                }
+            }
+        }
+
+        $kitsuId = $manga->getExternalId(ProviderName::Kitsu->value);
+        if ($kitsuId !== null) {
+            try {
+                $kitsuChapters = $this->resolver->resolve(ProviderName::Kitsu)->getChapters($kitsuId);
+                if (! empty($kitsuChapters)) {
+                    $this->syncLogRepository->record(
+                        manga: $manga,
+                        provider: ProviderName::Kitsu,
+                        operation: SyncOperation::Capitulos,
+                        status: 'sucesso',
+                        startedAt: now(),
+                        finishedAt: now(),
+                    );
+
+                    return $this->capituloRepository->syncChapters($manga, $kitsuChapters, ProviderName::Kitsu->value);
+                }
+            } catch (Throwable $e) {
+                $lastException = $e;
+            }
+        }
+
+        // Se a obra não tem capítulos conhecidos definidos, tenta atualizar metadados
+        if (($manga->capitulos_conhecidos ?? 0) <= 0) {
+            try {
+                $manga = $this->sync($manga->id);
+            } catch (Throwable) {
+                // Sincronização de metadados não bloqueia
+            }
+        }
+
+        // Fallback: se a contagem de capítulos é conhecida, gera os capítulos com numeração padrão
+        if (($manga->capitulos_conhecidos ?? 0) > 0) {
+            $generated = $this->capituloRepository->generateKnownChapters($manga);
+            if ($generated > 0 || $manga->capitulos()->exists()) {
+                return $generated;
+            }
+        }
+
+        if ($lastException !== null) {
+            throw new YomiSyncException('Falha ao sincronizar capítulos: '.$lastException->getMessage(), previous: $lastException);
+        }
+
+        return 0;
     }
 
     /**
@@ -176,11 +303,12 @@ class MangaSyncService
     private function syncChaptersBestEffort(Manga $manga, ProviderName $providerName, string $externalId): void
     {
         try {
-            $chapters = $this->resolver->resolve($providerName)->getChapters($externalId);
-
-            $this->capituloRepository->syncChapters($manga, $chapters, $providerName->value);
+            $this->syncChapterData($manga->id, $providerName);
         } catch (Throwable) {
             // Capítulos são auxiliares: a falha não deve interromper a sincronização principal.
+            if (($manga->capitulos_conhecidos ?? 0) > 0 && $manga->capitulos()->count() === 0) {
+                $this->capituloRepository->generateKnownChapters($manga, $providerName->value);
+            }
         }
     }
 

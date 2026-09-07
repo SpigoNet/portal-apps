@@ -24,7 +24,7 @@ class LogViewerController extends Controller
             ]);
         }
 
-        $content = File::get($this->logPath);
+        $content = $this->readTail($this->logPath);
         $lines = explode("\n", trim($content));
 
         $logs = collect(array_reverse($lines))
@@ -49,13 +49,38 @@ class LogViewerController extends Controller
             return response()->json(['error' => 'Log file not found'], 404);
         }
 
-        $content = File::get($this->logPath);
+        $content = $this->readTail($this->logPath);
         $allLines = explode("\n", trim($content));
         $tailLines = array_slice($allLines, -$lines);
 
         return response()->json([
             'lines' => array_reverse($tailLines),
         ]);
+    }
+
+    /**
+     * Read only the last chunk of a (potentially huge) log file to avoid exhausting memory.
+     */
+    protected function readTail(string $path, int $maxBytes = 2 * 1024 * 1024): string
+    {
+        $size = File::size($path);
+
+        if ($size <= 0) {
+            return '';
+        }
+
+        $handle = fopen($path, 'r');
+
+        if ($handle === false) {
+            return '';
+        }
+
+        $readBytes = min($size, $maxBytes);
+        fseek($handle, -$readBytes, SEEK_END);
+        $content = fread($handle, $readBytes);
+        fclose($handle);
+
+        return $content === false ? '' : $content;
     }
 
     public function clear()

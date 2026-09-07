@@ -100,9 +100,9 @@ class ProgressService
         return $this->progressoRepository->markChapterRead($userId, $mangaId, $capituloId, $numeroCapitulo);
     }
 
-    public function unmarkChapterRead(int $userId, int $capituloId): bool
+    public function unmarkChapterRead(int $userId, int $capituloId, ?int $mangaId = null): bool
     {
-        return $this->progressoRepository->unmarkChapterRead($userId, $capituloId);
+        return $this->progressoRepository->unmarkChapterRead($userId, $capituloId, $mangaId);
     }
 
     public function removeFromLibrary(int $userId, int $mangaId): bool

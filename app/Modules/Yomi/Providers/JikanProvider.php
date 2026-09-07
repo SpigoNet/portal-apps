@@ -93,15 +93,24 @@ class JikanProvider extends BaseHttpProvider
 
     public function getChapters(string $id): array
     {
-        $response = $this->request('GET', "/manga/{$id}/chapters");
-        $data = $this->decode($response);
-        $items = $data['data'] ?? [];
+        try {
+            $response = $this->request('GET', "/manga/{$id}/chapters");
 
-        if (! is_array($items)) {
-            throw new ProviderMalformedResponseException(provider: ProviderName::Jikan, message: 'Campo "data" ausente nos capítulos');
+            if ($response->status() === 404 || ! $response->successful()) {
+                return [];
+            }
+
+            $data = $this->decode($response);
+            $items = $data['data'] ?? [];
+
+            if (! is_array($items) || empty($items)) {
+                return [];
+            }
+
+            return $this->normalizer->normalizeChapters($items);
+        } catch (Throwable) {
+            return [];
         }
-
-        return $this->normalizer->normalizeChapters($items);
     }
 
     /**

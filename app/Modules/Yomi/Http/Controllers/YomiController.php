@@ -8,11 +8,14 @@ use App\Modules\Yomi\Enums\MidiaTipo;
 use App\Modules\Yomi\Enums\ProviderName;
 use App\Modules\Yomi\Enums\StatusLeitura;
 use App\Modules\Yomi\Exceptions\YomiSyncException;
+use App\Modules\Yomi\Models\Capitulo;
 use App\Modules\Yomi\Models\Manga;
 use App\Modules\Yomi\Models\MangaExternalId;
 use App\Modules\Yomi\Models\ProgressoUsuario;
 use App\Modules\Yomi\Models\UsuarioCapitulo;
+use App\Modules\Yomi\Repositories\CapituloRepository;
 use App\Modules\Yomi\Repositories\MangaRepository;
+use App\Modules\Yomi\Services\MangaSyncService;
 use App\Modules\Yomi\Services\ProgressService;
 use App\Modules\Yomi\Services\SyncManager;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,6 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Throwable;
 
 class YomiController extends Controller
 {
@@ -28,6 +32,8 @@ class YomiController extends Controller
         private readonly ProgressService $progressService,
         private readonly SyncManager $syncManager,
         private readonly MangaRepository $mangaRepository,
+        private readonly MangaSyncService $mangaSyncService,
+        private readonly CapituloRepository $capituloRepository,
     ) {}
 
     public function index(Request $request): View
@@ -84,17 +90,55 @@ class YomiController extends Controller
     public function show(Request $request, Manga $manga): View
     {
         $progress = $this->progressService->getForUser($request->user()->id, $manga->id);
-        $chapters = $manga->capitulos()->orderByDesc('numero')->get();
+
+        if ($manga->capitulos()->doesntExist()) {
+            if (($manga->capitulos_conhecidos ?? 0) > 0) {
+                $this->capituloRepository->generateKnownChapters($manga);
+            } else {
+                try {
+                    $this->mangaSyncService->syncChapterData($manga->id);
+                } catch (Throwable) {
+                    // Silencioso se offline/falha de rede
+                }
+            }
+        }
+
+        $chapterOrder = $request->string('ordem')->toString() === 'asc' ? 'asc' : 'desc';
+        $chapters = $manga->capitulos()->orderBy('numero', $chapterOrder)->get();
         $readIds = UsuarioCapitulo::where('user_id', $request->user()->id)
             ->where('manga_id', $manga->id)
             ->pluck('capitulo_id')
             ->flip();
+
+        if ($progress?->ultimo_capitulo_lido !== null && $chapters->isNotEmpty()) {
+            $toMark = $chapters->filter(fn (Capitulo $c) => $c->numero !== null
+                && (float) $c->numero <= (float) $progress->ultimo_capitulo_lido
+                && ! $readIds->has($c->id));
+
+            foreach ($toMark as $c) {
+                $this->progressService->markChapterRead($request->user()->id, $manga->id, $c->id);
+            }
+
+            if ($toMark->isNotEmpty()) {
+                $readIds = UsuarioCapitulo::where('user_id', $request->user()->id)
+                    ->where('manga_id', $manga->id)
+                    ->pluck('capitulo_id')
+                    ->flip();
+            }
+        }
+
+        $chapterReadCount = $chapters->filter(fn (Capitulo $chapter): bool => $readIds->has($chapter->id))->count();
+        $chapterTotal = $chapters->count();
 
         return view('Yomi::show', [
             'manga' => $manga->load(['generos', 'criadores', 'midias']),
             'progress' => $progress,
             'chapters' => $chapters,
             'readIds' => $readIds,
+            'chapterOrder' => $chapterOrder,
+            'chapterReadCount' => $chapterReadCount,
+            'chapterTotal' => $chapterTotal,
+            'chapterProgressPercent' => $chapterTotal > 0 ? (int) round(($chapterReadCount / $chapterTotal) * 100) : 0,
             'cover' => $this->coverUrl($manga),
         ]);
     }
@@ -119,10 +163,18 @@ class YomiController extends Controller
 
         abort_if($external === null, 404);
 
+        $ordem = $request->query('ordem', 'asc') === 'desc' ? 'desc' : 'asc';
+        $chapters = $external->chapterList;
+        if ($ordem === 'desc') {
+            $chapters = array_reverse($chapters);
+        }
+
         return view('Yomi::discover-detail', [
             'external' => $external,
             'provider' => $providerName->value,
             'externalId' => $externalId,
+            'chapters' => $chapters,
+            'ordem' => $ordem,
         ]);
     }
 
@@ -190,6 +242,37 @@ class YomiController extends Controller
         }
 
         return back()->with('status', $next ? 'Capítulo marcado como lido.' : 'Não há capítulos novos para marcar.');
+    }
+
+    public function syncChapters(Request $request, Manga $manga): RedirectResponse
+    {
+        try {
+            $synced = $this->mangaSyncService->syncChapterData($manga->id);
+
+            return back()->with('status', $synced > 0
+                ? "Sincronização concluída: {$synced} capítulos foram processados."
+                : 'Capítulos verificados com sucesso.');
+        } catch (Throwable $exception) {
+            return back()->with('error', 'Não foi possível atualizar os capítulos da API no momento: '.$exception->getMessage());
+        }
+    }
+
+    public function toggleChapter(Request $request, Manga $manga, Capitulo $capitulo): RedirectResponse
+    {
+        abort_unless($capitulo->manga_id === $manga->id, 404);
+
+        $userId = $request->user()->id;
+        $isRead = $this->progressService->isChapterRead($userId, $capitulo->id);
+
+        if ($isRead) {
+            $this->progressService->unmarkChapterRead($userId, $capitulo->id, $manga->id);
+            $msg = 'Capítulo '.($capitulo->numero ?? '').' desmarcado como lido.';
+        } else {
+            $this->progressService->markChapterRead($userId, $manga->id, $capitulo->id);
+            $msg = 'Capítulo '.($capitulo->numero ?? '').' marcado como lido.';
+        }
+
+        return back()->with('status', $msg);
     }
 
     public function removeFromLibrary(Request $request, Manga $manga): RedirectResponse

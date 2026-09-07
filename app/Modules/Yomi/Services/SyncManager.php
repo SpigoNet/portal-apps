@@ -2,6 +2,7 @@
 
 namespace App\Modules\Yomi\Services;
 
+use App\Modules\Yomi\DTOs\ExternalChapter;
 use App\Modules\Yomi\DTOs\ExternalManga;
 use App\Modules\Yomi\DTOs\MangaLookupResult;
 use App\Modules\Yomi\Enums\ProviderName;
@@ -77,10 +78,150 @@ class SyncManager
         }
 
         try {
-            return $this->resolver->resolve($provider)->findById($externalId);
+            $external = $this->resolver->resolve($provider)->findById($externalId);
         } catch (ProviderUnavailableException|ProviderMalformedResponseException $exception) {
             throw new YomiSyncException($exception->getMessage(), previous: $exception);
         }
+
+        if ($external === null) {
+            return null;
+        }
+
+        $chapters = $this->resolveChaptersForExternal($external, $provider, $externalId);
+
+        return $external->withChapterList($chapters);
+    }
+
+    /**
+     * @return array<int, ExternalChapter>
+     */
+    public function resolveChaptersForExternal(ExternalManga $external, ProviderName $provider, string $externalId): array
+    {
+        // 1. Tenta obter diretamente do provedor
+        try {
+            $chapters = $this->resolver->resolve($provider)->getChapters($externalId);
+            if (! empty($chapters)) {
+                return $this->formatExternalChapters($chapters);
+            }
+        } catch (Throwable) {
+            // Segue para os fallbacks
+        }
+
+        // 2. Se vazio, tenta buscar no MangaDex pelos títulos
+        try {
+            $candidateTitles = array_values(array_unique(array_filter([
+                $external->title,
+                $external->originalTitle,
+                ...$external->alternativeTitles,
+            ])));
+
+            foreach ($candidateTitles as $candidateTitle) {
+                $dexResults = $this->resolver->resolve(ProviderName::MangaDex)->search($candidateTitle, 1);
+                if (! empty($dexResults)) {
+                    $first = $dexResults[0];
+                    $dexId = $first->externalIds[0]['external_id'] ?? null;
+                    if ($dexId !== null) {
+                        $chapters = $this->resolver->resolve(ProviderName::MangaDex)->getChapters($dexId);
+                        if (! empty($chapters)) {
+                            return $this->formatExternalChapters($chapters);
+                        }
+                    }
+                }
+            }
+        } catch (Throwable) {
+            // Falha do MangaDex não interrompe
+        }
+
+        // 3. Se ainda vazio e o provedor de origem não for Kitsu, busca no Kitsu
+        if ($provider !== ProviderName::Kitsu) {
+            try {
+                foreach ($candidateTitles as $candidateTitle) {
+                    $kitsuResults = $this->resolver->resolve(ProviderName::Kitsu)->search($candidateTitle, 1);
+                    if (! empty($kitsuResults)) {
+                        $firstKitsu = $kitsuResults[0];
+                        $kitsuId = $firstKitsu->externalIds[0]['external_id'] ?? null;
+                        if ($kitsuId !== null) {
+                            $chapters = $this->resolver->resolve(ProviderName::Kitsu)->getChapters($kitsuId);
+                            if (! empty($chapters)) {
+                                return $this->formatExternalChapters($chapters);
+                            }
+                            if ($firstKitsu->chapters !== null && $firstKitsu->chapters > 0 && ($external->chapters === null || $external->chapters <= 0)) {
+                                $chapters = [];
+                                for ($i = 1; $i <= $firstKitsu->chapters; $i++) {
+                                    $chapters[] = new ExternalChapter(
+                                        number: (string) $i,
+                                        title: "Capítulo {$i}",
+                                        externalId: null,
+                                        publishedAt: null,
+                                    );
+                                }
+
+                                return $chapters;
+                            }
+                        }
+                    }
+                }
+            } catch (Throwable) {
+                // Falha do Kitsu não interrompe
+            }
+        }
+
+        // 4. Fallback para capítulos sintéticos quando a contagem é conhecida
+        if ($external->chapters !== null && $external->chapters > 0) {
+            $chapters = [];
+            for ($i = 1; $i <= $external->chapters; $i++) {
+                $chapters[] = new ExternalChapter(
+                    number: (string) $i,
+                    title: "Capítulo {$i}",
+                    externalId: null,
+                    publishedAt: null,
+                );
+            }
+
+            return $chapters;
+        }
+
+        return [];
+    }
+
+    /**
+     * Deduplica por número e ordena crescentemente os capítulos.
+     *
+     * @param  array<int, ExternalChapter>  $chapters
+     * @return array<int, ExternalChapter>
+     */
+    private function formatExternalChapters(array $chapters): array
+    {
+        $unique = [];
+
+        foreach ($chapters as $chapter) {
+            if ($chapter->number === null) {
+                continue;
+            }
+
+            $key = (string) $chapter->number;
+
+            if (! isset($unique[$key])) {
+                $unique[$key] = $chapter;
+            } elseif ($unique[$key]->title === null && $chapter->title !== null) {
+                $unique[$key] = $chapter;
+            }
+        }
+
+        $list = array_values($unique);
+
+        usort($list, function (ExternalChapter $a, ExternalChapter $b): int {
+            $numA = $a->number !== null ? (float) $a->number : PHP_INT_MAX;
+            $numB = $b->number !== null ? (float) $b->number : PHP_INT_MAX;
+
+            if ($numA === $numB) {
+                return 0;
+            }
+
+            return $numA <=> $numB;
+        });
+
+        return $list;
     }
 
     public function search(string $query, ?ProviderName $preferred = null): array
@@ -356,9 +497,16 @@ class SyncManager
     {
         try {
             $chapters = $this->resolver->resolve($providerName)->getChapters($lookupId);
-            $this->mangaSyncService->persistChapters($manga, $chapters, $providerName);
+            if (! empty($chapters)) {
+                $this->mangaSyncService->persistChapters($manga, $chapters, $providerName);
+            } elseif (($manga->capitulos_conhecidos ?? 0) > 0 && $manga->capitulos()->count() === 0) {
+                app(\App\Modules\Yomi\Repositories\CapituloRepository::class)->generateKnownChapters($manga, $providerName->value);
+            }
         } catch (Throwable) {
             // Auxiliar: falha não bloqueia o cadastro.
+            if (($manga->capitulos_conhecidos ?? 0) > 0 && $manga->capitulos()->count() === 0) {
+                app(\App\Modules\Yomi\Repositories\CapituloRepository::class)->generateKnownChapters($manga, $providerName->value);
+            }
         }
     }
 

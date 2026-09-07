@@ -61,4 +61,32 @@ class ExternalManga
             chapterList: $this->chapterList,
         );
     }
+
+    /**
+     * @param  array<int, ExternalChapter>  $chapterList
+     */
+    public function withChapterList(array $chapterList): self
+    {
+        return new self(
+            title: $this->title,
+            originalTitle: $this->originalTitle,
+            synopsis: $this->synopsis,
+            status: $this->status,
+            type: $this->type,
+            chapters: $this->chapters,
+            volumes: $this->volumes,
+            publishedFrom: $this->publishedFrom,
+            publishedTo: $this->publishedTo,
+            score: $this->score,
+            ageRating: $this->ageRating,
+            imageUrl: $this->imageUrl,
+            sourceUpdatedAt: $this->sourceUpdatedAt,
+            externalIds: $this->externalIds,
+            genres: $this->genres,
+            alternativeTitles: $this->alternativeTitles,
+            creators: $this->creators,
+            characters: $this->characters,
+            chapterList: $chapterList,
+        );
+    }
 }

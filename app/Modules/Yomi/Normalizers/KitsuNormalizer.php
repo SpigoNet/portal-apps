@@ -2,6 +2,7 @@
 
 namespace App\Modules\Yomi\Normalizers;
 
+use App\Modules\Yomi\DTOs\ExternalChapter;
 use App\Modules\Yomi\DTOs\ExternalCreator;
 use App\Modules\Yomi\DTOs\ExternalManga;
 use App\Modules\Yomi\Enums\StatusPublicacao;
@@ -168,6 +169,34 @@ class KitsuNormalizer
         }
 
         return round($score, 2);
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $items
+     * @return array<int, ExternalChapter>
+     */
+    public function normalizeChapters(array $items): array
+    {
+        $chapters = [];
+
+        foreach ($items as $item) {
+            $attrs = $item['attributes'] ?? [];
+            $number = $attrs['number'] ?? null;
+            $title = $attrs['canonicalTitle'] ?? null;
+
+            if ($title === null && $number !== null) {
+                $title = 'Capítulo '.$number;
+            }
+
+            $chapters[] = new ExternalChapter(
+                number: $number !== null ? (string) $number : null,
+                title: $title,
+                externalId: (string) ($item['id'] ?? ''),
+                publishedAt: $this->dateOnly($attrs['published'] ?? null),
+            );
+        }
+
+        return $chapters;
     }
 
     private function dateOnly(mixed $value): ?string

@@ -10,7 +10,7 @@
             <p>{{ $external->synopsis ?? 'Ainda não há uma sinopse disponível para esta obra no provedor.' }}</p>
             <div class="period-tabs">
                 <span class="pill active">★ {{ $external->score !== null ? number_format($external->score, 2, ',', '.') : '—' }}</span>
-                <span class="pill">{{ $external->chapters ?? '?' }} capítulos</span>
+                <span class="pill">{{ $external->chapters ?? (count($chapters) > 0 ? count($chapters) : '?') }} capítulos</span>
                 <span class="pill">{{ $external->volumes ?? '?' }} volumes</span>
             </div>
             <div style="margin-top:18px">
@@ -34,6 +34,62 @@
             <div class="panel">
                 <div class="section-kicker">SINOPSE</div>
                 <p>{{ $external->synopsis ?? 'Sem sinopse disponível.' }}</p>
+            </div>
+
+            <div class="panel" style="margin-top:16px" x-data="{
+                search: '',
+                sortAsc: {{ ($ordem ?? 'asc') === 'asc' ? 'true' : 'false' }},
+                matches(number, title) {
+                    if (!this.search) return true;
+                    const q = this.search.toLowerCase();
+                    return String(number).toLowerCase().includes(q) || String(title).toLowerCase().includes(q);
+                }
+            }">
+                <div class="section-row" style="align-items:center;flex-wrap:wrap;gap:10px">
+                    <div>
+                        <h2 class="section-title" style="margin:0">Capítulos ({{ count($chapters) }})</h2>
+                        <small style="color:var(--muted)">Lista de capítulos disponíveis para visualização prévia</small>
+                    </div>
+                </div>
+
+                @if(!empty($chapters))
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 16px;flex-wrap:wrap">
+                        <div style="display:flex;gap:8px;align-items:center">
+                            <input
+                                type="text"
+                                x-model="search"
+                                placeholder="Filtrar capítulo..."
+                                style="background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:6px 12px;color:var(--paper);font-size:12px;outline:none;width:160px"
+                            >
+                            <button
+                                type="button"
+                                @click="window.location.search = 'ordem=' + (sortAsc ? 'desc' : 'asc')"
+                                class="pill"
+                                style="cursor:pointer;border:0;padding:6px 10px;font-size:11px"
+                                x-text="sortAsc ? '▲ Mais antigos' : '▼ Mais recentes'"
+                            ></button>
+                        </div>
+                    </div>
+                @endif
+
+                <div class="chapter-list" style="display:flex;flex-direction:column;gap:7px">
+                    @forelse($chapters as $chapter)
+                        <div
+                            class="chapter"
+                            x-show="matches('{{ $chapter->number }}', '{{ addslashes($chapter->title ?? '') }}')"
+                        >
+                            <span class="chapter-number">{{ $chapter->number ?? '—' }}</span>
+                            <div style="flex:1">
+                                <strong>{{ $chapter->title ?? 'Capítulo '.$chapter->number }}</strong>
+                                <small>{{ $chapter->publishedAt ? \Carbon\Carbon::parse($chapter->publishedAt)->format('d/m/Y') : 'Data não informada' }}</small>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="empty-state" style="padding:24px;text-align:center;background:var(--surface);border:1px dashed var(--line);border-radius:6px">
+                            <p style="margin:0;color:var(--muted)">Nenhum capítulo disponível para esta obra no momento.</p>
+                        </div>
+                    @endforelse
+                </div>
             </div>
         </section>
         <aside>

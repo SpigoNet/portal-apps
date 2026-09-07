@@ -60,12 +60,31 @@ class ProgressoRepository
             ->exists();
     }
 
-    public function unmarkChapterRead(int $userId, int $capituloId): bool
+    public function unmarkChapterRead(int $userId, int $capituloId, ?int $mangaId = null): bool
     {
-        return (bool) UsuarioCapitulo::query()
+        $capitulo = \App\Modules\Yomi\Models\Capitulo::find($capituloId);
+
+        $deleted = (bool) UsuarioCapitulo::query()
             ->where('user_id', $userId)
             ->where('capitulo_id', $capituloId)
             ->delete();
+
+        if ($deleted && $capitulo !== null) {
+            $mangaId = $mangaId ?? $capitulo->manga_id;
+            $progresso = $this->getForUser($userId, $mangaId);
+
+            if ($progresso !== null && $progresso->ultimo_capitulo_lido !== null && (float) $progresso->ultimo_capitulo_lido === (float) $capitulo->numero) {
+                $maxRemaining = UsuarioCapitulo::query()
+                    ->where('yomi_usuario_capitulos.user_id', $userId)
+                    ->where('yomi_usuario_capitulos.manga_id', $mangaId)
+                    ->join('yomi_capitulos', 'yomi_usuario_capitulos.capitulo_id', '=', 'yomi_capitulos.id')
+                    ->max('yomi_capitulos.numero');
+
+                $progresso->update(['ultimo_capitulo_lido' => $maxRemaining !== null ? (float) $maxRemaining : null]);
+            }
+        }
+
+        return $deleted;
     }
 
     public function removeProgressForUser(int $userId, int $mangaId): bool

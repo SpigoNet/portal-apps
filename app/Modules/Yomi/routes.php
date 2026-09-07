@@ -21,6 +21,8 @@ Route::prefix('yomi')
         Route::post('/descobrir', [YomiController::class, 'registerFromDiscover'])->name('discover.register');
         Route::get('/mangas/{manga}', [YomiController::class, 'show'])->name('mangas.show');
         Route::post('/mangas/{manga}/proximo-capitulo', [YomiController::class, 'markNext'])->name('mangas.mark-next');
+        Route::post('/mangas/{manga}/sincronizar-capitulos', [YomiController::class, 'syncChapters'])->name('mangas.sync-chapters');
+        Route::post('/mangas/{manga}/capitulos/{capitulo}/toggle', [YomiController::class, 'toggleChapter'])->name('mangas.chapters.toggle');
         Route::post('/mangas/{manga}/remover', [YomiController::class, 'removeFromLibrary'])->name('mangas.remove');
 
         // Endpoint de saúde/infra: camada de consumo será definida na etapa de UI.

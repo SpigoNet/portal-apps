@@ -18,6 +18,7 @@ RSYNC_EXCLUDES=(
     --exclude '.env'
     --exclude '.env.example'
     --exclude 'storage/app/public'
+    --exclude 'storage/logs'
     --exclude 'public/hot'
     --exclude '.opencode'
     --exclude '.vscode'

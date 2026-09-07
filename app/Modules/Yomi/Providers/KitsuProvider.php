@@ -2,10 +2,12 @@
 
 namespace App\Modules\Yomi\Providers;
 
+use App\Modules\Yomi\DTOs\ExternalChapter;
 use App\Modules\Yomi\DTOs\ExternalManga;
 use App\Modules\Yomi\Enums\ProviderName;
 use App\Modules\Yomi\Exceptions\ProviderMalformedResponseException;
 use App\Modules\Yomi\Normalizers\KitsuNormalizer;
+use Throwable;
 
 class KitsuProvider extends BaseHttpProvider
 {
@@ -54,9 +56,68 @@ class KitsuProvider extends BaseHttpProvider
         return $this->hydrate($this->decode($response));
     }
 
+    /**
+     * @return array<int, ExternalChapter>
+     */
     public function getChapters(string $id): array
     {
-        return [];
+        $allChapters = [];
+        $offset = 0;
+        $limit = 20;
+
+        while (true) {
+            try {
+                $response = $this->request('GET', '/chapters', [
+                    'query' => [
+                        'filter[mangaId]' => $id,
+                        'page[limit]' => $limit,
+                        'page[offset]' => $offset,
+                        'sort' => 'number',
+                    ],
+                ]);
+            } catch (Throwable) {
+                break;
+            }
+
+            if (! $response->successful()) {
+                if ($offset === 0) {
+                    try {
+                        $response = $this->request('GET', '/manga/'.$id.'/chapters', [
+                            'query' => [
+                                'page[limit]' => $limit,
+                                'page[offset]' => $offset,
+                                'sort' => 'number',
+                            ],
+                        ]);
+                    } catch (Throwable) {
+                        break;
+                    }
+                }
+
+                if (! $response->successful()) {
+                    break;
+                }
+            }
+
+            $data = $this->decode($response);
+            $items = $data['data'] ?? [];
+
+            if (! is_array($items) || empty($items)) {
+                break;
+            }
+
+            $normalized = $this->normalizer->normalizeChapters($items);
+            $allChapters = array_merge($allChapters, $normalized);
+
+            $total = (int) ($data['meta']['count'] ?? count($allChapters));
+            $offset += count($items);
+
+            if ($offset >= $total || count($items) < $limit || $offset >= 500) {
+                break;
+            }
+        }
+
+        return $allChapters;
     }
 
     public function topManga(int $limit = 12): array

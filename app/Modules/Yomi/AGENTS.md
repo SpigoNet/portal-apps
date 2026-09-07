@@ -79,6 +79,8 @@ As **migrations ficam em `database/migrations/2026_09_06_00000*.php`** (globais,
 | POST | `/yomi/descobrir` | `yomi.discover.register` | Adiciona obra externa à estante (`provider` + `external_id`) |
 | GET | `/yomi/mangas/{manga}` | `yomi.mangas.show` | Detalhes da obra |
 | POST | `/yomi/mangas/{manga}/proximo-capitulo` | `yomi.mangas.mark-next` | Marca próximo capítulo lido |
+| POST | `/yomi/mangas/{manga}/sincronizar-capitulos` | `yomi.mangas.sync-chapters` | Sincroniza/atualiza capítulos manualmente da API |
+| POST | `/yomi/mangas/{manga}/capitulos/{capitulo}/toggle` | `yomi.mangas.chapters.toggle` | Alterna status lido/não lido de um capítulo |
 | POST | `/yomi/mangas/{manga}/remover` | `yomi.mangas.remove` | Remove a obra da estante do usuário (remove do catálogo se for o último dono) |
 | GET | `/yomi/status` | `yomi.status` | Healthcheck do módulo (status sincronização) |
 | GET | `/yomi/configuracoes` | `yomi.settings` | Configurações do módulo — **somente dono** (`EnsureYomiOwner`) |

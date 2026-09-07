@@ -60,17 +60,44 @@ class MangaDexProvider extends BaseHttpProvider
 
     public function getChapters(string $id): array
     {
-        $response = $this->request('GET', '/manga/'.$id.'/feed', [
-            'query' => [
-                'translatedLanguage[]' => 'en',
-                'order[chapter]' => 'asc',
-                'limit' => 100,
-            ],
-        ]);
+        $allChapters = [];
+        $offset = 0;
+        $limit = 500;
+        $maxLoops = 3;
 
-        $items = $this->items($response);
+        for ($loop = 0; $loop < $maxLoops; $loop++) {
+            $query = 'limit='.$limit.'&offset='.$offset.'&order[chapter]=asc&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&translatedLanguage[]=pt-br&translatedLanguage[]=en';
 
-        return $this->normalizer->normalizeChapters($items);
+            $response = $this->request('GET', '/manga/'.$id.'/feed', [
+                'query' => $query,
+            ]);
+
+            $items = $this->items($response);
+
+            if (empty($items) && $loop === 0) {
+                $queryAny = 'limit='.$limit.'&offset='.$offset.'&order[chapter]=asc&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic';
+                $response = $this->request('GET', '/manga/'.$id.'/feed', [
+                    'query' => $queryAny,
+                ]);
+                $items = $this->items($response);
+            }
+
+            if (empty($items)) {
+                break;
+            }
+
+            $normalized = $this->normalizer->normalizeChapters($items);
+            $allChapters = array_merge($allChapters, $normalized);
+
+            $total = (int) ($response->json('total') ?? count($items));
+            $offset += count($items);
+
+            if ($offset >= $total || count($items) < $limit) {
+                break;
+            }
+        }
+
+        return $allChapters;
     }
 
     public function topManga(int $limit = 12): array
@@ -109,7 +136,7 @@ class MangaDexProvider extends BaseHttpProvider
      */
     private function queryString(array $params): string
     {
-        $base = $this->includeQuery();
+        $base = $this->includeQuery().'&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic';
 
         if ($params === []) {
             return $base;

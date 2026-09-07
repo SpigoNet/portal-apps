@@ -16,7 +16,7 @@
                 <div class="p-6 bg-white border-b border-gray-200">
                     <form action="{{ route('admin.apps.store') }}" method="POST">
                         @csrf
-                        @include('Admin::apps._form')
+                        @include('Admin::apps._form', ['app' => $app])
                     </form>
                 </div>
             </div>

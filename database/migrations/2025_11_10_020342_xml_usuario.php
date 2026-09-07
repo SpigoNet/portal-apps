@@ -40,7 +40,7 @@ return new class extends Migration
             ->where('name', 'Padrão (Inicial)')
             ->value('id');
 
-        if (!$defaultConfigId) {
+        if (!$defaultConfigId && DB::table('users')->where('id', 1)->exists()) {
             $defaultConfigId = DB::table('dspace_xml_configurations')->insertGetId([
                 'user_id' => 1, // Conforme solicitado
                 'name' => 'Padrão (Inicial)',

@@ -12,23 +12,28 @@ class AppManagerController extends Controller
     public function index()
     {
         $apps = PortalApp::orderBy('title')->get();
+
         return view('Admin::apps.index', compact('apps'));
     }
 
     public function create()
     {
+        $app = new PortalApp;
         $users = User::orderBy('name')->get();
         $icons = $this->getAvailableIcons();
-        return view('Admin::apps.create', compact('users', 'icons'));
+
+        return view('Admin::apps.create', compact('app', 'users', 'icons'));
     }
 
     private function getAvailableIcons()
     {
         $path = public_path('images/apps');
-        if (!file_exists($path))
+        if (! file_exists($path)) {
             return [];
+        }
 
         $files = scandir($path);
+
         return array_filter($files, function ($file) {
             return in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), ['png', 'jpg', 'jpeg', 'svg']);
         });
@@ -42,7 +47,7 @@ class AppManagerController extends Controller
             'start_link' => 'required|string|unique:portal_apps,start_link',
             'icon' => 'nullable|string',
             'visibility' => 'required|in:public,private,specific',
-            'users' => 'required_if:visibility,specific|array'
+            'users' => 'required_if:visibility,specific|array',
         ]);
 
         $app = PortalApp::create($validated);
@@ -58,6 +63,7 @@ class AppManagerController extends Controller
     {
         $users = User::orderBy('name')->get();
         $icons = $this->getAvailableIcons();
+
         return view('Admin::apps.edit', compact('app', 'users', 'icons'));
     }
 
@@ -66,10 +72,10 @@ class AppManagerController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
-            'start_link' => 'required|string|unique:portal_apps,start_link,' . $app->id,
+            'start_link' => 'required|string|unique:portal_apps,start_link,'.$app->id,
             'icon' => 'nullable|string',
             'visibility' => 'required|in:public,private,specific',
-            'users' => 'required_if:visibility,specific|array'
+            'users' => 'required_if:visibility,specific|array',
         ]);
 
         $app->update($validated);
@@ -86,6 +92,7 @@ class AppManagerController extends Controller
     public function destroy(PortalApp $app)
     {
         $app->delete();
+
         return redirect()->route('admin.apps.index')->with('success', 'Aplicativo excluído com sucesso!');
     }
 }

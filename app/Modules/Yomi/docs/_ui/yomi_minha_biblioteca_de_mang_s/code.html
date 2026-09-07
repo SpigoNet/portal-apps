@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-background": "#e4e1e9", "secondary": "#c9c6c0", "surface-container": "#1f1f24", "tertiary-fixed": "#ffdad7", "primary-fixed-dim": "#ffb4ac", "on-tertiary-container": "#5c0009", "on-tertiary-fixed": "#410004", "background": "#131318", "primary-fixed": "#ffdad6", "secondary-fixed": "#e5e2db", "surface-container-high": "#2a292f", "on-primary-fixed-variant": "#93000d", "error-container": "#93000a", "on-surface": "#e4e1e9", "surface-container-low": "#1b1b20", "secondary-container": "#474742", "tertiary": "#ffb3ae", "on-secondary-fixed": "#1c1c18", "outline-variant": "#5b403d", "on-secondary": "#31312c", "secondary-fixed-dim": "#c9c6c0", "primary": "#ffb4ac", "on-surface-variant": "#e4beb9", "surface-container-lowest": "#0e0e13", "on-tertiary": "#68000c", "primary-container": "#ff544c", "on-secondary-container": "#b7b5af", "on-error": "#690005", "on-primary": "#690006", "surface-bright": "#39383e", "inverse-surface": "#e4e1e9", "on-primary-container": "#5c0005", "tertiary-fixed-dim": "#ffb3ae", "outline": "#ab8985", "inverse-on-surface": "#303035", "surface": "#131318", "surface-container-highest": "#35343a", "on-primary-fixed": "#410002", "tertiary-container": "#ff5353", "surface-variant": "#35343a", "error": "#ffb4ab", "on-secondary-fixed-variant": "#474742", "inverse-primary": "#bb171c", "surface-tint": "#ffb4ac", "surface-dim": "#131318", "on-error-container": "#ffdad6", "on-tertiary-fixed-variant": "#930015" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-xs": "0.5rem", "margin-tablet": "2rem", "space-sm": "0.75rem", "space-lg": "1.5rem", "space-2xs": "0.25rem", "space-2xl": "3rem", "poster-aspect-ratio": "2 / 3", "space-md": "1rem", "margin-desktop": "3rem", "space-3xl": "4rem", "space-xl": "2rem", "margin-mobile": "1rem", "gutter-mobile": "1rem", "gutter-desktop": "1.5rem" }, "fontFamily": { "headline-md": [ "Plus Jakarta Sans" ], "headline-lg": [ "Plus Jakarta Sans" ], "display-hero-mobile": [ "Plus Jakarta Sans" ], "title-editorial": [ "Plus Jakarta Sans" ], "label-caption": [ "Plus Jakarta Sans" ], "body-lg": [ "Plus Jakarta Sans" ], "body-md": [ "Plus Jakarta Sans" ], "display-hero": [ "Plus Jakarta Sans" ], "body-sm": [ "Plus Jakarta Sans" ], "counter-metric": [ "Space Grotesk" ], "headline-sm": [ "Plus Jakarta Sans" ], "label-badge": [ "Space Grotesk" ] }, "fontSize": { "headline-md": [ "22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" } ], "headline-lg": [ "28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "display-hero-mobile": [ "32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800" } ], "title-editorial": [ "15px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "700" } ], "label-caption": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" } ], "body-lg": [ "16px", { "lineHeight": "26px", "letterSpacing": "0.01em", "fontWeight": "400" } ], "body-md": [ "14px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" } ], "display-hero": [ "44px", { "lineHeight": "52px", "letterSpacing": "-0.03em", "fontWeight": "800" } ], "body-sm": [ "12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" } ], "counter-metric": [ "16px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700" } ], "headline-sm": [ "18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "label-badge": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" } ] } } } };</script></head><body class="bg-surface-container-lowest font-body-md text-on-surface min-h-screen"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between overflow-y-auto"><div class="p-space-lg flex flex-col gap-space-lg"><div class="flex items-center gap-space-sm"><div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center p-space-2xs"><span class="material-symbols-outlined text-primary text-[24px]">menu_book</span></div><div class="flex flex-col"><div class="flex items-center gap-space-2xs"><span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">YOMI</span><span class="w-1.5 h-1.5 rounded-full bg-primary-container inline-block"></span></div><span class="font-label-caption text-label-caption text-on-surface-variant">Sua jornada em mangás</span></div></div><div class="flex flex-col gap-space-2xs"><span class="font-label-badge text-label-badge uppercase tracking-wider text-secondary px-space-xs mb-space-2xs">Menu Principal</span><nav class="flex flex-col gap-space-2xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-xl"><a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="inicio" href="#"><span class="material-symbols-outlined text-[20px]">auto_stories</span><span class="font-body-md text-body-md">Início</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm transition-all bg-primary-container text-on-primary-container font-semibold rounded-xl" data-path="minha-biblioteca" href="#"><span class="material-symbols-outlined text-[20px]">shelves</span><span class="font-body-md text-body-md">Minha Biblioteca</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="explorar" href="#"><span class="material-symbols-outlined text-[20px]">explore</span><span class="font-body-md text-body-md">Explorar</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="estatisticas-jornada" href="#"><span class="material-symbols-outlined text-[20px]">insights</span><span class="font-body-md text-body-md">Estatísticas &amp; Jornada</span></a></nav></div><div class="flex flex-col gap-space-xs"><span class="font-label-badge text-label-badge uppercase tracking-wider text-secondary px-space-xs">Continuar Lendo</span><div class="p-space-sm bg-surface-container rounded-xl flex flex-col gap-space-xs"><div class="flex items-start justify-between gap-space-xs"><div class="flex flex-col"><span class="font-title-editorial text-title-editorial text-on-surface truncate max-w-[150px]">Chainsaw Man</span><span class="font-counter-metric text-counter-metric text-primary">Cap. 142 <span class="text-secondary font-body-sm text-body-sm font-normal">/ 158</span></span></div><span class="px-space-2xs py-0.5 bg-primary-container/20 text-primary-fixed-dim rounded font-label-badge text-label-badge uppercase">+1</span></div><div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden"><div class="bg-primary-container h-full w-[89%]"></div></div></div></div><div class="flex flex-col gap-space-2xs"><span class="font-label-badge text-label-badge uppercase tracking-wider text-secondary px-space-xs mb-space-2xs">Geral</span><nav class="flex flex-col gap-space-2xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-xl"><a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="notificacoes" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="font-body-md text-body-md">Notificações</span></div><span class="px-1.5 py-0.5 rounded-full bg-primary-container text-on-primary-container font-counter-metric text-[11px]">3</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="configuracoes" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span class="font-body-md text-body-md">Configurações</span></a></nav></div></div><div class="p-space-lg bg-surface-container-lowest/50"><div class="flex items-center gap-space-sm p-space-sm bg-surface-container rounded-xl"><img alt="Profile" class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1UzBFJI8mOsySQXbWq-33XQ1MSDeYC6XQ6H3aBJz5rIM-Gb1RJSq39a4XCQEdOBudWUnogtAbXXn2nTan1lCeR_oPO6Z_6CdzXM1UzZ8OtxYjsryXOv5X__b5G4i6KoI34jjxFDJl0R8f1wuwaBCH-nrslEMFS0iOeUHYmUdVIeKexVDCNtCP3jrOqnWZSaxzLNMqzQSLrul64QTkuA4esNgrJZPP4OtkvMo9NQaxUg1XB50_eTbP_5ZdLq_gTXSHJsjO1lEfLw7BE"/><div class="flex flex-col flex-1 min-w-0"><div class="flex items-center justify-between"><span class="font-title-editorial text-title-editorial text-on-surface truncate">Renato M.</span><span class="font-counter-metric text-counter-metric text-primary-fixed-dim text-body-sm">Nv. 14</span></div><div class="flex items-center justify-between gap-space-2xs mt-1"><div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden"><div class="bg-primary-container h-full w-[65%]"></div></div><span class="font-label-caption text-label-caption text-secondary shrink-0">Leitor</span></div></div></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-gutter-desktop"><div class="flex items-center gap-space-sm w-full max-w-lg"><div class="flex items-center gap-space-xs w-full bg-surface-container px-space-md py-space-2xs rounded-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><span class="material-symbols-outlined text-on-surface-variant text-[20px]">search</span><input class="w-full bg-transparent font-body-sm text-body-sm text-on-surface placeholder:text-secondary focus:outline-none" placeholder="Buscar mangás, autores ou gêneros..." type="text"/><kbd class="font-counter-metric text-label-badge text-secondary bg-surface-container-high px-1.5 py-0.5 rounded">⌘K</kbd></div></div><div class="flex items-center gap-space-md"><a class="relative text-on-surface-variant hover:text-on-surface p-space-2xs" data-path="notificacoes" href="#"><span class="material-symbols-outlined">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary-container"></span></a><div class="flex items-center gap-space-sm pl-space-sm"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1UzBFJI8mOsySQXbWq-33XQ1MSDeYC6XQ6H3aBJz5rIM-Gb1RJSq39a4XCQEdOBudWUnogtAbXXn2nTan1lCeR_oPO6Z_6CdzXM1UzZ8OtxYjsryXOv5X__b5G4i6KoI34jjxFDJl0R8f1wuwaBCH-nrslEMFS0iOeUHYmUdVIeKexVDCNtCP3jrOqnWZSaxzLNMqzQSLrul64QTkuA4esNgrJZPP4OtkvMo9NQaxUg1XB50_eTbP_5ZdLq_gTXSHJsjO1lEfLw7BE"/></div></div></header><main class="w-full pt-16 bg-surface"><div class="flex flex-col w-full">
+<!-- Dynamic Atmosphere Underlay -->
+<div class="relative w-full px-gutter-desktop py-space-xl flex flex-col gap-space-xl">
+<!-- Ambient Red Ink Blot Aura -->
+<div class="absolute top-0 right-1/4 w-96 h-96 rounded-full bg-primary-container/5 blur-3xl pointer-events-none -z-10"></div>
+<!-- Editorial Header Section -->
+<div class="flex flex-col gap-space-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-badge text-label-badge uppercase text-secondary tracking-widest">Acervo Pessoal • Neo-Tokyo Shelf</span>
+</div>
+<div class="flex items-baseline gap-space-sm">
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Minha Biblioteca</h1>
+<span class="font-counter-metric text-counter-metric text-secondary font-normal">(128 títulos)</span>
+</div>
+</div>
+<!-- Quick Summary Metrics Bento Strip -->
+<div class="flex items-center gap-space-sm bg-surface-container-low p-space-xs rounded-xl shadow-sm">
+<div class="flex items-center gap-space-xs px-space-sm py-space-2xs bg-surface-container rounded-lg">
+<span class="material-symbols-outlined text-primary text-[18px]">auto_stories</span>
+<div class="flex flex-col">
+<span class="font-label-caption text-label-caption text-secondary">Lendo Agora</span>
+<span class="font-counter-metric text-counter-metric text-on-surface">12 obras</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs px-space-sm py-space-2xs bg-surface-container rounded-lg">
+<span class="material-symbols-outlined text-primary text-[18px]">task_alt</span>
+<div class="flex flex-col">
+<span class="font-label-caption text-label-caption text-secondary">Completos</span>
+<span class="font-counter-metric text-counter-metric text-on-surface">68 volumes</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs px-space-sm py-space-2xs bg-surface-container rounded-lg">
+<span class="material-symbols-outlined text-primary text-[18px]">trending_up</span>
+<div class="flex flex-col">
+<span class="font-label-caption text-label-caption text-secondary">Média Leitura</span>
+<span class="font-counter-metric text-counter-metric text-primary">89.4%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Navigation Tabs & Toolbar Strip -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md bg-surface-container-lowest/80 backdrop-blur-md p-space-2xs rounded-xl">
+<!-- Status Tabs -->
+<div class="flex items-center gap-space-2xs overflow-x-auto pb-space-2xs lg:pb-0" id="filter-tabs">
+<button class="tab-btn px-space-md py-space-xs rounded-lg font-body-sm text-body-sm text-secondary hover:text-on-surface hover:bg-surface-container-high transition-all flex items-center gap-space-xs shrink-0" data-status="all">
+<span>Todos</span>
+<span class="font-counter-metric text-[11px] px-1.5 py-0.5 rounded-full bg-surface-container-high text-secondary">128</span>
+</button>
+<button class="tab-btn active px-space-md py-space-xs rounded-lg font-body-sm text-body-sm font-semibold text-on-surface bg-surface-container-high relative flex items-center gap-space-xs shrink-0" data-status="reading">
+<span class="text-on-surface">Lendo</span>
+<span class="font-counter-metric text-[11px] px-1.5 py-0.5 rounded-full bg-primary-container/20 text-primary-fixed-dim font-bold">12</span>
+<div class="absolute -bottom-1 left-2 right-2 h-0.5 bg-primary-container rounded-full"></div>
+</button>
+<button class="tab-btn px-space-md py-space-xs rounded-lg font-body-sm text-body-sm text-secondary hover:text-on-surface hover:bg-surface-container-high transition-all flex items-center gap-space-xs shrink-0" data-status="plan">
+<span>Pretendo Ler</span>
+<span class="font-counter-metric text-[11px] px-1.5 py-0.5 rounded-full bg-surface-container-high text-secondary">34</span>
+</button>
+<button class="tab-btn px-space-md py-space-xs rounded-lg font-body-sm text-body-sm text-secondary hover:text-on-surface hover:bg-surface-container-high transition-all flex items-center gap-space-xs shrink-0" data-status="completed">
+<span>Lidos / Concluídos</span>
+<span class="font-counter-metric text-[11px] px-1.5 py-0.5 rounded-full bg-surface-container-high text-secondary">68</span>
+</button>
+<button class="tab-btn px-space-md py-space-xs rounded-lg font-body-sm text-body-sm text-secondary hover:text-on-surface hover:bg-surface-container-high transition-all flex items-center gap-space-xs shrink-0" data-status="paused">
+<span>Pausados</span>
+<span class="font-counter-metric text-[11px] px-1.5 py-0.5 rounded-full bg-surface-container-high text-secondary">10</span>
+</button>
+<button class="tab-btn px-space-md py-space-xs rounded-lg font-body-sm text-body-sm text-secondary hover:text-on-surface hover:bg-surface-container-high transition-all flex items-center gap-space-xs shrink-0" data-status="dropped">
+<span>Abandonados</span>
+<span class="font-counter-metric text-[11px] px-1.5 py-0.5 rounded-full bg-surface-container-high text-secondary">4</span>
+</button>
+</div>
+<!-- Action Tools (Search, Genre Filter, Sort, View Toggle) -->
+<div class="flex items-center gap-space-xs flex-wrap sm:flex-nowrap">
+<!-- Search in Library -->
+<div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1.5 rounded-lg flex-1 sm:w-56">
+<span class="material-symbols-outlined text-secondary text-[18px]">search</span>
+<input class="w-full bg-transparent font-body-sm text-body-sm text-on-surface placeholder:text-secondary focus:outline-none" id="library-search" placeholder="Filtrar nesta lista..." type="text"/>
+</div>
+<!-- Genre Dropdown Selector -->
+<div class="relative">
+<select class="appearance-none bg-surface-container-low text-on-surface font-body-sm text-body-sm pl-space-sm pr-space-lg py-1.5 rounded-lg cursor-pointer focus:outline-none hover:bg-surface-container transition-colors" id="genre-select">
+<option value="all">Gênero: Todos</option>
+<option value="seinen">Seinen</option>
+<option value="shonen">Shonen</option>
+<option value="fantasia">Fantasia Sombria</option>
+<option value="scifi">Sci-Fi / Mistério</option>
+<option value="slice">Slice of Life / Drama</option>
+</select>
+<span class="material-symbols-outlined text-secondary text-[16px] absolute right-2 top-2.5 pointer-events-none">expand_more</span>
+</div>
+<!-- Sort Selector -->
+<div class="relative">
+<select class="appearance-none bg-surface-container-low text-on-surface font-body-sm text-body-sm pl-space-sm pr-space-lg py-1.5 rounded-lg cursor-pointer focus:outline-none hover:bg-surface-container transition-colors" id="sort-select">
+<option value="recent">Última Leitura</option>
+<option value="progress">Progresso %</option>
+<option value="title">Alfabético</option>
+<option value="rating">Nota Pessoal</option>
+</select>
+<span class="material-symbols-outlined text-secondary text-[16px] absolute right-2 top-2.5 pointer-events-none">swap_vert</span>
+</div>
+<!-- View Mode Toggle -->
+<div class="flex items-center bg-surface-container-low p-1 rounded-lg">
+<button class="p-1 rounded bg-surface-container-high text-on-surface" id="view-grid" title="Grade de Capas">
+<span class="material-symbols-outlined text-[18px]">grid_view</span>
+</button>
+<button class="p-1 rounded text-secondary hover:text-on-surface transition-colors" id="view-list" title="Lista Detalhada">
+<span class="material-symbols-outlined text-[18px]">view_list</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Active Filter Chips Indicator -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs text-secondary font-label-badge text-label-badge uppercase">
+<span class="text-on-surface">Exibindo:</span>
+<span class="px-space-xs py-0.5 rounded bg-surface-container-high text-on-surface font-normal">Lendo Atualmente</span>
+<span>•</span>
+<span class="text-secondary">10 de 12 em andamento</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="text-secondary hover:text-primary transition-colors text-label-caption font-label-caption flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">tune</span>
+          Filtros Avançados
+        </button>
+</div>
+</div>
+<!-- Manga Posters Responsive Grid (Strict 2:3 Cover Architecture) -->
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-space-md" id="manga-grid">
+<!-- Card 1: Berserk -->
+<div class="manga-card group flex flex-col bg-surface-container-low rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" data-genre="fantasia" data-status="reading" data-title="Berserk">
+<div class="relative w-full aspect-[2/3] overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Berserk manga cover art dark gothic aesthetic high contrast black and crimson warrior Guts with heavy dragonslayer sword dark ink wash style brooding atmospheric" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfloOy4DQHKaWRDs5RlY1tNCiAub7OCPQAzc3XUTFlR5ZsC2EeXrKCcHp5rhy2wCV22WMTz7l4T4taDYObak239_HE6uXzh_MJ-SYQJ-ofNmU4ayBOyXbQEwFjHrSxtaYPODRrwB3F-8eLX2eGxW-v7WsTjHsLq01WtmMKkXjlOW1EqyIcw8ugSlfJ5pCrdl4FdPOmE8b4P23x5olDiMcu8R4DfbgI1QPXTnTpwVCg7iLjWsnXx9bz0w"/>
+<!-- Top Badges Overlay -->
+<div class="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest/90 backdrop-blur-sm text-primary font-label-badge text-label-badge uppercase tracking-wider">Seinen</span>
+<span class="px-1.5 py-0.5 rounded bg-primary-container text-on-primary-container font-counter-metric text-[10px] font-bold shadow-md">+2 Cap</span>
+</div>
+<!-- Quick Advance +1 Floating Action -->
+<button class="quick-advance-btn absolute bottom-3 right-3 w-8 h-8 rounded-full bg-primary-container text-on-primary-container font-counter-metric text-[13px] font-bold flex items-center justify-center shadow-lg opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all z-10" title="Marcar próximo capítulo (+1)">
+            +1
+          </button>
+<!-- Scrim Gradient -->
+<div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-surface-container-low to-transparent pointer-events-none"></div>
+</div>
+<!-- Info Area -->
+<div class="p-space-sm flex flex-col gap-space-2xs flex-1 justify-between">
+<div class="flex flex-col">
+<div class="flex items-center justify-between gap-space-2xs">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate group-hover:text-primary transition-colors">Berserk</h2>
+<span class="font-counter-metric text-counter-metric text-primary text-[12px]">99%</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary truncate">Kentarou Miura • Fantasia</span>
+</div>
+<!-- Progress Rail & Chapter Details -->
+<div class="flex flex-col gap-1 mt-space-xs">
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[99%] transition-all duration-500"></div>
+</div>
+<div class="flex items-center justify-between text-secondary font-label-caption text-label-caption">
+<span>Cap. <strong class="text-on-surface font-counter-metric">374</strong> / 376</span>
+<span class="text-primary-fixed-dim">Faltam 2</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2: Chainsaw Man -->
+<div class="manga-card group flex flex-col bg-surface-container-low rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" data-genre="shonen" data-status="reading" data-title="Chainsaw Man">
+<div class="relative w-full aspect-[2/3] overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Chainsaw Man manga cover high dynamic graphic illustration urban gritty Tokyo dark pop aesthetic vibrant contrasting vermilion red splashes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDt_T2l00VUGcOpdn43mZUCPtmPiGRJRq-cwUrAU5o8B4AfyWKQ1eiRqJ3FNWjPMPoiKClSzytnoFJlb78KD0BnRUoJAcOpPkudTApAbGthv0X3UJLbf7yPwJsq2f955M163auaFVRJQb7AUTcpm-t_TcrNP5b6f802q7yc3hNYXK_3sd9a27j6qJADaW-8LjK1lPfGV7_3XGLxj4wfubRxrkCTeVWU_6AoKXPSaoYgQy7ZEKxl6D4QsA"/>
+<div class="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest/90 backdrop-blur-sm text-secondary font-label-badge text-label-badge uppercase">Shonen</span>
+<span class="px-1.5 py-0.5 rounded bg-primary-container text-on-primary-container font-counter-metric text-[10px] font-bold shadow-md">+4 Cap</span>
+</div>
+<button class="quick-advance-btn absolute bottom-3 right-3 w-8 h-8 rounded-full bg-primary-container text-on-primary-container font-counter-metric text-[13px] font-bold flex items-center justify-center shadow-lg opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all z-10" title="Marcar próximo capítulo (+1)">
+            +1
+          </button>
+<div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-surface-container-low to-transparent pointer-events-none"></div>
+</div>
+<div class="p-space-sm flex flex-col gap-space-2xs flex-1 justify-between">
+<div class="flex flex-col">
+<div class="flex items-center justify-between gap-space-2xs">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate group-hover:text-primary transition-colors">Chainsaw Man</h2>
+<span class="font-counter-metric text-counter-metric text-primary text-[12px]">86%</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary truncate">Tatsuki Fujimoto • Sobrenatural</span>
+</div>
+<div class="flex flex-col gap-1 mt-space-xs">
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[86%] transition-all duration-500"></div>
+</div>
+<div class="flex items-center justify-between text-secondary font-label-caption text-label-caption">
+<span>Cap. <strong class="text-on-surface font-counter-metric">112</strong> / 130</span>
+<span class="text-secondary">Faltam 18</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3: Vagabond -->
+<div class="manga-card group flex flex-col bg-surface-container-low rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" data-genre="seinen" data-status="paused" data-title="Vagabond">
+<div class="relative w-full aspect-[2/3] overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Vagabond manga portrait master samurai Takezo Musashi sumi-e ink wash style brushwork monochromatic calm introspective editorial" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWRfkyCAhQmvpBHKQ5udxMsAWz4fNHIXEblQSi4aq_xRcYz1Sx2VbTpl8oYJzox3nLousRU_dazingYlkdhEuNaaNsaD4WM83JYK4YonVr-3DdBxE6q2RVlVlgWJaGlJ0D-ympNETXBLuom8In1PiNcENmNlGCUt4EZ7ET4o0UGn9OXVxftdWjiNhAnliGtzgz3_cHm9vET_KYegBReFcNEw2oKfxt95abLD6hon4u7jDseGRsdWYlOw"/>
+<div class="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest/90 backdrop-blur-sm text-secondary font-label-badge text-label-badge uppercase">Seinen</span>
+<span class="px-2 py-0.5 rounded bg-secondary-container text-secondary font-label-badge text-[10px] uppercase">Hiato</span>
+</div>
+<button class="quick-advance-btn absolute bottom-3 right-3 w-8 h-8 rounded-full bg-surface-container-high text-secondary hover:bg-primary-container hover:text-on-primary-container font-counter-metric text-[13px] font-bold flex items-center justify-center shadow-lg transition-all z-10" title="Marcar próximo capítulo (+1)">
+            +1
+          </button>
+<div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-surface-container-low to-transparent pointer-events-none"></div>
+</div>
+<div class="p-space-sm flex flex-col gap-space-2xs flex-1 justify-between">
+<div class="flex flex-col">
+<div class="flex items-center justify-between gap-space-2xs">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate group-hover:text-primary transition-colors">Vagabond</h2>
+<span class="font-counter-metric text-counter-metric text-secondary text-[12px]">100%</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary truncate">Takehiko Inoue • Histórico</span>
+</div>
+<div class="flex flex-col gap-1 mt-space-xs">
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[100%] transition-all duration-500"></div>
+</div>
+<div class="flex items-center justify-between text-secondary font-label-caption text-label-caption">
+<span>Cap. <strong class="text-on-surface font-counter-metric">327</strong> / 327</span>
+<span class="text-secondary italic">Pausado</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 4: Monster -->
+<div class="manga-card group flex flex-col bg-surface-container-low rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" data-genre="scifi" data-status="completed" data-title="Monster">
+<div class="relative w-full aspect-[2/3] overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Monster manga cover Naoki Urasawa psychological thriller dark moody cold European cityscape silhouette Johan Liebert minimalist" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAg3buc4xB2hhJJDg0QoKqnOMSteat_xq6vLSi3kOhxilJxT7gUpW2LPsKqH_Fo8UD3PESpnqoShMVVhJosYDauHf_nCY6hEjyyBoy3vQvoEfRkqG1gtWgh9z6qAXqY7-Iwegq1Kv738vrjpGtUgCV25zlJfmJHHB7xzMwZFf8NeGFY_EsLpzNxY_XVEiLp9HCT0e4kWJeK2gYxpVkk5TzQhuH7-M1Yu9bBv-ku980nj5WBK_bAC5o5sg"/>
+<div class="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest/90 backdrop-blur-sm text-secondary font-label-badge text-label-badge uppercase">Mistério</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-label-badge text-[10px] uppercase flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-primary">done_all</span> Concluído
+            </span>
+</div>
+<!-- Completed Ribbon -->
+<div class="absolute bottom-3 right-3 px-2 py-1 rounded bg-surface-container-lowest/90 text-primary-fixed-dim font-counter-metric text-body-sm flex items-center gap-1 shadow-md">
+<span class="material-symbols-outlined text-[14px]">star</span> 10.0
+          </div>
+<div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-surface-container-low to-transparent pointer-events-none"></div>
+</div>
+<div class="p-space-sm flex flex-col gap-space-2xs flex-1 justify-between">
+<div class="flex flex-col">
+<div class="flex items-center justify-between gap-space-2xs">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate group-hover:text-primary transition-colors">Monster</h2>
+<span class="font-counter-metric text-counter-metric text-on-surface text-[12px]">100%</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary truncate">Naoki Urasawa • Psicológico</span>
+</div>
+<div class="flex flex-col gap-1 mt-space-xs">
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-on-surface h-full w-[100%]"></div>
+</div>
+<div class="flex items-center justify-between text-secondary font-label-caption text-label-caption">
+<span>Cap. <strong class="text-on-surface font-counter-metric">162</strong> / 162</span>
+<span class="text-secondary">Lido em 2024</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 5: Vinland Saga -->
+<div class="manga-card group flex flex-col bg-surface-container-low rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" data-genre="seinen" data-status="reading" data-title="Vinland Saga">
+<div class="relative w-full aspect-[2/3] overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Vinland Saga manga cover Thorfinn dramatic Norse landscape stormy skies detailed ink art historical Nordic epic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1jdbXBmeLF3Hi5E-fal5CSk9CoDghmrSuTCIePAF09K75cU2UJQptDmP9oSIQULnl_UrT-lD2vFFig_kfk15oHr26V1UTE9O3FZdh5ep4thx5cqEmLs6XCmvg4PEgeNaFHEgCtdF8VWwOUeMF7Zcr7G1JeUU2G9B_OsA-_yFd53K8YnFaddhclq_i0a86-xMjILxwcyNX7EBZ651p4-4UGNWgA2sIlmUjd7bBYhNxqMepjR2cJdbiig"/>
+<div class="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest/90 backdrop-blur-sm text-secondary font-label-badge text-label-badge uppercase">Seinen</span>
+<span class="px-1.5 py-0.5 rounded bg-primary-container text-on-primary-container font-counter-metric text-[10px] font-bold shadow-md">+1 Cap</span>
+</div>
+<button class="quick-advance-btn absolute bottom-3 right-3 w-8 h-8 rounded-full bg-primary-container text-on-primary-container font-counter-metric text-[13px] font-bold flex items-center justify-center shadow-lg opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all z-10" title="Marcar próximo capítulo (+1)">
+            +1
+          </button>
+<div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-surface-container-low to-transparent pointer-events-none"></div>
+</div>
+<div class="p-space-sm flex flex-col gap-space-2xs flex-1 justify-between">
+<div class="flex flex-col">
+<div class="flex items-center justify-between gap-space-2xs">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate group-hover:text-primary transition-colors">Vinland Saga</h2>
+<span class="font-counter-metric text-counter-metric text-primary text-[12px]">97%</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary truncate">Makoto Yukimura • Épico</span>
+</div>
+<div class="flex flex-col gap-1 mt-space-xs">
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[97%] transition-all duration-500"></div>
+</div>
+<div class="flex items-center justify-between text-secondary font-label-caption text-label-caption">
+<span>Cap. <strong class="text-on-surface font-counter-metric">204</strong> / 210</span>
+<span class="text-primary-fixed-dim">Faltam 6</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 6: Kingdom -->
+<div class="manga-card group flex flex-col bg-surface-container-low rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" data-genre="seinen" data-status="reading" data-title="Kingdom">
+<div class="relative w-full aspect-[2/3] overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Kingdom manga cover battle warfare ancient China grand army generals sword clash dynamic perspective traditional Japanese ink rendering" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRIDWfHqS-Qo9NUv6cooQ-6wZvopYKBS2S8xobt_9wNQyCppgOTzJcG4kd5D6EMBatWC57bp5AthbcFYv-DoGlUVepcW1LELFifQHh__h21F7OkNpYeL7Yl2fyzWGxF1YaLq85M7F8HcntNYNo4DxVtyh5Ef9U6IEi7OGe4RMxeLUevrcq1Nt8i1KSAYJGN_u09C584l0OhmpBiG11uwdAraAjfz0hPLbjenLsoxXPMXtOx9VNhZ15Hg"/>
+<div class="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest/90 backdrop-blur-sm text-secondary font-label-badge text-label-badge uppercase">Guerra</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-secondary font-counter-metric text-[10px] font-bold">Semanal</span>
+</div>
+<button class="quick-advance-btn absolute bottom-3 right-3 w-8 h-8 rounded-full bg-primary-container text-on-primary-container font-counter-metric text-[13px] font-bold flex items-center justify-center shadow-lg opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all z-10" title="Marcar próximo capítulo (+1)">
+            +1
+          </button>
+<div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-surface-container-low to-transparent pointer-events-none"></div>
+</div>
+<div class="p-space-sm flex flex-col gap-space-2xs flex-1 justify-between">
+<div class="flex flex-col">
+<div class="flex items-center justify-between gap-space-2xs">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate group-hover:text-primary transition-colors">Kingdom</h2>
+<span class="font-counter-metric text-counter-metric text-primary text-[12px]">95%</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary truncate">Yasuhisa Hara • Militar</span>
+</div>
+<div class="flex flex-col gap-1 mt-space-xs">
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[95%] transition-all duration-500"></div>
+</div>
+<div class="flex items-center justify-between text-secondary font-label-caption text-label-caption">
+<span>Cap. <strong class="text-on-surface font-counter-metric">760</strong> / 800</span>
+<span class="text-secondary">Faltam 40</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 7: 20th Century Boys -->
+<div class="manga-card group flex flex-col bg-surface-container-low rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" data-genre="scifi" data-status="completed" data-title="20th Century Boys">
+<div class="relative w-full aspect-[2/3] overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="20th Century Boys manga cover mysterious Friend symbol mask eye finger silhouette retro Tokyo urban sci-fi conspiracy mystery" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADifAHG3vCJehw2U4mUyfDEE65q77iqudmMgJaQT91eqGGmo1Wm1q6Alf819LJyNDJpzcg-5OFQIa06O7eAzN1wVdNLfZ2EPBGz4pxeSXxOIXsq5HseeLPt2dDLLwOSvDMcr9k6JvI2uxjBbGkif-ZEjb3TEN-PT5v_-cVTe3PIl2IVx8HrjTDVpZhx4hFbh1LgNINCY6sDP5nfm6WwROb49UJ2C8qyzqHKBo1PV7M_aZrababZgNtYQ"/>
+<div class="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest/90 backdrop-blur-sm text-secondary font-label-badge text-label-badge uppercase">Sci-Fi</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-label-badge text-[10px] uppercase flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-primary">done_all</span> Concluído
+            </span>
+</div>
+<div class="absolute bottom-3 right-3 px-2 py-1 rounded bg-surface-container-lowest/90 text-primary-fixed-dim font-counter-metric text-body-sm flex items-center gap-1 shadow-md">
+<span class="material-symbols-outlined text-[14px]">star</span> 9.8
+          </div>
+<div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-surface-container-low to-transparent pointer-events-none"></div>
+</div>
+<div class="p-space-sm flex flex-col gap-space-2xs flex-1 justify-between">
+<div class="flex flex-col">
+<div class="flex items-center justify-between gap-space-2xs">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate group-hover:text-primary transition-colors">20th Century Boys</h2>
+<span class="font-counter-metric text-counter-metric text-on-surface text-[12px]">100%</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary truncate">Naoki Urasawa • Suspense</span>
+</div>
+<div class="flex flex-col gap-1 mt-space-xs">
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-on-surface h-full w-[100%]"></div>
+</div>
+<div class="flex items-center justify-between text-secondary font-label-caption text-label-caption">
+<span>Cap. <strong class="text-on-surface font-counter-metric">249</strong> / 249</span>
+<span class="text-secondary">Edição Definitiva</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 8: Blue Lock -->
+<div class="manga-card group flex flex-col bg-surface-container-low rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" data-genre="shonen" data-status="reading" data-title="Blue Lock">
+<div class="relative w-full aspect-[2/3] overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Blue Lock manga cover hyper kinetic egoist striker Isagi Yoichi glowing eyes neon dark arena sports manga high tension visual" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARkAMjf_zoasGmW-yozGsNdpXrFwORWCYpHBNaXQvwPVYL3aODryePZBnGYivjGcHA7gtu7ngs7nf6BQf3B9WzgGym2zSb9vIoNjMSoCHhjKaruhmd4q0TKgnY4X0KIhWBTVXIOThsAExIDkTkhLhNCOta9iTkTKy-Rc5HHb5lbeHoihZJ_bIRu68UmMqMwlEZvmFDIUSNV0-6loFrQOZYfqlnTh0R2-SyhMwi6PHyeVQj0qHaPMNjHA"/>
+<div class="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest/90 backdrop-blur-sm text-secondary font-label-badge text-label-badge uppercase">Esporte</span>
+<span class="px-1.5 py-0.5 rounded bg-primary-container text-on-primary-container font-counter-metric text-[10px] font-bold shadow-md">+3 Cap</span>
+</div>
+<button class="quick-advance-btn absolute bottom-3 right-3 w-8 h-8 rounded-full bg-primary-container text-on-primary-container font-counter-metric text-[13px] font-bold flex items-center justify-center shadow-lg opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all z-10" title="Marcar próximo capítulo (+1)">
+            +1
+          </button>
+<div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-surface-container-low to-transparent pointer-events-none"></div>
+</div>
+<div class="p-space-sm flex flex-col gap-space-2xs flex-1 justify-between">
+<div class="flex flex-col">
+<div class="flex items-center justify-between gap-space-2xs">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate group-hover:text-primary transition-colors">Blue Lock</h2>
+<span class="font-counter-metric text-counter-metric text-primary text-[12px]">80%</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary truncate">Muneyuki Kaneshiro • Shonen</span>
+</div>
+<div class="flex flex-col gap-1 mt-space-xs">
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[80%] transition-all duration-500"></div>
+</div>
+<div class="flex items-center justify-between text-secondary font-label-caption text-label-caption">
+<span>Cap. <strong class="text-on-surface font-counter-metric">210</strong> / 260</span>
+<span class="text-secondary">Faltam 50</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 9: Oshi no Ko -->
+<div class="manga-card group flex flex-col bg-surface-container-low rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" data-genre="slice" data-status="reading" data-title="Oshi no Ko">
+<div class="relative w-full aspect-[2/3] overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Oshi no Ko manga cover dramatic idol stage star eyes contrast dark entertainment industry drama detailed anime illustration" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8gL_g_EcATvyoyrmet0jnKi-WF4Et13mu8sv2mbln7qK2vHvlRt2_bOmfK-ouBVterxEjijgo7WMBCBe14yjaOeQQLvsmu6gjQazKeCrJYBoYu3zIVMkS7j0czuQMEcGOIb6oIYzAeCA93pjAIbrRjeMlhOeilBqwDYvq6wy-UXgvHOLE9XxPtkSlL2r9bktvjb9QmuNlOdNuVggb2cqOOPD_2nfTgqvQHFIhz-67QSWvPaFaaInAJQ"/>
+<div class="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest/90 backdrop-blur-sm text-secondary font-label-badge text-label-badge uppercase">Drama</span>
+<span class="px-1.5 py-0.5 rounded bg-primary-container text-on-primary-container font-counter-metric text-[10px] font-bold shadow-md">+1 Cap</span>
+</div>
+<button class="quick-advance-btn absolute bottom-3 right-3 w-8 h-8 rounded-full bg-primary-container text-on-primary-container font-counter-metric text-[13px] font-bold flex items-center justify-center shadow-lg opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all z-10" title="Marcar próximo capítulo (+1)">
+            +1
+          </button>
+<div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-surface-container-low to-transparent pointer-events-none"></div>
+</div>
+<div class="p-space-sm flex flex-col gap-space-2xs flex-1 justify-between">
+<div class="flex flex-col">
+<div class="flex items-center justify-between gap-space-2xs">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate group-hover:text-primary transition-colors">Oshi no Ko</h2>
+<span class="font-counter-metric text-counter-metric text-primary text-[12px]">78%</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary truncate">Aka Akasaka • Seinen</span>
+</div>
+<div class="flex flex-col gap-1 mt-space-xs">
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[78%] transition-all duration-500"></div>
+</div>
+<div class="flex items-center justify-between text-secondary font-label-caption text-label-caption">
+<span>Cap. <strong class="text-on-surface font-counter-metric">130</strong> / 166</span>
+<span class="text-secondary">Faltam 36</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 10: Goodnight Punpun -->
+<div class="manga-card group flex flex-col bg-surface-container-low rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" data-genre="slice" data-status="completed" data-title="Goodnight Punpun">
+<div class="relative w-full aspect-[2/3] overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Goodnight Punpun manga cover Inio Asano melancholic surreal bird character dark atmospheric Tokyo street night photography backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1buJVG8WrbWuRsRsE0H2ltjkchNFu-u2u0MiNerKb0o3OBbDYCcUl3ZFaufLPaRFd3iouo_Fugqe70ZC2kKa-0UfJrIXcv3UUlMcSh0T61iTXaebmnPsdNaKt3K_O5SCCY_gTkjHcEKYB0CZsAjMZEvG3Ewy3XFpbcG5AcQOIv6YK9JMnGrgc3A_dTAk7gY5M3Sf1cABdE2SrQobka1S6HlvOxR5GlCXnS94zREIpQyj3NFvZrQcwhA"/>
+<div class="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest/90 backdrop-blur-sm text-secondary font-label-badge text-label-badge uppercase">Drama</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-label-badge text-[10px] uppercase flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-primary">done_all</span> Concluído
+            </span>
+</div>
+<div class="absolute bottom-3 right-3 px-2 py-1 rounded bg-surface-container-lowest/90 text-primary-fixed-dim font-counter-metric text-body-sm flex items-center gap-1 shadow-md">
+<span class="material-symbols-outlined text-[14px]">star</span> 9.5
+          </div>
+<div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-surface-container-low to-transparent pointer-events-none"></div>
+</div>
+<div class="p-space-sm flex flex-col gap-space-2xs flex-1 justify-between">
+<div class="flex flex-col">
+<div class="flex items-center justify-between gap-space-2xs">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate group-hover:text-primary transition-colors">Goodnight Punpun</h2>
+<span class="font-counter-metric text-counter-metric text-on-surface text-[12px]">100%</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary truncate">Inio Asano • Slice of Life</span>
+</div>
+<div class="flex flex-col gap-1 mt-space-xs">
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-on-surface h-full w-[100%]"></div>
+</div>
+<div class="flex items-center justify-between text-secondary font-label-caption text-label-caption">
+<span>Cap. <strong class="text-on-surface font-counter-metric">147</strong> / 147</span>
+<span class="text-secondary">Concluído</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Feedback Toast Notification (DOM-ready container) -->
+<div class="fixed bottom-8 right-8 z-50 transform translate-y-16 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-space-sm bg-surface-container-high px-space-md py-space-sm rounded-xl shadow-2xl" id="toast-notify">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<div class="flex flex-col">
+<span class="font-title-editorial text-title-editorial text-on-surface" id="toast-title">Progresso Atualizado!</span>
+<span class="font-body-sm text-body-sm text-secondary" id="toast-desc">Capítulo registrado com sucesso.</span>
+</div>
+</div>
+<!-- Pagination & Volume Counter Panel -->
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md pt-space-lg pb-space-2xl">
+<!-- Total Counter & Range -->
+<div class="flex items-center gap-space-xs text-secondary font-body-sm text-body-sm">
+<span>Mostrando</span>
+<span class="font-counter-metric text-counter-metric text-on-surface">1 - 10</span>
+<span>de</span>
+<span class="font-counter-metric text-counter-metric text-on-surface">128</span>
+<span>títulos cadastrados</span>
+</div>
+<!-- Clean Pagination Controls -->
+<div class="flex items-center gap-space-2xs bg-surface-container-low p-1 rounded-xl">
+<button class="w-9 h-9 flex items-center justify-center rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container disabled:opacity-30 disabled:pointer-events-none transition-colors" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-9 h-9 flex items-center justify-center rounded-lg bg-primary-container text-on-primary-container font-counter-metric text-counter-metric font-bold">1</button>
+<button class="w-9 h-9 flex items-center justify-center rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition-colors font-counter-metric text-counter-metric">2</button>
+<button class="w-9 h-9 flex items-center justify-center rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition-colors font-counter-metric text-counter-metric">3</button>
+<span class="px-2 text-secondary">•••</span>
+<button class="w-9 h-9 flex items-center justify-center rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition-colors font-counter-metric text-counter-metric">13</button>
+<button class="w-9 h-9 flex items-center justify-center rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+<!-- Items Per Page Selector -->
+<div class="flex items-center gap-space-xs">
+<span class="font-label-caption text-label-caption text-secondary">Por página:</span>
+<div class="relative">
+<select class="appearance-none bg-surface-container-low text-on-surface font-counter-metric text-[13px] pl-2.5 pr-6 py-1 rounded cursor-pointer focus:outline-none hover:bg-surface-container transition-colors">
+<option>10</option>
+<option selected="">20</option>
+<option>50</option>
+<option>100</option>
+</select>
+<span class="material-symbols-outlined text-secondary text-[14px] absolute right-1.5 top-1.5 pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    // Quick Chapter +1 Interaction
+    const quickAdvanceBtns = document.querySelectorAll('.quick-advance-btn');
+    const toast = document.getElementById('toast-notify');
+    const toastTitle = document.getElementById('toast-title');
+    const toastDesc = document.getElementById('toast-desc');
+    let toastTimeout;
+
+    quickAdvanceBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const card = btn.closest('.manga-card');
+        const mangaTitle = card.dataset.title || 'Mangá';
+        
+        // Find current chapter counter inside card
+        const strongEl = card.querySelector('strong');
+        if (strongEl) {
+          let currentCap = parseInt(strongEl.innerText, 10);
+          if (!isNaN(currentCap)) {
+            strongEl.innerText = currentCap + 1;
+          }
+        }
+
+        // Animate +1 Click Pulse
+        btn.classList.add('scale-125');
+        setTimeout(() => btn.classList.remove('scale-125'), 180);
+
+        // Display Toast
+        if (toast && toastTitle && toastDesc) {
+          clearTimeout(toastTimeout);
+          toastTitle.innerText = `${mangaTitle} atualizado!`;
+          toastDesc.innerText = `Próximo capítulo registrado na sua jornada.`;
+          toast.classList.remove('translate-y-16', 'opacity-0');
+          toast.classList.add('translate-y-0', 'opacity-100');
+
+          toastTimeout = setTimeout(() => {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-16', 'opacity-0');
+          }, 2400);
+        }
+      });
+    });
+
+    // Tab Status Filter
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const cards = document.querySelectorAll('.manga-card');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => {
+          b.classList.remove('active', 'font-semibold', 'bg-surface-container-high', 'text-on-surface');
+          b.classList.add('text-secondary');
+          const underline = b.querySelector('div');
+          if (underline) underline.remove();
+        });
+
+        btn.classList.add('active', 'font-semibold', 'bg-surface-container-high', 'text-on-surface');
+        btn.classList.remove('text-secondary');
+
+        // Add Active Underline
+        const underline = document.createElement('div');
+        underline.className = 'absolute -bottom-1 left-2 right-2 h-0.5 bg-primary-container rounded-full';
+        btn.appendChild(underline);
+
+        const filterStatus = btn.dataset.status;
+        cards.forEach(card => {
+          if (filterStatus === 'all' || card.dataset.status === filterStatus) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // Search Filter
+    const searchInput = document.getElementById('library-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        cards.forEach(card => {
+          const title = (card.dataset.title || '').toLowerCase();
+          if (title.includes(query)) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    }
+
+    // Genre Selector Filter
+    const genreSelect = document.getElementById('genre-select');
+    if (genreSelect) {
+      genreSelect.addEventListener('change', (e) => {
+        const selected = e.target.value;
+        cards.forEach(card => {
+          const genre = card.dataset.genre || '';
+          if (selected === 'all' || genre === selected) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    }
+
+    // Grid / List View Toggle Micro-interaction
+    const btnGrid = document.getElementById('view-grid');
+    const btnList = document.getElementById('view-list');
+    const gridContainer = document.getElementById('manga-grid');
+
+    if (btnGrid && btnList && gridContainer) {
+      btnList.addEventListener('click', () => {
+        btnList.classList.add('bg-surface-container-high', 'text-on-surface');
+        btnList.classList.remove('text-secondary');
+        btnGrid.classList.remove('bg-surface-container-high', 'text-on-surface');
+        btnGrid.classList.add('text-secondary');
+        gridContainer.className = 'grid grid-cols-1 sm:grid-cols-2 gap-space-sm';
+      });
+
+      btnGrid.addEventListener('click', () => {
+        btnGrid.classList.add('bg-surface-container-high', 'text-on-surface');
+        btnGrid.classList.remove('text-secondary');
+        btnList.classList.remove('bg-surface-container-high', 'text-on-surface');
+        btnList.classList.add('text-secondary');
+        gridContainer.className = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-space-md';
+      });
+    }
+  })();
+</script></main></div></body></html>

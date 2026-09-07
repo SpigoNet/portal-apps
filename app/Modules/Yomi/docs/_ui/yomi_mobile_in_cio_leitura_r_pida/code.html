@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100%;margin:0;padding:0;background-color:#131318;}body{overscroll-behavior-y:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-low": "#1b1b20", "surface-bright": "#39383e", "on-background": "#e4e1e9", "surface-variant": "#35343a", "primary-container": "#ff544c", "on-surface": "#e4e1e9", "primary": "#ffb4ac", "surface-container-lowest": "#0e0e13", "secondary": "#c9c6c0", "surface-tint": "#ffb4ac", "error-container": "#93000a", "tertiary-fixed": "#ffdad7", "on-tertiary": "#68000c", "primary-fixed": "#ffdad6", "inverse-on-surface": "#303035", "on-error-container": "#ffdad6", "surface-dim": "#131318", "surface-container-highest": "#35343a", "tertiary-container": "#ff5353", "surface": "#131318", "inverse-primary": "#bb171c", "on-primary-container": "#5c0005", "background": "#131318", "on-tertiary-container": "#5c0009", "surface-container-high": "#2a292f", "on-error": "#690005", "on-tertiary-fixed-variant": "#930015", "surface-container": "#1f1f24", "on-tertiary-fixed": "#410004", "on-secondary-container": "#b7b5af", "tertiary-fixed-dim": "#ffb3ae", "secondary-container": "#474742", "secondary-fixed-dim": "#c9c6c0", "secondary-fixed": "#e5e2db", "on-primary-fixed-variant": "#93000d", "on-primary": "#690006", "on-primary-fixed": "#410002", "on-secondary-fixed": "#1c1c18", "inverse-surface": "#e4e1e9", "tertiary": "#ffb3ae", "outline-variant": "#5b403d", "primary-fixed-dim": "#ffb4ac", "on-secondary-fixed-variant": "#474742", "outline": "#ab8985", "on-secondary": "#31312c", "on-surface-variant": "#e4beb9", "error": "#ffb4ab" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "poster-aspect-ratio": "2 / 3", "space-2xs": "0.25rem", "space-xl": "2rem", "gutter-desktop": "1.5rem", "margin-mobile": "1rem", "space-3xl": "4rem", "space-md": "1rem", "space-xs": "0.5rem", "margin-tablet": "2rem", "space-2xl": "3rem", "space-lg": "1.5rem", "margin-desktop": "3rem", "space-sm": "0.75rem", "gutter-mobile": "1rem" }, "fontFamily": { "headline-md": ["Plus Jakarta Sans"], "display-hero-mobile": ["Plus Jakarta Sans"], "display-hero": ["Plus Jakarta Sans"], "counter-metric": ["Space Grotesk"], "headline-sm": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "title-editorial": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "label-caption": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "label-badge": ["Space Grotesk"] }, "fontSize": { "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "display-hero-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "display-hero": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.03em", "fontWeight": "800" }], "counter-metric": ["16px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700" }], "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "0.01em", "fontWeight": "400" }], "title-editorial": ["15px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "700" }], "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" }], "label-caption": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "label-badge": ["11px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md min-h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container"><header class="fixed top-0 inset-x-0 z-50 bg-surface/85 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.4)]"><div class="h-16 px-margin-mobile flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="relative flex items-center justify-center w-8 h-8 rounded-full bg-primary-container/15 text-primary-container"><span class="material-symbols-outlined text-[20px]">auto_stories</span><span class="absolute top-0 right-0 w-2 h-2 rounded-full bg-primary-container ring-2 ring-surface"></span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface leading-none">Yomi</span><span class="font-label-caption text-label-caption text-secondary uppercase tracking-widest text-[9px]">読書録</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Buscar mangás ou ler código" class="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[22px]">qr_code_scanner</span></button><button aria-label="Notificações" class="relative min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-primary-container"></span></button><div class="min-w-[44px] min-h-[44px] flex items-center justify-center pl-space-2xs"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1Wx_Ux-_QbR4a7JPxZ9HCI4ry8cOo-I9UM8_I9xKnS3my00WU4xh6LPsCOeLsA50Hiq1gdGyyPtvC-2rvDVGmve6bG9hoOQPTfb9KL0yYD3QKEacRG7G3-B7kNso0cv5iqbXbYA2teiWr_98dzvEDEgbmPG3fq6GUzW0HZtRQofO9F3tIW-MgKhrUDZa1d39IxBcrx3nwAoyaX3IgV5ASJBsY4DJpjcXdetiGRaL11rKWuHi1HXluPQ9tCcR_u7smww0kATPgm7bBs"/></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-28 bg-surface"><div class="flex flex-col w-full">
+<!-- Toast Notificação Feedback de Toque -->
+<div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 transform -translate-y-2 flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-surface-container-highest/95 text-on-surface shadow-xl backdrop-blur-md" id="quick-toast">
+<span class="material-symbols-outlined text-primary-container text-[18px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label-badge text-label-badge uppercase tracking-wider text-on-surface" id="toast-message">Capítulo Registrado</span>
+</div>
+<!-- 1. Saudação personalizada com streak e ritmo semanal -->
+<section class="px-margin-mobile pt-space-xs pb-space-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">Bom dia, Renato</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-container/15 text-primary-container">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="font-counter-metric text-label-badge font-bold">19d</span>
+</span>
+</div>
+<div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high text-secondary">
+<span class="material-symbols-outlined text-[14px] text-primary">military_tech</span>
+<span class="font-label-badge text-label-badge uppercase tracking-widest text-[10px] text-on-surface font-semibold">Nv. 14</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-secondary">
+<p class="font-body-sm text-body-sm text-secondary">
+<span class="text-on-surface font-semibold">18 capítulos</span> lidos esta semana. Ritmo constante.
+      </p>
+<span class="font-counter-metric text-label-caption text-primary-container font-semibold">Meta: 25</span>
+</div>
+</section>
+<!-- 2. Cartão de Destaque "CONTINUE LENDO" (Polegar primário) -->
+<section class="px-margin-mobile pt-space-xs pb-space-md">
+<div class="relative overflow-hidden rounded-xl bg-surface-container-low shadow-xl p-space-md flex flex-col gap-space-md">
+<!-- Ambient sumi glow behind hero manga -->
+<div class="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-primary-container/10 blur-3xl pointer-events-none"></div>
+<!-- Top Tag & Options -->
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-space-2xs">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary-container text-on-primary font-label-badge text-label-badge uppercase">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">bolt</span>
+            Prioridade
+          </span>
+<span class="font-label-caption text-label-caption text-secondary uppercase tracking-widest pl-1">Leitura Ativa</span>
+</div>
+<button aria-label="Mais opções para Chainsaw Man" class="w-8 h-8 rounded-full flex items-center justify-center text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<!-- Manga Visual Info Horizontal Slice -->
+<div class="flex gap-space-md items-start relative z-10">
+<!-- Manga Cover (Strict 2:3 aspect ratio) -->
+<div class="relative w-24 flex-shrink-0 aspect-[2/3] rounded-lg overflow-hidden bg-surface-container-lowest shadow-md">
+<img class="w-full h-full object-cover" data-alt="Chainsaw Man manga cover illustration, dynamic dark sumi-e ink strokes, Chainsaw Devil Denji in dramatic silhouette with glowing vermilion orange details, moody black and charcoal background, highly detailed contemporary Tokyo graphic manga art style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRgSURzOQUbKQmkj-Fyr2PByQ3w265f08iM0y5FUxCc4Ura5IddqWzsi-NlmvXhzbYa07LUB2QWIAczGKvZEi-9ibtJmkpf1sBa9yIQrVBmMxW-KAfViaolLHVFxJh5oz8zskhMoEYC85rP7aOLEO0eH2XW40WwRFJqpjKLcJUPn5xhmocpGgnwWYuKtPdnNJDt1yYb-hbU5R_udfroAZVMkZnjcNKwiHdxl1o3NUpMVERn8yz_nhUZQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-transparent"></div>
+<span class="absolute bottom-1 left-1 font-counter-metric text-[10px] text-on-surface px-1 py-0.2 rounded bg-surface-container-lowest/80 backdrop-blur-sm">Tomo 16</span>
+</div>
+<!-- Info & Chapter Progress -->
+<div class="flex-1 min-w-0 flex flex-col justify-between self-stretch py-0.5">
+<div>
+<div class="flex items-center gap-1.5 mb-1">
+<span class="font-label-caption text-[10px] uppercase tracking-wider text-primary font-semibold">Shonen Jump</span>
+<span class="w-1 h-1 rounded-full bg-surface-bright"></span>
+<span class="font-label-caption text-[10px] text-secondary">Tatsuki Fujimoto</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold truncate">Chainsaw Man</h2>
+<p class="font-body-sm text-body-sm text-secondary truncate mt-0.5">Arco da Academia • Parte 2</p>
+</div>
+<div class="mt-space-sm flex flex-col gap-1.5">
+<div class="flex items-center justify-between text-on-surface font-counter-metric text-counter-metric">
+<span class="text-on-surface font-bold text-[14px]">Capítulo <span id="hero-current-chap">142</span> <span class="text-secondary font-normal text-[12px]">/ 158</span></span>
+<span class="text-primary-container text-[13px] font-bold" id="hero-percentage">89%</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-primary-container rounded-full transition-all duration-500" id="hero-progress-bar" style="width: 89%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Large Primary Action For Immediate Thumb Tap -->
+<div class="flex flex-col gap-space-xs relative z-10 pt-1">
+<button class="w-full h-14 rounded-full bg-primary-container hover:bg-primary text-on-primary flex items-center justify-center gap-space-xs font-title-editorial text-title-editorial shadow-lg shadow-primary-container/20 active:scale-[0.98] transition-transform" id="hero-advance-btn" onclick="advanceHeroProgress()">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>+1 Marcar Cap. <span id="hero-next-chap">143</span> Lido</span>
+</button>
+<div class="flex items-center justify-between pt-1">
+<button class="flex items-center gap-1.5 px-3 py-2 rounded-full bg-surface-container-high hover:bg-surface-bright text-secondary hover:text-on-surface font-label-badge text-label-badge transition-colors">
+<span class="material-symbols-outlined text-[16px]">open_in_new</span>
+<span>MangaPlus / App Externo</span>
+</button>
+<button class="flex items-center gap-1 px-3 py-2 rounded-full bg-transparent hover:bg-surface-container-high text-secondary hover:text-on-surface font-label-badge text-label-badge transition-colors">
+<span class="material-symbols-outlined text-[16px]">history</span>
+<span>Histórico</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Carrossel Horizontal: "Fila de Leitura Rápida" -->
+<section class="py-space-xs flex flex-col gap-space-sm">
+<div class="px-margin-mobile flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Fila de Leitura</h3>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-secondary font-counter-metric text-label-badge">3</span>
+</div>
+<a class="font-label-badge text-label-badge text-primary hover:text-on-surface transition-colors flex items-center gap-0.5" href="#">
+<span>VER TODOS</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+<!-- Scroll horizontal com cards compactos e botão rápido +1 -->
+<div class="flex overflow-x-auto no-scrollbar gap-space-sm px-margin-mobile pb-space-2xs">
+<!-- Item 1: Jujutsu Kaisen -->
+<div class="flex-shrink-0 w-44 rounded-xl bg-surface-container-low p-space-sm flex flex-col justify-between gap-space-xs shadow-md">
+<div class="relative w-full aspect-[2/3] rounded-lg overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover" data-alt="Jujutsu Kaisen volume cover, Ryomen Sukuna and Gojo Satoru clash in cursed energy domain, high contrast sumi brush ink art, black background with dark vermilion and crimson energy aura, dramatic cinematic framing." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDov7tSYIeLGgHPg_wLEM3UBIm6GJwjlqONaxgcHBlWO2e6SG09mNIx8c4egRF--ROSKt5J1-qiQAVl2CPQtUdYnRJgftMPXgXp8Kw2gnCdatstgVpfKJJ9g0q1r66hd7WSHRjUXZAtIRLK5kLEyVoVLKYXzjSmHQKA0GLNgV0K0wbW2y2Bk5AbUiYOASKJLNkwk4328Hte_2dsczetPeWkQJgD0hcHcTb9ZHjJLQaisKIfRkqtmukkw"/>
+<span class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-surface-container-lowest/85 backdrop-blur-sm text-primary font-counter-metric text-[10px] font-bold">91%</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<h4 class="font-title-editorial text-title-editorial text-on-surface truncate">Jujutsu Kaisen</h4>
+<p class="font-body-sm text-[11px] text-secondary font-counter-metric">Cap. <span id="chap-jjk">248</span> / 271</p>
+<div class="w-full h-1 rounded-full bg-surface-container-highest mt-1 overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 91%;"></div>
+</div>
+</div>
+<button class="w-full mt-1 py-1.5 rounded-lg bg-surface-container-high hover:bg-primary-container hover:text-on-primary text-on-surface flex items-center justify-center gap-1 font-counter-metric text-[12px] font-bold transition-all active:scale-95" onclick="quickIncrement(this, 'Jujutsu Kaisen', 'chap-jjk')">
+<span class="material-symbols-outlined text-[14px]">add</span>
+<span>+1 Cap.</span>
+</button>
+</div>
+<!-- Item 2: Vinland Saga -->
+<div class="flex-shrink-0 w-44 rounded-xl bg-surface-container-low p-space-sm flex flex-col justify-between gap-space-xs shadow-md">
+<div class="relative w-full aspect-[2/3] rounded-lg overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover" data-alt="Vinland Saga manga cover art, Thorfinn portrait with weathered resolute expression, wheat field silhouette background in twilight, sumi-e ink style strokes, dark moody aesthetics with warm paper accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCI-DLVlU026evengyw-56X8z5cribYa4h_rYoyvpnb8FYlPIRzHwtIu2rNJrfueoTa-ixQTjwuWQddcYunkqIHrSeGsasLKB58zEymFZooxaVU-l7nxq7kcY42S5yjdSBIHVbfbRV-zEhEPdVXTPvgw6Yx9UvsBDl-ILnv0BF2ychGahsJk0QR_182cjyaBGpHBiivu8ysDgxOUmW0ZSd3Nl5Di-dzvDQJfQlXi9ROPaid8MxZ5jNI0g"/>
+<span class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-surface-container-lowest/85 backdrop-blur-sm text-primary font-counter-metric text-[10px] font-bold">97%</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<h4 class="font-title-editorial text-title-editorial text-on-surface truncate">Vinland Saga</h4>
+<p class="font-body-sm text-[11px] text-secondary font-counter-metric">Cap. <span id="chap-vinland">204</span> / 210</p>
+<div class="w-full h-1 rounded-full bg-surface-container-highest mt-1 overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 97%;"></div>
+</div>
+</div>
+<button class="w-full mt-1 py-1.5 rounded-lg bg-surface-container-high hover:bg-primary-container hover:text-on-primary text-on-surface flex items-center justify-center gap-1 font-counter-metric text-[12px] font-bold transition-all active:scale-95" onclick="quickIncrement(this, 'Vinland Saga', 'chap-vinland')">
+<span class="material-symbols-outlined text-[14px]">add</span>
+<span>+1 Cap.</span>
+</button>
+</div>
+<!-- Item 3: Dungeon Meshi -->
+<div class="flex-shrink-0 w-44 rounded-xl bg-surface-container-low p-space-sm flex flex-col justify-between gap-space-xs shadow-md">
+<div class="relative w-full aspect-[2/3] rounded-lg overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover" data-alt="Delicious in Dungeon Delicious Meshi manga cover, Marcille and Laios around a fantasy camp cooking pot, deep shadows and ink hatchings, dark sumi minimalist comic framing, warm hearth fire glow." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqSoNbKDSjgjGw9pxLsj83VQmj-PYdBgxDpzAfnnVeVJRhLzzAfxIqo4bkR6CxlZFL96XkkYrhoZK3bKCCjPcoustfnHMdLsw4PboDrRKPgiKk3mEc3GJMUNJMQLnEQGVjl1dQIGnmAXC1F2-_fiG3HcOJbpWzGCCkS8BDGR9w1mPZ1QoyJouA8VCQtY7bNJnnqFJXKKhuiprzaktcXA1COgxYHkN0PQ9sr3om65YivtH6hebqamBK9g"/>
+<span class="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded bg-surface-container-lowest/85 backdrop-blur-sm text-secondary font-counter-metric text-[10px] font-bold">87%</span>
+</div>
+<div class="flex flex-col gap-0.5">
+<h4 class="font-title-editorial text-title-editorial text-on-surface truncate">Dungeon Meshi</h4>
+<p class="font-body-sm text-[11px] text-secondary font-counter-metric">Cap. <span id="chap-meshi">85</span> / 97</p>
+<div class="w-full h-1 rounded-full bg-surface-container-highest mt-1 overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 87%;"></div>
+</div>
+</div>
+<button class="w-full mt-1 py-1.5 rounded-lg bg-surface-container-high hover:bg-primary-container hover:text-on-primary text-on-surface flex items-center justify-center gap-1 font-counter-metric text-[12px] font-bold transition-all active:scale-95" onclick="quickIncrement(this, 'Dungeon Meshi', 'chap-meshi')">
+<span class="material-symbols-outlined text-[14px]">add</span>
+<span>+1 Cap.</span>
+</button>
+</div>
+</div>
+</section>
+<!-- 4. Seção "Radar de Capítulos Novos" (Simulpub / Lançamentos) -->
+<section class="px-margin-mobile pt-space-md pb-space-xs flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">radar</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Radar de Novos Capítulos</h3>
+</div>
+<span class="font-label-badge text-label-badge text-secondary uppercase tracking-widest">Simulpub</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<!-- Card Radar 1: One Piece -->
+<div class="flex items-center justify-between p-space-sm rounded-xl bg-surface-container-low shadow-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="relative w-12 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover" data-alt="One Piece manga cover art, Monkey D. Luffy gear 5 laughing joyfully with ink clouds and monochrome manga background, red accent strokes, Eiichiro Oda iconic sumi ink visual style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWP6LFz5_Am4JF4VLmfJgWRaYTrctVjNYWMD2392SEvFu0ec4RqBcg_ep50CS8nqdnXjYH_VAtQDwO3ewG4bZBXUqDyPXTKZBhBH8MJGOY7SvVfjN6dXO5H2Q2F57Ri3p6AQpnYXAteXNiXrAdB93hI-E-DK8A7opNYnsbI0P2LIBDmomQ6NIZo5k1pAK-pcLlhq2SkVLS9ttwZamaqooPy3EdMHCAPPvAf1Ct8bWH6xSdCjl7aAwy-g"/>
+<span class="absolute top-0.5 left-0.5 w-2 h-2 rounded-full bg-primary-container"></span>
+</div>
+<div class="min-w-0 flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="px-1.5 py-0.2 rounded bg-primary-container/20 text-primary-container font-label-badge text-[9px] uppercase font-bold tracking-wider">Novo</span>
+<span class="font-label-caption text-label-caption text-secondary">Há 2 dias</span>
+</div>
+<h4 class="font-title-editorial text-title-editorial text-on-surface truncate">One Piece</h4>
+<p class="font-body-sm text-[12px] text-secondary truncate">Cap. 1115 • "Fragmentos do Século"</p>
+</div>
+</div>
+<button class="flex-shrink-0 min-w-[40px] h-10 px-3 rounded-full bg-surface-container-high hover:bg-primary-container hover:text-on-primary text-primary transition-colors flex items-center justify-center gap-1 font-counter-metric text-[12px]" onclick="markFeedRead(this, 'One Piece 1115')">
+<span class="material-symbols-outlined text-[18px]">check</span>
+<span class="hidden xs:inline font-semibold">Lido</span>
+</button>
+</div>
+<!-- Card Radar 2: Spy x Family -->
+<div class="flex items-center justify-between p-space-sm rounded-xl bg-surface-container-low shadow-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="relative w-12 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover" data-alt="Spy x Family manga volume cover, Anya Forger with funny smirk and Loid Forger in dark silhouette behind, sumi-e wash background, modern Tokyo publication editorial comic layout." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjbilHbYI0mhIf9Vs19vzAvlyoeIZPk3SJxfhaZjYabCPcgR4pE4Z4l7soKkQCe54EvFRLR-NEoHK3Vw-ryAVRhMwaKfZTA7wglaNO75RRH0F7q71oMAHivZzcXqfS1wElQO_dzaNNGBODOz-ytWi2gwNODYkzOPNlZovxXOAymcGoklS4-pzZ0-HzIkP3Aauvl2ITbUPNwBI3vsriS9bV_4h1D7JrSPXrcQLxVAXCD4pIXglFXPTzzQ"/>
+<span class="absolute top-0.5 left-0.5 w-2 h-2 rounded-full bg-primary-container"></span>
+</div>
+<div class="min-w-0 flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="px-1.5 py-0.2 rounded bg-primary-container/20 text-primary-container font-label-badge text-[9px] uppercase font-bold tracking-wider">Novo</span>
+<span class="font-label-caption text-label-caption text-secondary">Ontem</span>
+</div>
+<h4 class="font-title-editorial text-title-editorial text-on-surface truncate">Spy x Family</h4>
+<p class="font-body-sm text-[12px] text-secondary truncate">Capítulo 98 • Missão Operação Strix</p>
+</div>
+</div>
+<button class="flex-shrink-0 min-w-[40px] h-10 px-3 rounded-full bg-surface-container-high hover:bg-primary-container hover:text-on-primary text-primary transition-colors flex items-center justify-center gap-1 font-counter-metric text-[12px]" onclick="markFeedRead(this, 'Spy x Family 98')">
+<span class="material-symbols-outlined text-[18px]">check</span>
+<span class="hidden xs:inline font-semibold">Lido</span>
+</button>
+</div>
+<!-- Card Radar 3: Sakamoto Days -->
+<div class="flex items-center justify-between p-space-sm rounded-xl bg-surface-container-low shadow-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="relative w-12 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-surface-container-lowest">
+<img class="w-full h-full object-cover" data-alt="Sakamoto Days manga cover, Taro Sakamoto wielding combat weapons with deadpan expression, dynamic action line ink style, high contrast black and crimson aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYXQaEG6heWiD4uXAXkTyvVWheGIgeMyve80oS9pfhbaGq83mldkhKEPICwq8bf35jlxAR5A_8qRghI-kQbx8mcEnH8F6fX-CyzislJ8c0h4vZ6suhv2bKrlwan-GsXJKEV1kcf1TMTtlweRvYrpDAKSEvO8FobTu8HpIa-rNodNlBM8NlGnBphcnZfA7IKFdFh-DyI4CX72Q87mXpI8gotiECeY4z-AwLoMR7M2FqA4B8tiwdzjFySA"/>
+</div>
+<div class="min-w-0 flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-label-caption text-label-caption text-secondary">Há 3 dias</span>
+</div>
+<h4 class="font-title-editorial text-title-editorial text-on-surface truncate">Sakamoto Days</h4>
+<p class="font-body-sm text-[12px] text-secondary truncate">Capítulo 162 • Batalha no Museu</p>
+</div>
+</div>
+<button class="flex-shrink-0 min-w-[40px] h-10 px-3 rounded-full bg-surface-container-high hover:bg-primary-container hover:text-on-primary text-secondary hover:text-on-primary transition-colors flex items-center justify-center gap-1 font-counter-metric text-[12px]" onclick="markFeedRead(this, 'Sakamoto Days 162')">
+<span class="material-symbols-outlined text-[18px]">check</span>
+<span class="hidden xs:inline font-semibold">Lido</span>
+</button>
+</div>
+</div>
+</section>
+<!-- 5. Mini Widget Motivacional de Ritmo Semanal -->
+<section class="px-margin-mobile pt-space-md pb-space-md">
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-space-md shadow-md">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-caption text-label-caption text-secondary uppercase tracking-widest">Ritmo Semanal</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">18 caps lidos</span>
+</div>
+<div class="text-right">
+<span class="font-counter-metric text-headline-sm text-primary font-bold">1.482</span>
+<span class="block font-label-caption text-label-caption text-secondary uppercase">Caps no ano</span>
+</div>
+</div>
+<!-- Gráfico de barras simplificado Seg a Dom -->
+<div class="flex items-end justify-between gap-2 h-20 pt-2 px-1">
+<!-- Seg -->
+<div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full rounded-t bg-surface-container-highest" style="height: 45%;"></div>
+<span class="font-label-badge text-[10px] text-secondary">S</span>
+</div>
+<!-- Ter -->
+<div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full rounded-t bg-surface-container-highest" style="height: 60%;"></div>
+<span class="font-label-badge text-[10px] text-secondary">T</span>
+</div>
+<!-- Qua -->
+<div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full rounded-t bg-surface-container-highest" style="height: 30%;"></div>
+<span class="font-label-badge text-[10px] text-secondary">Q</span>
+</div>
+<!-- Qui -->
+<div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full rounded-t bg-surface-container-highest" style="height: 80%;"></div>
+<span class="font-label-badge text-[10px] text-secondary">Q</span>
+</div>
+<!-- Sex -->
+<div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full rounded-t bg-surface-container-highest" style="height: 50%;"></div>
+<span class="font-label-badge text-[10px] text-secondary">S</span>
+</div>
+<!-- Sáb (Hoje - Destaque em carmim) -->
+<div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full rounded-t bg-primary-container shadow-[0_0_12px_rgba(255,84,76,0.5)]" style="height: 95%;"></div>
+<span class="font-label-badge text-[10px] text-primary font-bold">S</span>
+</div>
+<!-- Dom -->
+<div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+<div class="w-full rounded-t bg-surface-container-highest/40" style="height: 10%;"></div>
+<span class="font-label-badge text-[10px] text-secondary/60">D</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Script local para micro-interações de toque no mobile -->
+<script>
+    function showToast(msg) {
+      const toast = document.getElementById('quick-toast');
+      const text = document.getElementById('toast-message');
+      if (toast && text) {
+        text.innerText = msg;
+        toast.classList.remove('opacity-0', '-translate-y-2');
+        toast.classList.add('opacity-100', 'translate-y-0');
+        setTimeout(() => {
+          toast.classList.remove('opacity-100', 'translate-y-0');
+          toast.classList.add('opacity-0', '-translate-y-2');
+        }, 2200);
+      }
+    }
+
+    let heroCurrent = 142;
+    const heroTotal = 158;
+
+    function advanceHeroProgress() {
+      if (heroCurrent < heroTotal) {
+        heroCurrent++;
+        document.getElementById('hero-current-chap').innerText = heroCurrent;
+        document.getElementById('hero-next-chap').innerText = Math.min(heroCurrent + 1, heroTotal);
+        const percent = Math.round((heroCurrent / heroTotal) * 100);
+        document.getElementById('hero-percentage').innerText = percent + '%';
+        document.getElementById('hero-progress-bar').style.width = percent + '%';
+        showToast(`Chainsaw Man: Cap. ${heroCurrent} lido!`);
+      } else {
+        showToast("Você está em dia com Chainsaw Man!");
+      }
+    }
+
+    function quickIncrement(button, title, elementId) {
+      const el = document.getElementById(elementId);
+      if (el) {
+        let val = parseInt(el.innerText, 10);
+        val++;
+        el.innerText = val;
+        button.classList.add('bg-primary-container', 'text-on-primary');
+        showToast(`${title}: Cap. ${val} lido!`);
+      }
+    }
+
+    function markFeedRead(button, title) {
+      button.innerHTML = '<span class="material-symbols-outlined text-[18px]">done_all</span>';
+      button.classList.remove('bg-surface-container-high', 'text-primary');
+      button.classList.add('bg-surface-container-highest', 'text-secondary', 'opacity-60');
+      button.disabled = true;
+      showToast(`${title} registrado como lido!`);
+    }
+  </script>
+</div></main><nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_-4px_20px_rgba(0,0,0,0.5)]" data-active-classes="text-primary-container font-semibold"><div class="flex items-center justify-around h-16 px-space-xs"><a class="min-w-[44px] min-h-[44px] flex flex-col items-center justify-center gap-1 text-secondary hover:text-on-surface transition-colors" data-path="home" href="#"><span class="material-symbols-outlined text-[22px]">home</span><span class="font-label-caption text-label-caption">Início</span></a><a class="min-w-[44px] min-h-[44px] flex flex-col items-center justify-center gap-1 text-secondary hover:text-on-surface transition-colors" data-path="library" href="#"><span class="material-symbols-outlined text-[22px]">local_library</span><span class="font-label-caption text-label-caption">Biblioteca</span></a><a class="min-w-[44px] min-h-[44px] flex flex-col items-center justify-center gap-1 text-secondary hover:text-on-surface transition-colors" data-path="explore" href="#"><span class="material-symbols-outlined text-[22px]">explore</span><span class="font-label-caption text-label-caption">Explorar</span></a><a class="min-w-[44px] min-h-[44px] flex flex-col items-center justify-center gap-1 text-secondary hover:text-on-surface transition-colors" data-path="stats" href="#"><span class="material-symbols-outlined text-[22px]">local_fire_department</span><span class="font-label-caption text-label-caption">Estatísticas</span></a><a class="min-w-[44px] min-h-[44px] flex flex-col items-center justify-center gap-1 text-secondary hover:text-on-surface transition-colors" data-path="profile" href="#"><span class="material-symbols-outlined text-[22px]">account_circle</span><span class="font-label-caption text-label-caption">Perfil</span></a></div></nav></body></html>

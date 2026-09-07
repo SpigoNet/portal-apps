@@ -1,0 +1,13 @@
+<svg width="24" height="24" viewBox="0 0 24 24"
+     fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path
+    d="M19.2 13.25C19.25 12.84 19.25 12.42 19.2 12L21 10.6L19.2 7.5L17.05 8.35C16.4 7.8 15.65 7.4 14.8 7.15L14.5 4.75H10.9L10.6 7.15C9.75 7.4 9 7.8 8.35 8.35L6.2 7.5L4.4 10.6L6.2 12C6.15 12.42 6.15 12.84 6.2 13.25L4.4 14.65L6.2 17.75L8.35 16.9C9 17.45 9.75 17.85 10.6 18.1L10.9 20.5H14.5L14.8 18.1C15.65 17.85 16.4 17.45 17.05 16.9L19.2 17.75L21 14.65L19.2 13.25Z"
+    stroke="currentColor"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+  <circle
+    cx="12.7" cy="12.65" r="2.7"
+    stroke="currentColor"
+    stroke-width="1.8"/>
+</svg>

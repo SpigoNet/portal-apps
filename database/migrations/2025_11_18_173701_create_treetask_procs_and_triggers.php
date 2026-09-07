@@ -6,13 +6,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
+        // SQL específico do MySQL (stored procedures/triggers): ignorado em sqlite/pgsql.
+        if (! $this->runsOnMySql()) {
+            return;
+        }
+
         // =========================================================
         // 1. STORED PROCEDURE: ATUALIZA STATUS DA FASE
         // (Usando a lógica corrigida que inclui 'Aguardando resposta')
@@ -169,11 +169,13 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down()
     {
+        if (! $this->runsOnMySql()) {
+            return;
+        }
+
         // =========================================================
         // 1. DROP TRIGGERS
         // =========================================================
@@ -190,5 +192,10 @@ return new class extends Migration
         // =========================================================
         DB::unprepared('DROP PROCEDURE IF EXISTS SP_treetask_atualiza_status_fase');
         DB::unprepared('DROP PROCEDURE IF EXISTS SP_treetask_atualiza_status_projeto');
+    }
+
+    protected function runsOnMySql(): bool
+    {
+        return in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true);
     }
 };

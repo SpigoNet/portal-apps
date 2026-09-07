@@ -6,21 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        //-- Ordem das Tarefas dentro da Fase
-        //ALTER TABLE `portal-apps`.treetask_tarefas ADD COLUMN ordem INT DEFAULT 0;
-        //
-        //-- Ordem Global (para o Modo Foco)
-        //ALTER TABLE `portal-apps`.treetask_tarefas ADD COLUMN ordem_global INT DEFAULT 0;
-        // Fazer a adiçao dos campos
-        DB::statement("ALTER TABLE `portal-apps`.treetask_tarefas ADD COLUMN ordem INT DEFAULT 0;");
-        DB::statement("ALTER TABLE `portal-apps`.treetask_tarefas ADD COLUMN ordem_global INT DEFAULT 0;");
+        if (Schema::hasTable('treetask_tarefas')) {
+            Schema::table('treetask_tarefas', function (Blueprint $table) {
+                if (! Schema::hasColumn('treetask_tarefas', 'ordem')) {
+                    $table->integer('ordem')->default(0);
+                }
 
-
+                if (! Schema::hasColumn('treetask_tarefas', 'ordem_global')) {
+                    $table->integer('ordem_global')->default(0);
+                }
+            });
+        }
     }
 
     /**
@@ -28,7 +26,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE `portal-apps`.treetask_tarefas DROP COLUMN ordem;");
-        DB::statement("ALTER TABLE `portal-apps`.treetask_tarefas DROP COLUMN ordem_global;");
+        if (Schema::hasTable('treetask_tarefas')) {
+            Schema::table('treetask_tarefas', function (Blueprint $table) {
+                $table->dropColumn(['ordem', 'ordem_global']);
+            });
+        }
     }
 };

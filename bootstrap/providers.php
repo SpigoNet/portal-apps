@@ -19,4 +19,5 @@ return [
     App\Modules\VocabularioControlado\VocabularioControladoServiceProvider::class,
     App\Modules\Alfred\AlfredServiceProvider::class,
     App\Modules\Pidgey\PidgeyServiceProvider::class,
+    App\Modules\Yomi\YomiServiceProvider::class,
 ];

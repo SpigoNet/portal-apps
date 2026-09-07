@@ -33,8 +33,7 @@ Route::prefix('ant')->name('ant.')->middleware('web')->group(function () {
 
 // Grupo Principal com Prefixo 'ant' e Middleware de Autenticação
 Route::prefix('ant')
-    ->middleware(['web', 'auth'])
-    ->middleware(RegistrarAcesso::class.':ANT')
+    ->middleware(['web', 'auth', RegistrarAcesso::class.':ANT'])
     ->group(function () {
 
         // Rota Inicial (Dashboard)

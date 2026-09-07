@@ -10,7 +10,6 @@ Route::get('/acompanhamento/{token}', [ContratoController::class, 'publicView'])
 
 Route::middleware(['web', 'auth'])
     ->prefix('gestor-horas')
-    ->middleware('auth:sanctum')
     ->name('gestor-horas.')
     ->middleware(RegistrarAcesso::class . ':GestorHoras')
     ->group(function () {

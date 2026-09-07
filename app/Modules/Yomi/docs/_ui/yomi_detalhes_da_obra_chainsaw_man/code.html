@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-background": "#e4e1e9", "secondary": "#c9c6c0", "surface-container": "#1f1f24", "tertiary-fixed": "#ffdad7", "primary-fixed-dim": "#ffb4ac", "on-tertiary-container": "#5c0009", "on-tertiary-fixed": "#410004", "background": "#131318", "primary-fixed": "#ffdad6", "secondary-fixed": "#e5e2db", "surface-container-high": "#2a292f", "on-primary-fixed-variant": "#93000d", "error-container": "#93000a", "on-surface": "#e4e1e9", "surface-container-low": "#1b1b20", "secondary-container": "#474742", "tertiary": "#ffb3ae", "on-secondary-fixed": "#1c1c18", "outline-variant": "#5b403d", "on-secondary": "#31312c", "secondary-fixed-dim": "#c9c6c0", "primary": "#ffb4ac", "on-surface-variant": "#e4beb9", "surface-container-lowest": "#0e0e13", "on-tertiary": "#68000c", "primary-container": "#ff544c", "on-secondary-container": "#b7b5af", "on-error": "#690005", "on-primary": "#690006", "surface-bright": "#39383e", "inverse-surface": "#e4e1e9", "on-primary-container": "#5c0005", "tertiary-fixed-dim": "#ffb3ae", "outline": "#ab8985", "inverse-on-surface": "#303035", "surface": "#131318", "surface-container-highest": "#35343a", "on-primary-fixed": "#410002", "tertiary-container": "#ff5353", "surface-variant": "#35343a", "error": "#ffb4ab", "on-secondary-fixed-variant": "#474742", "inverse-primary": "#bb171c", "surface-tint": "#ffb4ac", "surface-dim": "#131318", "on-error-container": "#ffdad6", "on-tertiary-fixed-variant": "#930015" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-xs": "0.5rem", "margin-tablet": "2rem", "space-sm": "0.75rem", "space-lg": "1.5rem", "space-2xs": "0.25rem", "space-2xl": "3rem", "poster-aspect-ratio": "2 / 3", "space-md": "1rem", "margin-desktop": "3rem", "space-3xl": "4rem", "space-xl": "2rem", "margin-mobile": "1rem", "gutter-mobile": "1rem", "gutter-desktop": "1.5rem" }, "fontFamily": { "headline-md": [ "Plus Jakarta Sans" ], "headline-lg": [ "Plus Jakarta Sans" ], "display-hero-mobile": [ "Plus Jakarta Sans" ], "title-editorial": [ "Plus Jakarta Sans" ], "label-caption": [ "Plus Jakarta Sans" ], "body-lg": [ "Plus Jakarta Sans" ], "body-md": [ "Plus Jakarta Sans" ], "display-hero": [ "Plus Jakarta Sans" ], "body-sm": [ "Plus Jakarta Sans" ], "counter-metric": [ "Space Grotesk" ], "headline-sm": [ "Plus Jakarta Sans" ], "label-badge": [ "Space Grotesk" ] }, "fontSize": { "headline-md": [ "22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" } ], "headline-lg": [ "28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "display-hero-mobile": [ "32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800" } ], "title-editorial": [ "15px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "700" } ], "label-caption": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" } ], "body-lg": [ "16px", { "lineHeight": "26px", "letterSpacing": "0.01em", "fontWeight": "400" } ], "body-md": [ "14px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" } ], "display-hero": [ "44px", { "lineHeight": "52px", "letterSpacing": "-0.03em", "fontWeight": "800" } ], "body-sm": [ "12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" } ], "counter-metric": [ "16px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700" } ], "headline-sm": [ "18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "label-badge": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" } ] } } } };</script></head><body class="bg-surface-container-lowest font-body-md text-on-surface min-h-screen"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between overflow-y-auto"><div class="p-space-lg flex flex-col gap-space-lg"><div class="flex items-center gap-space-sm"><div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center p-space-2xs"><span class="material-symbols-outlined text-primary text-[24px]">menu_book</span></div><div class="flex flex-col"><div class="flex items-center gap-space-2xs"><span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">YOMI</span><span class="w-1.5 h-1.5 rounded-full bg-primary-container inline-block"></span></div><span class="font-label-caption text-label-caption text-on-surface-variant">Sua jornada em mangás</span></div></div><div class="flex flex-col gap-space-2xs"><span class="font-label-badge text-label-badge uppercase tracking-wider text-secondary px-space-xs mb-space-2xs">Menu Principal</span><nav class="flex flex-col gap-space-2xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-xl"><a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="inicio" href="#"><span class="material-symbols-outlined text-[20px]">auto_stories</span><span class="font-body-md text-body-md">Início</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="minha-biblioteca" href="#"><span class="material-symbols-outlined text-[20px]">shelves</span><span class="font-body-md text-body-md">Minha Biblioteca</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm transition-all bg-primary-container text-on-primary-container font-semibold rounded-xl" data-path="explorar" href="#"><span class="material-symbols-outlined text-[20px]">explore</span><span class="font-body-md text-body-md">Explorar</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="estatisticas-jornada" href="#"><span class="material-symbols-outlined text-[20px]">insights</span><span class="font-body-md text-body-md">Estatísticas &amp; Jornada</span></a></nav></div><div class="flex flex-col gap-space-xs"><span class="font-label-badge text-label-badge uppercase tracking-wider text-secondary px-space-xs">Continuar Lendo</span><div class="p-space-sm bg-surface-container rounded-xl flex flex-col gap-space-xs"><div class="flex items-start justify-between gap-space-xs"><div class="flex flex-col"><span class="font-title-editorial text-title-editorial text-on-surface truncate max-w-[150px]">Chainsaw Man</span><span class="font-counter-metric text-counter-metric text-primary">Cap. 142 <span class="text-secondary font-body-sm text-body-sm font-normal">/ 158</span></span></div><span class="px-space-2xs py-0.5 bg-primary-container/20 text-primary-fixed-dim rounded font-label-badge text-label-badge uppercase">+1</span></div><div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden"><div class="bg-primary-container h-full w-[89%]"></div></div></div></div><div class="flex flex-col gap-space-2xs"><span class="font-label-badge text-label-badge uppercase tracking-wider text-secondary px-space-xs mb-space-2xs">Geral</span><nav class="flex flex-col gap-space-2xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold rounded-xl"><a class="flex items-center justify-between px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="notificacoes" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="font-body-md text-body-md">Notificações</span></div><span class="px-1.5 py-0.5 rounded-full bg-primary-container text-on-primary-container font-counter-metric text-[11px]">3</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="configuracoes" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span class="font-body-md text-body-md">Configurações</span></a></nav></div></div><div class="p-space-lg bg-surface-container-lowest/50"><div class="flex items-center gap-space-sm p-space-sm bg-surface-container rounded-xl"><img alt="Profile" class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1UzBFJI8mOsySQXbWq-33XQ1MSDeYC6XQ6H3aBJz5rIM-Gb1RJSq39a4XCQEdOBudWUnogtAbXXn2nTan1lCeR_oPO6Z_6CdzXM1UzZ8OtxYjsryXOv5X__b5G4i6KoI34jjxFDJl0R8f1wuwaBCH-nrslEMFS0iOeUHYmUdVIeKexVDCNtCP3jrOqnWZSaxzLNMqzQSLrul64QTkuA4esNgrJZPP4OtkvMo9NQaxUg1XB50_eTbP_5ZdLq_gTXSHJsjO1lEfLw7BE"/><div class="flex flex-col flex-1 min-w-0"><div class="flex items-center justify-between"><span class="font-title-editorial text-title-editorial text-on-surface truncate">Renato M.</span><span class="font-counter-metric text-counter-metric text-primary-fixed-dim text-body-sm">Nv. 14</span></div><div class="flex items-center justify-between gap-space-2xs mt-1"><div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden"><div class="bg-primary-container h-full w-[65%]"></div></div><span class="font-label-caption text-label-caption text-secondary shrink-0">Leitor</span></div></div></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-gutter-desktop"><div class="flex items-center gap-space-sm w-full max-w-lg"><div class="flex items-center gap-space-xs w-full bg-surface-container px-space-md py-space-2xs rounded-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><span class="material-symbols-outlined text-on-surface-variant text-[20px]">search</span><input class="w-full bg-transparent font-body-sm text-body-sm text-on-surface placeholder:text-secondary focus:outline-none" placeholder="Buscar mangás, autores ou gêneros..." type="text"/><kbd class="font-counter-metric text-label-badge text-secondary bg-surface-container-high px-1.5 py-0.5 rounded">⌘K</kbd></div></div><div class="flex items-center gap-space-md"><a class="relative text-on-surface-variant hover:text-on-surface p-space-2xs" data-path="notificacoes" href="#"><span class="material-symbols-outlined">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary-container"></span></a><div class="flex items-center gap-space-sm pl-space-sm"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1UzBFJI8mOsySQXbWq-33XQ1MSDeYC6XQ6H3aBJz5rIM-Gb1RJSq39a4XCQEdOBudWUnogtAbXXn2nTan1lCeR_oPO6Z_6CdzXM1UzZ8OtxYjsryXOv5X__b5G4i6KoI34jjxFDJl0R8f1wuwaBCH-nrslEMFS0iOeUHYmUdVIeKexVDCNtCP3jrOqnWZSaxzLNMqzQSLrul64QTkuA4esNgrJZPP4OtkvMo9NQaxUg1XB50_eTbP_5ZdLq_gTXSHJsjO1lEfLw7BE"/></div></div></header><main class="w-full pt-16 bg-surface"><div class="flex flex-col w-full">
+<!-- Immersive Backdrop & Top Gradient Layer -->
+<div class="relative w-full overflow-hidden">
+<!-- Atmospheric Cover Ambient Blur Background -->
+<div class="absolute inset-0 h-[480px] w-full bg-cover bg-center filter blur-3xl opacity-20 scale-110 pointer-events-none transform -translate-y-12" data-alt="Dark cinematic manga background with gritty urban grit, dynamic motion lines and deep shadows from Chainsaw Man universe, dark sumi-e palette with crimson accents." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBVr943AVut3sfw9Sc_Izl0HaTxbG6_6FJLclOP5rZbhIQ0_LSaNHU8cAvanXjfZPXZ-kMENHQffcKeGx52W3wn0axzj5UO3LqTUiga8BT0MvN3awgWuXXD04P4nvW6rdRc3DmMrpbBXPn5HDKHUTu63bLu-cuQBSTUvTL0r2AdLvuM7TFplCU0xdxqXkHkqEa895wlCs4wuespHNNsDlGOM2lXuFKM71J4Lxpr3iwkh6hDVTj6Zv-TzQ');">
+</div>
+<div class="absolute inset-0 h-[480px] bg-gradient-to-b from-surface/40 via-surface/85 to-surface pointer-events-none"></div>
+<!-- Main Container -->
+<div class="relative z-10 w-full max-w-[1360px] mx-auto px-gutter-desktop pt-space-lg pb-space-2xl">
+<!-- Top Breadcrumb & Metadata Line -->
+<div class="flex items-center justify-between gap-space-sm mb-space-lg text-secondary">
+<div class="flex items-center gap-space-xs font-label-badge text-label-badge uppercase tracking-widest text-on-surface-variant">
+<a class="hover:text-on-surface transition-colors" href="#">Catálogo</a>
+<span class="text-secondary/40">/</span>
+<a class="hover:text-on-surface transition-colors" href="#">Shonen Jump</a>
+<span class="text-secondary/40">/</span>
+<span class="text-primary-container font-bold">Chainsaw Man</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-high text-secondary font-counter-metric text-body-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+            Simulpub Oficial
+          </span>
+<button class="flex items-center gap-1 text-secondary hover:text-on-surface transition-colors px-2 py-1 rounded hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[18px]">share</span>
+<span class="font-body-sm text-body-sm">Compartilhar</span>
+</button>
+</div>
+</div>
+<!-- Hero Panel: Cover (2:3 aspect) + Editorial Title & Metadata -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+<!-- Left: Poster Column -->
+<div class="lg:col-span-4 xl:col-span-3 flex flex-col gap-space-md">
+<div class="relative group aspect-[2/3] w-full rounded-xl overflow-hidden shadow-2xl bg-surface-container-low">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Chainsaw Man Volume 12 manga cover art in 2:3 vertical aspect ratio, dark intense composition featuring Denji in hybrid form with Chainsaw head and neon crimson highlights against black background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDB7i78jANR1VQy5kF_REkvZIs1JLuFENUf2uUR3qHDiWLyxNlxdSGdK3xSHu2_VUHycUlCD5Pbo0NtaHRzMCtjAg8jQLanJocAxGIgvY9yYzvgBjyZu5g9vAQOTTAZ22UlrN1J2z8_IvIgLkQxd7skxjSBRxQfnY9Vc-1DyLl8_Y2F1C9oq-N0ZznTZgjivIWeGJkUurqPl55RzpdRUrbMepZxDCVxIJDZ-OgQpH_BDNwLDdhV4BHgCg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/90 via-transparent to-black/30 pointer-events-none"></div>
+<!-- Top Badges -->
+<div class="absolute top-3 left-3 flex flex-col gap-1.5">
+<span class="px-2 py-1 rounded bg-surface-container-lowest/90 backdrop-blur-md font-label-badge text-label-badge text-primary-fixed uppercase tracking-wider shadow">
+                Oficial Shueisha
+              </span>
+</div>
+<!-- Bottom Cover Meta -->
+<div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-on-surface">
+<div class="flex items-center gap-1 bg-surface-container-high/80 backdrop-blur-md px-2 py-1 rounded font-counter-metric text-body-sm">
+<span class="material-symbols-outlined text-primary-container text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold">4.8</span>
+<span class="text-secondary text-body-sm">/ 5.0</span>
+</div>
+<span class="font-label-caption text-label-caption px-2 py-1 rounded bg-surface-container-lowest/90 backdrop-blur-md text-on-surface-variant uppercase">
+                Parte 2 (Gakko-hen)
+              </span>
+</div>
+</div>
+<!-- Quick Access Pill Links -->
+<div class="grid grid-cols-2 gap-space-xs">
+<button class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-surface-container-high hover:bg-surface-bright text-on-surface transition-colors font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px]">bookmark_add</span>
+              Minha Coleção
+            </button>
+<button class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-surface-container-high hover:bg-surface-bright text-on-surface transition-colors font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px]">favorite_border</span>
+              Favorito
+            </button>
+</div>
+</div>
+<!-- Right: Primary Metadata & Reader Status Section -->
+<div class="lg:col-span-8 xl:col-span-9 flex flex-col gap-space-lg">
+<!-- Title & Japanese Moniker -->
+<div class="flex flex-col gap-space-2xs">
+<div class="flex flex-wrap items-center gap-x-space-md gap-y-1">
+<h1 class="font-display-hero text-display-hero text-on-surface tracking-tight font-extrabold">
+                Chainsaw Man
+              </h1>
+<div class="flex items-center gap-space-xs">
+<span class="font-label-badge text-headline-sm text-on-surface-variant/70 tracking-normal font-normal">
+                  チェンソーマン
+                </span>
+<span class="text-secondary/40 font-counter-metric">•</span>
+<span class="font-body-sm text-body-sm text-secondary tracking-wide">
+                  Chensō Man
+                </span>
+</div>
+</div>
+<!-- Taxonomies & Author Meta -->
+<div class="flex flex-wrap items-center gap-space-sm mt-1">
+<span class="px-2.5 py-0.5 rounded-full bg-primary-container/15 text-primary-fixed-dim font-label-badge text-label-badge uppercase font-semibold">
+                Em Andamento
+              </span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface font-body-sm text-body-sm">
+                Shonen
+              </span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface font-body-sm text-body-sm">
+                Ação &amp; Horror
+              </span>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface font-body-sm text-body-sm">
+                Sobrenatural
+              </span>
+<span class="text-secondary font-body-sm text-body-sm ml-2">
+                Criado por <strong class="text-on-surface font-semibold">Tatsuki Fujimoto</strong>
+</span>
+<span class="text-secondary font-body-sm text-body-sm">• Publicação Semanal (Manga Plus)</span>
+</div>
+</div>
+<!-- THE READER COCKPIT: "ONDE VOCÊ ESTÁ" -->
+<section class="p-space-lg rounded-xl bg-surface-container-low shadow-xl relative overflow-hidden">
+<!-- Background Crimson Vignette -->
+<div class="absolute -right-16 -top-16 w-56 h-56 bg-primary-container/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="flex flex-col gap-space-md relative z-10">
+<!-- Cockpit Header: Status & Progression Header -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="font-label-badge text-label-badge uppercase tracking-widest text-primary-fixed-dim">
+                    Onde Você Parou
+                  </span>
+<div class="relative inline-block text-left">
+<button class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-container-high hover:bg-surface-bright text-on-surface font-label-badge text-label-badge uppercase tracking-wider transition-colors shadow-sm" id="statusDropdownBtn">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span id="currentStatusLabel">Lendo</span>
+<span class="material-symbols-outlined text-[16px] text-secondary">expand_more</span>
+</button>
+<!-- Dropdown Content (Hidden by default, simple toggle via JS) -->
+<div class="hidden absolute left-0 mt-2 w-48 rounded-xl bg-surface-container-high shadow-2xl py-1 z-30 font-body-sm text-body-sm" id="statusMenu">
+<button class="w-full text-left px-4 py-2 hover:bg-surface-bright text-on-surface flex items-center gap-2" onclick="setStatus('Lendo', 'bg-primary-container')">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span> Lendo
+                      </button>
+<button class="w-full text-left px-4 py-2 hover:bg-surface-bright text-on-surface flex items-center gap-2" onclick="setStatus('Pretendo Ler', 'bg-secondary')">
+<span class="w-2 h-2 rounded-full bg-secondary"></span> Pretendo Ler
+                      </button>
+<button class="w-full text-left px-4 py-2 hover:bg-surface-bright text-on-surface flex items-center gap-2" onclick="setStatus('Lido', 'bg-emerald-500')">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Concluído
+                      </button>
+<button class="w-full text-left px-4 py-2 hover:bg-surface-bright text-on-surface flex items-center gap-2" onclick="setStatus('Pausado', 'bg-amber-500')">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span> Pausado
+                      </button>
+</div>
+</div>
+</div>
+<!-- Last read timestamp -->
+<span class="font-label-caption text-label-caption text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">history</span>
+                  Último registro: 12 de Março de 2024
+                </span>
+</div>
+<!-- Main Tracker Metric & Progress Rail -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-baseline justify-between">
+<div class="flex items-baseline gap-space-2xs">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface">Capítulo 112</span>
+<span class="font-counter-metric text-counter-metric text-secondary font-normal">de 130 capítulos</span>
+</div>
+<div class="flex items-baseline gap-1 font-counter-metric text-counter-metric text-primary-fixed-dim">
+<span>86%</span>
+<span class="font-label-caption text-label-caption text-secondary font-normal">completado</span>
+</div>
+</div>
+<!-- Sleek High Precision Bar -->
+<div class="w-full h-3 bg-surface-container-highest rounded-full overflow-hidden p-0.5 relative">
+<div class="bg-primary-container h-full rounded-full transition-all duration-700 ease-out" id="readingProgressTrack" style="width: 86%;"></div>
+</div>
+<div class="flex justify-between items-center text-secondary font-body-sm text-body-sm">
+<span>Faltam 18 capítulos para alcançar os lançamentos semanais</span>
+<span>Volume 13 • Arco do Demônio da Justiça</span>
+</div>
+</div>
+<!-- Instant Call-to-Action Bar -->
+<div class="pt-space-xs flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<button class="flex items-center gap-space-xs px-space-lg py-2.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-headline-sm text-title-editorial font-bold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]" id="markNextChapterBtn">
+<span class="material-symbols-outlined text-[20px]">done_all</span>
+<span>Marcar Cap. 113 como Lido</span>
+</button>
+<button class="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-surface-container-high hover:bg-surface-bright text-on-surface font-body-md text-body-md transition-colors">
+<span class="material-symbols-outlined text-[18px]">chrome_reader_mode</span>
+<span>Ler no App</span>
+</button>
+</div>
+<!-- Personal Rating Widget -->
+<div class="flex items-center gap-space-sm bg-surface-container px-3 py-1.5 rounded-lg">
+<span class="font-label-caption text-label-caption text-secondary uppercase tracking-wider">Sua Nota:</span>
+<div class="flex items-center gap-0.5 text-primary-container" id="ratingStars">
+<button class="hover:scale-125 transition-transform" onclick="setRating(1)"><span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span></button>
+<button class="hover:scale-125 transition-transform" onclick="setRating(2)"><span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span></button>
+<button class="hover:scale-125 transition-transform" onclick="setRating(3)"><span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span></button>
+<button class="hover:scale-125 transition-transform" onclick="setRating(4)"><span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star</span></button>
+<button class="hover:scale-125 transition-transform" onclick="setRating(5)"><span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">star_half</span></button>
+</div>
+<span class="font-counter-metric text-body-sm font-bold text-on-surface ml-1">4.5</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Synopsis Editorial Block -->
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-badge text-label-badge uppercase tracking-widest text-secondary">Sinopse da Obra</span>
+<p class="font-body-lg text-body-lg text-on-surface/90 leading-relaxed font-normal">
+              Denji é um jovem que vive na miséria absoluta pagando as dívidas astronômicas de seu falecido pai à Yakuza com a ajuda de Pochita, o cão-demônio da motosserra. Após uma emboscada mortal arquitetada pelo Demônio Zumbi, Pochita se funde ao coração de Denji, transformando-o no implacável Homem-Motosserra. Recrutado pela misteriosa Makima para a divisão especial da Segurança Pública, Denji busca desfrutar dos pequenos prazeres mundanos enquanto enfrenta os demônios mais aterrorizantes da humanidade.
+            </p>
+</div>
+</div>
+</div>
+<!-- Bento Metadata Grid: Details & Stats Section -->
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-space-md mt-space-xl">
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-1 shadow-sm">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-secondary">Volumes Tankobon</span>
+<span class="font-counter-metric text-headline-sm font-bold text-on-surface">16 Vols</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Lançamento contínuo</span>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-1 shadow-sm">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-secondary">Capítulos Totais</span>
+<span class="font-counter-metric text-headline-sm font-bold text-on-surface">130 Caps</span>
+<span class="font-body-sm text-body-sm text-primary-fixed-dim">Parte 2 em curso</span>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-1 shadow-sm">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-secondary">Tempo Estimado</span>
+<span class="font-counter-metric text-headline-sm font-bold text-on-surface">~18h 40m</span>
+<span class="font-body-sm text-body-sm text-secondary">Média 8 min/cap</span>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-1 shadow-sm">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-secondary">Ano de Estreia</span>
+<span class="font-counter-metric text-headline-sm font-bold text-on-surface">2018</span>
+<span class="font-body-sm text-body-sm text-secondary">Weekly Shonen Jump</span>
+</div>
+<div class="col-span-2 p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-caption text-label-caption uppercase tracking-wider text-secondary">Leitores no Yomi</span>
+<span class="font-counter-metric text-body-sm font-bold text-on-surface">42.840 leitores</span>
+</div>
+<div class="w-full h-2 rounded-full overflow-hidden flex bg-surface-container-highest">
+<div class="bg-primary-container h-full" style="width: 64%" title="64% Lendo"></div>
+<div class="bg-emerald-500 h-full" style="width: 26%" title="26% Concluído Parte 1"></div>
+<div class="bg-secondary h-full" style="width: 10%" title="10% Pretendem Ler"></div>
+</div>
+<div class="flex items-center justify-between text-[11px] font-label-badge uppercase tracking-wider text-secondary mt-2">
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span> 64% Lendo</span>
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 26% Concluído P1</span>
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> 10% Fila</span>
+</div>
+</div>
+</div>
+<!-- MAIN INTERACTIVE TRACKER: CHAPTERS & VOLUMES EXPLORER -->
+<section class="mt-space-2xl flex flex-col gap-space-lg">
+<!-- Tab Navigation and Controls Bar -->
+<div class="flex flex-wrap items-center justify-between gap-space-md border-b-0 pb-2">
+<div class="flex items-center gap-space-xs bg-surface-container-low p-1 rounded-xl">
+<button class="px-space-md py-2 rounded-lg font-headline-sm text-title-editorial font-bold bg-primary-container text-on-primary transition-all" id="tabChaptersBtn" onclick="switchTab('chapters')">
+              Por Capítulos (130)
+            </button>
+<button class="px-space-md py-2 rounded-lg font-headline-sm text-title-editorial text-secondary hover:text-on-surface transition-all" id="tabVolumesBtn" onclick="switchTab('volumes')">
+              Por Volumes (16)
+            </button>
+</div>
+<!-- Quick Chapter Finder & Filters -->
+<div class="flex items-center gap-space-sm">
+<div class="flex items-center gap-space-xs bg-surface-container px-3 py-1.5 rounded-lg shadow-sm">
+<span class="material-symbols-outlined text-secondary text-[18px]">search</span>
+<input class="bg-transparent font-body-sm text-body-sm text-on-surface placeholder:text-secondary focus:outline-none w-44" placeholder="Ir para capítulo (ex: 113)..." type="text"/>
+</div>
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container text-secondary hover:text-on-surface font-body-sm text-body-sm transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+<span>Mais Recentes</span>
+</button>
+</div>
+</div>
+<!-- Chapters View Mode -->
+<div class="flex flex-col gap-space-xs" id="chaptersView">
+<!-- Next Chapter: HIGHLIGHTED CARD -->
+<div class="p-space-md rounded-xl bg-surface-container-high border-l-4 border-l-primary-container flex flex-col md:flex-row md:items-center justify-between gap-space-md shadow-lg relative overflow-hidden">
+<div class="flex items-start gap-space-md">
+<div class="flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-primary-container/20 text-primary-fixed-dim shrink-0">
+<span class="font-label-badge text-label-badge uppercase">Próx</span>
+<span class="font-counter-metric text-headline-sm font-bold">113</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-title-editorial text-title-editorial text-on-surface font-bold">Uma Noite no Cinema</span>
+<span class="px-2 py-0.5 rounded bg-primary-container text-on-primary-container font-label-badge text-label-badge uppercase font-bold">
+                    A Seguir
+                  </span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary">
+                  Arco do Demônio da Queda • 19 páginas • Lançado em 15/03/2024
+                </span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-headline-sm text-title-editorial font-bold shadow transition-transform hover:scale-105" onclick="markAsRead(113)">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span>Marcar como Lido</span>
+</button>
+<button class="p-2 rounded-lg bg-surface-container hover:bg-surface-bright text-secondary hover:text-on-surface">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Previously Read Chapter 112 -->
+<div class="p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center justify-center w-12 h-12 rounded-xl bg-surface-container-highest text-secondary shrink-0 font-counter-metric text-counter-metric">
+                112
+              </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-title-editorial text-title-editorial text-on-surface">Galinha Assada</span>
+<span class="material-symbols-outlined text-primary-container text-[18px]" title="Capítulo Lido">check</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary">Lido em 12 de Março, 2024 • 21 páginas</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="font-label-badge text-label-badge uppercase text-emerald-400 font-semibold px-2 py-1 rounded bg-emerald-950/30">
+                Lido
+              </span>
+<button class="text-secondary hover:text-on-surface p-1.5 rounded hover:bg-surface-container-high" title="Desmarcar leitura">
+<span class="material-symbols-outlined text-[18px]">undo</span>
+</button>
+</div>
+</div>
+<!-- Chapter 111 -->
+<div class="p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center justify-center w-12 h-12 rounded-xl bg-surface-container-highest text-secondary shrink-0 font-counter-metric text-counter-metric">
+                111
+              </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-title-editorial text-title-editorial text-on-surface">Aha-ha-ha</span>
+<span class="material-symbols-outlined text-primary-container text-[18px]">check</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary">Lido em 10 de Março, 2024 • 19 páginas</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="font-label-badge text-label-badge uppercase text-emerald-400 font-semibold px-2 py-1 rounded bg-emerald-950/30">
+                Lido
+              </span>
+<button class="text-secondary hover:text-on-surface p-1.5 rounded hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[18px]">undo</span>
+</button>
+</div>
+</div>
+<!-- Chapter 110 -->
+<div class="p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center justify-center w-12 h-12 rounded-xl bg-surface-container-highest text-secondary shrink-0 font-counter-metric text-counter-metric">
+                110
+              </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-title-editorial text-title-editorial text-on-surface">Um Toque Noturno</span>
+<span class="material-symbols-outlined text-primary-container text-[18px]">check</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary">Lido em 08 de Março, 2024 • 23 páginas</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="font-label-badge text-label-badge uppercase text-emerald-400 font-semibold px-2 py-1 rounded bg-emerald-950/30">
+                Lido
+              </span>
+<button class="text-secondary hover:text-on-surface p-1.5 rounded hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[18px]">undo</span>
+</button>
+</div>
+</div>
+<!-- Chapter 109 -->
+<div class="p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center justify-center w-12 h-12 rounded-xl bg-surface-container-highest text-secondary shrink-0 font-counter-metric text-counter-metric">
+                109
+              </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-title-editorial text-title-editorial text-on-surface">O Começo do Fim</span>
+<span class="material-symbols-outlined text-primary-container text-[18px]">check</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary">Lido em 05 de Março, 2024 • 20 páginas</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="font-label-badge text-label-badge uppercase text-emerald-400 font-semibold px-2 py-1 rounded bg-emerald-950/30">
+                Lido
+              </span>
+<button class="text-secondary hover:text-on-surface p-1.5 rounded hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-[18px]">undo</span>
+</button>
+</div>
+</div>
+<!-- Load more chapters button -->
+<div class="pt-space-sm flex justify-center">
+<button class="px-space-xl py-2.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-headline-sm text-title-editorial transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+              Ver capítulos anteriores (1 - 108)
+            </button>
+</div>
+</div>
+<!-- Volumes View Mode (Hidden initially) -->
+<div class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-space-md" id="volumesView">
+<!-- Volume 13 (Current Reading) -->
+<div class="flex flex-col gap-space-xs p-space-sm rounded-xl bg-surface-container-high relative group">
+<div class="aspect-[2/3] w-full rounded-lg overflow-hidden relative shadow bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Manga cover artwork of Chainsaw Man Volume 13 featuring Asa Mitaka and Yoru the War Devil against high contrast dark background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAR-N93r7KZzGfBOD2fPMjbh6fnbeFSewyC0CCax1IHcO236xNnl-C6LptAZcblnSaDZhlZW3Sb2fWSuyPzc1YqepvNas1X4CzX5pgw_wC7Pld8Q8sFItlywpwZyVlzqaLap3tdR0ew7hdKqz0ji7cftkpoTlGaOQey5_5vRV-iwNuW5JTA0CW_Av8GFK7j_eCyW74S0JIDmy6JUEFgCJo8m4Ag-8uPpRN6XKiv3D3hfdBDeRLlOOxXyg"/>
+<span class="absolute top-2 right-2 px-2 py-0.5 rounded bg-primary-container text-on-primary font-label-badge text-label-badge uppercase font-bold">
+                Lendo
+              </span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-editorial text-title-editorial text-on-surface">Volume 13</span>
+<span class="font-body-sm text-body-sm text-secondary">Capítulos 104 - 112</span>
+<div class="w-full bg-surface-container-highest h-1 rounded-full mt-2 overflow-hidden">
+<div class="bg-primary-container h-full w-[88%]"></div>
+</div>
+</div>
+</div>
+<!-- Volume 12 -->
+<div class="flex flex-col gap-space-xs p-space-sm rounded-xl bg-surface-container-low relative group">
+<div class="aspect-[2/3] w-full rounded-lg overflow-hidden relative shadow bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Manga cover artwork of Chainsaw Man Volume 12 featuring the intro arc of part 2 with gritty modern typography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPtS3Yqp6LXX1zziCClO-c19eYU_rOQ7xyPKPh4tB7EPG8QoX78QOBetjKjMtMNsZ1VOt5s1hG7dViuwC50qgZNAlUVHU4pCR1WCUBCOrewrCFcgAwj3-TWYvc3WVrnzo656kq71D8OGhP0bzhMbWRv2NA2TuWt_lZSBFVaYth3xv0LSVZkKZ8AUHP7WuD3X0Kc6LBUc4rdADCqt5Dxn3fhg8hm1W5ynjSslZSXuv_MGHzUPJUvLNWCQ"/>
+<span class="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface-container-lowest/80 text-emerald-400 font-label-badge text-label-badge uppercase flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-editorial text-title-editorial text-on-surface">Volume 12</span>
+<span class="font-body-sm text-body-sm text-secondary">Capítulos 98 - 103</span>
+<span class="font-label-badge text-label-badge text-emerald-400 mt-1 uppercase">100% Lido</span>
+</div>
+</div>
+<!-- Volume 11 (End of Part 1) -->
+<div class="flex flex-col gap-space-xs p-space-sm rounded-xl bg-surface-container-low relative group">
+<div class="aspect-[2/3] w-full rounded-lg overflow-hidden relative shadow bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Manga cover artwork of Chainsaw Man Volume 11 featuring Denji and Makima climax battle in sumi-e style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRhCqasa_NN-M8ymoFjtSY4k7bay1gnfVh0sn2vfixQnXLqQj0yAg24vfQgRe6Ol7oxqfJZRlVdebYZGVsSFCNm-qnuvTx2LerJSsFlR3X_bzvRT3PZ_YArchc-zY5DIgbQ_EUzAcAj5gYTYNj-27WYF0CjjqEo-FRJ3IXn7Swt-aHWEVuqIVkuMZqNMZ73N2CdDjeTBS5uL6cTQWXnAa1KmiTmh4tMGawZJhGdm7m_GKC844_foASYQ"/>
+<span class="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface-container-lowest/80 text-emerald-400 font-label-badge text-label-badge uppercase flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-editorial text-title-editorial text-on-surface">Volume 11</span>
+<span class="font-body-sm text-body-sm text-secondary">Capítulos 89 - 97</span>
+<span class="font-label-badge text-label-badge text-emerald-400 mt-1 uppercase">100% Lido</span>
+</div>
+</div>
+<!-- Volume 10 -->
+<div class="flex flex-col gap-space-xs p-space-sm rounded-xl bg-surface-container-low relative group">
+<div class="aspect-[2/3] w-full rounded-lg overflow-hidden relative shadow bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Manga cover artwork of Chainsaw Man Volume 10 featuring dark dramatic manga panel illustration." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1Eo7lSRUak8VLzELoKhlk0iqVGvIwH7YU0v-D_EC2oLOkQ5IGf5o28tu7219KCt5auVkRCdXuT4v2l5gdH5STkZsFrP2zRr4bZ2m1NC1fyoRixB_ckiUXRBbPucAwUASFYQ1WTsmen2IYHbwZKPZQMug0kfKmCf-8UvpfbLyocBNIj4iZBBBrIAiB7qlAFLDoCfW_2apSL1Wo1TaJjAPg5j1hP4-4fPtEawfFqZK8j13RDkQY_EvFNA"/>
+<span class="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface-container-lowest/80 text-emerald-400 font-label-badge text-label-badge uppercase flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-editorial text-title-editorial text-on-surface">Volume 10</span>
+<span class="font-body-sm text-body-sm text-secondary">Capítulos 80 - 88</span>
+<span class="font-label-badge text-label-badge text-emerald-400 mt-1 uppercase">100% Lido</span>
+</div>
+</div>
+<!-- Volume 09 -->
+<div class="flex flex-col gap-space-xs p-space-sm rounded-xl bg-surface-container-low relative group">
+<div class="aspect-[2/3] w-full rounded-lg overflow-hidden relative shadow bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Manga cover artwork of Chainsaw Man Volume 09 featuring Aki Hayakawa and Angel Devil." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsq22iwWVCH_c8so9HqpjPY082j9ux4Rzz5Zi8FHndb3K02DVp7mEorFIP2qrotwBZ2YGGepgsRA3J9Qj6-lUc6HHoijhl-rZl2pjvno7sx-6trUrMq_89CC69BBXIS5cK8bqPjP6vbMNLdBFGvpoAv7E3ZxJynPxeP7l_nhPHq6hqDVjWbXj616dnk8_mauXleFUqSgccKcFNvcVPV_aGbAG-4-Gg3iolkfjG5ShZkDyxfcnTw5NO4Q"/>
+<span class="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface-container-lowest/80 text-emerald-400 font-label-badge text-label-badge uppercase flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-editorial text-title-editorial text-on-surface">Volume 09</span>
+<span class="font-body-sm text-body-sm text-secondary">Capítulos 71 - 79</span>
+<span class="font-label-badge text-label-badge text-emerald-400 mt-1 uppercase">100% Lido</span>
+</div>
+</div>
+<!-- Volume 14 (Upcoming / Not yet read) -->
+<div class="flex flex-col gap-space-xs p-space-sm rounded-xl bg-surface-container-low opacity-60 hover:opacity-100 transition-opacity relative group">
+<div class="aspect-[2/3] w-full rounded-lg overflow-hidden relative shadow bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Manga cover artwork of Chainsaw Man Volume 14 with contemporary bold manga art design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQveuMNQALrlq7TD7QWKdqjMCfsAp8jbG_krxoYcARHioAqo9GyE2d_6w0VNhDAyrS1VJd443t8QvHiWwr-3lSHiwTmIGMYDpjtzZyX0EuGIzetPl3YcJW9JpXiji45uU5R-mq8-BbM5Td_aIPeWWNQmbBcL96nEg3kWHh0H8mmZ-BKgyIhH2Z8YfQ7dSnfG0F9i3Zvs-6_nNrSIOsAPzt6tDDQW4l5AjWvK7j6xl91aZJJD4GF-jreQ"/>
+<span class="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-surface-container-lowest text-secondary font-label-badge text-label-badge uppercase">
+                Fila
+              </span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-editorial text-title-editorial text-on-surface">Volume 14</span>
+<span class="font-body-sm text-body-sm text-secondary">Capítulos 113 - 122</span>
+<span class="font-label-badge text-label-badge text-secondary mt-1 uppercase">Não Iniciado</span>
+</div>
+</div>
+</div>
+</section>
+<!-- SIMILAR WORKS / RECOMMENDATIONS -->
+<section class="mt-space-3xl mb-space-2xl flex flex-col gap-space-lg">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-badge text-label-badge uppercase tracking-wider text-secondary">Sugestões do Algoritmo Yomi</span>
+<h2 class="font-headline-lg text-headline-lg font-bold text-on-surface">Se você aprecia o estilo de Tatsuki Fujimoto</h2>
+</div>
+<a class="text-primary-fixed-dim hover:text-primary font-body-sm text-body-sm flex items-center gap-1 font-semibold" href="#">
+            Explorar Semelhantes <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-space-md">
+<!-- Recommendation 1: Dandadan -->
+<div class="flex flex-col gap-space-xs bg-surface-container-low p-space-sm rounded-xl group hover:bg-surface-container transition-colors">
+<div class="aspect-[2/3] w-full rounded-lg overflow-hidden relative shadow bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Cover of manga Dandadan showing energetic modern exorcist sci-fi characters in vivid color." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCjwV7KRjbMocE0Di1df1Dkc5Dy7NBn6xcIDy9rpn3ZqLl6PnajK9pptDudLleYLbxhG-zQ5L0Z_QS6qqKqDSwPGkrYYyW3HxeWBNg6xnNtw3g0ge3Viqapw71bRvlOv3kVswJ40c5UZNjMawkJi4WqX7vroXl1YKXx9Ydn5Ex9xoNQN7Gvc_Kxf8zaZpz_n-Cr42_fAbObVadasuh4XDdeZQHxtn-KJ6cSHS-fUjpaO-sesmB8DzgbQ"/>
+<span class="absolute bottom-2 left-2 bg-surface-container-lowest/80 px-2 py-0.5 rounded font-counter-metric text-[11px] text-on-surface">
+                ★ 4.9
+              </span>
+</div>
+<span class="font-title-editorial text-title-editorial text-on-surface truncate font-bold">Dandadan</span>
+<span class="font-body-sm text-body-sm text-secondary">Yukinobu Tatsu (Ex-assistente)</span>
+</div>
+<!-- Recommendation 2: Jujutsu Kaisen -->
+<div class="flex flex-col gap-space-xs bg-surface-container-low p-space-sm rounded-xl group hover:bg-surface-container transition-colors">
+<div class="aspect-[2/3] w-full rounded-lg overflow-hidden relative shadow bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Cover of manga Jujutsu Kaisen with dark sorcery and sharp contrast ink work." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYQOrdYnvRuVW-IFyH1nIvN8uxjmgzK39W0EQfAAVZEph9g80Pvfv-30tyHSwAyDBbyC8R3NGdsNYFhPc-xCZs762M8YBSaLxeozqJNUy5GPhS8_gSNt46KR-KfvLDIs-Fw2OEh1RYylTt7o10jAhB4XYGlR7OwOQCXCWzs3GPY3EYx4iWpUwaE8tUEjoKj-IM72dz2k9cfom9PgtLkAjSbE6B0TB7R74k-G-MaDDvTx09Rjp4HfW3LQ"/>
+<span class="absolute bottom-2 left-2 bg-surface-container-lowest/80 px-2 py-0.5 rounded font-counter-metric text-[11px] text-on-surface">
+                ★ 4.7
+              </span>
+</div>
+<span class="font-title-editorial text-title-editorial text-on-surface truncate font-bold">Jujutsu Kaisen</span>
+<span class="font-body-sm text-body-sm text-secondary">Gege Akutami</span>
+</div>
+<!-- Recommendation 3: Fire Punch -->
+<div class="flex flex-col gap-space-xs bg-surface-container-low p-space-sm rounded-xl group hover:bg-surface-container transition-colors">
+<div class="aspect-[2/3] w-full rounded-lg overflow-hidden relative shadow bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Cover of manga Fire Punch featuring protagonist covered in flames on frozen wasteland." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC94Pvkk1HM6fXZe8JO0ncuZ4rUWpmcP3H0kChGXNRpf6QmMv2lBJkReBSTZp2DLQBSqNR9hcuPZxTylstuH8EKshk-JS90wmNY18_e98gRLu0ASGie_FSkGEzGmTQxvGDfBpGGzjF8ZAJ7hdULm6AB5uYB5se4-572Ju-qb7K_LVV5_vmTSzFu6qis7vvgoM6fK5ZAOEq1lMPagIWgIxpLRsOUWita7gbQWybQlehbDCQI6TxBtiAdHA"/>
+<span class="absolute bottom-2 left-2 bg-surface-container-lowest/80 px-2 py-0.5 rounded font-counter-metric text-[11px] text-on-surface">
+                ★ 4.6
+              </span>
+</div>
+<span class="font-title-editorial text-title-editorial text-on-surface truncate font-bold">Fire Punch</span>
+<span class="font-body-sm text-body-sm text-secondary">Tatsuki Fujimoto (Obra anterior)</span>
+</div>
+<!-- Recommendation 4: Goodbye, Eri -->
+<div class="flex flex-col gap-space-xs bg-surface-container-low p-space-sm rounded-xl group hover:bg-surface-container transition-colors">
+<div class="aspect-[2/3] w-full rounded-lg overflow-hidden relative shadow bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Cover of one-shot manga Goodbye Eri featuring girl filmed through smartphone lens." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXz6JA-YKM01y8rt86lOegQdtXdtpGM9vPI1T5zI6g6tx-3keT4LlF39GJ7IRFVfXk9n9eyRMmUwvAfwopFDo8fkf9Mwzc5S38fM4yEFZ2fl17BHTcNMgE2Xk8F6aLjZYT1LJqAKdvQhyg2pBGOZJXFPu-Z3IICYcANjwcTBpBPuDPeXYDU5AaPpXH5_52OqrTFm7vTyiDYM1DtpwCbIFu3Y65L5UrNmPuQRBqggXdChS9H8gfZI68qA"/>
+<span class="absolute bottom-2 left-2 bg-surface-container-lowest/80 px-2 py-0.5 rounded font-counter-metric text-[11px] text-on-surface">
+                ★ 4.9
+              </span>
+</div>
+<span class="font-title-editorial text-title-editorial text-on-surface truncate font-bold">Adeus, Eri</span>
+<span class="font-body-sm text-body-sm text-secondary">One-shot Editorial</span>
+</div>
+<!-- Recommendation 5: Choujin X -->
+<div class="flex flex-col gap-space-xs bg-surface-container-low p-space-sm rounded-xl group hover:bg-surface-container transition-colors">
+<div class="aspect-[2/3] w-full rounded-lg overflow-hidden relative shadow bg-surface-container-lowest">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Cover of Choujin X manga by Sui Ishida with dark watercolor ink textures." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCUIMOPINI3Qeb0csFgMT2szI4KiyBwVumMKQ4xXojNKGLCZ5UpDd2FrzcS43SFsXz9-O6aYEjOAbw-mxj2ds2XPKetYvZ4yDrR7c3cS0PT2HEcwdLhRrvByerxrOVyuGB-eWufUBCzoOW2tiScN5tR6io7sC55X9xmk8gngWbqrxyAkhk-Y1hH-Le3uiL2KsGAp1sfVKIK_Oii67UkjEvjYWtJz2w73vDPUglYZh7cLcPKO5vMfl-dQ"/>
+<span class="absolute bottom-2 left-2 bg-surface-container-lowest/80 px-2 py-0.5 rounded font-counter-metric text-[11px] text-on-surface">
+                ★ 4.5
+              </span>
+</div>
+<span class="font-title-editorial text-title-editorial text-on-surface truncate font-bold">Choujin X</span>
+<span class="font-body-sm text-body-sm text-secondary">Sui Ishida</span>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Micro-Interactivity Script -->
+<script>
+    // Tab switcher between chapters and volumes
+    function switchTab(mode) {
+      const chaptersView = document.getElementById('chaptersView');
+      const volumesView = document.getElementById('volumesView');
+      const tabChaptersBtn = document.getElementById('tabChaptersBtn');
+      const tabVolumesBtn = document.getElementById('tabVolumesBtn');
+
+      if (mode === 'chapters') {
+        chaptersView.classList.remove('hidden');
+        volumesView.classList.add('hidden');
+        tabChaptersBtn.className = 'px-space-md py-2 rounded-lg font-headline-sm text-title-editorial font-bold bg-primary-container text-on-primary transition-all';
+        tabVolumesBtn.className = 'px-space-md py-2 rounded-lg font-headline-sm text-title-editorial text-secondary hover:text-on-surface transition-all';
+      } else {
+        chaptersView.classList.add('hidden');
+        volumesView.classList.remove('hidden');
+        tabVolumesBtn.className = 'px-space-md py-2 rounded-lg font-headline-sm text-title-editorial font-bold bg-primary-container text-on-primary transition-all';
+        tabChaptersBtn.className = 'px-space-md py-2 rounded-lg font-headline-sm text-title-editorial text-secondary hover:text-on-surface transition-all';
+      }
+    }
+
+    // Status Dropdown Behavior
+    const statusDropdownBtn = document.getElementById('statusDropdownBtn');
+    const statusMenu = document.getElementById('statusMenu');
+    if (statusDropdownBtn && statusMenu) {
+      statusDropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        statusMenu.classList.toggle('hidden');
+      });
+      document.addEventListener('click', () => {
+        statusMenu.classList.add('hidden');
+      });
+    }
+
+    function setStatus(label, dotColorClass) {
+      const currentStatusLabel = document.getElementById('currentStatusLabel');
+      if (currentStatusLabel) {
+        currentStatusLabel.textContent = label;
+      }
+      if (statusMenu) statusMenu.classList.add('hidden');
+    }
+
+    // Dynamic Chapter increment action
+    const markNextChapterBtn = document.getElementById('markNextChapterBtn');
+    if (markNextChapterBtn) {
+      markNextChapterBtn.addEventListener('click', () => {
+        markAsRead(113);
+      });
+    }
+
+    function markAsRead(capNum) {
+      const track = document.getElementById('readingProgressTrack');
+      if (track) {
+        track.style.width = '87%';
+      }
+      if (markNextChapterBtn) {
+        markNextChapterBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">check</span><span>Cap. ' + capNum + ' Concluído!</span>';
+        markNextChapterBtn.classList.replace('bg-primary-container', 'bg-emerald-600');
+        setTimeout(() => {
+          markNextChapterBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">done_all</span><span>Marcar Cap. 114 como Lido</span>';
+          markNextChapterBtn.classList.replace('bg-emerald-600', 'bg-primary-container');
+        }, 1800);
+      }
+    }
+
+    function setRating(val) {
+      const stars = document.querySelectorAll('#ratingStars span');
+      stars.forEach((star, index) => {
+        if (index < val) {
+          star.textContent = 'star';
+          star.style.fontVariationSettings = "'FILL' 1";
+        } else {
+          star.textContent = 'star_border';
+          star.style.fontVariationSettings = "'FILL' 0";
+        }
+      });
+    }
+  </script>
+</div></main></div></body></html>

@@ -4,7 +4,7 @@
 - **Stack:** Laravel 12 / PHP 8.2.
 - **Structure:** Multi-module. All modules in `app/Modules/`. Each encapsulates an independent app sharing DB and auth.
 - **Frontend:** Blade, Tailwind CSS, Alpine.js. **Livewire is PROHIBITED for new features.**
-- **Database:** MySQL/MariaDB.
+- **Database:** PostgreSQL.
 
 ## Developer Commands
 - **Frontend:** `npm run dev` / `npm run build`
@@ -101,3 +101,8 @@
 
 ### VocabularioControlado
 - **Purpose:** Controlled vocabulary management.
+
+### Yomi
+- **Purpose:** Personal manga catalog, reading progress and metadata sync (Jikan + AniList).
+- **Prefix:** `/yomi`
+- **Key Note:** Jikan is the primary provider, AniList the fallback; local DB (PostgreSQL) is the primary source. Media mirrored locally with checksum-based deduplication. Tests use `RefreshYomiDatabase` trait (full migration chain has SGBD-specific statements incompatible with sqlite; the trait runs only `users` + `yomi_*`). See `app/Modules/Yomi/AGENTS.md`.

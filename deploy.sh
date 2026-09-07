@@ -44,7 +44,7 @@ remote_cmd() {
 }
 
 # 1. Testar conexão
-echo "[1/5] Testando conexão SSH..."
+echo "[1/6] Testando conexão SSH..."
 if ! remote_cmd "echo 'OK'" > /dev/null 2>&1; then
     echo "ERRO: Não foi possível conectar ao servidor $REMOTE_HOST"
     exit 1
@@ -52,20 +52,20 @@ fi
 echo "     Conexão OK!"
 
 # 2. Criar diretório base e backup da versão anterior
-echo "[2/5] Preparando diretório e backup..."
+echo "[2/6] Preparando diretório e backup..."
 remote_cmd "mkdir -p $REMOTE_BASE"
 remote_cmd "rm -rf $REMOTE_BASE.bak && ([ -f $REMOTE_BASE/Dockerfile ] && cp -a $REMOTE_BASE $REMOTE_BASE.bak || true)"
 echo "     Diretório pronto!"
 
 # 3. Sincronizar projeto (código fonte) com rsync
-echo "[3/5] Sincronizando código (rsync)..."
+echo "[3/6] Sincronizando código (rsync)..."
 rsync -az --delete "${RSYNC_EXCLUDES[@]}" \
     -e "ssh $SSH_OPTS" \
     "$REPO_DIR/" "$REMOTE_USER@$REMOTE_HOST:$REMOTE_BASE/"
 echo "     Código sincronizado!"
 
 # 4. Validar .env no servidor
-echo "[4/5] Verificando .env no servidor..."
+echo "[4/6] Verificando .env no servidor..."
 if ! remote_cmd "[ -f $REMOTE_BASE/.env ]"; then
     echo "AVISO: .env não existe no servidor. Criando a partir do .env.example..."
     remote_cmd "cp $REMOTE_BASE/.env.example $REMOTE_BASE/.env"
@@ -73,10 +73,15 @@ if ! remote_cmd "[ -f $REMOTE_BASE/.env ]"; then
 fi
 
 # 5. Build + restart
-echo "[5/5] Buildando e reiniciando containers..."
+echo "[5/6] Buildando e reiniciando containers..."
 # Garante que nenhum public/hot (servidor de dev) do destino entre no contexto de build
 remote_cmd "rm -f $REMOTE_BASE/public/hot"
 remote_cmd "cd $REMOTE_BASE && docker compose down && docker compose up -d --build"
+
+# 6. Rodar migrations
+echo "[6/6] Migrando banco de dados..."
+remote_cmd "cd $REMOTE_BASE && docker compose exec -T spigo-portal-app php artisan migrate --force"
+echo "     Migrations concluídas!"
 
 # Ajusta permissões do storage montado (bind mount criado como root no host;
 # o Apache roda como www-data e precisa de escrita para os uploads)

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100%;margin:0;padding:0;background-color:#131318;}body{overscroll-behavior-y:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-low": "#1b1b20", "surface-bright": "#39383e", "on-background": "#e4e1e9", "surface-variant": "#35343a", "primary-container": "#ff544c", "on-surface": "#e4e1e9", "primary": "#ffb4ac", "surface-container-lowest": "#0e0e13", "secondary": "#c9c6c0", "surface-tint": "#ffb4ac", "error-container": "#93000a", "tertiary-fixed": "#ffdad7", "on-tertiary": "#68000c", "primary-fixed": "#ffdad6", "inverse-on-surface": "#303035", "on-error-container": "#ffdad6", "surface-dim": "#131318", "surface-container-highest": "#35343a", "tertiary-container": "#ff5353", "surface": "#131318", "inverse-primary": "#bb171c", "on-primary-container": "#5c0005", "background": "#131318", "on-tertiary-container": "#5c0009", "surface-container-high": "#2a292f", "on-error": "#690005", "on-tertiary-fixed-variant": "#930015", "surface-container": "#1f1f24", "on-tertiary-fixed": "#410004", "on-secondary-container": "#b7b5af", "tertiary-fixed-dim": "#ffb3ae", "secondary-container": "#474742", "secondary-fixed-dim": "#c9c6c0", "secondary-fixed": "#e5e2db", "on-primary-fixed-variant": "#93000d", "on-primary": "#690006", "on-primary-fixed": "#410002", "on-secondary-fixed": "#1c1c18", "inverse-surface": "#e4e1e9", "tertiary": "#ffb3ae", "outline-variant": "#5b403d", "primary-fixed-dim": "#ffb4ac", "on-secondary-fixed-variant": "#474742", "outline": "#ab8985", "on-secondary": "#31312c", "on-surface-variant": "#e4beb9", "error": "#ffb4ab" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "poster-aspect-ratio": "2 / 3", "space-2xs": "0.25rem", "space-xl": "2rem", "gutter-desktop": "1.5rem", "margin-mobile": "1rem", "space-3xl": "4rem", "space-md": "1rem", "space-xs": "0.5rem", "margin-tablet": "2rem", "space-2xl": "3rem", "space-lg": "1.5rem", "margin-desktop": "3rem", "space-sm": "0.75rem", "gutter-mobile": "1rem" }, "fontFamily": { "headline-md": ["Plus Jakarta Sans"], "display-hero-mobile": ["Plus Jakarta Sans"], "display-hero": ["Plus Jakarta Sans"], "counter-metric": ["Space Grotesk"], "headline-sm": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "title-editorial": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "label-caption": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "label-badge": ["Space Grotesk"] }, "fontSize": { "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "display-hero-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "display-hero": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.03em", "fontWeight": "800" }], "counter-metric": ["16px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "700" }], "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "0.01em", "fontWeight": "400" }], "title-editorial": ["15px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "700" }], "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" }], "label-caption": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "label-badge": ["11px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md min-h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container"><header class="fixed top-0 inset-x-0 z-50 bg-surface/85 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.4)]"><div class="h-16 px-margin-mobile flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="relative flex items-center justify-center w-8 h-8 rounded-full bg-primary-container/15 text-primary-container"><span class="material-symbols-outlined text-[20px]">auto_stories</span><span class="absolute top-0 right-0 w-2 h-2 rounded-full bg-primary-container ring-2 ring-surface"></span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface leading-none">Yomi</span><span class="font-label-caption text-label-caption text-secondary uppercase tracking-widest text-[9px]">読書録</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Buscar mangás ou ler código" class="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[22px]">qr_code_scanner</span></button><button aria-label="Notificações" class="relative min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-primary-container"></span></button><div class="min-w-[44px] min-h-[44px] flex items-center justify-center pl-space-2xs"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1Wx_Ux-_QbR4a7JPxZ9HCI4ry8cOo-I9UM8_I9xKnS3my00WU4xh6LPsCOeLsA50Hiq1gdGyyPtvC-2rvDVGmve6bG9hoOQPTfb9KL0yYD3QKEacRG7G3-B7kNso0cv5iqbXbYA2teiWr_98dzvEDEgbmPG3fq6GUzW0HZtRQofO9F3tIW-MgKhrUDZa1d39IxBcrx3nwAoyaX3IgV5ASJBsY4DJpjcXdetiGRaL11rKWuHi1HXluPQ9tCcR_u7smww0kATPgm7bBs"/></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-28 bg-surface"><div class="flex flex-col w-full">
+<!-- Status & Compact Stats Header -->
+<section class="px-margin-mobile pt-space-sm pb-space-xs flex flex-col gap-space-xs">
+<div class="flex items-baseline justify-between">
+<div class="flex items-baseline gap-space-xs">
+<h1 class="font-headline-md text-headline-md text-on-surface">Minha Biblioteca</h1>
+<span class="font-label-badge text-label-badge text-secondary uppercase tracking-widest text-[10px]">128 Títulos</span>
+</div>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]">insights</span>
+<span class="font-counter-metric text-counter-metric text-primary">94%</span>
+</div>
+</div>
+<!-- Quick Stat Pills: Tactile thumb target indicators -->
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface text-body-sm font-body-sm shadow-sm flex-shrink-0">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-counter-metric text-label-badge">12</span>
+<span class="text-secondary text-[11px]">Lendo</span>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface text-body-sm font-body-sm shadow-sm flex-shrink-0">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-counter-metric text-label-badge">68</span>
+<span class="text-secondary text-[11px]">Concluídos</span>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface text-body-sm font-body-sm shadow-sm flex-shrink-0">
+<span class="w-2 h-2 rounded-full bg-surface-variant"></span>
+<span class="font-counter-metric text-label-badge">34</span>
+<span class="text-secondary text-[11px]">Pretendo Ler</span>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface text-body-sm font-body-sm shadow-sm flex-shrink-0">
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+<span class="font-counter-metric text-label-badge">14</span>
+<span class="text-secondary text-[11px]">Outros</span>
+</div>
+</div>
+</section>
+<!-- Horizontal Scrollable Pills Filter Bar -->
+<section class="py-space-xs sticky top-16 z-40 bg-surface/90 backdrop-blur-md">
+<div class="flex items-center gap-2 px-margin-mobile overflow-x-auto no-scrollbar" id="tab-container">
+<button class="filter-tab px-3.5 py-2 rounded-full bg-primary-container text-on-primary-container font-counter-metric text-label-badge shadow-md flex-shrink-0 flex items-center gap-1.5 transition-transform active:scale-95">
+<span>Lendo</span>
+<span class="px-1.5 py-0.5 rounded-full bg-on-primary-container/20 text-[10px] leading-none">12</span>
+</button>
+<button class="filter-tab px-3.5 py-2 rounded-full bg-surface-container text-secondary font-counter-metric text-label-badge flex-shrink-0 flex items-center gap-1.5 transition-colors hover:text-on-surface active:scale-95">
+<span>Pretendo Ler</span>
+<span class="px-1.5 py-0.5 rounded-full bg-surface-variant text-[10px] leading-none">34</span>
+</button>
+<button class="filter-tab px-3.5 py-2 rounded-full bg-surface-container text-secondary font-counter-metric text-label-badge flex-shrink-0 flex items-center gap-1.5 transition-colors hover:text-on-surface active:scale-95">
+<span>Concluídos</span>
+<span class="px-1.5 py-0.5 rounded-full bg-surface-variant text-[10px] leading-none">68</span>
+</button>
+<button class="filter-tab px-3.5 py-2 rounded-full bg-surface-container text-secondary font-counter-metric text-label-badge flex-shrink-0 flex items-center gap-1.5 transition-colors hover:text-on-surface active:scale-95">
+<span>Pausados</span>
+<span class="px-1.5 py-0.5 rounded-full bg-surface-variant text-[10px] leading-none">10</span>
+</button>
+<button class="filter-tab px-3.5 py-2 rounded-full bg-surface-container text-secondary font-counter-metric text-label-badge flex-shrink-0 flex items-center gap-1.5 transition-colors hover:text-on-surface active:scale-95">
+<span>Todos</span>
+<span class="px-1.5 py-0.5 rounded-full bg-surface-variant text-[10px] leading-none">128</span>
+</button>
+</div>
+</section>
+<!-- Quick Filter & Search Utility Bar -->
+<section class="px-margin-mobile py-space-xs flex items-center gap-2">
+<div class="relative flex-1 flex items-center bg-surface-container-low rounded-xl px-3 py-2.5 focus-within:bg-surface-container transition-colors shadow-inner">
+<span class="material-symbols-outlined text-[20px] text-secondary mr-2">search</span>
+<input class="w-full bg-transparent text-on-surface font-body-md text-body-sm focus:outline-none placeholder:text-secondary/60" placeholder="Buscar mangá na estante..." type="text"/>
+<button aria-label="Limpar ou filtrar voz" class="text-secondary hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+</button>
+</div>
+<!-- Demography Filter Pills -->
+<button class="h-10 px-3 bg-surface-container-low hover:bg-surface-container active:bg-surface-container-high rounded-xl text-on-surface font-label-badge text-[11px] flex items-center gap-1 flex-shrink-0 shadow-sm transition-colors">
+<span>Seinen</span>
+<span class="material-symbols-outlined text-[14px] text-secondary">expand_more</span>
+</button>
+<!-- Layout Switcher Button (2-col grid / list) -->
+<button aria-label="Alternar modo de exibição" class="w-10 h-10 flex items-center justify-center bg-surface-container-low hover:bg-surface-container active:bg-surface-container-high rounded-xl text-on-surface flex-shrink-0 shadow-sm transition-colors" id="viewToggleBtn">
+<span class="material-symbols-outlined text-[20px]" id="viewToggleIcon">grid_view</span>
+</button>
+</section>
+<!-- 2-Column Manga Grid (2:3 Aspect Ratio Covers) -->
+<section class="px-margin-mobile pt-space-xs pb-space-lg">
+<div class="grid grid-cols-2 gap-3.5" id="mangaGrid">
+<!-- Card 1: Berserk -->
+<article class="flex flex-col bg-surface-container-low rounded-xl overflow-hidden shadow-md group transition-transform active:scale-[0.98]">
+<div class="relative w-full aspect-[2/3] bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Monochromatic dark fantasy manga cover of a scarred mercenary warrior holding a colossal dragon slayer sword, textured dark ink lines with crimson atmospheric embers in the shadows, sumi-e aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1dL8ew98--RwhhXboRXZ15fIzGIUM1pAcqznuiDqua7Wgzw4W1gtfsypB-ZrJLi3xzl-5WCgU5S5C18YzXKJW9xP0O1Kp5J1YV7JSCGPpFLzgEv99cJkV_v3ksmyagVoRYMPGJ9gk47ah2AuZ4CJhYukWWDlejGw7KipSvLsIoVKK0izRaGFaFcXtYhOkT9nO5WBaRt6s8yv7DwBkje1hbPRAsB_lenluJ7pblx8GsyCII2gKACKSPQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/30 to-transparent"></div>
+<!-- Demography / Status Badges Top -->
+<div class="absolute top-2 left-2 flex flex-col gap-1 items-start">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-sm text-primary font-label-badge text-[9px] uppercase tracking-wider font-bold">Seinen</span>
+<span class="px-1.5 py-0.5 rounded bg-primary-container text-on-primary-container font-label-badge text-[9px] uppercase tracking-wider font-bold shadow-sm">+1 Novo</span>
+</div>
+<!-- Bottom Scrim details overlay -->
+<div class="absolute bottom-2 left-2 right-2 flex flex-col gap-1">
+<div class="flex items-center justify-between text-[11px] font-counter-metric">
+<span class="text-on-surface">99% Lido</span>
+<span class="text-primary font-semibold">Cap. 374</span>
+</div>
+<!-- Progress Track -->
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 99%;"></div>
+</div>
+</div>
+</div>
+<!-- Info & Fast +1 Increment Bar -->
+<div class="p-2.5 flex flex-col gap-2">
+<div class="flex flex-col">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate">Berserk</h2>
+<p class="font-body-sm text-body-sm text-secondary truncate">Cap. 374 / 376</p>
+</div>
+<!-- Fast increment touch target for mobile thumb -->
+<div class="flex items-center justify-between pt-1">
+<span class="font-label-badge text-[10px] text-secondary uppercase tracking-widest">Kentarou Miura</span>
+<button aria-label="Adicionar 1 capítulo a Berserk" class="quick-add-btn h-8 px-2.5 bg-primary-container hover:bg-primary text-on-primary-container rounded-lg font-counter-metric text-[12px] flex items-center gap-1 shadow-sm transition-all active:scale-90" data-current="374" data-title="Berserk" data-total="376">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>+1</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Card 2: Chainsaw Man -->
+<article class="flex flex-col bg-surface-container-low rounded-xl overflow-hidden shadow-md group transition-transform active:scale-[0.98]">
+<div class="relative w-full aspect-[2/3] bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Dynamic manga book cover art depicting an urban demon hunter with a mechanized saw blade motif, high contrast monochrome with bold red splashes, modern pop manga editorial styling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvi7qAbn9beljl5i8_ZxZJnOOUKYSxga92mxFqO9PahvklesSjySMvDCX3WmeNMJaz8H1FDjflkfb_aN1pryKIfIrq6y-beRvQC-rgdJZavH_HQrlOPeXqkVNPGChIUgQZMwpSKvBGwWaFjBris_jSBG6qJsdONHqxQRGtTNhCkbT6rU5CArzIvqcRG6suE-nUYSnjImHsoFQOnyxYH7p1LgB4p_H76gN5NnU09BkLebcnBo-QL3rISA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/30 to-transparent"></div>
+<!-- Status Badges Top -->
+<div class="absolute top-2 left-2 flex flex-col gap-1 items-start">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-sm text-on-surface font-label-badge text-[9px] uppercase tracking-wider font-bold">Shonen</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high/90 text-primary font-label-badge text-[9px] uppercase tracking-wider font-bold">Semanal</span>
+</div>
+<div class="absolute bottom-2 left-2 right-2 flex flex-col gap-1">
+<div class="flex items-center justify-between text-[11px] font-counter-metric">
+<span class="text-on-surface">86% Lido</span>
+<span class="text-primary font-semibold">Cap. 112</span>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 86%;"></div>
+</div>
+</div>
+</div>
+<div class="p-2.5 flex flex-col gap-2">
+<div class="flex flex-col">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate">Chainsaw Man</h2>
+<p class="font-body-sm text-body-sm text-secondary truncate">Cap. 112 / 130</p>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="font-label-badge text-[10px] text-secondary uppercase tracking-widest">Tatsuki Fujimoto</span>
+<button aria-label="Adicionar 1 capítulo a Chainsaw Man" class="quick-add-btn h-8 px-2.5 bg-primary-container hover:bg-primary text-on-primary-container rounded-lg font-counter-metric text-[12px] flex items-center gap-1 shadow-sm transition-all active:scale-90" data-current="112" data-title="Chainsaw Man" data-total="130">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>+1</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Card 3: Vagabond -->
+<article class="flex flex-col bg-surface-container-low rounded-xl overflow-hidden shadow-md group transition-transform active:scale-[0.98]">
+<div class="relative w-full aspect-[2/3] bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-85" data-alt="Detailed ink brush artwork of a lone wandering samurai with tied back hair, close up portrait under heavy rain, exquisite Japanese sumi-e calligraphy aesthetics with charcoal textures" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzcCrNpG0iROhIqRZDitxxbQAuoED-WzamNZnwvZ1DLI-w6d_QHWR2mdmnUmmJ9FtA2X5cA-vxbESgcql8CzF4Dp3KVJ2Tw8aBka3iudjJkVTHaRtaqJjSmd3iub9AUXTT3vduvWnBCrKTDIj2eP892pl-MaYclG73TyPOpJeayLlEI8PrbDyCZpVyEDRSf_hFMpCqXqfaW2AtKoGpy_EMSoCadPzExaSgo_0exOuJGH1qPOOTEbVaZg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/30 to-transparent"></div>
+<div class="absolute top-2 left-2 flex flex-col gap-1 items-start">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-sm text-primary font-label-badge text-[9px] uppercase tracking-wider font-bold">Seinen</span>
+<span class="px-1.5 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-badge text-[9px] uppercase tracking-wider font-bold">Pausado</span>
+</div>
+<div class="absolute bottom-2 left-2 right-2 flex flex-col gap-1">
+<div class="flex items-center justify-between text-[11px] font-counter-metric">
+<span class="text-secondary">Pausado</span>
+<span class="text-on-surface font-semibold">Cap. 327</span>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 100%;"></div>
+</div>
+</div>
+</div>
+<div class="p-2.5 flex flex-col gap-2">
+<div class="flex flex-col">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate">Vagabond</h2>
+<p class="font-body-sm text-body-sm text-secondary truncate">Cap. 327 / 327 (Hiato)</p>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="font-label-badge text-[10px] text-secondary uppercase tracking-widest">Takehiko Inoue</span>
+<button aria-label="Opções para Vagabond" class="h-8 w-8 bg-surface-container hover:bg-surface-container-high text-secondary hover:text-on-surface rounded-lg flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Card 4: Monster -->
+<article class="flex flex-col bg-surface-container-low rounded-xl overflow-hidden shadow-md group transition-transform active:scale-[0.98]">
+<div class="relative w-full aspect-[2/3] bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Psychological mystery manga cover showing an enigmatic blonde villain silhouette in front of an eerie vintage European city street at dusk, cinematic noir dark tone" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvkmU3rA7246cE9Alas0R-ipKSm-RnKnjtdg4x5MvxJuJQUNWhaDcjTLhOsUgQXdhdhyixVmPI5pgJZH127WxvwxcHj6Da9diPUQY4cVFhQE42XXWQ4xKVgImN6ezUQX_uzHDCMqhj4Yp4mDn6KvWZuYwQBifSvyoGbi7nKnKryrNoK0cJL9DNOv2HSjllpZ_A-0qKC7AQkBaCr6VJ9JhRq1d0Qqd3o2YsnwjywD4AKZ6fLAddKBOJyw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/30 to-transparent"></div>
+<div class="absolute top-2 left-2 flex flex-col gap-1 items-start">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-sm text-primary font-label-badge text-[9px] uppercase tracking-wider font-bold">Seinen</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-label-badge text-[9px] uppercase tracking-wider font-bold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[10px]">done_all</span> Concluído
+            </span>
+</div>
+<div class="absolute bottom-2 left-2 right-2 flex flex-col gap-1">
+<div class="flex items-center justify-between text-[11px] font-counter-metric">
+<span class="text-on-surface">100%</span>
+<span class="text-secondary font-semibold">162 / 162</span>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="bg-on-surface h-full rounded-full" style="width: 100%;"></div>
+</div>
+</div>
+</div>
+<div class="p-2.5 flex flex-col gap-2">
+<div class="flex flex-col">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate">Monster</h2>
+<p class="font-body-sm text-body-sm text-secondary truncate">Todos 162 lidos</p>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="font-label-badge text-[10px] text-secondary uppercase tracking-widest">Naoki Urasawa</span>
+<div class="h-8 flex items-center gap-1 text-primary text-[12px] font-counter-metric">
+<span class="material-symbols-outlined text-[16px]">star</span>
+<span>10.0</span>
+</div>
+</div>
+</div>
+</article>
+<!-- Card 5: Vinland Saga -->
+<article class="flex flex-col bg-surface-container-low rounded-xl overflow-hidden shadow-md group transition-transform active:scale-[0.98]">
+<div class="relative w-full aspect-[2/3] bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Historical viking manga illustration of Thorfinn looking toward a stormy northern sea with wheat fields, gritty pen hatching, somber Nordic atmosphere with dawn light touches" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0Ja6dmK-wcN3fZ-eGwc_HP4Qsw6W4RXXqWx8ghSvJvqPP25XkmPolD4R79oGPdcNL-dcV3Bp1t5ep20ZFaePXA1kFrSSuiks_N0-V7rZtHOyiJ2iLJVsBW8LEGKXvJbpF9c1FgGPQzbHqLHcPFp1DZrXtizyVisLqC0CaJOuK8-30bAsZ6t0WFWBNcK6oagcJKreHExM_wc6exP-qBuASDDbpSM6UL62gbsUGW0WvjNPZhtHtYAofsw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/30 to-transparent"></div>
+<div class="absolute top-2 left-2 flex flex-col gap-1 items-start">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-sm text-primary font-label-badge text-[9px] uppercase tracking-wider font-bold">Seinen</span>
+<span class="px-1.5 py-0.5 rounded bg-primary-container text-on-primary-container font-label-badge text-[9px] uppercase tracking-wider font-bold shadow-sm">Mensal</span>
+</div>
+<div class="absolute bottom-2 left-2 right-2 flex flex-col gap-1">
+<div class="flex items-center justify-between text-[11px] font-counter-metric">
+<span class="text-on-surface">97% Lido</span>
+<span class="text-primary font-semibold">Cap. 204</span>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 97%;"></div>
+</div>
+</div>
+</div>
+<div class="p-2.5 flex flex-col gap-2">
+<div class="flex flex-col">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate">Vinland Saga</h2>
+<p class="font-body-sm text-body-sm text-secondary truncate">Cap. 204 / 210</p>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="font-label-badge text-[10px] text-secondary uppercase tracking-widest">Makoto Yukimura</span>
+<button aria-label="Adicionar 1 capítulo a Vinland Saga" class="quick-add-btn h-8 px-2.5 bg-primary-container hover:bg-primary text-on-primary-container rounded-lg font-counter-metric text-[12px] flex items-center gap-1 shadow-sm transition-all active:scale-90" data-current="204" data-title="Vinland Saga" data-total="210">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>+1</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Card 6: Blue Lock -->
+<article class="flex flex-col bg-surface-container-low rounded-xl overflow-hidden shadow-md group transition-transform active:scale-[0.98]">
+<div class="relative w-full aspect-[2/3] bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Intense high-energy sports manga visual with an egoist striker kicking a glowing football surrounded by explosive dynamic blue and dark aura lines, sharp modern manga style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwaSp5Ur_XktgEsSrk8ACocEotieISdxh3IKRJ3Yqg_DhgoHPSeVDxWj0FGp5inESstnyk5qaEipr6lk02_6ktPIl2vYJN1Jd6tdHN6UIWFl1-Hi6heDSCSuT2TS7gpmmxgY1Qmk_4WnGa80wAzLw11mxT1oWwhAmpqlzNNL4W64bodJrylm1oWfLoloyDz7ymS07uiMW3oqaMByRVnwCZ-zx3SIi-R0Kq3jMOFw4POItU7QryMnjIsg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/30 to-transparent"></div>
+<div class="absolute top-2 left-2 flex flex-col gap-1 items-start">
+<span class="px-1.5 py-0.5 rounded bg-surface-container-lowest/80 backdrop-blur-sm text-on-surface font-label-badge text-[9px] uppercase tracking-wider font-bold">Shonen</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high/90 text-primary font-label-badge text-[9px] uppercase tracking-wider font-bold">Semanal</span>
+</div>
+<div class="absolute bottom-2 left-2 right-2 flex flex-col gap-1">
+<div class="flex items-center justify-between text-[11px] font-counter-metric">
+<span class="text-on-surface">80% Lido</span>
+<span class="text-primary font-semibold">Cap. 210</span>
+</div>
+<div class="w-full h-1 bg-surface-variant rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 80%;"></div>
+</div>
+</div>
+</div>
+<div class="p-2.5 flex flex-col gap-2">
+<div class="flex flex-col">
+<h2 class="font-title-editorial text-title-editorial text-on-surface truncate">Blue Lock</h2>
+<p class="font-body-sm text-body-sm text-secondary truncate">Cap. 210 / 260</p>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="font-label-badge text-[10px] text-secondary uppercase tracking-widest">Muneyuki Kaneshiro</span>
+<button aria-label="Adicionar 1 capítulo a Blue Lock" class="quick-add-btn h-8 px-2.5 bg-primary-container hover:bg-primary text-on-primary-container rounded-lg font-counter-metric text-[12px] flex items-center gap-1 shadow-sm transition-all active:scale-90" data-current="210" data-title="Blue Lock" data-total="260">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>+1</span>
+</button>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- Interactive Toast Notification Container for One-Hand Feedback -->
+<div class="fixed bottom-20 inset-x-4 z-50 pointer-events-none transform translate-y-8 opacity-0 transition-all duration-300 flex items-center justify-between p-3.5 bg-surface-container-highest text-on-surface rounded-xl shadow-2xl" id="toastNotification">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined text-[18px]">check</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-editorial text-[13px] leading-tight" id="toastTitle">Capítulo Atualizado!</span>
+<span class="font-body-sm text-[11px] text-secondary" id="toastDesc">Avançado para o próximo capítulo</span>
+</div>
+</div>
+<span class="font-counter-metric text-primary text-label-badge font-bold">読了</span>
+</div>
+</div>
+<script>
+  // Filter tab active switch interaction
+  const tabs = document.querySelectorAll('.filter-tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => {
+        t.classList.remove('bg-primary-container', 'text-on-primary-container', 'shadow-md');
+        t.classList.add('bg-surface-container', 'text-secondary');
+        const badge = t.querySelector('span:last-child');
+        if (badge) {
+          badge.classList.remove('bg-on-primary-container/20');
+          badge.classList.add('bg-surface-variant');
+        }
+      });
+      tab.classList.remove('bg-surface-container', 'text-secondary');
+      tab.classList.add('bg-primary-container', 'text-on-primary-container', 'shadow-md');
+      const badge = tab.querySelector('span:last-child');
+      if (badge) {
+        badge.classList.remove('bg-surface-variant');
+        badge.classList.add('bg-on-primary-container/20');
+      }
+    });
+  });
+
+  // Quick "+1" chapter addition with micro-feedback toast
+  const addButtons = document.querySelectorAll('.quick-add-btn');
+  const toast = document.getElementById('toastNotification');
+  const toastTitle = document.getElementById('toastTitle');
+  const toastDesc = document.getElementById('toastDesc');
+  let toastTimeout;
+
+  addButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      let current = parseInt(btn.getAttribute('data-current') || '0', 10);
+      const total = parseInt(btn.getAttribute('data-total') || '0', 10);
+      const title = btn.getAttribute('data-title') || 'Mangá';
+
+      if (current < total) {
+        current += 1;
+        btn.setAttribute('data-current', current);
+        
+        // Find text elements within the card
+        const card = btn.closest('article');
+        const progressSubtitle = card.querySelector('p.text-body-sm');
+        const bottomProgressText = card.querySelector('.absolute.bottom-2 .text-primary');
+        const progressBar = card.querySelector('.absolute.bottom-2 .bg-primary-container');
+        
+        if (progressSubtitle) {
+          progressSubtitle.textContent = `Cap. ${current} / ${total}`;
+        }
+        if (bottomProgressText) {
+          bottomProgressText.textContent = `Cap. ${current}`;
+        }
+        if (progressBar) {
+          const pct = Math.round((current / total) * 100);
+          progressBar.style.width = `${pct}%`;
+        }
+
+        // Show Toast
+        toastTitle.textContent = `${title} +1 Cap.`;
+        toastDesc.textContent = `Progresso: Cap. ${current} de ${total}`;
+        
+        clearTimeout(toastTimeout);
+        toast.classList.remove('translate-y-8', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+
+        toastTimeout = setTimeout(() => {
+          toast.classList.remove('translate-y-0', 'opacity-100');
+          toast.classList.add('translate-y-8', 'opacity-0');
+        }, 2200);
+      }
+    });
+  });
+
+  // Grid / Compact List Layout Toggle
+  const viewToggleBtn = document.getElementById('viewToggleBtn');
+  const viewToggleIcon = document.getElementById('viewToggleIcon');
+  const mangaGrid = document.getElementById('mangaGrid');
+  let isGrid = true;
+
+  viewToggleBtn.addEventListener('click', () => {
+    isGrid = !isGrid;
+    if (!isGrid) {
+      mangaGrid.classList.remove('grid-cols-2');
+      mangaGrid.classList.add('grid-cols-1');
+      viewToggleIcon.textContent = 'view_agenda';
+    } else {
+      mangaGrid.classList.remove('grid-cols-1');
+      mangaGrid.classList.add('grid-cols-2');
+      viewToggleIcon.textContent = 'grid_view';
+    }
+  });
+</script></main><nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_-4px_20px_rgba(0,0,0,0.5)]" data-active-classes="text-primary-container font-semibold"><div class="flex items-center justify-around h-16 px-space-xs"><a class="min-w-[44px] min-h-[44px] flex flex-col items-center justify-center gap-1 text-secondary hover:text-on-surface transition-colors" data-path="home" href="#"><span class="material-symbols-outlined text-[22px]">home</span><span class="font-label-caption text-label-caption">Início</span></a><a class="min-w-[44px] min-h-[44px] flex flex-col items-center justify-center gap-1 text-secondary hover:text-on-surface transition-colors" data-path="library" href="#"><span class="material-symbols-outlined text-[22px]">local_library</span><span class="font-label-caption text-label-caption">Biblioteca</span></a><a class="min-w-[44px] min-h-[44px] flex flex-col items-center justify-center gap-1 text-secondary hover:text-on-surface transition-colors" data-path="explore" href="#"><span class="material-symbols-outlined text-[22px]">explore</span><span class="font-label-caption text-label-caption">Explorar</span></a><a class="min-w-[44px] min-h-[44px] flex flex-col items-center justify-center gap-1 text-secondary hover:text-on-surface transition-colors" data-path="stats" href="#"><span class="material-symbols-outlined text-[22px]">local_fire_department</span><span class="font-label-caption text-label-caption">Estatísticas</span></a><a class="min-w-[44px] min-h-[44px] flex flex-col items-center justify-center gap-1 text-secondary hover:text-on-surface transition-colors" data-path="profile" href="#"><span class="material-symbols-outlined text-[22px]">account_circle</span><span class="font-label-caption text-label-caption">Perfil</span></a></div></nav></body></html>

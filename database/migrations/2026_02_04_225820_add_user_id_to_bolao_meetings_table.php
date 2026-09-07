@@ -10,6 +10,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        if (! Schema::hasTable('bolao_meetings')) {
+            return;
+        }
+
         Schema::table('bolao_meetings', function (Illuminate\Database\Schema\Blueprint $table) {
             $table->foreignId('user_id')->nullable()->after('id')->constrained('users')->onDelete('cascade');
         });
@@ -20,6 +24,10 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        if (! Schema::hasTable('bolao_meetings') || ! Schema::hasColumn('bolao_meetings', 'user_id')) {
+            return;
+        }
+
         Schema::table('bolao_meetings', function (Illuminate\Database\Schema\Blueprint $table) {
             $table->dropForeign(['user_id']);
             $table->dropColumn('user_id');

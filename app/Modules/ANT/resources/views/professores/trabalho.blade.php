@@ -52,15 +52,26 @@
                     <div>
                         <label for="prazo" class="block text-xs font-medium text-gray-600 mb-1">Data de Entrega (Prazo)</label>
                         <input type="date" name="prazo" id="prazo"
-                               value="{{ $trabalho->prazo->format('Y-m-d') }}"
+                               value="{{ old('prazo', $trabalho->prazo->format('Y-m-d')) }}"
                                class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                                required>
                     </div>
+                    <div>
+                        <label for="maximo_alunos" class="block text-xs font-medium text-gray-600 mb-1">Máximo de Alunos por Entrega</label>
+                        <input type="number" name="maximo_alunos" id="maximo_alunos"
+                               value="{{ old('maximo_alunos', $trabalho->maximo_alunos) }}"
+                               min="1"
+                               class="w-28 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                               required>
+                    </div>
                     <button type="submit" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors">
-                        Alterar Data
+                        Salvar Alterações
                     </button>
-                    <span class="text-sm text-gray-500">Atual: {{ $trabalho->prazo->format('d/m/Y') }}</span>
+                    <span class="text-sm text-gray-500">Data atual: {{ $trabalho->prazo->format('d/m/Y') }} · Máximo atual: {{ $trabalho->maximo_alunos }}</span>
                     @error('prazo')
+                        <span class="text-sm text-red-600">{{ $message }}</span>
+                    @enderror
+                    @error('maximo_alunos')
                         <span class="text-sm text-red-600">{{ $message }}</span>
                     @enderror
                 </form>

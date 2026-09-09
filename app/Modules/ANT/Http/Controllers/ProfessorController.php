@@ -350,7 +350,7 @@ class ProfessorController extends Controller
         return redirect()->route('ant.professor.trabalho', $trabalho->id)->with('success', 'Trabalho atualizado com sucesso!');
     }
 
-    // Alterar apenas a data de entrega (prazo) do trabalho
+    // Alterar rapidamente o prazo e o tamanho máximo do grupo do trabalho
     public function updatePrazo(Request $request, $id)
     {
         $trabalho = AntTrabalho::findOrFail($id);
@@ -366,12 +366,16 @@ class ProfessorController extends Controller
 
         $request->validate([
             'prazo' => 'required|date',
+            'maximo_alunos' => 'required|integer|min:1',
         ]);
 
-        $trabalho->update(['prazo' => $request->prazo]);
+        $trabalho->update([
+            'prazo' => $request->prazo,
+            'maximo_alunos' => $request->maximo_alunos,
+        ]);
 
         return redirect()->route('ant.professor.trabalho', $trabalho->id)
-            ->with('success', 'Data de entrega atualizada com sucesso!');
+            ->with('success', 'Prazo e máximo de alunos atualizados com sucesso!');
     }
 
     // Lista de alunos do professor (com filtros por RA e e-mail) para diagnóstico de vínculo

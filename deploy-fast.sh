@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Fast deploy: copia APENAS arquivos PHP para o container em execução
+# Fast deploy: copia APENAS arquivos PHP (e modelos .xlsx dos módulos) para o container em execução
 # e roda as migrations. Útil para pequenas alterações de código PHP,
 # sem rebuild da imagem Docker.
 
@@ -53,6 +53,7 @@ rsync -az -e "ssh $SSH_OPTS" \
     --prune-empty-dirs \
     --include='*/' \
     --include='*.php' \
+    --include='app/Modules/*/resources/templates/*.xlsx' \
     --exclude='storage' \
     --exclude='vendor' \
     --exclude='node_modules' \

@@ -111,7 +111,9 @@ class CorrecaoController extends Controller
                     $unityUrl = null;
                     foreach ($allExtractedFiles as $f) {
                         if (basename($f) === 'index.html') {
-                            $unityUrl = $this->publicStorageUrl($f);
+                            $relative = ltrim(substr($f, strlen($extractBasePath)), '/');
+                            $unityUrl = rtrim(request()->root(), '/').'/ant/unity/'.$entrega->id.'/'.$fileIndex.'/'
+                                .implode('/', array_map('rawurlencode', explode('/', $relative)));
                             break;
                         }
                     }
@@ -279,13 +281,15 @@ class CorrecaoController extends Controller
         Log::info('BROTLI DEBUG: Limites de memória e tempo aumentados via ini_set.');
         // --- FIM DA MUDANÇA ---
 
-        // Se já extraiu (cache), retorna o caminho relativo para montar a URL depois
-        if (Storage::disk('public')->exists($extractPath.'/index.html')) {
-            Log::info('BROTLI DEBUG: Arquivo index.html encontrado no cache. Pulando extração.');
+        // Se já extraiu (cache), retorna o caminho relativo para montar a URL depois.
+        // O marcador garante que extrações antigas (que removiam os arquivos .br) sejam refeitas.
+        if (Storage::disk('public')->exists($extractPath.'/.extraido_v2')) {
+            Log::info('BROTLI DEBUG: Extração em cache encontrada. Pulando extração.');
 
             return $extractPath;
         }
-        // ... (restante do código permanece igual)
+
+        Storage::disk('public')->deleteDirectory($extractPath);
 
         // Define a origem (Legado ou Novo)
         $fullZipPath = $this->getPhysicalPath($caminhoZip);
@@ -310,61 +314,14 @@ class CorrecaoController extends Controller
             $this->setRecursivePermissions($destination);
             Log::info("BROTLI DEBUG: Permissões definidas para recursivamente em {$destination}.");
 
-            // 2. Lógica de Descompressão via função nativa/biblioteca (vdechenaux/brotli)
-            $files = Storage::disk('public')->allFiles($extractPath);
-            $decompression_function_exists = function_exists('brotli_uncompress');
-            Log::info('BROTLI DEBUG: brotli_uncompress function_exists: '.($decompression_function_exists ? 'TRUE' : 'FALSE'));
-
-            // Limite de 20 MB para o arquivo comprimido (20 * 1024 * 1024 bytes)
-            $MAX_COMPRESSED_SIZE = 20971520;
-
-            foreach ($files as $file) {
-                $fullFilePath = Storage::disk('public')->path($file);
-                $uncompressedData = false;
-
-                // Limpeza de .htaccess
+            // 2. Mantém os .br/.gz originais (servidos com Content-Encoding correto por unityArquivo)
+            //    e remove apenas .htaccess enviados pelo aluno.
+            foreach (Storage::disk('public')->allFiles($extractPath) as $file) {
                 if (basename($file) === '.htaccess') {
                     Storage::disk('public')->delete($file);
-                    Log::info("BROTLI DEBUG: Limpeza de .htaccess em: {$file}");
-
-                    continue;
-                }
-
-                // Tenta descompactar Brotli
-                if (str_ends_with($file, '.br')) {
-                    $targetFilePath = substr($fullFilePath, 0, -3); // Ex: de file.js.br para file.js
-                    $fileSize = filesize($fullFilePath);
-
-                    if ($fileSize > $MAX_COMPRESSED_SIZE) {
-                        Log::error("BROTLI DEBUG: ARQUIVO MUITO GRANDE ({$fileSize} bytes)! Ignorando descompressão para evitar 'Broken pipe'.");
-                        // Força fallback e continua
-                    } elseif ($decompression_function_exists) {
-                        // O problema do Broken Pipe ocorre aqui:
-                        $compressedData = file_get_contents($fullFilePath);
-
-                        try {
-                            $uncompressedData = brotli_uncompress($compressedData);
-                        } catch (\Throwable $e) {
-                            Log::error('BROTLI DEBUG: ERRO CRÍTICO (Broken Pipe/Timeout) em brotli_uncompress! Mensagem: '.$e->getMessage());
-                        }
-                    }
-
-                    if ($uncompressedData !== false && $uncompressedData !== null) {
-                        file_put_contents($targetFilePath, $uncompressedData);
-                        Storage::disk('public')->delete($file); // Remove o comprimido
-                        Log::info("BROTLI DEBUG: SUCESSO! Descompactado e escrito: {$targetFilePath}. Arquivo .br removido.");
-                    } else {
-                        // Último recurso: remove o .br e espera que o arquivo não comprimido estivesse no zip
-                        Storage::disk('public')->delete($file);
-                        Log::error('BROTLI DEBUG: FALHA na descompressão (função indisponível/retornou false/null). Arquivo .br removido (Fallback).');
-                    }
-                }
-                // Limpeza de Gzip (opcionalmente pode adicionar lógica de descompressão Gzip aqui, se necessário)
-                elseif (str_ends_with($file, '.gz')) {
-                    Storage::disk('public')->delete($file);
-                    Log::info("BROTLI DEBUG: Limpeza de arquivo .gz: {$file}");
                 }
             }
+            Storage::disk('public')->put($extractPath.'/.extraido_v2', '1');
 
             // 3. Procura recursivamente por index.html
             $files = Storage::disk('public')->allFiles($extractPath);
@@ -383,6 +340,44 @@ class CorrecaoController extends Controller
 
             return null;
         }
+    }
+
+    /**
+     * Serve arquivos de uma build Unity WebGL extraída, definindo Content-Type e
+     * Content-Encoding corretos para arquivos .br/.gz (o servidor web não faz isso).
+     */
+    public function unityArquivo($idEntrega, $fileIndex, string $path)
+    {
+        $base = realpath(Storage::disk('public')->path("ant/extracted/{$idEntrega}_{$fileIndex}"));
+        $full = $base ? realpath($base.'/'.$path) : false;
+
+        if ($full === false || ! str_starts_with($full, $base.DIRECTORY_SEPARATOR) || ! is_file($full)) {
+            abort(404);
+        }
+
+        $headers = [];
+        $name = strtolower(basename($full));
+        if (str_ends_with($name, '.br')) {
+            $headers['Content-Encoding'] = 'br';
+            $name = substr($name, 0, -3);
+        } elseif (str_ends_with($name, '.gz')) {
+            $headers['Content-Encoding'] = 'gzip';
+            $name = substr($name, 0, -3);
+        }
+
+        $headers['Content-Type'] = match (pathinfo($name, PATHINFO_EXTENSION)) {
+            'js' => 'application/javascript',
+            'wasm' => 'application/wasm',
+            'html', 'htm' => 'text/html; charset=utf-8',
+            'json' => 'application/json',
+            'css' => 'text/css',
+            'png' => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'ico' => 'image/x-icon',
+            default => 'application/octet-stream',
+        };
+
+        return response()->file($full, $headers);
     }
 
     public function iaSugestao(Request $request, $idEntrega)

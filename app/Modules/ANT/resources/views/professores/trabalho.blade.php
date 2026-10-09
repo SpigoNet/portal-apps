@@ -7,7 +7,10 @@
                 {{ $trabalho->nome }}
             </h2>
             <div class="flex items-center gap-3">
-                <span class="text-sm text-gray-500">{{ $trabalho->materia->nome }}</span>
+                <span class="text-sm text-gray-500">{{ $trabalho->materia->nome }} · {{ $trabalho->semestre }}</span>
+                @if($trabalho->semestre < \App\Modules\ANT\Services\SemestreService::getCurrent())
+                    <a href="{{ route('ant.professor.historico', ['semestre' => $trabalho->semestre]) }}" class="text-sm text-indigo-600 hover:text-indigo-900">Voltar ao histórico</a>
+                @endif
                 <a href="{{ route('ant.professor.trabalho.edit', $trabalho->id) }}"
                    class="inline-flex items-center gap-1 bg-indigo-600 text-white text-sm px-3 py-1.5 rounded hover:bg-indigo-700 shadow-sm">
                     <span class="material-icons text-base leading-none">edit</span>

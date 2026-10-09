@@ -35,10 +35,7 @@ class MensagemController
             'ai_model_id' => 'sometimes|nullable|exists:ai_modelos,id',
         ]);
 
-        $persona = Persona::query()
-            ->where('slug', $data['persona'])
-            ->orWhere('id', $data['persona'])
-            ->first();
+        $persona = $this->buscarPersona($data['persona']);
 
         if (! $persona instanceof Persona) {
             return response()->json(['ok' => false, 'error' => 'Persona não encontrada'], 404);
@@ -93,10 +90,7 @@ class MensagemController
         ]);
 
         $slug = $data['persona'] ?? 'nami';
-        $persona = Persona::query()
-            ->where('slug', $slug)
-            ->orWhere('id', $slug)
-            ->first();
+        $persona = $this->buscarPersona($slug);
 
         if (! $persona instanceof Persona) {
             return response()->json(['ok' => false, 'error' => 'Persona não encontrada'], 404);
@@ -153,5 +147,17 @@ class MensagemController
             'vermelho' => $vermelho,
             'mensagem_enviada' => $mensagemFinal,
         ]);
+    }
+
+    /**
+     * Busca a persona pelo slug ou, se o valor for numérico, também pelo id.
+     * Comparar `id` (bigint) com texto quebra no PostgreSQL.
+     */
+    private function buscarPersona(string $identificador): ?Persona
+    {
+        return Persona::query()
+            ->where('slug', $identificador)
+            ->when(ctype_digit($identificador), fn ($query) => $query->orWhere('id', (int) $identificador))
+            ->first();
     }
 }

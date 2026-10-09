@@ -259,97 +259,69 @@ class ApontamentoController extends Controller
             return back()->withErrors(['erro' => 'Esta ação está disponível apenas para contratos livres.']);
         }
 
-        $apontamentos = $contrato->apontamentos()
-            ->where('faturamento_status', 'separado')
+        $selecionados = $request->validate([
+            'apontamentos' => 'nullable|array',
+            'apontamentos.*' => 'integer',
+        ])['apontamentos'] ?? [];
+
+        $query = $contrato->apontamentos();
+
+        // Com seleção, exporta exatamente o que foi marcado; sem seleção, mantém o comportamento antigo (separados).
+        if (! empty($selecionados)) {
+            $query->whereIn('id', $selecionados);
+        } else {
+            $query->where('faturamento_status', 'separado');
+        }
+
+        $apontamentos = $query
             ->orderBy('data_realizacao', 'asc')
+            ->orderBy('iniciado_em', 'asc')
+            ->orderBy('id', 'asc')
             ->get();
 
         if ($apontamentos->isEmpty()) {
-            return back()->withErrors(['erro' => 'Não há apontamentos separados para exportar.']);
+            return back()->withErrors(['erro' => empty($selecionados)
+                ? 'Não há apontamentos separados para exportar.'
+                : 'Nenhum dos apontamentos selecionados foi encontrado neste contrato.']);
         }
 
-        $rows = [];
-        $rows[] = ['Data', 'Descrição', 'Tempo (h)', 'Status'];
+        $modelo = __DIR__.'/../../resources/templates/apontamento-modelo.xlsx';
 
-        foreach ($apontamentos as $a) {
-            // Normaliza quebras: trata sequências literais "\\r\\n" (backslash + r + backslash + n)
-            // e quebras reais CRLF/CR para LF, produzindo newline real para o XML do Excel.
-            $descricao = (string) $a->descricao;
-            $descricao = str_replace(['\\r\\n', '\\n', '\\r'], "\n", $descricao); // literais
-            $descricao = str_replace(["\r\n", "\r"], "\n", $descricao); // reais
-
-            $rows[] = [
-                $a->data_realizacao->format('d/m/Y'),
-                $descricao,
-                number_format($a->horas, 2, ',', '.'),
-                ucfirst(str_replace('_', ' ', $a->faturamento_status)),
-            ];
+        if (! is_file($modelo)) {
+            return back()->withErrors(['erro' => 'O modelo de exportação (apontamento-modelo.xlsx) não foi encontrado no servidor.']);
         }
-
-        $sheetXml = '<?xml version="1.0" encoding="UTF-8"?>';
-        $sheetXml .= '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">';
-        $sheetXml .= '<sheetData>';
-        $r = 1;
-        foreach ($rows as $row) {
-            $sheetXml .= '<row r="'.$r.'">';
-            $c = 0;
-            foreach ($row as $cell) {
-                $c++;
-                $col = $this->numToCol($c);
-                $cellEscaped = htmlspecialchars((string) $cell, ENT_XML1 | ENT_SUBSTITUTE, 'UTF-8');
-                // Preserva quebras de linha no Excel
-                $sheetXml .= '<c r="'.$col.$r.'" t="inlineStr"><is><t xml:space="preserve">'.$cellEscaped.'</t></is></c>';
-            }
-            $sheetXml .= '</row>';
-            $r++;
-        }
-        $sheetXml .= '</sheetData></worksheet>';
-
-        $contentTypes = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
-            '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' .
-            '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' .
-            '<Default Extension="xml" ContentType="application/xml"/>' .
-            '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' .
-            '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' .
-            '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' .
-            '</Types>';
-
-        $rels = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
-            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' .
-            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' .
-            '</Relationships>';
-
-        $workbook = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
-            '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">' .
-            '<sheets><sheet name="Sheet1" sheetId="1" r:id="rId1"/></sheets>' .
-            '</workbook>';
-
-        $workbookRels = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
-            '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' .
-            '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' .
-            '</Relationships>';
-
-        $styles = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
-            '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' .
-            '<fonts count="1"><font><sz val="11"/></font></fonts>' .
-            '<fills count="1"><fill><patternFill patternType="none"/></fill></fills>' .
-            '<borders count="1"><border/></borders>' .
-            '<cellStyleXfs count="1"><xf/></cellStyleXfs>' .
-            '<cellXfs count="1"><xf/></cellXfs>' .
-            '</styleSheet>';
 
         $tmpFile = tempnam(sys_get_temp_dir(), 'gh_xlsx_');
-        $zip = new \ZipArchive();
-        if ($zip->open($tmpFile, \ZipArchive::OVERWRITE) !== true) {
-            return back()->withErrors(['erro' => 'Não foi possível criar arquivo temporário para exportação.']);
+
+        if (! copy($modelo, $tmpFile)) {
+            return back()->withErrors(['erro' => 'Não foi possível preparar o modelo de exportação.']);
         }
 
-        $zip->addFromString('[Content_Types].xml', $contentTypes);
-        $zip->addFromString('_rels/.rels', $rels);
-        $zip->addFromString('xl/workbook.xml', $workbook);
-        $zip->addFromString('xl/_rels/workbook.xml.rels', $workbookRels);
-        $zip->addFromString('xl/worksheets/sheet1.xml', $sheetXml);
-        $zip->addFromString('xl/styles.xml', $styles);
+        $zip = new \ZipArchive();
+        if ($zip->open($tmpFile) !== true) {
+            return back()->withErrors(['erro' => 'Não foi possível abrir o modelo de exportação.']);
+        }
+
+        $zip->addFromString('xl/worksheets/sheet1.xml', $this->montarPlanilhaApontamentos($contrato, $apontamentos));
+        $zip->addFromString('xl/styles.xml', $this->adicionarEstiloHorasAcumuladas((string) $zip->getFromName('xl/styles.xml')));
+
+        // O calcChain do modelo descreve as células do exemplo; o Excel o recria ao abrir.
+        $zip->deleteName('xl/calcChain.xml');
+        $zip->addFromString('[Content_Types].xml', str_replace(
+            '<Override PartName="/xl/calcChain.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.calcChain+xml"/>',
+            '',
+            (string) $zip->getFromName('[Content_Types].xml')
+        ));
+        $zip->addFromString('xl/_rels/workbook.xml.rels', preg_replace(
+            '/<Relationship [^>]*calcChain[^>]*\/>/',
+            '',
+            (string) $zip->getFromName('xl/_rels/workbook.xml.rels')
+        ));
+        $zip->addFromString('xl/workbook.xml', str_replace(
+            '<calcPr calcId="191029"/>',
+            '<calcPr calcId="191029" fullCalcOnLoad="1"/>',
+            (string) $zip->getFromName('xl/workbook.xml')
+        ));
         $zip->close();
 
         $filename = 'contrato-'.$contrato->id.'-apontamentos-separados.xlsx';
@@ -357,15 +329,119 @@ class ApontamentoController extends Controller
         return response()->download($tmpFile, $filename, ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])->deleteFileAfterSend(true);
     }
 
-    private function numToCol(int $n): string
+    /**
+     * Gera o XML da planilha seguindo o modelo (estilos 1 a 13 do styles.xml do modelo).
+     */
+    private function montarPlanilhaApontamentos(Contrato $contrato, $apontamentos): string
     {
-        $s = '';
-        while ($n > 0) {
-            $mod = ($n - 1) % 26;
-            $s = chr(65 + $mod) . $s;
-            $n = intdiv($n - 1, 26);
+        $valorHora = (float) ($contrato->valor_hora ?? 0);
+
+        // Remove UTF-8 inválido e caracteres de controle, que tornam o XML inválido e truncam a planilha.
+        $limpar = fn (string $valor): string => (string) preg_replace(
+            '/[^\x{9}\x{A}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]/u',
+            '',
+            mb_convert_encoding($valor, 'UTF-8', 'UTF-8')
+        );
+        $texto = fn (string $ref, int $estilo, string $valor): string => '<c r="'.$ref.'" s="'.$estilo.'" t="inlineStr"><is><t xml:space="preserve">'
+            .htmlspecialchars($limpar($valor), ENT_XML1 | ENT_SUBSTITUTE, 'UTF-8').'</t></is></c>';
+        $numero = fn (string $ref, int $estilo, float $valor): string => '<c r="'.$ref.'" s="'.$estilo.'"><v>'.rtrim(rtrim(number_format($valor, 14, '.', ''), '0'), '.').'</v></c>';
+
+        $cabecalhos = ['Data', 'Dia da Semana', 'H. Início', 'H. Término', 'H. Trabalhadas', 'H. Acumuladas', 'Tipo Atividade', 'Descrição das Atividades', 'Horas Decimais', 'Valor Total'];
+        $colunas = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+
+        $linhas = '<row r="1" spans="1:10" ht="15.75">'
+            .$texto('I1', 2, 'Valor da Hora')
+            .$numero('J1', 1, $valorHora)
+            .'</row>';
+
+        $linhas .= '<row r="2" spans="1:10">';
+        foreach ($cabecalhos as $i => $titulo) {
+            $linhas .= $texto($colunas[$i].'2', 3, $titulo);
         }
-        return $s;
+        $linhas .= '</row>';
+
+        $linha = 2;
+        $acumuladoMinutos = 0;
+        $totalValor = 0.0;
+
+        foreach ($apontamentos as $a) {
+            $linha++;
+            $minutos = (int) $a->minutos_gastos;
+            $acumuladoMinutos += $minutos;
+
+            $inicio = $a->iniciado_em;
+            $fim = $a->finalizado_em;
+            if (! $inicio && $fim && $minutos > 0) {
+                $inicio = $fim->copy()->subMinutes($minutos);
+            }
+
+            $descricao = (string) $a->descricao;
+            $descricao = str_replace(['\\r\\n', '\\n', '\\r'], "\n", $descricao);
+            $descricao = str_replace(["\r\n", "\r"], "\n", $descricao);
+
+            $linhasTexto = 0;
+            foreach (explode("\n", $descricao) as $parte) {
+                $linhasTexto += max(1, (int) ceil(mb_strlen($parte) / 48));
+            }
+            $altura = max(15, $linhasTexto * 15);
+
+            $horasDecimais = round($minutos / 60, 2);
+            $valor = $horasDecimais * $valorHora;
+            $totalValor += $valor;
+
+            $serialData = intdiv(gmmktime(0, 0, 0, (int) $a->data_realizacao->format('n'), (int) $a->data_realizacao->format('j'), (int) $a->data_realizacao->format('Y')), 86400) + 25569;
+            $fracao = fn ($momento): float => ((int) $momento->format('H') * 3600 + (int) $momento->format('i') * 60 + (int) $momento->format('s')) / 86400;
+
+            $linhas .= '<row r="'.$linha.'" spans="1:10" ht="'.$altura.'" customHeight="1">'
+                .$numero('A'.$linha, 4, $serialData)
+                .$texto('B'.$linha, 5, $a->data_realizacao->copy()->locale('pt_BR')->translatedFormat('l'))
+                .($inicio ? $numero('C'.$linha, 6, $fracao($inicio)) : '<c r="C'.$linha.'" s="6"/>')
+                .($fim ? $numero('D'.$linha, 6, $fracao($fim)) : '<c r="D'.$linha.'" s="6"/>')
+                .$numero('E'.$linha, 6, $minutos / 1440)
+                .$numero('F'.$linha, 14, $acumuladoMinutos / 1440)
+                .'<c r="G'.$linha.'" s="11"/>'
+                .$texto('H'.$linha, 7, $descricao)
+                .$numero('I'.$linha, 8, $horasDecimais)
+                .'<c r="J'.$linha.'" s="9"><f>I'.$linha.'*$J$1</f><v>'.round($valor, 2).'</v></c>'
+                .'</row>';
+        }
+
+        $ultima = $linha;
+        $linha++;
+        $linhas .= '<row r="'.$linha.'" spans="1:10">'
+            .'<c r="A'.$linha.'" s="10"/><c r="B'.$linha.'" s="10"/><c r="C'.$linha.'" s="10"/><c r="D'.$linha.'" s="10"/><c r="E'.$linha.'" s="10"/><c r="F'.$linha.'" s="10"/>'
+            .$texto('G'.$linha, 12, 'Total')
+            .'<c r="H'.$linha.'" s="10"/><c r="I'.$linha.'" s="10"/>'
+            .'<c r="J'.$linha.'" s="13"><f>SUM(J3:J'.$ultima.')</f><v>'.round($totalValor, 2).'</v></c>'
+            .'</row>';
+
+        return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'."\n"
+            .'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+            .'<dimension ref="A1:J'.$linha.'"/>'
+            .'<sheetViews><sheetView tabSelected="1" workbookViewId="0"/></sheetViews>'
+            .'<sheetFormatPr defaultRowHeight="15"/>'
+            .'<cols><col min="1" max="1" width="10.7109375" customWidth="1"/><col min="2" max="2" width="18.42578125" customWidth="1"/><col min="3" max="3" width="17" customWidth="1"/><col min="4" max="4" width="15.7109375" customWidth="1"/><col min="5" max="5" width="22.85546875" customWidth="1"/><col min="6" max="7" width="22.42578125" customWidth="1"/><col min="8" max="8" width="44.140625" customWidth="1"/><col min="9" max="9" width="15.42578125" customWidth="1"/><col min="10" max="10" width="10.5703125" customWidth="1"/></cols>'
+            .'<sheetData>'.$linhas.'</sheetData>'
+            .'<pageMargins left="0.511811024" right="0.511811024" top="0.78740157499999996" bottom="0.78740157499999996" header="0.31496062000000002" footer="0.31496062000000002"/>'
+            .'</worksheet>';
+    }
+
+    /**
+     * Acrescenta o estilo 14 (igual ao 6, mas com formato [h]:mm) para as horas acumuladas passarem de 24h.
+     */
+    private function adicionarEstiloHorasAcumuladas(string $styles): string
+    {
+        $styles = str_replace(
+            '<numFmts count="1">',
+            '<numFmts count="2"><numFmt numFmtId="164" formatCode="[h]:mm"/>',
+            $styles
+        );
+
+        return str_replace(
+            '</cellXfs>',
+            '<xf numFmtId="164" fontId="4" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf></cellXfs>',
+            str_replace('<cellXfs count="14">', '<cellXfs count="15">', $styles)
+        );
     }
 
     public function mobileTimer()
@@ -422,7 +498,7 @@ class ApontamentoController extends Controller
         $contrato->apontamentos()->create([
             'gh_contrato_item_id' => $validated['gh_contrato_item_id'],
             'user_id' => auth()->id(),
-            'descricao' => 'Apontamento iniciado via tela mobile.',
+            'descricao' => '',
             'data_realizacao' => now()->toDateString(),
             'minutos_gastos' => 0,
             'iniciado_em' => now(),

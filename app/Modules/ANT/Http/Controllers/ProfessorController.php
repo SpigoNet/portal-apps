@@ -15,9 +15,12 @@ use App\Modules\ANT\Models\AntPeso;
 use App\Modules\ANT\Models\AntTipoTrabalho;
 use App\Modules\ANT\Models\AntTrabalho;
 use App\Modules\ANT\Services\SemestreService;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class ProfessorController extends Controller
 {
@@ -67,6 +70,57 @@ class ProfessorController extends Controller
         return view('ANT::professores.index', compact('materiasProfessor', 'semestreAtual', 'user', 'isAdmin'));
     }
 
+    public function historico(Request $request): View
+    {
+        $userId = $request->user()->id;
+        abort_unless(DB::table('ant_professor_materia')->where('user_id', $userId)->exists(), 403);
+
+        $semestreAtual = SemestreService::getCurrent();
+        $consulta = AntTrabalho::query()
+            ->where('semestre', '<', $semestreAtual)
+            ->whereExists(function (Builder $query) use ($userId): void {
+                $query->selectRaw('1')->from('ant_professor_materia')
+                    ->where('user_id', $userId)
+                    ->whereColumn('ant_professor_materia.materia_id', 'ant_trabalhos.materia_id')
+                    ->whereColumn('ant_professor_materia.semestre', 'ant_trabalhos.semestre');
+            });
+
+        $semestres = (clone $consulta)->distinct()->orderByDesc('semestre')->pluck('semestre');
+        $validated = $request->validate([
+            'semestre' => ['nullable', 'string', Rule::in($semestres->all())],
+            'trabalho' => ['nullable', 'string', 'max:255'],
+            'disciplina' => ['nullable', 'string', 'max:255'],
+            'aluno' => ['nullable', 'string', 'max:255'],
+        ]);
+        $filtros = [
+            'trabalho' => trim($validated['trabalho'] ?? ''),
+            'disciplina' => trim($validated['disciplina'] ?? ''),
+            'aluno' => trim($validated['aluno'] ?? ''),
+        ];
+        if ($filtros['trabalho'] !== '') {
+            $consulta->whereLike('nome', '%'.$filtros['trabalho'].'%');
+        }
+        if ($filtros['disciplina'] !== '') {
+            $consulta->whereHas('materia', function ($query) use ($filtros): void {
+                $query->whereLike('nome', '%'.$filtros['disciplina'].'%');
+            });
+        }
+        if ($filtros['aluno'] !== '') {
+            $consulta->whereHas('entregas.aluno', function ($query) use ($filtros): void {
+                $query->where(function ($query) use ($filtros): void {
+                    $query->whereLike('nome', '%'.$filtros['aluno'].'%')
+                        ->orWhereLike('ra', '%'.$filtros['aluno'].'%');
+                });
+            });
+        }
+        $semestreSelecionado = $validated['semestre'] ?? $semestres->first();
+        $trabalhos = $consulta->when($semestreSelecionado, function ($query) use ($semestreSelecionado): void {
+            $query->where('semestre', $semestreSelecionado);
+        })->with('materia')->withCount('entregas')->orderBy('nome')->paginate(20)->withQueryString();
+
+        return view('ANT::professores.historico', compact('semestreAtual', 'semestres', 'semestreSelecionado', 'trabalhos', 'filtros'));
+    }
+
     // Lista de Entregas de um Trabalho Específico
     public function trabalho($id)
     {
@@ -79,6 +133,7 @@ class ProfessorController extends Controller
         $ehProfessorDestaMateria = DB::table('ant_professor_materia')
             ->where('user_id', $user->id)
             ->where('materia_id', $trabalho->materia_id)
+            ->where('semestre', $trabalho->semestre)
             ->exists();
 
         // (Opcional: Permitir se for Admin também)
@@ -89,7 +144,7 @@ class ProfessorController extends Controller
 
         // Busca todos os alunos matriculados nesta matéria para montar a lista completa
         // Mesmo quem não entregou deve aparecer na lista
-        $alunos = AntAluno::whereHas('materias', function ($q) use ($trabalho) {
+        $alunos = AntAluno::whereHas('historico', function ($q) use ($trabalho) {
             $q->where('ant_materias.id', $trabalho->materia_id)
                 ->where('ant_aluno_materia.semestre', $trabalho->semestre);
         })

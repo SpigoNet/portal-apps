@@ -59,6 +59,7 @@ Route::prefix('ant')
         Route::get('/boletim/{idMateria}', [AntHomeController::class, 'boletim'])->name('ant.aluno.boletim');
         Route::get('/prova/{idTrabalho}/resultado', [ProvaController::class, 'resultado'])->name('ant.prova.resultado');
 
+        Route::get('/unity/{idEntrega}/{fileIndex}/{path}', [CorrecaoController::class, 'unityArquivo'])->where('path', '.*')->name('ant.unity.arquivo');
         Route::get('/correcao/{idEntrega}/{fileIndex?}', [CorrecaoController::class, 'edit'])->name('ant.correcao.edit');
         Route::post('/correcao/{idEntrega}', [CorrecaoController::class, 'update'])->name('ant.correcao.update');
 
@@ -68,6 +69,7 @@ Route::prefix('ant')
         Route::prefix('professor')->group(function () {
             // Dashboard
             Route::get('/', [ProfessorController::class, 'index'])->name('ant.professor.index');
+            Route::get('/historico', [ProfessorController::class, 'historico'])->name('ant.professor.historico');
             Route::get('/semestre/{semestre}', [ProfessorController::class, 'setSemestre'])->name('ant.professor.semestre');
             Route::get('/novo-trabalho', [ProfessorController::class, 'create'])->name('ant.professor.create');
             Route::post('/novo-trabalho', [ProfessorController::class, 'store'])->name('ant.professor.store');

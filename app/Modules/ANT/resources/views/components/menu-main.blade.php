@@ -23,3 +23,8 @@
         Apresentações (Professor)
     </x-dropdown-link>
 @endif
+@if(\Illuminate\Support\Facades\DB::table('ant_professor_materia')->where('user_id', auth()->id())->exists())
+    <x-dropdown-link :href="route('ant.professor.historico')">
+        Histórico de trabalhos
+    </x-dropdown-link>
+@endif

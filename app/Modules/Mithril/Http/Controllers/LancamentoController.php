@@ -138,10 +138,16 @@ class LancamentoController extends Controller
         }
         // ---------------------------------
 
+        // Atualização dinâmica: devolve apenas as linhas da tabela já recalculadas
+        if ($request->boolean('_parcial')) {
+            return view('Mithril::lancamentos._linhas', compact('listaCombinada', 'mes', 'ano', 'contaId', 'saldoInicial'));
+        }
+
         $contas = Conta::all();
+        $contasNormais = $contas->where('tipo', 'normal')->sortBy('nome')->values();
 
         // Passamos também o $saldoInicial para a View
-        return view('Mithril::lancamentos.index', compact('listaCombinada', 'contas', 'mes', 'ano', 'contaId', 'saldoInicial'));
+        return view('Mithril::lancamentos.index', compact('listaCombinada', 'contas', 'contasNormais', 'mes', 'ano', 'contaId', 'saldoInicial'));
     }
 
     private function diffEmMeses($dataInicio, $dataAtual)

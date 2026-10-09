@@ -138,6 +138,13 @@ class PreTransacaoAcoesController extends Controller
 
         $transacao->delete();
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'data' => ['transacao_id' => (int) $id, 'pre_transacao_id' => $pt?->id],
+                'message' => 'Transação estornada com sucesso.',
+            ]);
+        }
+
         return redirect()->route('mithril.lancamentos.index', [
             'mes' => $request->input('mes', now()->month),
             'ano' => $request->input('ano', now()->year),
@@ -150,10 +157,16 @@ class PreTransacaoAcoesController extends Controller
      */
     public function efetivar(Request $request, $id)
     {
+        $request->validate(['data_efetiva' => 'nullable|date']);
+
         $pt = PreTransacao::findOrFail($id);
 
         $mes = $request->input('mes', now()->month);
         $ano = $request->input('ano', now()->year);
+
+        $dataEfetiva = $request->filled('data_efetiva')
+            ? Carbon::parse($request->input('data_efetiva'))
+            : Carbon::create($ano, $mes, $pt->dia_vencimento);
 
         $transacao = Transacao::create([
             'user_id' => auth()->id(),
@@ -161,7 +174,7 @@ class PreTransacaoAcoesController extends Controller
             'pre_transacao_id' => $pt->id,
             'descricao' => $pt->descricao,
             'valor' => $pt->valor_parcela,
-            'data_efetiva' => Carbon::create($ano, $mes, $pt->dia_vencimento)->format('Y-m-d'),
+            'data_efetiva' => $dataEfetiva->format('Y-m-d'),
         ]);
 
         if ($pt->tipo === 'parcelada') {

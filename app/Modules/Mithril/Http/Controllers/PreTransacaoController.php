@@ -40,6 +40,7 @@ class PreTransacaoController extends Controller
 
         $dados = $request->all();
         $dados['user_id'] = auth()->id();
+        $dados['data_inicio'] = $request->input('data_inicio') ?: now()->toDateString();
 
         // Ajusta o sinal do valor (Débito vira negativo)
         $valorLimpo = $this->limparValor($request->valor_parcela);
@@ -51,7 +52,14 @@ class PreTransacaoController extends Controller
             $dados['parcela_atual'] = 0;
         }
 
-        PreTransacao::create($dados);
+        $preTransacao = PreTransacao::create($dados);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'data' => ['id' => $preTransacao->id],
+                'message' => 'Pré-transação criada com sucesso.',
+            ], 201);
+        }
 
         return redirect()->route('mithril.pre-transacoes.index')
             ->with('success', 'Pré-transação criada com sucesso.');

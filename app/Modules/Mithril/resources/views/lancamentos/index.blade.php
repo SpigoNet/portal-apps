@@ -1,4 +1,10 @@
 <x-Mithril::layout>
+    @php
+        $classeInput = 'w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2 text-sm text-slate-200 focus:ring-mithril-accent focus:border-mithril-accent transition-colors';
+        $classeLabel = 'block elf-title text-[9px] text-slate-400 mb-2';
+        $classeBtnCancelar = 'px-4 py-2 rounded-lg border border-white/5 text-slate-300 hover:bg-white/5 transition';
+    @endphp
+
     <x-slot name="header">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
             <div class="flex items-center gap-3">
@@ -13,10 +19,10 @@
                     </h2>
                 </div>
             </div>
-            <a href="{{ route('mithril.pre-transacoes.create') }}" class="btn-elf text-white">
+            <button type="button" id="novo-lancamento-btn" class="btn-elf text-white">
                 <i class="fa-solid fa-plus mr-2"></i>
                 Novo Lançamento
-            </a>
+            </button>
         </div>
     </x-slot>
 
@@ -24,29 +30,26 @@
         {{-- Filtros --}}
         <div class="mithril-theme-surface rounded-2xl border border-white/5 overflow-hidden">
             <div class="p-6">
-                <form method="GET" action="{{ route('mithril.lancamentos.index') }}"
+                <form method="GET" id="filtros-form" action="{{ route('mithril.lancamentos.index') }}"
                     class="flex flex-wrap gap-6 items-end">
 
                     <div class="flex-1 min-w-[200px]">
-                        <label class="block elf-title text-[9px] text-slate-400 mb-2">Período de Referência</label>
+                        <label class="{{ $classeLabel }}">Período de Referência</label>
                         <div class="flex gap-2">
-                            <select name="mes"
-                                class="flex-1 rounded-lg border-white/10 bg-black/20 text-slate-200 focus:ring-mithril-accent focus:border-mithril-accent text-sm transition-colors">
+                            <select name="mes" class="flex-1 {{ $classeInput }}">
                                 @foreach (range(1, 12) as $m)
                                     <option value="{{ $m }}" {{ $m == $mes ? 'selected' : '' }}>
                                         {{ date('F', mktime(0, 0, 0, $m, 1)) }}
                                     </option>
                                 @endforeach
                             </select>
-                            <input type="number" name="ano" value="{{ $ano }}"
-                                class="w-24 rounded-lg border-white/10 bg-black/20 text-slate-200 focus:ring-mithril-accent focus:border-mithril-accent text-sm transition-colors">
+                            <input type="number" name="ano" value="{{ $ano }}" class="w-24 {{ $classeInput }}">
                         </div>
                     </div>
 
                     <div class="flex-1 min-w-[200px]">
-                        <label class="block elf-title text-[9px] text-slate-400 mb-2">Filtrar por Conta</label>
-                        <select name="conta_id"
-                            class="w-full rounded-lg border-white/10 bg-black/20 text-slate-200 focus:ring-mithril-accent focus:border-mithril-accent text-sm transition-colors">
+                        <label class="{{ $classeLabel }}">Filtrar por Conta</label>
+                        <select name="conta_id" class="{{ $classeInput }}">
                             <option value="">Todas as Contas</option>
                             @foreach ($contas as $c)
                                 <option value="{{ $c->id }}" {{ $contaId == $c->id ? 'selected' : '' }}>
@@ -60,8 +63,9 @@
                         <i class="fa-solid fa-filter mr-2"></i>
                         Filtrar
                     </button>
-                    
-                    <button type="button" id="toggle-efetivados-btn" class="btn-elf text-white bg-black/20 px-4 py-1.5 rounded-lg"
+
+                    <button type="button" id="toggle-efetivados-btn"
+                        class="btn-elf text-white bg-black/20 px-4 py-1.5 rounded-lg"
                         title="Oculta/mostra lançamentos já efetivados">
                         <i class="fa-solid fa-eye-slash mr-2"></i>
                         Ocultar Efetivados
@@ -73,604 +77,526 @@
         {{-- Tabela --}}
         <div class="mithril-theme-surface rounded-2xl border border-white/5 overflow-hidden">
             <div class="overflow-x-auto mobile-stack">
-                <table class="min-w-full divide-y divide-white/5">
+                <table id="tabela-lancamentos" class="min-w-full divide-y divide-white/5">
                     <thead>
                         <tr class="bg-black/20">
                             <th class="px-6 py-4 text-left elf-title text-[9px] text-slate-400">Data</th>
                             <th class="px-6 py-4 text-left elf-title text-[9px] text-slate-400">Descrição / Conta</th>
                             <th class="px-6 py-4 text-right elf-title text-[9px] text-slate-400">Valor</th>
-                            <th
-                                class="px-6 py-4 text-right elf-title text-[9px] text-slate-400 border-l border-white/5">
+                            <th class="px-6 py-4 text-right elf-title text-[9px] text-slate-400 border-l border-white/5">
                                 Saldo Real</th>
                             <th class="px-6 py-4 text-right elf-title text-[9px] text-slate-400">Saldo Prev.</th>
                             <th class="px-6 py-4 text-center elf-title text-[9px] text-slate-400">Ações</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-white/5">
-
-                        <tr class="bg-white/5 italic">
-                            <td class="px-6 py-3 text-sm text-slate-400" data-label="Data">
-                                01/{{ str_pad($mes, 2, '0', STR_PAD_LEFT) }}</td>
-                            <td class="px-6 py-3 text-sm text-slate-300" data-label="Descrição">Saldo Inicial do Período
-                            </td>
-                            <td class="px-6 py-3 text-right text-sm" data-label="Valor">--</td>
-                            <td class="px-6 py-3 text-right text-sm border-l border-white/5 {{ $saldoInicial >= 0 ? 'text-emerald-400' : 'text-rose-400' }}"
-                                data-label="Saldo Real">
-                                R$ {{ number_format($saldoInicial, 2, ',', '.') }}
-                            </td>
-                            <td class="px-6 py-3 text-right text-sm {{ $saldoInicial >= 0 ? 'text-emerald-400' : 'text-rose-400' }}"
-                                data-label="Saldo Prev.">
-                                R$ {{ number_format($saldoInicial, 2, ',', '.') }}
-                            </td>
-                            <td data-label="Ações"></td>
-                        </tr>
-
-                        @forelse($listaCombinada as $index => $item)
-                            @php
-                                $proximoItem = $listaCombinada->get($index + 1);
-                                $ultimoDoDia =
-                                    !$proximoItem ||
-                                    $proximoItem->data_efetiva->format('Y-m-d') != $item->data_efetiva->format('Y-m-d');
-
-                                $rowClass = '';
-                                if ($item->status === 'confirmado') {
-                                    $rowClass = 'bg-amber-500/5';
-                                } elseif ($item->status === 'pendente') {
-                                    $rowClass = 'bg-orange-500/5';
-                                }
-                            @endphp
-
-                            <tr class="{{ $rowClass }} hover:bg-white/5 transition duration-150 row-selectable"
-                                data-valor="{{ $item->valor }}" data-status="{{ $item->status }}" data-index="{{ $index }}" data-dia="{{ $item->dia_vencimento }}" data-conta-id="{{ $item->conta->id }}">
-                                <td class="px-6 py-4 whitespace-nowrap" data-label="Data">
-                                    <div class="flex flex-col">
-                                        <span
-                                            class="text-sm font-bold text-slate-200">{{ $item->data_efetiva->format('d/m') }}</span>
-                                        <span
-                                            class="text-[10px] text-slate-500 uppercase tracking-widest">{{ $item->data_efetiva->translatedFormat('D') }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4" data-label="Descrição">
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-medium text-slate-200">
-                                            {{ $item->descricao }}
-                                            @if ($item->meta_parcela)
-                                                <span
-                                                    class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-black bg-white/5 text-slate-400 border border-white/5">
-                                                    {{ $item->meta_parcela }}
-                                                </span>
-                                            @endif
-                                        </span>
-                                        <span class="text-xs text-slate-500">{{ $item->conta->nome }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-black {{ $item->valor >= 0 ? 'text-emerald-400' : 'text-rose-400' }}"
-                                    data-label="Valor">
-                                    {{ $item->valor >= 0 ? '+' : '' }} R$
-                                    {{ number_format($item->valor, 2, ',', '.') }}
-                                </td>
-
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right border-l border-white/5"
-                                    data-label="Saldo Real">
-                                    @if ($ultimoDoDia)
-                                        <span
-                                            class="font-bold {{ $item->saldo_acumulado_efetivado >= 0 ? 'text-emerald-400' : 'text-rose-400' }}">
-                                            R$ {{ number_format($item->saldo_acumulado_efetivado, 2, ',', '.') }}
-                                        </span>
-                                    @else
-                                        <span class="text-slate-700">--</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right" data-label="Saldo Prev.">
-                                    @if ($ultimoDoDia)
-                                        <span
-                                            class="font-medium {{ $item->saldo_acumulado_previsto >= 0 ? 'text-slate-300' : 'text-rose-400' }}">
-                                            R$ {{ number_format($item->saldo_acumulado_previsto, 2, ',', '.') }}
-                                        </span>
-                                    @else
-                                        <span class="text-slate-700">--</span>
-                                    @endif
-                                </td>
-
-                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium"
-                                    data-label="Ações">
-                                    <div class="flex justify-center items-center gap-2">
-                                            @if ($item->tipo === 'projetado')
-                                                @if ($item->status === 'pendente')
-                                                    @php
-                                                        $isCredito = $item->valor >= 0;
-                                                        $acaoLabel = $isCredito ? 'Recebi hoje' : 'Paguei agora';
-                                                        $acaoTitle = $isCredito ? 'confirma e recebe na data atual' : 'confirma e paga na data atual';
-                                                    @endphp
-                                                    <form
-                                                        action="{{ route('mithril.pre-transacoes.paguei-agora', ['id' => $item->pre_transacao_id]) }}"
-                                                        method="POST" class="inline">
-                                                        @csrf
-                                                        <input type="hidden" name="valor" value="{{ $item->valor }}">
-                                                        <input type="hidden" name="mes" value="{{ $mes }}">
-                                                        <input type="hidden" name="ano" value="{{ $ano }}">
-                                                        <input type="hidden" name="conta_id" value="{{ $contaId }}">
-                                                        <button type="submit"
-                                                            class="p-2 bg-violet-500/20 text-violet-300 rounded-lg hover:bg-violet-500 hover:text-white transition shadow-lg border border-violet-500/20"
-                                                            title="{{ $acaoTitle }}">
-                                                            <i class="fa-solid fa-bolt text-xs"></i>
-                                                        </button>
-                                                    </form>
-                                                    <a href="{{ route('mithril.pre-transacoes.form-confirmar', ['id' => $item->pre_transacao_id, 'mes' => $mes, 'ano' => $ano, 'conta_id' => $contaId]) }}"
-                                                        class="p-2 bg-amber-500/20 text-amber-400 rounded-lg hover:bg-amber-500 hover:text-white transition shadow-lg border border-amber-500/20 js-open-confirm"
-                                                        title="Confirmar Valor"
-                                                        data-pt-id="{{ $item->pre_transacao_id }}"
-                                                        data-confirm-url="{{ route('mithril.pre-transacoes.confirmar', ['id' => $item->pre_transacao_id]) }}"
-                                                        data-mes="{{ $mes }}" data-ano="{{ $ano }}" data-conta-id="{{ $contaId }}">
-                                                        <i class="fa-solid fa-pen-to-square text-xs"></i>
-                                                    </a>
-                                                @elseif($item->status === 'confirmado')
-                                                    <form
-                                                        action="{{ route('mithril.pre-transacoes.efetivar', ['id' => $item->pre_transacao_id]) }}"
-                                                        method="POST" class="inline">
-                                                        @csrf
-                                                        <input type="hidden" name="mes" value="{{ $mes }}">
-                                                        <input type="hidden" name="ano" value="{{ $ano }}">
-                                                        <input type="hidden" name="conta_id" value="{{ $contaId }}">
-                                                        <button type="submit"
-                                                            class="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500 hover:text-white transition shadow-lg border border-emerald-500/20 js-efetivar-btn"
-                                                            data-pt-id="{{ $item->pre_transacao_id }}"
-                                                            title="Pagar / Efetivar">
-                                                            <i class="fa-solid fa-check text-xs"></i>
-                                                        </button>
-                                                    </form>
-                                                    <a href="{{ route('mithril.pre-transacoes.form-confirmar', ['id' => $item->pre_transacao_id, 'mes' => $mes, 'ano' => $ano, 'conta_id' => $contaId]) }}"
-                                                        class="text-slate-500 hover:text-slate-300 transition js-open-confirm"
-                                                        data-pt-id="{{ $item->pre_transacao_id }}"
-                                                        data-confirm-url="{{ route('mithril.pre-transacoes.confirmar', ['id' => $item->pre_transacao_id]) }}"
-                                                        data-mes="{{ $mes }}" data-ano="{{ $ano }}" data-conta-id="{{ $contaId }}">
-                                                        <i class="fa-solid fa-ellipsis-vertical"></i>
-                                                    </a>
-                                                @endif
-                                            @else
-                                            <div class="flex items-center gap-2">
-                                                <div
-                                                    class="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full elf-title text-[8px] flex items-center gap-1 border border-emerald-500/20">
-                                                    <i class="fa-solid fa-check-double text-[8px]"></i>
-                                                    Efetivado
-                                                </div>
-                                                <form
-                                                    action="{{ route('mithril.transacoes.estornar', ['id' => $item->id]) }}"
-                                                    method="POST" class="inline">
-                                                    @csrf
-                                                    <input type="hidden" name="mes" value="{{ $mes }}">
-                                                    <input type="hidden" name="ano" value="{{ $ano }}">
-                                                    <input type="hidden" name="conta_id" value="{{ $contaId }}">
-                                                    <button type="submit"
-                                                        class="p-2 bg-rose-500/20 text-rose-400 rounded-lg hover:bg-rose-500 hover:text-white transition shadow-lg border border-rose-500/20"
-                                                        title="Estornar (desfazer efetivação)"
-                                                        onclick="return confirm('Tem certeza que deseja estornar esta transação?')">
-                                                        <i class="fa-solid fa-rotate-left text-xs"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="px-6 py-20 text-center">
-                                    <div class="flex flex-col items-center gap-4">
-                                        <i class="fa-solid fa-scroll text-5xl text-slate-800"></i>
-                                        <span class="text-slate-500 font-medium italic">Nenhum lançamento encontrado em
-                                            seus registros.</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
+                    <tbody id="lancamentos-linhas" class="divide-y divide-white/5">
+                        @include('Mithril::lancamentos._linhas')
                     </tbody>
                 </table>
             </div>
         </div>
-
     </div>
 
-    <!-- Selected sum overlay -->
-    <div id="selected-sum-overlay" class="hidden fixed bottom-6 right-6 z-50">
+    {{-- Soma dos selecionados --}}
+    <div id="selected-sum-overlay" class="hidden fixed bottom-6 right-6 z-40">
         <div class="mithril-theme-surface px-4 py-3 rounded-xl shadow-lg text-sm flex flex-col items-end gap-0.5">
             <div class="flex items-center gap-2">
                 <div class="text-slate-400 text-xs" id="selected-count">0 selecionado(s)</div>
-                <button type="button" id="clear-selection-btn" class="text-slate-600 hover:text-slate-300 transition text-xs" title="Limpar seleção">
+                <button type="button" id="clear-selection-btn"
+                    class="text-slate-600 hover:text-slate-300 transition text-xs" title="Limpar seleção">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
             <div class="flex flex-col items-end gap-0.5 mt-1">
                 <div class="text-emerald-400 font-semibold text-sm" id="selected-credits">Créditos: R$ 0,00</div>
                 <div class="text-rose-400 font-semibold text-sm" id="selected-debits">Débitos: R$ 0,00</div>
-                <div class="text-white font-bold text-lg border-t border-white/10 pt-1 w-full text-right" id="selected-sum">R$ 0,00</div>
+                <div class="text-white font-bold text-lg border-t border-white/10 pt-1 w-full text-right"
+                    id="selected-sum">R$ 0,00</div>
             </div>
         </div>
     </div>
 
+    {{-- Aviso de sucesso/erro --}}
+    <div id="toast" role="status"
+        class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] px-4 py-2 rounded-lg text-sm font-medium shadow-lg"></div>
+
+    {{-- Diálogo: confirmar valor e data --}}
+    <dialog id="dlg-confirmar" class="mithril-theme-surface text-slate-200 rounded-xl p-6 w-full max-w-md backdrop:bg-black/60">
+        <form method="dialog" id="form-confirmar" class="space-y-4">
+            <h3 class="text-lg font-bold">Confirmar lançamento</h3>
+            <p class="text-sm text-slate-400" data-campo="descricao"></p>
+            <div>
+                <label class="{{ $classeLabel }}">Valor</label>
+                <input name="valor" type="number" step="0.01" required class="{{ $classeInput }}">
+            </div>
+            <div class="flex gap-2 items-end">
+                <div class="flex-1">
+                    <label class="{{ $classeLabel }}">Data</label>
+                    <input name="data_vencimento" type="date" required class="{{ $classeInput }}">
+                </div>
+                <button type="button" data-hoje class="btn-elf text-white px-3 py-2">Hoje</button>
+            </div>
+            <p class="text-sm text-rose-400 hidden" data-erro></p>
+            <div class="flex justify-end gap-2">
+                <button type="button" data-fechar class="{{ $classeBtnCancelar }}">Cancelar</button>
+                <button type="submit" class="btn-elf text-white">Salvar</button>
+            </div>
+        </form>
+    </dialog>
+
+    {{-- Diálogo: efetivar --}}
+    <dialog id="dlg-efetivar" class="mithril-theme-surface text-slate-200 rounded-xl p-6 w-full max-w-md backdrop:bg-black/60">
+        <form method="dialog" id="form-efetivar" class="space-y-4">
+            <h3 class="text-lg font-bold">Efetivar lançamento</h3>
+            <div>
+                <div class="text-sm text-slate-400">Descrição</div>
+                <div class="text-sm font-medium" data-campo="descricao"></div>
+            </div>
+            <div>
+                <div class="text-sm text-slate-400">Valor</div>
+                <div class="text-lg font-bold text-white" data-campo="valor"></div>
+            </div>
+            <div class="flex gap-2 items-end">
+                <div class="flex-1">
+                    <label class="{{ $classeLabel }}">Data efetiva</label>
+                    <input name="data_efetiva" type="date" required class="{{ $classeInput }}">
+                </div>
+                <button type="button" data-hoje class="btn-elf text-white px-3 py-2">Hoje</button>
+            </div>
+            <p class="text-sm text-rose-400 hidden" data-erro></p>
+            <div class="flex justify-end gap-2">
+                <button type="button" data-fechar class="{{ $classeBtnCancelar }}">Cancelar</button>
+                <button type="submit" class="btn-elf text-white">Confirmar</button>
+            </div>
+        </form>
+    </dialog>
+
+    {{-- Diálogo: estornar --}}
+    <dialog id="dlg-estornar" class="mithril-theme-surface text-slate-200 rounded-xl p-6 w-full max-w-md backdrop:bg-black/60">
+        <form method="dialog" id="form-estornar" class="space-y-4">
+            <h3 class="text-lg font-bold">Estornar transação</h3>
+            <p class="text-sm text-slate-300">
+                Desfazer a efetivação de <strong data-campo="descricao"></strong>
+                (<span data-campo="valor"></span>)? A transação será apagada e o lançamento volta a ser previsto.
+            </p>
+            <p class="text-sm text-rose-400 hidden" data-erro></p>
+            <div class="flex justify-end gap-2">
+                <button type="button" data-fechar class="{{ $classeBtnCancelar }}">Cancelar</button>
+                <button type="submit" class="px-4 py-2 rounded-lg bg-rose-500/80 hover:bg-rose-500 text-white font-bold transition">Estornar</button>
+            </div>
+        </form>
+    </dialog>
+
+    {{-- Diálogo: novo lançamento --}}
+    <dialog id="dlg-novo" class="mithril-theme-surface text-slate-200 rounded-xl p-6 w-full max-w-lg backdrop:bg-black/60">
+        <form method="dialog" id="form-novo" class="space-y-4">
+            <h3 class="text-lg font-bold">Novo lançamento</h3>
+
+            <div>
+                <label class="{{ $classeLabel }}">Descrição</label>
+                <input name="descricao" type="text" required maxlength="255" class="{{ $classeInput }}"
+                    placeholder="Ex: Assinatura Netflix, Aluguel, etc">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="{{ $classeLabel }}">Valor da parcela (R$)</label>
+                    <input name="valor_parcela" type="text" inputmode="decimal" required placeholder="0,00"
+                        class="{{ $classeInput }} text-right">
+                </div>
+                <div>
+                    <label class="{{ $classeLabel }}">Dia do vencimento</label>
+                    <input name="dia_vencimento" type="number" min="1" max="31" required class="{{ $classeInput }}">
+                </div>
+            </div>
+
+            <div>
+                <label class="{{ $classeLabel }}">Conta</label>
+                <select name="conta_id" required class="{{ $classeInput }}">
+                    @foreach ($contasNormais as $c)
+                        <option value="{{ $c->id }}" {{ $contaId == $c->id ? 'selected' : '' }}>{{ $c->nome }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="{{ $classeLabel }}">Operação</label>
+                    <select name="operacao" class="{{ $classeInput }}">
+                        <option value="debito">Débito / Despesa</option>
+                        <option value="credito">Crédito / Receita</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="{{ $classeLabel }}">Modelo</label>
+                    <select name="tipo" class="{{ $classeInput }}">
+                        <option value="recorrente">Mensal (fixo)</option>
+                        <option value="parcelada">Parcelado</option>
+                    </select>
+                </div>
+            </div>
+
+            <div data-parcelas class="hidden grid grid-cols-2 gap-4">
+                <div>
+                    <label class="{{ $classeLabel }}">Total de parcelas</label>
+                    <input name="total_parcelas" type="number" min="1" class="{{ $classeInput }}">
+                </div>
+                <div>
+                    <label class="{{ $classeLabel }}">Primeiro vencimento</label>
+                    <input name="data_inicio" type="date" class="{{ $classeInput }}">
+                </div>
+            </div>
+
+            <p class="text-sm text-rose-400 hidden" data-erro></p>
+            <div class="flex justify-end gap-2">
+                <button type="button" data-fechar class="{{ $classeBtnCancelar }}">Cancelar</button>
+                <button type="submit" class="btn-elf text-white">Cadastrar</button>
+            </div>
+        </form>
+    </dialog>
+
     <style>
         .selected-row {
-            background-color: rgba(255,255,255,0.04) !important;
-            box-shadow: inset 0 0 0 1px rgba(99,102,241,0.06);
+            background-color: rgba(255, 255, 255, 0.04) !important;
+            box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.06);
         }
+
         table[data-hide-efetivados="true"] tr[data-status="efetivado"] {
             display: none;
         }
+
         #selected-sum-overlay .mithril-theme-surface {
             min-width: 220px;
         }
+
+        #lancamentos-linhas.carregando {
+            opacity: .55;
+            transition: opacity .15s;
+        }
+
+        @keyframes destaque-linha {
+            from { box-shadow: inset 0 0 0 2px rgba(125, 211, 252, .8); }
+            to { box-shadow: inset 0 0 0 2px rgba(125, 211, 252, 0); }
+        }
+
+        .linha-destaque {
+            animation: destaque-linha 1.6s ease-out;
+        }
     </style>
-
-    <!-- Confirm / Efetivar modals -->
-    <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/60"></div>
-        <div class="relative mithril-theme-surface rounded-xl p-6 w-full max-w-md z-10">
-            <h3 class="text-lg font-bold mb-3">Confirmar lançamento</h3>
-            <form id="confirm-form">
-                <input type="hidden" id="confirm-pt-id" name="pt_id">
-                <input type="hidden" id="confirm-mes" name="mes" value="{{ $mes }}">
-                <input type="hidden" id="confirm-ano" name="ano" value="{{ $ano }}">
-                <input type="hidden" id="confirm-conta-id" name="conta_id">
-
-                <div class="mb-3">
-                    <label class="block text-sm text-slate-400 mb-1">Valor</label>
-                    <input id="confirm-valor" name="valor" type="number" step="0.01"
-                        class="w-full rounded-lg bg-black/10 border border-white/5 px-3 py-2 text-white">
-                </div>
-
-                <div class="mb-4 flex gap-2 items-end">
-                    <div class="flex-1">
-                        <label class="block text-sm text-slate-400 mb-1">Data</label>
-                        <input id="confirm-data" name="data_vencimento" type="date"
-                            class="w-full rounded-lg bg-black/10 border border-white/5 px-3 py-2 text-white">
-                    </div>
-                    <div>
-                        <button type="button" id="confirm-use-today"
-                            class="btn-elf text-white px-3 py-2">Hoje</button>
-                    </div>
-                </div>
-
-                <div class="flex justify-end gap-2">
-                    <button type="button" id="confirm-cancel"
-                        class="px-4 py-2 rounded-lg border border-white/5 text-slate-300">Cancelar</button>
-                    <button type="submit" id="confirm-submit"
-                        class="btn-elf text-white">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="efetivar-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/60"></div>
-        <div class="relative mithril-theme-surface rounded-xl p-6 w-full max-w-md z-10">
-            <h3 class="text-lg font-bold mb-3">Efetivar lançamento</h3>
-            <div class="mb-3 text-sm text-slate-300">Confirme os dados antes de registrar o pagamento.</div>
-            <form id="efetivar-form">
-                <input type="hidden" id="efetivar-pt-id" name="pt_id">
-                <input type="hidden" id="efetivar-mes" name="mes" value="{{ $mes }}">
-                <input type="hidden" id="efetivar-ano" name="ano" value="{{ $ano }}">
-                <input type="hidden" id="efetivar-conta-id" name="conta_id">
-
-                <div class="mb-2">
-                    <div class="text-sm text-slate-400">Descrição</div>
-                    <div id="efetivar-desc" class="text-sm font-medium text-slate-200"></div>
-                </div>
-
-                <div class="mb-3">
-                    <div class="text-sm text-slate-400">Valor</div>
-                    <div id="efetivar-valor" class="text-lg font-bold text-white"></div>
-                </div>
-
-                <div class="mb-4 flex gap-2 items-end">
-                    <div class="flex-1">
-                        <label class="block text-sm text-slate-400 mb-1">Data efetiva</label>
-                        <input id="efetivar-data" name="data_efetiva" type="date"
-                            class="w-full rounded-lg bg-black/10 border border-white/5 px-3 py-2 text-white">
-                    </div>
-                    <div>
-                        <button type="button" id="efetivar-use-today" class="btn-elf text-white px-3 py-2">Hoje</button>
-                    </div>
-                </div>
-
-                <div class="flex justify-end gap-2">
-                    <button type="button" id="efetivar-cancel"
-                        class="px-4 py-2 rounded-lg border border-white/5 text-slate-300">Cancelar</button>
-                    <button type="submit" id="efetivar-confirm" class="btn-elf text-white">Confirmar</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const URL_LISTA = @json(route('mithril.lancamentos.index'));
+            const URL_BASE = @json(url('/mithril'));
+            const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+            const filtrosForm = document.getElementById('filtros-form');
+            const tabela = document.getElementById('tabela-lancamentos');
+            const corpo = document.getElementById('lancamentos-linhas');
             const toggleBtn = document.getElementById('toggle-efetivados-btn');
-            const table = document.querySelector('table.min-w-full');
-            const rows = Array.from(document.querySelectorAll('tbody tr.row-selectable'));
             const overlay = document.getElementById('selected-sum-overlay');
-            const selectedSumEl = document.getElementById('selected-sum');
-            const selectedCountEl = document.getElementById('selected-count');
-            const confirmModal = document.getElementById('confirm-modal');
-            const confirmForm = document.getElementById('confirm-form');
-            const confirmPtId = document.getElementById('confirm-pt-id');
-            const confirmValor = document.getElementById('confirm-valor');
-            const confirmData = document.getElementById('confirm-data');
-            const confirmContaId = document.getElementById('confirm-conta-id');
+            const toastEl = document.getElementById('toast');
 
-            const efetivarModal = document.getElementById('efetivar-modal');
-            const efetivarForm = document.getElementById('efetivar-form');
-            const efetivarPtId = document.getElementById('efetivar-pt-id');
-            const efetivarDesc = document.getElementById('efetivar-desc');
-            const efetivarValor = document.getElementById('efetivar-valor');
-            const efetivarData = document.getElementById('efetivar-data');
-            const efetivarContaId = document.getElementById('efetivar-conta-id');
+            const hoje = () => {
+                const d = new Date();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                return `${d.getFullYear()}-${mm}-${dd}`;
+            };
+            const moeda = v => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
-            let activeRow = null; // referência à linha atualmente em edição
-
-            function formatCurrency(value) {
-                return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+            // ---------- Aviso ----------
+            let toastTimer = null;
+            function avisar(mensagem, erro = false) {
+                toastEl.textContent = mensagem;
+                toastEl.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] px-4 py-2 rounded-lg text-sm font-medium shadow-lg '
+                    + (erro ? 'bg-rose-600 text-white' : 'bg-emerald-600 text-white');
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => toastEl.classList.add('hidden'), 3500);
             }
 
-            function updateOverlay() {
-                const selected = rows.filter(r => r.classList.contains('selected-row'));
-                const creditsEl = document.getElementById('selected-credits');
-                const debitsEl = document.getElementById('selected-debits');
-                if (selected.length === 0) {
+            // ---------- Requisições ----------
+            function filtrosAtuais() {
+                const dados = new FormData(filtrosForm);
+                return {
+                    mes: dados.get('mes') || '',
+                    ano: dados.get('ano') || '',
+                    conta_id: dados.get('conta_id') || '',
+                };
+            }
+
+            async function enviar(url, dados) {
+                const corpoReq = new FormData();
+                Object.entries(dados).forEach(([k, v]) => corpoReq.append(k, v ?? ''));
+                const resp = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                    body: corpoReq,
+                    credentials: 'same-origin',
+                });
+                const json = await resp.json().catch(() => ({}));
+                if (!resp.ok) {
+                    const erros = json.errors ? Object.values(json.errors).flat() : [];
+                    throw new Error(erros[0] || json.message || 'Não foi possível concluir a operação.');
+                }
+                return json;
+            }
+
+            // ---------- Seleção (soma) ----------
+            const selecionadas = new Set();
+            const chaveLinha = tr => tr.dataset.ptId ? 'pt:' + tr.dataset.ptId : 'tx:' + tr.dataset.txId;
+            const linhas = () => Array.from(corpo.querySelectorAll('tr.row-selectable'));
+
+            function atualizarSoma() {
+                const marcadas = linhas().filter(r => r.classList.contains('selected-row'));
+                if (marcadas.length === 0) {
                     overlay.classList.add('hidden');
-                    selectedSumEl.textContent = formatCurrency(0);
-                    selectedCountEl.textContent = '0 selecionado(s)';
                     return;
                 }
-                let credits = 0, debits = 0;
-                selected.forEach(r => {
+                let creditos = 0, debitos = 0;
+                marcadas.forEach(r => {
                     const v = parseFloat(r.dataset.valor || 0);
-                    if (v > 0) credits += v;
-                    else debits += v;
+                    if (v > 0) creditos += v; else debitos += v;
                 });
-                const total = credits + debits;
-                creditsEl.textContent = 'Créditos: ' + formatCurrency(credits);
-                debitsEl.textContent = 'Débitos: ' + formatCurrency(debits);
-                selectedSumEl.textContent = formatCurrency(total);
-                selectedCountEl.textContent = selected.length + ' selecionado(s)';
+                document.getElementById('selected-credits').textContent = 'Créditos: ' + moeda(creditos);
+                document.getElementById('selected-debits').textContent = 'Débitos: ' + moeda(debitos);
+                document.getElementById('selected-sum').textContent = moeda(creditos + debitos);
+                document.getElementById('selected-count').textContent = marcadas.length + ' selecionado(s)';
                 overlay.classList.remove('hidden');
             }
 
-            // Row click selection; ignore clicks on interactive elements
-            rows.forEach(r => {
-                r.addEventListener('click', function (e) {
-                    if (e.target.closest('a, button, form, input, select')) return;
-                    r.classList.toggle('selected-row');
-                    updateOverlay();
+            function reaplicarSelecao() {
+                const existentes = new Set();
+                linhas().forEach(r => {
+                    const chave = chaveLinha(r);
+                    existentes.add(chave);
+                    r.classList.toggle('selected-row', selecionadas.has(chave));
                 });
+                selecionadas.forEach(c => { if (!existentes.has(c)) selecionadas.delete(c); });
+                atualizarSoma();
+            }
+
+            document.getElementById('clear-selection-btn')?.addEventListener('click', () => {
+                selecionadas.clear();
+                reaplicarSelecao();
             });
 
-            // Clear selection button
-            document.getElementById('clear-selection-btn').addEventListener('click', function () {
-                rows.forEach(r => r.classList.remove('selected-row'));
-                updateOverlay();
-            });
-
-            // Prevent action buttons from selecting the row
-            document.querySelectorAll('tbody tr.row-selectable a, tbody tr.row-selectable button, tbody tr.row-selectable form').forEach(el => {
-                el.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                });
-            });
-
-            // Delegated handler: Open confirm modal
-            document.addEventListener('click', function (e) {
-                const a = e.target.closest('a.js-open-confirm');
-                if (!a) return;
-                e.preventDefault();
-                const ptId = a.dataset.ptId;
-                const row = a.closest('tr');
-                activeRow = row;
-
-                // preenche valores
-                confirmPtId.value = ptId;
-                confirmValor.value = parseFloat(row.dataset.valor || 0).toFixed(2);
-                const dia = row.dataset.dia;
-                if (dia) {
-                    // usa ano/mes atuais do filtro
-                    const y = document.getElementById('confirm-ano').value || new Date().getFullYear();
-                    const m = document.getElementById('confirm-mes').value || (new Date().getMonth()+1);
-                    // pad
-                    const mm = String(m).padStart(2, '0');
-                    const dd = String(dia).padStart(2, '0');
-                    confirmData.value = `${y}-${mm}-${dd}`;
-                } else {
-                    confirmData.value = new Date().toISOString().slice(0,10);
-                }
-                confirmContaId.value = a.dataset.contaId || document.getElementById('confirm-conta-id').value || '';
-                confirmModal.classList.remove('hidden');
-            });
-
-            // confirm modal - use today
-            document.getElementById('confirm-use-today').addEventListener('click', function () {
-                confirmData.value = new Date().toISOString().slice(0,10);
-            });
-
-            document.getElementById('confirm-cancel').addEventListener('click', function () {
-                confirmModal.classList.add('hidden');
-            });
-
-            // submit confirm via AJAX
-            confirmForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-                const ptId = confirmPtId.value;
-                const url = document.querySelector('a.js-open-confirm[data-pt-id="' + ptId + '"]')?.dataset.confirmUrl || `/mithril/pre-transacao/${ptId}/confirmar`;
-                const data = new FormData();
-                data.append('valor', confirmValor.value);
-                data.append('data_vencimento', confirmData.value);
-                data.append('mes', document.getElementById('confirm-mes').value || '{{ $mes }}');
-                data.append('ano', document.getElementById('confirm-ano').value || '{{ $ano }}');
-                data.append('conta_id', confirmContaId.value || '');
-
-                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrf,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: data,
-                    credentials: 'same-origin'
-                }).then(r => r.json()).then(json => {
-                    if (json?.data) {
-                        // atualiza a linha
-                        const row = activeRow;
-                        if (row) {
-                            row.dataset.valor = json.data.valor_parcela;
-                            row.dataset.status = json.data.status || 'confirmado';
-                            // atualiza célula de valor (3rd td)
-                            const valorTd = row.querySelector('td[data-label="Valor"]');
-                            if (valorTd) {
-                                const v = parseFloat(json.data.valor_parcela || 0);
-                                const sign = v >= 0 ? '+' : '';
-                                valorTd.innerHTML = `${sign} ${formatCurrency(v)}`;
-                                if (v >= 0) {
-                                    valorTd.classList.remove('text-rose-400');
-                                    valorTd.classList.add('text-emerald-400');
-                                } else {
-                                    valorTd.classList.remove('text-emerald-400');
-                                    valorTd.classList.add('text-rose-400');
-                                }
-                            }
-
-                            // Atualiza ação: troca para botão de efetivar + editar
-                            const actionsTd = row.querySelector('td[data-label="Ações"] .flex');
-                            if (actionsTd) {
-                                actionsTd.innerHTML = `
-                                    <form action="/mithril/pre-transacao/${ptId}/efetivar" method="POST" class="inline">
-                                        <input type="hidden" name="_token" value="${csrf}">
-                                        <input type="hidden" name="mes" value="${document.getElementById('confirm-mes').value}">
-                                        <input type="hidden" name="ano" value="${document.getElementById('confirm-ano').value}">
-                                        <input type="hidden" name="conta_id" value="${confirmContaId.value}">
-                                        <button type="button" class="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500 hover:text-white transition shadow-lg border border-emerald-500/20 js-efetivar-btn" data-pt-id="${ptId}" title="Pagar / Efetivar">
-                                            <i class="fa-solid fa-check text-xs"></i>
-                                        </button>
-                                    </form>
-                                    <a href="/mithril/pre-transacao/${ptId}/confirmar" class="text-slate-500 hover:text-slate-300 transition js-open-confirm" data-pt-id="${ptId}" data-confirm-url="/mithril/pre-transacao/${ptId}/confirmar">
-                                        <i class="fa-solid fa-ellipsis-vertical"></i>
-                                    </a>
-                                `;
-                            }
-                        }
+            // ---------- Recarga dinâmica das linhas ----------
+            async function recarregarLinhas(destaque = null) {
+                const params = new URLSearchParams(filtrosAtuais());
+                params.set('_parcial', '1');
+                corpo.classList.add('carregando');
+                try {
+                    const resp = await fetch(`${URL_LISTA}?${params}`, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        credentials: 'same-origin',
+                    });
+                    if (!resp.ok) throw new Error('Falha ao atualizar a lista.');
+                    corpo.innerHTML = await resp.text();
+                    reaplicarSelecao();
+                    if (destaque) {
+                        const alvo = linhas().find(r => (destaque.ptId && r.dataset.ptId === String(destaque.ptId))
+                            || (destaque.txId && r.dataset.txId === String(destaque.txId)));
+                        if (alvo) alvo.classList.add('linha-destaque');
                     }
-                    confirmModal.classList.add('hidden');
-                }).catch(err => {
-                    console.error(err);
-                    alert('Ocorreu um erro ao confirmar.');
-                });
-            });
-
-            // intercept efetivar button to open modal
-            document.addEventListener('click', function (e) {
-                const btn = e.target.closest('.js-efetivar-btn');
-                if (!btn) return;
-                e.preventDefault();
-                const ptId = btn.dataset.ptId;
-                const row = btn.closest('tr');
-                activeRow = row;
-                efetivarPtId.value = ptId;
-                efetivarContaId.value = row.dataset.contaId || document.getElementById('efetivar-conta-id')?.value || '';
-                efetivarDesc.textContent = row.querySelector('td[data-label="Descrição"] .text-sm')?.textContent?.trim() || '';
-                const v = parseFloat(row.dataset.valor || 0);
-                efetivarValor.textContent = formatCurrency(v);
-                // set date
-                const dia = row.dataset.dia;
-                if (dia) {
-                    const y = document.getElementById('efetivar-ano').value || new Date().getFullYear();
-                    const m = document.getElementById('efetivar-mes').value || (new Date().getMonth()+1);
-                    const mm = String(m).padStart(2, '0');
-                    const dd = String(dia).padStart(2, '0');
-                    efetivarData.value = `${y}-${mm}-${dd}`;
-                } else {
-                    efetivarData.value = new Date().toISOString().slice(0,10);
+                } catch (e) {
+                    avisar(e.message, true);
+                } finally {
+                    corpo.classList.remove('carregando');
                 }
-                efetivarModal.classList.remove('hidden');
-            });
+            }
 
-            document.getElementById('efetivar-use-today').addEventListener('click', function () {
-                efetivarData.value = new Date().toISOString().slice(0,10);
-            });
-
-            document.getElementById('efetivar-cancel').addEventListener('click', function () {
-                efetivarModal.classList.add('hidden');
-            });
-
-            // submit efetivar via AJAX
-            efetivarForm.addEventListener('submit', function (e) {
+            // Filtros sem recarregar a página (mantém URL compartilhável e histórico)
+            filtrosForm.addEventListener('submit', function (e) {
                 e.preventDefault();
-                const ptId = efetivarPtId.value;
-                const url = `/mithril/pre-transacao/${ptId}/efetivar`;
-                const data = new FormData();
-                data.append('mes', document.getElementById('efetivar-mes').value || '{{ $mes }}');
-                data.append('ano', document.getElementById('efetivar-ano').value || '{{ $ano }}');
-                data.append('conta_id', efetivarContaId.value || '');
+                const params = new URLSearchParams(filtrosAtuais());
+                if (!params.get('conta_id')) params.delete('conta_id');
+                history.pushState(null, '', `${URL_LISTA}?${params}`);
+                recarregarLinhas();
+            });
 
-                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            window.addEventListener('popstate', function () {
+                const params = new URLSearchParams(location.search);
+                filtrosForm.elements.mes.value = params.get('mes') || filtrosForm.elements.mes.value;
+                filtrosForm.elements.ano.value = params.get('ano') || filtrosForm.elements.ano.value;
+                filtrosForm.elements.conta_id.value = params.get('conta_id') || '';
+                recarregarLinhas();
+            });
 
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrf,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: data,
-                    credentials: 'same-origin'
-                }).then(r => r.json()).then(json => {
-                    if (json?.data?.transacao) {
-                        const row = activeRow;
-                        if (row) {
-                            row.dataset.status = 'efetivado';
-                            // update date cell
-                            const dateTd = row.querySelector('td[data-label="Data"] .text-sm');
-                            if (dateTd && json.data.transacao.data_efetiva) {
-                                const d = new Date(json.data.transacao.data_efetiva);
-                                const dd = String(d.getDate()).padStart(2, '0');
-                                const mm = String(d.getMonth()+1).padStart(2, '0');
-                                dateTd.textContent = `${dd}/${mm}`;
-                                // also update dataset dia
-                                row.dataset.dia = d.getDate();
-                            }
+            // ---------- Ocultar efetivados (persistido) ----------
+            function aplicarOcultar(ocultar) {
+                tabela.setAttribute('data-hide-efetivados', ocultar ? 'true' : 'false');
+                toggleBtn.innerHTML = ocultar
+                    ? '<i class="fa-solid fa-eye mr-2"></i> Mostrar Efetivados'
+                    : '<i class="fa-solid fa-eye-slash mr-2"></i> Ocultar Efetivados';
+                toggleBtn.title = ocultar ? 'Mostrar lançamentos já efetivados' : 'Oculta/mostra lançamentos já efetivados';
+                try { localStorage.setItem('mithril.ocultarEfetivados', ocultar ? '1' : '0'); } catch (e) { /* storage indisponível */ }
+            }
+            try { aplicarOcultar(localStorage.getItem('mithril.ocultarEfetivados') === '1'); } catch (e) { /* storage indisponível */ }
+            toggleBtn.addEventListener('click', () => aplicarOcultar(tabela.getAttribute('data-hide-efetivados') !== 'true'));
 
-                            // update actions cell to Efetivado badge
-                            const actionsTd = row.querySelector('td[data-label="Ações"] .flex');
-                            if (actionsTd) {
-                                actionsTd.innerHTML = `
-                                    <div class="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full elf-title text-[8px] flex items-center gap-1 border border-emerald-500/20">
-                                        <i class="fa-solid fa-check-double text-[8px]"></i>
-                                        Efetivado
-                                    </div>
-                                `;
-                            }
-                        }
-                    }
-                    efetivarModal.classList.add('hidden');
-                }).catch(err => {
-                    console.error(err);
-                    alert('Ocorreu um erro ao efetivar.');
+            // ---------- Diálogos ----------
+            const dialogos = {
+                confirmar: document.getElementById('dlg-confirmar'),
+                efetivar: document.getElementById('dlg-efetivar'),
+                estornar: document.getElementById('dlg-estornar'),
+                novo: document.getElementById('dlg-novo'),
+            };
+
+            function mostrarErro(dlg, mensagem) {
+                const el = dlg.querySelector('[data-erro]');
+                el.textContent = mensagem || '';
+                el.classList.toggle('hidden', !mensagem);
+            }
+
+            function abrir(dlg) {
+                mostrarErro(dlg, '');
+                dlg.showModal();
+            }
+
+            Object.values(dialogos).forEach(dlg => {
+                dlg.querySelectorAll('[data-fechar]').forEach(b => b.addEventListener('click', () => dlg.close()));
+                // fecha ao clicar no fundo (fora do conteúdo)
+                dlg.addEventListener('mousedown', e => { if (e.target === dlg) dlg.close(); });
+                dlg.querySelector('[data-hoje]')?.addEventListener('click', () => {
+                    const campo = dlg.querySelector('input[type="date"]');
+                    campo.value = hoje();
                 });
             });
 
-            // Toggle Ocultar Efetivados
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', function () {
-                    const isHidden = table.getAttribute('data-hide-efetivados') === 'true';
-                    const newVal = isHidden ? 'false' : 'true';
-                    table.setAttribute('data-hide-efetivados', newVal);
-
-                    const icon = toggleBtn.querySelector('i');
-                    if (newVal === 'true') {
-                        toggleBtn.innerHTML = '<i class="fa-solid fa-eye mr-2"></i> Mostrar Efetivados';
-                        toggleBtn.title = 'Mostrar lançamentos já efetivados';
-                    } else {
-                        toggleBtn.innerHTML = '<i class="fa-solid fa-eye-slash mr-2"></i> Ocultar Efetivados';
-                        toggleBtn.title = 'Oculta/mostra lançamentos já efetivados';
+            // Envio padrão: desabilita o botão, trata erro no próprio diálogo e recarrega as linhas
+            function ligarEnvio(dlg, montar) {
+                dlg.querySelector('form').addEventListener('submit', async function (e) {
+                    e.preventDefault();
+                    const botao = e.submitter || dlg.querySelector('button[type="submit"]');
+                    botao.disabled = true;
+                    mostrarErro(dlg, '');
+                    try {
+                        const { url, dados, destaque } = montar();
+                        const json = await enviar(url, dados);
+                        dlg.close();
+                        avisar(json.message || 'Operação concluída.');
+                        await recarregarLinhas(destaque);
+                    } catch (err) {
+                        mostrarErro(dlg, err.message);
+                    } finally {
+                        botao.disabled = false;
                     }
                 });
             }
+
+            let linhaAtiva = null;
+
+            ligarEnvio(dialogos.confirmar, () => {
+                const f = dialogos.confirmar.querySelector('form').elements;
+                return {
+                    url: `${URL_BASE}/pre-transacao/${linhaAtiva.dataset.ptId}/confirmar`,
+                    dados: { valor: f.valor.value, data_vencimento: f.data_vencimento.value, ...filtrosAtuais() },
+                    destaque: { ptId: linhaAtiva.dataset.ptId },
+                };
+            });
+
+            ligarEnvio(dialogos.efetivar, () => {
+                const f = dialogos.efetivar.querySelector('form').elements;
+                return {
+                    url: `${URL_BASE}/pre-transacao/${linhaAtiva.dataset.ptId}/efetivar`,
+                    dados: { data_efetiva: f.data_efetiva.value, ...filtrosAtuais() },
+                    destaque: { ptId: linhaAtiva.dataset.ptId },
+                };
+            });
+
+            ligarEnvio(dialogos.estornar, () => ({
+                url: `${URL_BASE}/transacao/${linhaAtiva.dataset.txId}/estornar`,
+                dados: filtrosAtuais(),
+                destaque: linhaAtiva.dataset.ptId ? { ptId: linhaAtiva.dataset.ptId } : null,
+            }));
+
+            // Novo lançamento
+            const formNovo = dialogos.novo.querySelector('form');
+            const blocoParcelas = dialogos.novo.querySelector('[data-parcelas]');
+            const alternarParcelas = () => {
+                const parcelada = formNovo.elements.tipo.value === 'parcelada';
+                blocoParcelas.classList.toggle('hidden', !parcelada);
+                formNovo.elements.total_parcelas.required = parcelada;
+                formNovo.elements.data_inicio.required = parcelada;
+            };
+            formNovo.elements.tipo.addEventListener('change', alternarParcelas);
+
+            // O botão fica no slot do header (renderizado fora deste DOM inicial): delegação no document
+            document.addEventListener('click', e => {
+                if (!e.target.closest('#novo-lancamento-btn')) return;
+                formNovo.reset();
+                formNovo.elements.dia_vencimento.value = new Date().getDate();
+                formNovo.elements.data_inicio.value = hoje();
+                const contaFiltro = filtrosAtuais().conta_id;
+                if (contaFiltro) formNovo.elements.conta_id.value = contaFiltro;
+                alternarParcelas();
+                abrir(dialogos.novo);
+                formNovo.elements.descricao.focus();
+            });
+
+            ligarEnvio(dialogos.novo, () => {
+                const dados = Object.fromEntries(new FormData(formNovo));
+                if (dados.tipo !== 'parcelada') delete dados.total_parcelas;
+                return { url: `${URL_BASE}/pre-transacoes`, dados, destaque: null };
+            });
+
+            // ---------- Ações nas linhas ----------
+            corpo.addEventListener('click', async function (e) {
+                const botao = e.target.closest('[data-acao]');
+                const linha = e.target.closest('tr.row-selectable');
+                if (!linha) return;
+
+                // Clique fora dos botões: seleciona a linha para somar
+                if (!botao) {
+                    if (e.target.closest('a, input, select')) return;
+                    const chave = chaveLinha(linha);
+                    if (selecionadas.has(chave)) selecionadas.delete(chave); else selecionadas.add(chave);
+                    reaplicarSelecao();
+                    return;
+                }
+
+                linhaAtiva = linha;
+                const acao = botao.dataset.acao;
+                const valor = parseFloat(linha.dataset.valor || 0);
+                const descricao = linha.dataset.descricao;
+
+                if (acao === 'paguei-agora') {
+                    botao.disabled = true;
+                    try {
+                        const json = await enviar(`${URL_BASE}/pre-transacao/${linha.dataset.ptId}/paguei-agora`, {
+                            valor: linha.dataset.valor,
+                            ...filtrosAtuais(),
+                        });
+                        avisar(json.message || 'Pagamento registrado.');
+                        await recarregarLinhas({ ptId: linha.dataset.ptId });
+                    } catch (err) {
+                        botao.disabled = false;
+                        avisar(err.message, true);
+                    }
+                    return;
+                }
+
+                if (acao === 'confirmar') {
+                    const f = dialogos.confirmar.querySelector('form').elements;
+                    dialogos.confirmar.querySelector('[data-campo="descricao"]').textContent = descricao;
+                    f.valor.value = valor.toFixed(2);
+                    f.data_vencimento.value = linha.dataset.data;
+                    abrir(dialogos.confirmar);
+                } else if (acao === 'efetivar') {
+                    const f = dialogos.efetivar.querySelector('form').elements;
+                    dialogos.efetivar.querySelector('[data-campo="descricao"]').textContent = descricao;
+                    dialogos.efetivar.querySelector('[data-campo="valor"]').textContent = moeda(valor);
+                    f.data_efetiva.value = linha.dataset.data;
+                    abrir(dialogos.efetivar);
+                } else if (acao === 'estornar') {
+                    dialogos.estornar.querySelector('[data-campo="descricao"]').textContent = descricao;
+                    dialogos.estornar.querySelector('[data-campo="valor"]').textContent = moeda(valor);
+                    abrir(dialogos.estornar);
+                }
+            });
+
+            reaplicarSelecao();
         });
     </script>
 

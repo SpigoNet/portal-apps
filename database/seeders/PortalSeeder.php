@@ -37,7 +37,7 @@ class PortalSeeder extends Seeder
             [
                 'title' => 'Gerenciador do Portal',
                 'description' => 'Área para cadastrar e configurar os aplicativos do portal.',
-                'icon' => 'fa-solid fa-gear',
+                'icon' => 'images/apps/admin.png',
                 'visibility' => 'specific',
                 'package_id' => $package->id
             ]
@@ -54,7 +54,7 @@ class PortalSeeder extends Seeder
                 'id' => 12,
                 'title' => 'Pidgey',
                 'description' => 'Agendador de mensagens disparadas pelas personas no Telegram.',
-                'icon' => 'fa-solid fa-dove',
+                'icon' => 'images/apps/pidgey.png',
                 'visibility' => 'public',
                 'package_id' => $package->id,
             ]

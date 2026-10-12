@@ -89,6 +89,11 @@
 - **Prefix:** `/mundos-de-mim`
 - **Key Note:** Daily cron for generation; consumes AI via `AiProviderService`.
 
+### QuebraCabeca
+- **Purpose:** Classic rectangular-tile jigsaw: shuffled pieces are freely swapped until the image is rebuilt.
+- **Prefix:** `/quebra-cabeca`
+- **Key Note:** Auth-only. Users upload images (`Imagem` model, `public` disk, served via owner-checked route). Game logic is 100% Alpine.js in `index.blade.php`; best times live in `localStorage`. Built-in images are SVG data URIs from the controller, plus the user's uploaded images.
+
 ### StreamingManager
 - **Purpose:** Shared streaming subscription management.
 - **Prefix:** `/streaming-manager`

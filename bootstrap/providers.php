@@ -20,4 +20,5 @@ return [
     App\Modules\Alfred\AlfredServiceProvider::class,
     App\Modules\Pidgey\PidgeyServiceProvider::class,
     App\Modules\Yomi\YomiServiceProvider::class,
+    App\Modules\QuebraCabeca\QuebraCabecaServiceProvider::class,
 ];

@@ -78,9 +78,10 @@
                 <span>🔁 <strong x-text="movimentos"></strong> trocas</span>
                 <span x-show="melhor !== null" class="text-amber-300">🏆 Melhor: <span x-text="formatarTempo(melhor)"></span></span>
                 <div class="ml-auto flex gap-2">
-                    <button type="button" @mousedown="previa = true" @mouseup="previa = false" @mouseleave="previa = false"
-                            @touchstart.prevent="previa = true" @touchend="previa = false"
-                            class="px-3 py-1.5 rounded bg-slate-700 hover:bg-slate-600">👁️ Ver modelo</button>
+                    <button type="button" @pointerdown="previa = true" @pointerup="previa = false"
+                            @pointercancel="previa = false" @pointerleave="previa = false"
+                            @contextmenu.prevent
+                            class="px-3 py-1.5 rounded bg-slate-700 hover:bg-slate-600 touch-none select-none">👁️ Ver modelo</button>
                     <button type="button" @click="iniciar()" class="px-3 py-1.5 rounded bg-slate-700 hover:bg-slate-600">Reembaralhar</button>
                     <button type="button" @click="sair()" class="px-3 py-1.5 rounded bg-slate-700 hover:bg-slate-600">Trocar imagem</button>
                 </div>
@@ -89,23 +90,23 @@
             <div class="relative mx-auto select-none" :style="`width: min(100%, ${larguraMax}px); aspect-ratio: ${proporcao}`">
                 <div class="absolute inset-0 grid gap-px bg-slate-950 rounded-lg overflow-hidden"
                      :style="`grid-template-columns: repeat(${colunas}, 1fr); grid-template-rows: repeat(${linhas}, 1fr)`">
-                    <template x-for="(peca, pos) in ordem" :key="peca">
+                    <template x-for="(peca, pos) in ordem" :key="pos">
                         <div draggable="true"
                              @click="clicar(pos)"
                              @dragstart="arrastando = pos; $event.dataTransfer.effectAllowed = 'move'"
                              @dragover.prevent
                              @drop.prevent="soltar(pos)"
                              @dragend="arrastando = null"
-                             class="cursor-pointer transition-all"
+                             class="cursor-pointer"
                              :class="[
-                                 selecionada === pos ? 'ring-4 ring-amber-400 ring-inset z-10' : '',
+                                 selecionada === pos ? 'ring-4 ring-amber-400 ring-inset' : '',
                                  arrastando === pos ? 'opacity-40' : '',
                                  venceu ? '' : 'hover:brightness-110'
                              ]"
                              :style="estiloPeca(peca)"></div>
                     </template>
                 </div>
-                <div x-show="previa" class="absolute inset-0 rounded-lg bg-cover bg-center pointer-events-none"
+                <div x-show="previa" class="absolute inset-0 rounded-lg bg-cover bg-center pointer-events-none z-20"
                      :style="`background-image: url('${imagemUrl}')`"></div>
             </div>
             <p class="text-center text-xs text-slate-500 mt-3">Arraste uma peça sobre outra, ou toque em duas peças, para trocá-las de lugar.</p>
@@ -205,6 +206,7 @@
                     this.venceu = false;
                     this.recorde = false;
                     this.melhor = this.lerRecorde();
+                    this.previa = false;
                     this.jogando = true;
                     clearInterval(this.timer);
                     this.timer = setInterval(() => this.segundos++, 1000);

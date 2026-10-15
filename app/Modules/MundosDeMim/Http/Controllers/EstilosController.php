@@ -47,7 +47,7 @@ class EstilosController extends Controller
 
         if ($exists) {
             // Se existe, inverte o valor de is_enabled
-            $newStatus = !$exists->pivot->is_enabled;
+            $newStatus = ! $exists->pivot->is_enabled;
             $user->belongsToMany(Theme::class, 'mundos_de_mim_user_themes')
                 ->updateExistingPivot($themeId, ['is_enabled' => $newStatus]);
         } else {

@@ -67,6 +67,14 @@ return [
         'model' => env('OLLAMA_MODEL', 'llama3'),
     ],
 
+    'telegram' => [
+        'timeout' => env('TELEGRAM_TIMEOUT', 15),
+    ],
+
+    'mundos_de_mim' => [
+        'telegram_token' => env('MUNDOS_DE_MIM_TELEGRAM_TOKEN', ''),
+    ],
+
     'pidgey' => [
         'financeiro_user_id' => env('PIDGEY_FINANCEIRO_USER_ID', 1),
     ],

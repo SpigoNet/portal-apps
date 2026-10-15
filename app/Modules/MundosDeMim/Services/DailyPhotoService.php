@@ -5,12 +5,14 @@ namespace App\Modules\MundosDeMim\Services;
 use App\Models\DailyNotification;
 use App\Modules\Admin\Services\AiProviderService;
 use App\Modules\MundosDeMim\Models\DailyGeneration;
+use App\Modules\MundosDeMim\Models\RelatedPerson;
 use App\Modules\MundosDeMim\Models\UserAttribute;
 use App\Services\AI\Drivers\AirForceDriver;
 use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\LmStudioDriver;
 use App\Services\AI\Drivers\OllamaDriver;
+use App\Services\AI\Drivers\OpenAiCompatibleDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use App\Services\AI\Drivers\PollinationImageEditDriver;
 use Illuminate\Support\Facades\Log;
@@ -101,7 +103,7 @@ class DailyPhotoService
         }
 
         $options = [];
-        if ($userAttr->photo_path && in_array($this->driver, ['pollination', 'pollination_image_edit', 'airforce', 'gemini'], true)) {
+        if ($userAttr->photo_path && in_array($this->driver, ['pollination', 'pollination_image_edit', 'airforce', 'gemini', 'openai'], true)) {
             $options['reference_image_path'] = $userAttr->photo_path;
         }
 
@@ -121,6 +123,7 @@ class DailyPhotoService
     {
         return match ($this->driver) {
             'airforce' => new AirForceDriver($this->model, $this->apiKey, $this->baseUrl),
+            'openai' => new OpenAiCompatibleDriver($this->model, $this->apiKey, $this->baseUrl),
             'gemini' => new GeminiDriver($this->apiKey, $this->model, $this->baseUrl),
             'kdjingpai' => new KdjingpaiDriver($this->model, $this->apiKey, $this->baseUrl),
             'pollination_image_edit' => new PollinationImageEditDriver($this->model, $this->apiKey, $this->baseUrl),
@@ -136,6 +139,10 @@ class DailyPhotoService
             return false;
         }
 
+        $generation = $generationId ? DailyGeneration::with('theme')->find($generationId) : null;
+        $mundo = $generation?->theme?->name;
+        $story = $this->resolveStory($user, $generation, $prompt);
+
         $notification = DailyNotification::create([
             'user_id' => $user->id,
             'generation_id' => $generationId,
@@ -144,14 +151,128 @@ class DailyPhotoService
             'sent' => false,
         ]);
 
-        $result = match ($preference) {
-            'email' => $this->sendEmail($user, $imageUrl, $prompt, $notification),
-            'telegram' => $this->sendTelegram($user, $imageUrl, $prompt, $notification),
-            'whatsapp' => $this->sendWhatsapp($user, $imageUrl, $prompt, $notification),
+        return match ($preference) {
+            'email' => $this->sendEmail($user, $imageUrl, $story, $mundo, $notification),
+            'telegram' => $this->sendTelegram($user, $imageUrl, $story, $mundo, $notification),
+            'whatsapp' => $this->sendWhatsapp($user, $imageUrl, $story, $mundo, $notification),
             default => false,
         };
+    }
 
-        return $result;
+    /**
+     * Devolve a história do postal: a já guardada na geração, ou uma nova (que passa a ser guardada).
+     */
+    public function resolveStory($user, ?DailyGeneration $generation, string $prompt): string
+    {
+        if ($generation && filled($generation->story)) {
+            return $generation->story;
+        }
+
+        $mundo = $generation?->theme?->name;
+        $story = $this->generateStory($user, $mundo, $prompt) ?? $this->fallbackStory($user, $mundo);
+
+        if ($generation) {
+            try {
+                $generation->update(['story' => $story]);
+            } catch (\Throwable $e) {
+                Log::warning('DailyPhotoService: não foi possível guardar a história: '.$e->getMessage());
+            }
+        }
+
+        return $story;
+    }
+
+    protected function generateStory($user, ?string $mundo, string $prompt): ?string
+    {
+        try {
+            $aiProviderService = new AiProviderService;
+            $provider = $aiProviderService->getTextToTextProvider();
+
+            if (! $provider) {
+                return null;
+            }
+
+            $driver = $this->createTextDriver(
+                $aiProviderService->getDriverForProvider($provider),
+                $provider->model,
+                $aiProviderService->getApiKeyForProvider($provider),
+                $aiProviderService->getBaseUrlForProvider($provider)
+            );
+
+            $response = $driver->generateText($this->buildStoryPrompt($user, $mundo, $prompt), []);
+
+            return $this->cleanStory($response);
+        } catch (\Throwable $e) {
+            Log::error('DailyPhotoService: Erro ao gerar a história do postal: '.$e->getMessage());
+
+            return null;
+        }
+    }
+
+    protected function buildStoryPrompt($user, ?string $mundo, string $imagePrompt): array
+    {
+        $primeiroNome = \Illuminate\Support\Str::before(trim((string) $user->name), ' ') ?: 'você';
+        $imagePrompt = \Illuminate\Support\Str::limit(trim($imagePrompt), 1200, '');
+
+        $companhias = RelatedPerson::where('user_id', $user->id)
+            ->where('is_active', true)
+            ->pluck('name')
+            ->filter(fn ($nome) => filled($nome) && mb_stripos($imagePrompt, $nome) !== false)
+            ->values()
+            ->all();
+
+        $linhas = [
+            'Você escreve o texto de um postal do app "Mundos de Mim": cada dia o usuário recebe a imagem de um mundo paralelo onde ele vive.',
+            'Escreva em português do Brasil uma história curta, de 1 a 2 parágrafos (no máximo 700 caracteres no total), como se o postal tivesse sido enviado de lá.',
+            "A pessoa se chama {$primeiroNome}. Conte a cena na segunda pessoa (\"você\") ou como um recado de quem está lá, com um toque de curiosidade e carinho.",
+            $mundo ? "O nome do mundo é \"{$mundo}\"; cite-o uma vez." : 'Não cite nome de mundo.',
+            $companhias ? 'Quem aparece junto: '.implode(', ', $companhias).'. Cite essas pessoas pelo nome.' : 'Não invente outras pessoas.',
+            'Use apenas o que a descrição da imagem permite. Não invente fatos, lugares ou objetos que não estejam nela.',
+            'Não use markdown, listas, emojis, títulos nem saudação com o nome. Responda somente com o texto da história.',
+            '',
+            "Descrição da imagem (em inglês ou português, é um prompt técnico): \"{$imagePrompt}\"",
+        ];
+
+        return [['role' => 'user', 'content' => implode("\n", $linhas)]];
+    }
+
+    protected function createTextDriver(string $driverName, ?string $model, ?string $apiKey, ?string $baseUrl)
+    {
+        return match ($driverName) {
+            'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
+            'openai' => new OpenAiCompatibleDriver($model, $apiKey, $baseUrl),
+            'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
+            'gemini' => new GeminiDriver($apiKey, $model, $baseUrl),
+            'lm_studio' => new LmStudioDriver($baseUrl),
+            'ollama' => new OllamaDriver($model, $apiKey, $baseUrl),
+            default => new PollinationDriver($model, $apiKey, $baseUrl),
+        };
+    }
+
+    protected function cleanStory(mixed $response): ?string
+    {
+        if (! is_string($response)) {
+            return null;
+        }
+
+        $texto = trim(preg_replace('/[*_#`>]+/u', '', $response));
+        $texto = trim(preg_replace("/\n{3,}/", "\n\n", $texto));
+
+        if (mb_strlen($texto) < 40) {
+            return null;
+        }
+
+        return \Illuminate\Support\Str::limit($texto, 900, '…');
+    }
+
+    protected function fallbackStory($user, ?string $mundo): string
+    {
+        $primeiroNome = \Illuminate\Support\Str::before(trim((string) $user->name), ' ');
+        $saudacao = $primeiroNome !== '' ? "{$primeiroNome}, " : '';
+
+        return $mundo
+            ? "{$saudacao}este postal chegou direto de {$mundo}. Hoje o mundo foi um pouco mais seu: confira cada detalhe e imagine o que vem amanhã."
+            : "{$saudacao}este postal chegou de um dos seus mundos. Confira cada detalhe e imagine o que vem amanhã.";
     }
 
     protected function saveGeneration(UserAttribute $userAttr, string $imageUrl, string $prompt): ?DailyGeneration
@@ -170,14 +291,15 @@ class DailyPhotoService
         }
     }
 
-    protected function sendEmail($user, string $imageUrl, string $prompt, DailyNotification $notification): bool
+    protected function sendEmail($user, string $imageUrl, string $story, ?string $mundo, DailyNotification $notification): bool
     {
         try {
-            $emailBody = $this->generateEmailBody($user, $imageUrl, $prompt, $notification->generation_id);
+            $emailBody = $this->renderEmail($user, $imageUrl, $story, $mundo, $notification->generation_id);
+            $assunto = $mundo ? "Seu postal de hoje chegou: {$mundo}" : 'Seu postal de hoje chegou';
 
-            Mail::send([], [], function ($message) use ($user, $emailBody) {
+            Mail::send([], [], function ($message) use ($user, $emailBody, $assunto) {
                 $message->to($user->email, $user->name)
-                    ->subject('🌟 Sua Foto do Dia!')
+                    ->subject($assunto)
                     ->html($emailBody);
             });
 
@@ -195,126 +317,27 @@ class DailyPhotoService
         }
     }
 
-    protected function generateEmailBody($user, string $imageUrl, string $prompt, ?int $generationId = null): string
+    protected function renderEmail($user, string $imageUrl, string $story, ?string $mundo, ?int $generationId): string
     {
-        try {
-            $aiProviderService = new AiProviderService;
-            $provider = $aiProviderService->getTextToTextProvider();
+        $notas = [];
 
-            if (! $provider) {
-                return $this->getDefaultEmailBody($user, $imageUrl, $generationId);
+        if ($generationId) {
+            foreach (range(1, 5) as $nota) {
+                $notas[$nota] = \Illuminate\Support\Facades\URL::signedRoute('mundos-de-mim.rate', ['generation' => $generationId, 'rating' => $nota]);
             }
-
-            $driverName = $aiProviderService->getDriverForProvider($provider);
-            $apiKey = $aiProviderService->getApiKeyForProvider($provider);
-            $baseUrl = $aiProviderService->getBaseUrlForProvider($provider);
-            $model = $provider->model;
-
-            $driver = $this->createTextDriver($driverName, $model, $apiKey, $baseUrl);
-
-            if (! $driver) {
-                return $this->getDefaultEmailBody($user, $imageUrl, $generationId);
-            }
-
-            $messages = $this->buildTextPrompt($prompt, $user->name);
-
-            $response = $driver->generateText($messages, []);
-
-            if ($response) {
-                return $this->formatEmailBody($user, $imageUrl, $response, $generationId);
-            }
-
-            return $this->getDefaultEmailBody($user, $imageUrl, $generationId);
-        } catch (\Exception $e) {
-            Log::error('DailyPhotoService: Erro ao gerar corpo do email: '.$e->getMessage());
-
-            return $this->getDefaultEmailBody($user, $imageUrl, $generationId);
-        }
-    }
-
-    protected function buildTextPrompt(string $imagePrompt, string $userName): array
-    {
-        return [
-            [
-                'role' => 'user',
-                'content' => "Com base no seguinte prompt de geração de imagem, escreva uma mensagem calorosa e motivadora para o usuário em português brasileiro:\n\n\"{$imagePrompt}\"\n\nEscreva 2-3 parágrafos curtos, friendly e inspirador. Foque na emoção e energia do que foi gerado. Não inclua saudação com nome próprio, apenas a mensagem.",
-            ],
-        ];
-    }
-
-    protected function createTextDriver(string $driverName, ?string $model, ?string $apiKey, ?string $baseUrl)
-    {
-        return match ($driverName) {
-            'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
-            'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
-            'gemini' => new GeminiDriver($apiKey, $model, $baseUrl),
-            'lm_studio' => new LmStudioDriver($baseUrl),
-            'ollama' => new OllamaDriver($model, $apiKey, $baseUrl),
-            default => new PollinationDriver($model, $apiKey, $baseUrl),
-        };
-    }
-
-    protected function generateRatingHtml(?int $generationId): string
-    {
-        if (! $generationId) {
-            return '';
         }
 
-        $html = "<div style='text-align: center; margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 10px;'>";
-        $html .= "<p style='color: #475569; font-weight: bold; margin-bottom: 10px;'>Como você avalia a imagem de hoje?</p>";
-        $html .= "<div style='font-size: 32px;'>";
-
-        for ($i = 1; $i <= 5; $i++) {
-            $url = \Illuminate\Support\Facades\URL::signedRoute('mundos-de-mim.rate', ['generation' => $generationId, 'rating' => $i]);
-            $html .= "<a href='{$url}' style='text-decoration: none; color: #fbbf24; margin: 0 5px;'>★</a>";
-        }
-
-        $html .= '</div>';
-        $html .= "<p style='color: #64748b; font-size: 12px; margin-top: 10px;'>Ao avaliar, você será automaticamente logado na sua galeria.</p>";
-        $html .= '</div>';
-
-        return $html;
+        return view('MundosDeMim::emails.postal', [
+            'primeiroNome' => \Illuminate\Support\Str::before(trim((string) $user->name), ' '),
+            'imageUrl' => $imageUrl,
+            'story' => $story,
+            'mundo' => $mundo,
+            'notas' => $notas,
+            'atlasUrl' => route('mundos-de-mim.galeria.index'),
+        ])->render();
     }
 
-    protected function formatEmailBody($user, string $imageUrl, string $aiMessage, ?int $generationId = null): string
-    {
-        $ratingHtml = $this->generateRatingHtml($generationId);
-
-        return "
-            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; color: #1e1e24;'>
-                <h1 style='color: #6366f1;'>Olá, {$user->name}!</h1>
-                <div style='background-color: #ede9fe; border-left: 4px solid #6366f1; padding: 20px; border-radius: 0 10px 10px 0; margin: 20px 0;'>
-                    <p style='color: #3730a3; font-size: 18px; margin: 0;'>{$aiMessage}</p>
-                </div>
-                <p><a href='{$imageUrl}' target='_blank'><img src='{$imageUrl}' style='max-width: 100%; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'/></a></p>
-                <p><a href='{$imageUrl}' target='_blank' style='color: #6366f1;'>Clique aqui para ver a imagem em tamanho maior</a></p>
-                {$ratingHtml}
-                <br>
-                <p style='color: #555555; font-size: 14px;'>
-                    Com carinho,<br>
-                    Equipe Mundos de Mim
-                </p>
-            </div>
-        ";
-    }
-
-    protected function getDefaultEmailBody($user, string $imageUrl, ?int $generationId = null): string
-    {
-        $ratingHtml = $this->generateRatingHtml($generationId);
-
-        return "
-            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; color: #1e1e24;'>
-                <h1 style='color: #6366f1;'>Olá, {$user->name}!</h1>
-                <p style='color: #333333;'>Sua foto do dia foi gerada!</p>
-                <p><a href='{$imageUrl}' target='_blank'><img src='{$imageUrl}' style='max-width: 100%; border-radius: 10px;'/></a></p>
-                <p><a href='{$imageUrl}' target='_blank' style='color: #6366f1;'>Clique aqui para ver a imagem em tamanho maior</a></p>
-                <br>
-                <p style='color: #555555; font-size: 14px;'>Atenciosamente,<br>Equipe Mundos de Mim</p>
-            </div>
-        ";
-    }
-
-    protected function sendTelegram($user, string $imageUrl, string $prompt, DailyNotification $notification): bool
+    protected function sendTelegram($user, string $imageUrl, string $story, ?string $mundo, DailyNotification $notification): bool
     {
         $telegramId = $user->telegram_id ?? null;
 
@@ -326,17 +349,35 @@ class DailyPhotoService
             return false;
         }
 
+        $token = (string) config('services.mundos_de_mim.telegram_token', '');
+
+        if ($token === '') {
+            Log::warning('DailyPhotoService: MUNDOS_DE_MIM_TELEGRAM_TOKEN não configurado');
+
+            $notification->markAsFailed('Token do bot do Telegram não configurado');
+
+            return false;
+        }
+
         try {
-            $messageText = "🌟 *Sua Foto do Dia!* \n\n";
-            $messageText .= "Olá, {$user->name}! Sua foto foi gerada:\n";
-            $messageText .= "[Ver Imagem]({$imageUrl})";
+            $legenda = ($mundo ? '<b>'.e($mundo)."</b>\n\n" : '').e($story);
+            $base = 'https://api.telegram.org/bot'.$token;
+            $timeout = (int) config('services.telegram.timeout', 15);
 
-            // Aqui você integraria com a API do Telegram
-            // Exemplo: Http::post("https://api.telegram.org/bot{$token}/sendMessage", [...]);
+            $resposta = \Illuminate\Support\Facades\Http::timeout($timeout)->post($base.'/sendPhoto', [
+                'chat_id' => $telegramId,
+                'photo' => $imageUrl,
+                'caption' => mb_substr($legenda, 0, 1024),
+                'parse_mode' => 'HTML',
+            ]);
 
-            Log::info("DailyPhotoService: Telegram enviado para user_id {$telegramId}");
+            if (! $resposta->successful()) {
+                throw new \RuntimeException('Telegram respondeu '.$resposta->status());
+            }
 
-            $notification->markAsSent($messageText);
+            Log::info("DailyPhotoService: Telegram enviado para {$telegramId}");
+
+            $notification->markAsSent($legenda);
 
             return true;
         } catch (\Exception $e) {
@@ -348,7 +389,7 @@ class DailyPhotoService
         }
     }
 
-    protected function sendWhatsapp($user, string $imageUrl, string $prompt, DailyNotification $notification): bool
+    protected function sendWhatsapp($user, string $imageUrl, string $story, ?string $mundo, DailyNotification $notification): bool
     {
         // Implementação futura quando a API do WhatsApp estiver disponível
         Log::info("DailyPhotoService: WhatsApp ainda não implementado para usuário {$user->id}");

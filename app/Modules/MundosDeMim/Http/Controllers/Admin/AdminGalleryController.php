@@ -25,8 +25,8 @@ class AdminGalleryController extends Controller
                 if (in_array(strtolower($file->getExtension()), ['jpg', 'jpeg', 'png', 'webp'])) {
                     $publicImages[] = [
                         'filename' => $file->getFilename(),
-                        'url' => asset('images/mundos-de-mim/' . $file->getFilename()),
-                        'path' => $file->getRealPath()
+                        'url' => asset('images/mundos-de-mim/'.$file->getFilename()),
+                        'path' => $file->getRealPath(),
                     ];
                 }
             }
@@ -44,23 +44,23 @@ class AdminGalleryController extends Controller
     public function copyToPublic(Request $request)
     {
         $request->validate([
-            'example_id' => 'required|exists:mundos_de_mim_theme_examples,id'
+            'example_id' => 'required|exists:mundos_de_mim_theme_examples,id',
         ]);
 
         $example = ThemeExample::findOrFail($request->example_id);
         $sourcePath = Storage::disk('public')->path($example->image_path);
 
-        if (!File::exists($sourcePath)) {
+        if (! File::exists($sourcePath)) {
             return back()->with('error', 'Arquivo de origem não encontrado.');
         }
 
         $publicDir = public_path('images/mundos-de-mim');
-        if (!File::exists($publicDir)) {
+        if (! File::exists($publicDir)) {
             File::makeDirectory($publicDir, 0755, true);
         }
 
         $filename = basename($example->image_path);
-        $destinationPath = $publicDir . '/' . $filename;
+        $destinationPath = $publicDir.'/'.$filename;
 
         // Se já existir, podemos renomear ou apenas sobrescrever. Vamos copiar.
         File::copy($sourcePath, $destinationPath);
@@ -74,14 +74,15 @@ class AdminGalleryController extends Controller
     public function deleteFromPublic(Request $request)
     {
         $request->validate([
-            'filename' => 'required|string'
+            'filename' => 'required|string',
         ]);
 
         $filename = $request->filename;
-        $path = public_path('images/mundos-de-mim/' . $filename);
+        $path = public_path('images/mundos-de-mim/'.$filename);
 
         if (File::exists($path)) {
             File::delete($path);
+
             return back()->with('success', 'Imagem removida da galeria pública.');
         }
 

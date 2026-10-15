@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Modules\MundosDeMim\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -6,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Prompt extends Model
 {
     protected $table = 'mundos_de_mim_prompts';
+
     // Removemos 'is_couple_prompt' do fillable
     protected $fillable = ['theme_id', 'prompt_text'];
 

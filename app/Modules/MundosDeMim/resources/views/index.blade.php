@@ -31,7 +31,7 @@
                         <span class="mm-chip" style="align-self:flex-start;color:var(--mm-menta)">{{ $ultima->reference_date->isToday() ? 'Postal de hoje' : 'Último postal · '.$ultima->reference_date->format('d/m') }}</span>
                         <h2 class="mm-display" style="margin:0;font-size:40px;line-height:1.02;font-weight:800">{{ $ultima->theme?->name ?? 'Mundo surpresa' }}</h2>
                         <p style="margin:0;font-size:16px;line-height:1.55;color:var(--mm-texto-suave)">
-                            {{ $ultima->theme?->is_seasonal ? 'Um mundo de temporada, só por alguns dias.' : 'Um dos mundos que você ligou no seu atlas.' }}
+                            {{ $ultima->story ?: ($ultima->theme?->is_seasonal ? 'Um mundo de temporada, só por alguns dias.' : 'Um dos mundos que você ligou no seu atlas.') }}
                         </p>
                         <div style="display:flex;flex-wrap:wrap;gap:10px">
                             <a href="{{ route('mundos-de-mim.galeria.index') }}" class="mm-btn mm-btn-primario">Abrir no atlas</a>

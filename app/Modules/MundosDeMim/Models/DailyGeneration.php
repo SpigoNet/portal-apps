@@ -15,6 +15,7 @@ class DailyGeneration extends Model
         'prompt_id',
         'image_url',
         'final_prompt_used',
+        'story',
         'reference_date',
         'rating',
     ];

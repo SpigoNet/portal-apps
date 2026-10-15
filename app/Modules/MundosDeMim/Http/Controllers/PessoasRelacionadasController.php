@@ -6,13 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Modules\MundosDeMim\Models\RelatedPerson;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class PessoasRelacionadasController extends Controller
 {
     public function index()
     {
         $pessoas = RelatedPerson::where('user_id', Auth::id())->get();
+
         return view('MundosDeMim::pessoas.index', compact('pessoas'));
     }
 
@@ -47,7 +47,7 @@ class PessoasRelacionadasController extends Controller
     public function toggleActive($id)
     {
         $pessoa = RelatedPerson::where('user_id', Auth::id())->findOrFail($id);
-        $pessoa->is_active = !$pessoa->is_active;
+        $pessoa->is_active = ! $pessoa->is_active;
         $pessoa->save();
 
         return redirect()->back()->with('success', 'Status atualizado.');

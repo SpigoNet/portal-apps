@@ -14,6 +14,7 @@ class AdminThemeController extends Controller
     public function index()
     {
         $themes = Theme::withCount('prompts')->orderBy('created_at', 'desc')->get();
+
         return view('MundosDeMim::admin.themes.index', compact('themes'));
     }
 
@@ -53,7 +54,7 @@ class AdminThemeController extends Controller
                 $path = $photo->store('themes/examples', 'public');
                 $theme->examples()->create([
                     'prompt_id' => null,
-                    'image_path' => $path
+                    'image_path' => $path,
                 ]);
             }
         }
@@ -69,6 +70,7 @@ class AdminThemeController extends Controller
             'prompts.generatedExamples',
             'examples',
         ])->findOrFail($id);
+
         return view('MundosDeMim::admin.themes.edit', compact('theme'));
     }
 
@@ -105,7 +107,7 @@ class AdminThemeController extends Controller
                 $path = $photo->store('themes/examples', 'public');
                 $theme->examples()->create([
                     'prompt_id' => null,
-                    'image_path' => $path
+                    'image_path' => $path,
                 ]);
             }
         }
@@ -134,6 +136,7 @@ class AdminThemeController extends Controller
         // O delete cascade do banco deve cuidar dos registros filhos,
         // mas idealmente deletaríamos os arquivos físicos aqui também.
         $theme->delete();
+
         return back()->with('success', 'Tema excluído.');
     }
 }

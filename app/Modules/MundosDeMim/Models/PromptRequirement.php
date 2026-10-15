@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Modules\MundosDeMim\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ class PromptRequirement extends Model
         'prompt_id',
         'requirement_key',
         'requirement_value',
-        'operator'
+        'operator',
     ];
 
     public function prompt()

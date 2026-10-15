@@ -11,6 +11,7 @@ use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\LmStudioDriver;
 use App\Services\AI\Drivers\OllamaDriver;
+use App\Services\AI\Drivers\OpenAiCompatibleDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -174,6 +175,7 @@ EOT;
     {
         return match ($driverName) {
             'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
+            'openai' => new OpenAiCompatibleDriver($model, $apiKey, $baseUrl),
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
             'gemini' => new GeminiDriver($apiKey),
             'lm_studio' => new LmStudioDriver($baseUrl),

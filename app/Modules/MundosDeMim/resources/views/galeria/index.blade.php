@@ -33,6 +33,12 @@
                                 <span>{{ $art->theme?->is_seasonal ? 'Edição de temporada' : 'Sempre aberto' }}</span>
                                 <a href="{{ $art->image_url }}" target="_blank" rel="noopener" download style="color:var(--mm-bruma);font-weight:600;padding:4px 0">Baixar HD</a>
                             </span>
+                            @if($art->story)
+                                <details style="margin-top:6px">
+                                    <summary style="cursor:pointer;padding:8px 0;color:var(--mm-bruma);font-weight:600">Ler a história</summary>
+                                    <p style="margin:0;padding-bottom:6px;line-height:1.55;color:#D6D3EE;white-space:pre-line">{{ $art->story }}</p>
+                                </details>
+                            @endif
                         </figcaption>
                     </figure>
                 @endforeach

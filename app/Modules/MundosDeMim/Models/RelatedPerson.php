@@ -2,8 +2,8 @@
 
 namespace App\Modules\MundosDeMim\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 class RelatedPerson extends Model
 {

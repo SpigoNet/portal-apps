@@ -2,8 +2,8 @@
 
 namespace App\Modules\MundosDeMim\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\User;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class RechargeCredits extends Command

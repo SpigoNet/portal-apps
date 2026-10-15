@@ -9,16 +9,17 @@ use App\Modules\Admin\Services\AiProviderService;
 use App\Modules\MundosDeMim\Models\DailyGeneration;
 use App\Modules\MundosDeMim\Models\Prompt;
 use App\Modules\MundosDeMim\Models\UserAttribute;
+use App\Modules\MundosDeMim\Services\DailyPhotoService;
 use App\Services\AI\Drivers\AirForceDriver;
 use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\LmStudioDriver;
 use App\Services\AI\Drivers\OllamaDriver;
+use App\Services\AI\Drivers\OpenAiCompatibleDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use App\Services\AI\Drivers\PollinationImageEditDriver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class PlaygroundController extends Controller
@@ -161,7 +162,7 @@ class PlaygroundController extends Controller
             : null;
 
         try {
-            if (! in_array($driverName, ['pollination', 'pollination_image_edit', 'airforce', 'gemini'], true)) {
+            if (! in_array($driverName, ['pollination', 'pollination_image_edit', 'airforce', 'gemini', 'openai'], true)) {
                 return back()->with('error', "O driver '{$driverName}' ainda não é suportado no Playground.")->withInput();
             }
 
@@ -219,7 +220,7 @@ class PlaygroundController extends Controller
                     $themeId = $savedPrompt?->theme_id;
                 }
 
-                DailyGeneration::create([
+                $generation = DailyGeneration::create([
                     'user_id' => $user->id,
                     'theme_id' => $themeId,
                     'prompt_id' => $savedPromptId,
@@ -247,8 +248,13 @@ class PlaygroundController extends Controller
 
                 // Enviar para o usuário se solicitado
                 if ($sendToUser) {
-                    $this->sendToUser($user, $imageUrl);
-                    $htmlResult = str_replace('</div>', "<div class='mt-4 bg-green-100 text-green-700 text-xs py-2 px-3 rounded'>✉️ Imagem enviada para o usuário!</div></div>", $htmlResult);
+                    $enviado = $attributes
+                        ? app(DailyPhotoService::class)->sendNotification($attributes, $imageUrl, $finalPrompt, 'email', $generation->id)
+                        : false;
+                    $aviso = $enviado
+                        ? 'Postal com a história enviado por e-mail para o usuário.'
+                        : 'Não foi possível enviar o e-mail para o usuário.';
+                    $htmlResult = str_replace('</div>', "<div class='mt-4 bg-green-100 text-green-700 text-xs py-2 px-3 rounded'>".e($aviso).'</div></div>', $htmlResult);
                 }
             } else {
                 return back()->with('error', 'O provedor selecionado não retornou uma imagem válida.')->withInput();
@@ -305,6 +311,7 @@ class PlaygroundController extends Controller
     {
         return match ($driverName) {
             'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
+            'openai' => new OpenAiCompatibleDriver($model, $apiKey, $baseUrl),
             'gemini' => new GeminiDriver($apiKey, $model, $baseUrl),
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
             'ollama' => new OllamaDriver($model, $apiKey, $baseUrl),
@@ -317,6 +324,7 @@ class PlaygroundController extends Controller
     {
         return match ($driverName) {
             'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
+            'openai' => new OpenAiCompatibleDriver($model, $apiKey, $baseUrl),
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
             'gemini' => new GeminiDriver($apiKey, $model, $baseUrl),
             'lm_studio' => new LmStudioDriver($baseUrl),
@@ -350,33 +358,5 @@ class PlaygroundController extends Controller
         }
 
         return $currentUser;
-    }
-
-    private function sendToUser(User $user, string $imageUrl): bool
-    {
-        try {
-            Mail::send([], [], function ($message) use ($user, $imageUrl) {
-                $message->to($user->email, $user->name)
-                    ->subject('🌟 Sua Nova Imagem Gerada!')
-                    ->html("
-                        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; color: #1e1e24;'>
-                            <h1 style='color: #6366f1;'>Olá, {$user->name}!</h1>
-                            <p style='color: #333333;'>Uma nova imagem foi gerada para você!</p>
-                            <p><a href='{$imageUrl}' target='_blank'><img src='{$imageUrl}' style='max-width: 100%; border-radius: 10px;'/></a></p>
-                            <p><a href='{$imageUrl}' target='_blank' style='color: #6366f1;'>Clique aqui para ver a imagem em tamanho maior</a></p>
-                            <br>
-                            <p style='color: #555555; font-size: 14px;'>Atenciosamente,<br>Equipe Mundos de Mim</p>
-                        </div>
-                    ");
-            });
-
-            \Illuminate\Support\Facades\Log::info("Playground: Imagem enviada para {$user->email}");
-
-            return true;
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Playground: Erro ao enviar email: '.$e->getMessage());
-
-            return false;
-        }
     }
 }

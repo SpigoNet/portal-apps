@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Modules\MundosDeMim\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 class Theme extends Model
 {
@@ -10,7 +11,7 @@ class Theme extends Model
 
     protected $fillable = [
         'name', 'slug', 'age_rating', 'is_seasonal', 'starts_at', 'ends_at',
-        'example_input_path', 'example_input_description' // Novos campos
+        'example_input_path', 'example_input_description', // Novos campos
     ];
 
     // Relação com Exemplos de Resultado ("Depois")

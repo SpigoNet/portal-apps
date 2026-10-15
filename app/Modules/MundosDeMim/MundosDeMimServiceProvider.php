@@ -11,6 +11,7 @@ class MundosDeMimServiceProvider extends ServiceProvider
 {
     /**
      * Define o namespace do módulo para as views.
+     *
      * @var string
      */
     protected $namespace = 'MundosDeMim';
@@ -18,10 +19,10 @@ class MundosDeMimServiceProvider extends ServiceProvider
     public function boot()
     {
         // Carrega as views do módulo com o namespace 'MundosDeMim'
-        $this->loadViewsFrom(__DIR__ . '/resources/views', $this->namespace);
+        $this->loadViewsFrom(__DIR__.'/resources/views', $this->namespace);
 
         // Carrega as migrações do módulo
-        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
 
         // Registra comandos de console
         if ($this->app->runningInConsole()) {
@@ -32,7 +33,7 @@ class MundosDeMimServiceProvider extends ServiceProvider
 
         // Carrega as rotas web com middleware padrão
         Route::middleware(['web'])
-            ->group(__DIR__ . '/routes.php');
+            ->group(__DIR__.'/routes.php');
 
         Gate::define('admin-do-app', function ($user) {
             return PortalAppUser::where('user_id', $user->id)

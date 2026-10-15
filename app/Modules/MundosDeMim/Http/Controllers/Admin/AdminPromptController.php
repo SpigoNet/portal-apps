@@ -10,6 +10,7 @@ use App\Services\AI\Drivers\AirForceDriver;
 use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\OllamaDriver;
+use App\Services\AI\Drivers\OpenAiCompatibleDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use App\Services\AI\Drivers\PollinationImageEditDriver;
 use Illuminate\Http\Request;
@@ -144,6 +145,7 @@ class AdminPromptController extends Controller
     {
         return match ($driverName) {
             'airforce' => new AirForceDriver($model, $apiKey, $baseUrl),
+            'openai' => new OpenAiCompatibleDriver($model, $apiKey, $baseUrl),
             'gemini' => new GeminiDriver($apiKey, $model, $baseUrl),
             'kdjingpai' => new KdjingpaiDriver($model, $apiKey, $baseUrl),
             'ollama' => new OllamaDriver($model, $apiKey, $baseUrl),

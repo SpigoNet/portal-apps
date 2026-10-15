@@ -248,19 +248,14 @@ class PlaygroundController extends Controller
 
                 // Enviar para o usuário se solicitado
                 if ($sendToUser) {
-                    $enviado = $attributes
-                        ? app(DailyPhotoService::class)->sendNotification($attributes, $imageUrl, $finalPrompt, 'email', $generation->id)
-                        : false;
-                    $aviso = $enviado
-                        ? 'Postal com a história enviado por e-mail para o usuário.'
-                        : 'Não foi possível enviar o e-mail para o usuário.';
+                    [$enviado, $aviso] = $this->enviarGeracao($user, $generation);
                     $htmlResult = str_replace('</div>', "<div class='mt-4 bg-green-100 text-green-700 text-xs py-2 px-3 rounded'>".e($aviso).'</div></div>', $htmlResult);
                 }
             } else {
                 return back()->with('error', 'O provedor selecionado não retornou uma imagem válida.')->withInput();
             }
 
-            return back()->with('result', $htmlResult)->withInput();
+            return back()->with('result', $htmlResult)->with('result_generation_id', $generation->id)->withInput();
 
         } catch (\Exception $e) {
             return back()->with('error', 'Erro no Playground: '.$e->getMessage());
@@ -331,6 +326,49 @@ class PlaygroundController extends Controller
             'ollama' => new OllamaDriver($model, $apiKey, $baseUrl),
             default => new PollinationDriver($model, $apiKey, $baseUrl),
         };
+    }
+
+    public function enviar(Request $request)
+    {
+        if (! auth()->user()->can('admin-do-app')) {
+            abort(403);
+        }
+
+        $request->validate([
+            'generation_id' => 'required|integer',
+        ]);
+
+        $user = $this->getTargetUser();
+        $generation = DailyGeneration::where('user_id', $user->id)->findOrFail($request->input('generation_id'));
+
+        [$enviado, $aviso] = $this->enviarGeracao($user, $generation);
+
+        return back()->with($enviado ? 'success' : 'error', $aviso);
+    }
+
+    /**
+     * Envia a geração pelo canal que o usuário escolheu (e-mail quando não escolheu nenhum).
+     *
+     * @return array{0: bool, 1: string}
+     */
+    private function enviarGeracao(User $user, DailyGeneration $generation): array
+    {
+        $attributes = UserAttribute::where('user_id', $user->id)->first();
+
+        if (! $attributes) {
+            return [false, 'O usuário ainda não tem retrato cadastrado, então não dá para enviar.'];
+        }
+
+        $canal = $attributes->notification_preference;
+        $canal = in_array($canal, ['email', 'telegram'], true) ? $canal : 'email';
+        $rotulo = $canal === 'telegram' ? 'Telegram' : 'e-mail';
+
+        $enviado = app(DailyPhotoService::class)
+            ->sendNotification($attributes, $generation->image_url, (string) $generation->final_prompt_used, $canal, $generation->id);
+
+        return $enviado
+            ? [true, "Postal com a história enviado por {$rotulo} para {$user->name}."]
+            : [false, "Não foi possível enviar por {$rotulo} para {$user->name}. Veja se o usuário conectou o canal."];
     }
 
     public function selectUser(Request $request)

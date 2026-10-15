@@ -22,6 +22,9 @@
         @if(session('error'))
             <div role="alert" class="mm-alerta mm-alerta-erro"><b>Algo deu errado:</b> {{ session('error') }}</div>
         @endif
+        @if(session('success'))
+            <div role="status" class="mm-alerta mm-alerta-ok">{{ session('success') }}</div>
+        @endif
 
         <form id="form-gerar" data-aguarde="Gerando o postal… pode levar alguns instantes." action="{{ route('mundos-de-mim.playground.generate') }}" method="POST" style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
             @csrf
@@ -64,7 +67,7 @@
                     @if($currentUser->can('admin-do-app'))
                         <label class="mm-opcao" style="padding:4px 0">
                             <input type="checkbox" name="send_to_user" value="1">
-                            <span>Enviar o resultado para o usuário<br><span class="mm-dica">Manda a imagem por e-mail para a pessoa escolhida acima.</span></span>
+                            <span>Enviar o resultado para o usuário<br><span class="mm-dica">Pelo canal que ela escolheu (e-mail ou Telegram), com a história do postal.</span></span>
                         </label>
                     @endif
                 </section>
@@ -148,6 +151,13 @@
             <section class="mm-card mm-card-lua" style="display:flex;flex-direction:column;gap:16px">
                 <h2 class="mm-display" style="margin:0;font-size:28px;font-weight:700">Resultado</h2>
                 <div style="width:100%;overflow-x:auto">{!! session('result') !!}</div>
+                @if($currentUser->can('admin-do-app') && session('result_generation_id'))
+                    <form action="{{ route('mundos-de-mim.playground.enviar') }}" method="POST" data-aguarde="Enviando o postal…" style="display:flex;justify-content:center">
+                        @csrf
+                        <input type="hidden" name="generation_id" value="{{ session('result_generation_id') }}">
+                        <button type="submit" class="mm-btn mm-btn-escuro"><i class="fa-solid fa-paper-plane"></i> Enviar para {{ \Illuminate\Support\Str::before($targetUser->name, ' ') }}</button>
+                    </form>
+                @endif
             </section>
         @endif
 
@@ -159,14 +169,23 @@
                 </div>
                 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px">
                     @foreach($recentGenerations as $generation)
+                        <div style="display:flex;flex-direction:column;background:var(--mm-crepusculo);border-radius:20px;overflow:hidden">
                         <button type="button" onclick="applyPromptFromList('{{ $generation->prompt_id ?? '' }}', @js($generation->final_prompt_used))"
-                                style="text-align:left;padding:0;border:0;background:var(--mm-crepusculo);color:inherit;border-radius:20px;overflow:hidden;cursor:pointer;font-family:inherit;display:flex;flex-direction:column">
+                                style="text-align:left;padding:0;border:0;background:none;color:inherit;cursor:pointer;font-family:inherit;display:flex;flex-direction:column">
                             <span class="mm-postal" style="border:0;border-radius:0;aspect-ratio:4/3;display:block"><img src="{{ $generation->image_url }}" alt="Resultado gerado" loading="lazy"></span>
                             <span style="padding:14px;display:flex;flex-direction:column;gap:6px">
                                 <span class="mm-dica">{{ optional($generation->created_at)->format('d/m/Y H:i') }}</span>
                                 <span style="font-size:14px;line-height:1.45;color:#D6D3EE;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">{{ $generation->final_prompt_used }}</span>
                             </span>
                         </button>
+                            @if($currentUser->can('admin-do-app'))
+                                <form action="{{ route('mundos-de-mim.playground.enviar') }}" method="POST" data-aguarde="Enviando o postal…" style="padding:0 14px 14px">
+                                    @csrf
+                                    <input type="hidden" name="generation_id" value="{{ $generation->id }}">
+                                    <button type="submit" class="mm-btn mm-btn-contorno mm-btn-bloco" style="padding:12px 16px"><i class="fa-solid fa-paper-plane"></i> Enviar ao usuário</button>
+                                </form>
+                            @endif
+                        </div>
                     @endforeach
                 </div>
             </section>

@@ -3,7 +3,7 @@
         <header class="mb-8 flex justify-between items-center">
             <div>
                 <a href="{{ route('mundos-de-mim.admin.user-gallery.index') }}"
-                    class="text-[#a3e635] font-bold flex items-center gap-2 mb-2 hover:underline">
+                    class="text-[#FF7A59] font-bold flex items-center gap-2 mb-2 hover:underline">
                     <i class="fa-solid fa-arrow-left"></i> Voltar para Lista de Usuários
                 </a>
                 <h1 class="text-3xl font-black text-white uppercase tracking-tighter">Galeria de {{ $user->name }}</h1>
@@ -38,7 +38,7 @@
                                     method="POST">
                                     @csrf
                                     <button type="submit" title="Reenviar para o Usuário"
-                                        class="bg-[#a3e635] text-black p-4 rounded-2xl hover:scale-110 transition">
+                                        class="bg-[#FF7A59] text-[#14122B] p-4 rounded-2xl hover:scale-110 transition">
                                         <i class="fa-solid fa-paper-plane text-xl"></i>
                                     </button>
                                 </form>

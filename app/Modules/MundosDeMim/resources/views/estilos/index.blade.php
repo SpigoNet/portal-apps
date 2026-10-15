@@ -24,13 +24,15 @@
                         images: {{ json_encode($exampleUrls) }},
                         active: 0,
                         timer: null,
-                        start() { if (this.images.length > 1 && !this.timer) { this.timer = setInterval(() => { this.active = (this.active + 1) % this.images.length }, 1200) } },
-                        stop() { clearInterval(this.timer); this.timer = null; this.active = 0 }
+                        start() { if (this.images.length > 1 && !this.timer) { this.timer = setInterval(() => { this.active = (this.active + 1) % this.images.length }, 1600) } },
+                        stop() { clearInterval(this.timer); this.timer = null; this.active = 0 },
+                        next() { this.active = (this.active + 1) % this.images.length }
                     }"
+                     x-init="if (window.matchMedia('(hover: none)').matches && 'IntersectionObserver' in window) { new IntersectionObserver(e => e[0].isIntersecting ? start() : stop(), { threshold: 0.6 }).observe($el) }"
                      @mouseenter="start()" @mouseleave="stop()" @focusin="start()" @focusout="stop()"
                      class="mm-card" style="padding:0;overflow:hidden;display:flex;flex-direction:column;{{ $isEnabled ? 'box-shadow:0 0 0 2px var(--mm-poente)' : '' }}">
 
-                    <div style="position:relative;height:340px;background:var(--mm-noite)">
+                    <div @click="next()" style="position:relative;height:340px;background:var(--mm-noite)">
                         @if(count($exampleUrls))
                             <img :src="images[active]" alt="Exemplo de postal do mundo {{ $theme->name }}" loading="lazy"
                                  style="width:100%;height:100%;object-fit:cover;display:block">
@@ -38,6 +40,9 @@
                             <div class="mm-cena-{{ ($theme->id % 4) + 1 }}" role="img" aria-label="Sem exemplo ainda" style="width:100%;height:100%"></div>
                         @endif
 
+                        @if(count($exampleUrls) > 1)
+                            <span class="mm-chip" style="position:absolute;right:14px;top:14px" x-text="(active + 1) + '/' + images.length" aria-hidden="true"></span>
+                        @endif
                         <span class="mm-chip" style="position:absolute;left:14px;top:14px">
                             {{ $theme->is_seasonal ? 'Temporada' : 'Sempre aberto' }}
                         </span>

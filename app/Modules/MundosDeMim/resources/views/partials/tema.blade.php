@@ -99,6 +99,23 @@
     .mm-papel table thead { background: #E6E1F7 !important; }
     .mm-papel .container-admin { max-width: 1280px; margin: 0 auto; }
 
+    .mm .glass { background: var(--mm-crepusculo); border-color: var(--mm-linha); backdrop-filter: none; }
+    .mm .glass .text-slate-400 { color: var(--mm-texto-suave); }
+    .mm-pagina .p-6 { max-width: 1280px; margin: 0 auto; }
+
+    /* Aparelhos sem mouse: o que só aparecia ao passar o mouse fica sempre visível */
+    @media (hover: none) {
+        .mm [class*="group-hover"].opacity-0 { opacity: 1 !important; inset: auto 0 0 0 !important; height: auto !important; padding: 10px; background: linear-gradient(transparent, rgba(20,18,43,.9)) !important; justify-content: flex-end !important; align-items: flex-end !important; gap: 10px; }
+        .mm button, .mm .mm-btn, .mm select { min-height: 44px; }
+        .mm [class*="group-hover"] button[title] { min-width: 44px; }
+    }
+    @media (max-width: 767px) {
+        .mm-wrap { padding: 32px 16px 56px; }
+        .mm-card { padding: 20px; border-radius: 22px; }
+        .mm-papel table { display: block; overflow-x: auto; white-space: nowrap; }
+        .mm-papel .max-w-7xl, .mm-papel .max-w-5xl, .mm-papel .max-w-4xl { padding-left: 4px; padding-right: 4px; }
+    }
+
     .mm-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
     .mm-pagina nav[role="navigation"] svg { width: 20px; height: 20px; }
     .mm-pagina nav[role="navigation"] a, .mm-pagina nav[role="navigation"] span[aria-current] > span { color: var(--mm-lua); }

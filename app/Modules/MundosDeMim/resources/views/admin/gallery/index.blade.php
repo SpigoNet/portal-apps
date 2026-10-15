@@ -26,7 +26,7 @@
         <!-- Seção 1: Galeria Atual (Public) -->
         <section class="mb-12">
             <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                <i class="fa-solid fa-eye text-[#a3e635]"></i> Imagens Atuais na Landing Page
+                <i class="fa-solid fa-eye text-[#FF7A59]"></i> Imagens Atuais na Landing Page
             </h2>
 
             @if(count($publicImages) > 0)
@@ -60,7 +60,7 @@
         <!-- Seção 2: Sugestões dos Temas (Exemplos) -->
         <section>
             <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                <i class="fa-solid fa-wand-magic-sparkles text-[#a3e635]"></i> Escolher das Demonstrações dos Temas
+                <i class="fa-solid fa-wand-magic-sparkles text-[#FF7A59]"></i> Escolher das Demonstrações dos Temas
             </h2>
 
             <div class="space-y-8">
@@ -81,7 +81,7 @@
                                                 @csrf
                                                 <input type="hidden" name="example_id" value="{{ $example->id }}">
                                                 <button type="submit"
-                                                    class="bg-[#a3e635] text-black px-3 py-1 rounded-lg font-bold text-xs hover:scale-105 transition">
+                                                    class="bg-[#FF7A59] text-[#14122B] px-3 py-1 rounded-lg font-bold text-xs hover:scale-105 transition">
                                                     USAR NA LANDING
                                                 </button>
                                             </form>

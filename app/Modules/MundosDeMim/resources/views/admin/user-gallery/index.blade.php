@@ -38,7 +38,7 @@
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#a3e635] to-blue-500 flex items-center justify-center font-black text-black">
+                                        class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#FF7A59] to-blue-500 flex items-center justify-center font-black text-black">
                                         {{ substr($user->name, 0, 1) }}
                                     </div>
                                     <div>
@@ -48,7 +48,7 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="bg-[#a3e635]/10 text-[#a3e635] px-3 py-1 rounded-full text-xs font-black">
+                                <span class="bg-[#FF7A59]/10 text-[#FF7A59] px-3 py-1 rounded-full text-xs font-black">
                                     {{ $user->generations_count }} fotos
                                 </span>
                             </td>

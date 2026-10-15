@@ -1,5 +1,6 @@
 @php
-    $papel = request()->routeIs('mundos-de-mim.admin.*') || request()->routeIs('mundos-de-mim.playground.*');
+    $papel = request()->routeIs('mundos-de-mim.admin.themes.*', 'mundos-de-mim.admin.prompts.*', 'mundos-de-mim.admin.importador.*', 'mundos-de-mim.playground.*');
+    $emAdmin = request()->routeIs('mundos-de-mim.admin.*', 'mundos-de-mim.playground.*');
     $usuario = auth()->user();
     $atual = fn (string ...$rotas) => request()->routeIs(...$rotas) ? 'page' : 'false';
     $linksPrincipais = [
@@ -55,7 +56,7 @@
                     @can('admin-do-app')
                         <div x-data="{ menu: false }" style="position:relative" @click.outside="menu = false" @keydown.escape="menu = false">
                             <button type="button" class="mm-nav-link" @click="menu = !menu" :aria-expanded="menu" aria-haspopup="true"
-                                    aria-current="{{ $papel ? 'true' : 'false' }}" style="{{ $papel ? 'color:var(--mm-poente)' : '' }}">
+                                    aria-current="{{ $emAdmin ? 'true' : 'false' }}" style="{{ $emAdmin ? 'color:var(--mm-poente)' : '' }}">
                                 Admin <i class="fa-solid fa-chevron-down" style="font-size:10px"></i>
                             </button>
                             <div class="mm-menu" x-show="menu" x-cloak>

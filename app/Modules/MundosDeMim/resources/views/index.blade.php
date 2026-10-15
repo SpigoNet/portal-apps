@@ -1,132 +1,100 @@
+@php
+    $primeiroNome = \Illuminate\Support\Str::before(auth()->user()->name ?? 'viajante', ' ');
+    $hora = (int) now()->format('G');
+    $saudacao = $hora < 12 ? 'Bom dia' : ($hora < 18 ? 'Boa tarde' : 'Boa noite');
+    $planoRotulo = ($stats['plano'] ?? null) === 'prime' ? 'Expedição' : 'Passagem';
+@endphp
 <x-MundosDeMim::layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight font-heading">
-            {{ __('Painel de Controle') }}
-        </h2>
-    </x-slot>
+    <div class="mm-wrap mm-stack">
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div style="display:flex;flex-direction:column;gap:8px">
+            <h1 class="mm-h1">{{ $saudacao }}, {{ $primeiroNome }}.</h1>
+            <p class="mm-lead">
+                @if($ultima)
+                    Seu postal de hoje está no atlas. Você já guardou {{ $stats['total_artes'] }} {{ $stats['total_artes'] === 1 ? 'postal' : 'postais' }}.
+                @else
+                    Seu atlas ainda está vazio. Conte como você é e o primeiro postal chega na próxima viagem.
+                @endif
+            </p>
+        </div>
 
-            <!-- Banner de Boas Vindas com o Roxo Tech -->
-            <div class="bg-[#7B2CBF] rounded-[2rem] shadow-xl p-8 mb-10 text-white relative overflow-hidden">
-                <div class="absolute -top-10 -right-10 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-                
-                <h3 class="text-3xl font-bold font-heading mb-2">Bem-vindo ao seu estúdio de criação</h3>
-                <p class="text-[#F8F9FA]/80 text-lg max-w-2xl">
-                    Aqui você define como a Inteligência Artificial enxerga você e seus entes queridos para criar obras de arte diárias impressionantes.
-                </p>
+        <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:stretch">
+
+            <div class="mm-card" style="flex:2 1 520px;min-width:0;padding:20px;display:flex;flex-wrap:wrap;gap:24px">
+                <div class="mm-postal {{ $ultima ? '' : 'mm-cena-1' }}" style="flex:1 1 260px;min-width:0">
+                    @if($ultima)
+                        <img src="{{ $ultima->image_url }}" alt="Postal de {{ $ultima->reference_date->format('d/m/Y') }}">
+                    @endif
+                </div>
+                <div style="flex:1 1 260px;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:12px 8px">
+                    @if($ultima)
+                        <span class="mm-chip" style="align-self:flex-start;color:var(--mm-menta)">{{ $ultima->reference_date->isToday() ? 'Postal de hoje' : 'Último postal · '.$ultima->reference_date->format('d/m') }}</span>
+                        <h2 class="mm-display" style="margin:0;font-size:40px;line-height:1.02;font-weight:800">{{ $ultima->theme?->name ?? 'Mundo surpresa' }}</h2>
+                        <p style="margin:0;font-size:16px;line-height:1.55;color:var(--mm-texto-suave)">
+                            {{ $ultima->theme?->is_seasonal ? 'Um mundo de temporada, só por alguns dias.' : 'Um dos mundos que você ligou no seu atlas.' }}
+                        </p>
+                        <div style="display:flex;flex-wrap:wrap;gap:10px">
+                            <a href="{{ route('mundos-de-mim.galeria.index') }}" class="mm-btn mm-btn-primario">Abrir no atlas</a>
+                            <a href="{{ $ultima->image_url }}" target="_blank" rel="noopener" download class="mm-btn mm-btn-contorno">Baixar em HD</a>
+                        </div>
+                    @else
+                        <h2 class="mm-display" style="margin:0;font-size:36px;line-height:1.05;font-weight:800">Nenhum postal ainda</h2>
+                        <p style="margin:0;font-size:16px;line-height:1.55;color:var(--mm-texto-suave)">Complete seu retrato e ligue alguns mundos. Os postais saem todo dia.</p>
+                        <div><a href="{{ route('mundos-de-mim.perfil.index') }}" class="mm-btn mm-btn-primario">Fazer meu retrato</a></div>
+                    @endif
+                </div>
             </div>
 
-            <!-- Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Perfil: Verde Aquarela -->
-                <a href="{{ route('mundos-de-mim.perfil.index') }}" class="group block">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1 h-full border-l-4 {{ $stats['perfil_ok'] ? 'border-[#62A87C]' : 'border-orange-500' }}">
-                        <div class="p-8">
-                            <div class="flex items-center justify-between mb-4">
-                                <h4 class="text-xl font-bold text-gray-900 group-hover:text-[#62A87C] transition-colors font-heading">
-                                    Meu Perfil
-                                </h4>
-                                <div class="w-12 h-12 bg-[#62A87C]/10 rounded-xl flex items-center justify-center text-[#62A87C] text-xl group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-user-astronaut"></i>
-                                </div>
-                            </div>
-                            <p class="text-gray-600 mb-6">
-                                Conte para a IA como você é, sua energia, seus gostos e os cenários que mais combinam com você.
-                            </p>
-                            <div class="flex items-center text-sm mt-auto">
-                                @if($stats['perfil_ok'])
-                                    <span class="text-[#62A87C] font-semibold bg-[#62A87C]/10 px-3 py-1.5 rounded-lg flex items-center gap-2">
-                                        <i class="fa-solid fa-circle-check"></i> Configurado
-                                    </span>
-                                @else
-                                    <span class="text-orange-600 font-semibold bg-orange-50 px-3 py-1.5 rounded-lg flex items-center gap-2">
-                                        <i class="fa-solid fa-triangle-exclamation"></i> Pendente
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
+            <div style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:24px">
+                <div class="mm-card mm-card-lua" style="display:flex;flex-direction:column;gap:12px">
+                    <span class="mm-rotulo">Seus extras · {{ $planoRotulo }}</span>
+                    <div style="display:flex;align-items:baseline;gap:8px">
+                        <span class="mm-display" style="font-size:64px;font-weight:800;line-height:1">{{ $stats['creditos'] ?? 0 }}</span>
+                        <span style="font-size:16px;color:var(--mm-texto-papel)">{{ ($stats['creditos'] ?? 0) === 1 ? 'extra disponível' : 'extras disponíveis' }}</span>
                     </div>
-                </a>
+                    <span style="font-size:14px;line-height:1.4;color:var(--mm-texto-papel)">Peça um postal na hora, além do que chega todo dia.</span>
+                </div>
 
-                <!-- Entes Queridos: Roxo Tech -->
-                <a href="{{ route('mundos-de-mim.pessoas.index') }}" class="group block">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1 h-full border-l-4 border-[#7B2CBF]">
-                        <div class="p-8">
-                            <div class="flex items-center justify-between mb-4">
-                                <h4 class="text-xl font-bold text-gray-900 group-hover:text-[#7B2CBF] transition-colors font-heading">
-                                    Entes Queridos
-                                </h4>
-                                <div class="w-12 h-12 bg-[#7B2CBF]/10 rounded-xl flex items-center justify-center text-[#7B2CBF] text-xl group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-users"></i>
-                                </div>
-                            </div>
-                            <p class="text-gray-600 mb-6">
-                                Gerencie quem aparece com você nas fotos em dupla ou família.
-                            </p>
-                            <div class="text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg inline-block font-medium">
-                                <span class="text-[#7B2CBF] font-bold">{{ $stats['pessoas_ativas'] }}</span> perfis ativos para IA
-                            </div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Galeria: Azul Metálico -->
-                <a href="{{ route('mundos-de-mim.galeria.index') }}" class="group block">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1 h-full border-l-4 border-[#0077B6]">
-                        <div class="p-8">
-                            <div class="flex items-center justify-between mb-4">
-                                <h4 class="text-xl font-bold text-gray-900 group-hover:text-[#0077B6] transition-colors font-heading">
-                                    Minha Galeria
-                                </h4>
-                                <div class="w-12 h-12 bg-[#0077B6]/10 rounded-xl flex items-center justify-center text-[#0077B6] text-xl group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-images"></i>
-                                </div>
-                            </div>
-                            <p class="text-gray-600 mb-6">
-                                Visualize, baixe e compartilhe suas obras de arte diárias.
-                            </p>
-                            <div class="text-sm text-[#0077B6] bg-[#0077B6]/10 px-3 py-1.5 rounded-lg inline-block font-semibold flex items-center gap-2 w-max">
-                                <i class="fa-solid fa-bolt"></i> {{ $stats['total_artes'] }} artes geradas
-                            </div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Estilos: Azul Aquarela -->
-                <a href="{{ route('mundos-de-mim.estilos.index') }}" class="group block">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-2xl hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1 h-full border-l-4 border-[#3B9AB2]">
-                        <div class="p-8">
-                            <div class="flex items-center justify-between mb-4">
-                                <h4 class="text-xl font-bold text-gray-900 group-hover:text-[#3B9AB2] transition-colors font-heading">
-                                    Estilos & Temas
-                                </h4>
-                                <div class="w-12 h-12 bg-[#3B9AB2]/10 rounded-xl flex items-center justify-center text-[#3B9AB2] text-xl group-hover:scale-110 transition-transform">
-                                    <i class="fa-solid fa-palette"></i>
-                                </div>
-                            </div>
-                            <p class="text-gray-600 mb-6">
-                                Explore os universos disponíveis e veja o calendário sazonal.
-                            </p>
-                            @if($stats['temas_sazonais'] > 0)
-                                <div class="text-sm text-yellow-800 bg-yellow-100 px-3 py-1.5 rounded-lg inline-block font-bold animate-pulse flex items-center gap-2 w-max">
-                                    <i class="fa-solid fa-star"></i> {{ $stats['temas_sazonais'] }} evento(s) ativo(s) hoje!
-                                </div>
-                            @else
-                                <div class="text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg inline-block font-medium">
-                                    Explore a coleção permanente
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="mt-12 text-center text-sm text-gray-400 font-medium">
-                <p>Status do Sistema: <span class="text-[#62A87C]">● Operacional</span></p>
-                <p class="mt-1">As gerações ocorrem diariamente às 07:00 via Job Scheduler.</p>
+                <div class="mm-card" style="display:flex;flex-direction:column;gap:4px;flex-grow:1">
+                    <span class="mm-rotulo" style="margin-bottom:8px">Para a próxima viagem</span>
+                    <a href="{{ route('mundos-de-mim.perfil.index') }}" style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--mm-linha)">
+                        <span>Retrato</span>
+                        @if($stats['perfil_ok'])
+                            <span style="color:var(--mm-menta);font-size:14px;font-weight:600">Completo</span>
+                        @else
+                            <span style="color:var(--mm-poente);font-size:14px;font-weight:600">Falta contar como você é</span>
+                        @endif
+                    </a>
+                    <a href="{{ route('mundos-de-mim.pessoas.index') }}" style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--mm-linha)">
+                        <span>Companhias</span>
+                        <span style="color:var(--mm-texto-suave);font-size:14px">{{ $stats['pessoas_ativas'] }} {{ $stats['pessoas_ativas'] === 1 ? 'viajando' : 'viajando' }} com você</span>
+                    </a>
+                    <a href="{{ route('mundos-de-mim.estilos.index') }}" style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0">
+                        <span>Mundos</span>
+                        @if($stats['temas_sazonais'] > 0)
+                            <span style="color:var(--mm-poente);font-size:14px;font-weight:600">{{ $stats['temas_sazonais'] }} de temporada aberto{{ $stats['temas_sazonais'] > 1 ? 's' : '' }}</span>
+                        @else
+                            <span style="color:var(--mm-texto-suave);font-size:14px">Explore a coleção permanente</span>
+                        @endif
+                    </a>
+                </div>
             </div>
         </div>
+
+        @if($recentes->count() > 1)
+            <section style="display:flex;flex-direction:column;gap:20px">
+                <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px">
+                    <h2 class="mm-display" style="margin:0;font-size:32px;font-weight:700">Últimos postais</h2>
+                    <a href="{{ route('mundos-de-mim.galeria.index') }}" style="padding:12px 0;font-size:15px;color:var(--mm-bruma);font-weight:600">Ver o atlas inteiro</a>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px">
+                    @foreach($recentes->skip(1) as $art)
+                        <a href="{{ route('mundos-de-mim.galeria.index') }}" class="mm-postal" aria-label="{{ $art->theme?->name ?? 'Mundo surpresa' }}, {{ $art->reference_date->format('d/m') }}">
+                            <img src="{{ $art->image_url }}" alt="" loading="lazy">
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+        @endif
     </div>
 </x-MundosDeMim::layout>

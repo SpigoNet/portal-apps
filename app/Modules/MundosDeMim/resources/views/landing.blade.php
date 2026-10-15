@@ -1,242 +1,135 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mundos de Mim - Sua Vida em Arte Digital</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#14122B">
+    <meta name="description" content="Todo dia, um postal de um mundo novo de você, direto no seu celular.">
+    <title>Mundos de Mim · Todo dia, um mundo novo de você</title>
+    @include('MundosDeMim::partials.tema')
     <style>
-        
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .font-heading {
-            font-family: 'Space Grotesk', sans-serif;
-        }
-        .bg-dark-tech {
-            background-color: #1E1E24;
-            background-image: radial-gradient(circle at top right, rgba(123, 44, 191, 0.15), transparent 40%),
-                              radial-gradient(circle at bottom left, rgba(0, 119, 182, 0.15), transparent 40%);
-        }
-
-
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-        }
-
-        .bg-dark-tech {
-            background: linear-gradient(135deg, #1E1E24 0%, #141419 100%);
-        }
-
-        .text-gradient {
-            background: linear-gradient(to right, #8b5cf6, #d946ef, #62A87C);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero-pattern {
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23a3e635' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
+        html { scroll-behavior: smooth; }
+        .ld-wrap { max-width: 1200px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+        .ld-titulo { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; letter-spacing: -0.03em; line-height: 1.02; margin: 0; }
+        .ld-passo { background: var(--mm-crepusculo); border-radius: 24px; padding: 32px; display: flex; flex-direction: column; gap: 14px; }
+        .ld-passo b.n { font: 800 56px/1 'Bricolage Grotesque', sans-serif; }
+        .ld-passo h3 { margin: 0; font: 700 26px/1.1 'Bricolage Grotesque', sans-serif; letter-spacing: -0.02em; }
+        .ld-passo p { margin: 0; font-size: 16px; line-height: 1.55; color: var(--mm-texto-suave); }
+        .ld-plano { flex: 1 1 320px; max-width: 480px; min-width: 0; border-radius: 32px; padding: 40px; display: flex; flex-direction: column; gap: 20px; position: relative; }
+        .ld-plano ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 16px; flex-grow: 1; }
+        .ld-plano .preco { display: flex; align-items: baseline; gap: 6px; }
+        .ld-plano .preco b { font: 800 52px/1 'Bricolage Grotesque', sans-serif; letter-spacing: -0.03em; }
     </style>
 </head>
+<body class="mm">
+    @php
+        $cenas = ['mm-cena-1', 'mm-cena-2', 'mm-cena-3', 'mm-cena-4'];
+        $destaques = array_slice($images ?? [], 0, 4);
+    @endphp
 
-<body class="bg-dark-tech text-white min-h-screen">
-
-    <div class="hero-pattern absolute inset-0 z-0"></div>
-
-    {{-- Header --}}
-    <nav class="relative z-10 px-6 py-4 flex justify-between items-center max-w-7xl mx-auto">
-        <div class="flex items-center gap-2">
-            <span class="text-2xl font-black tracking-tighter font-heading">MUNDOS DE <span class="text-[#62A87C]">MIM</span></span>
-        </div>
-        <div class="flex gap-4 items-center">
+    <header class="ld-wrap" style="padding-top:24px;padding-bottom:24px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between">
+        <a href="#topo" aria-label="Mundos de Mim"><x-MundosDeMim::logo :tamanho="40" fonte="26px" /></a>
+        <nav style="display:flex;flex-wrap:wrap;gap:8px;align-items:center" aria-label="Principal">
+            <a href="#como" class="mm-nav-link">Como funciona</a>
+            <a href="#planos" class="mm-nav-link">Planos</a>
             @auth
-                <a href="{{ route('mundos-de-mim.index') }}"
-                    class="text-sm font-semibold hover:text-[#62A87C] transition">Dashboard</a>
+                <a href="{{ route('mundos-de-mim.index') }}" class="mm-btn mm-btn-primario">Abrir meu atlas</a>
             @else
-                <a href="{{ route('mundos-de-mim.login') }}" class="text-sm font-semibold hover:text-[#62A87C] transition">Entrar</a>
-                <a href="{{ route('mundos-de-mim.register') }}"
-                    class="bg-[#62A87C] text-black px-5 py-2 rounded-full font-bold text-sm hover:scale-105 transition transform">Começar
-                    Agora</a>
+                <a href="{{ route('mundos-de-mim.login') }}" class="mm-btn mm-btn-contorno">Entrar</a>
+                <a href="{{ route('mundos-de-mim.register') }}" class="mm-btn mm-btn-primario">Criar meu atlas</a>
             @endauth
-        </div>
-    </nav>
+        </nav>
+    </header>
 
-    {{-- Hero --}}
-    <main class="relative z-10 px-6 pt-20 pb-16 text-center max-w-7xl mx-auto">
-        <div
-            class="inline-block px-4 py-1.5 mb-6 rounded-full bg-[#62A87C]/10 border border-[#62A87C]/20 text-[#62A87C] text-sm font-bold tracking-wide uppercase">
-            A Nova Fronteira da Arte Digital
-        </div>
-        <h1 class="text-6xl md:text-8xl font-extrabold mb-8 leading-tight tracking-tighter font-heading">
-            Sua essência em <br><span class="text-gradient">universos infinitos</span>.
-        </h1>
-        <p class="text-lg md:text-2xl text-slate-400 mb-12 max-w-4xl mx-auto leading-relaxed">
-            Mundos de Mim usa IA generativa de ponta para criar artes digitais únicas. <br class="hidden md:block"> Todo
-            dia uma nova versão de você em cenários que desafiam a realidade.
-        </p>
-
-        <div class="flex flex-wrap justify-center gap-6 mb-24">
-            <a href="#planos"
-                class="bg-[#62A87C] text-black px-10 py-5 rounded-2xl font-black text-xl hover:shadow-[0_0_30px_rgba(163,230,53,0.5)] transition hover:scale-105 transform">VER
-                PLANOS</a>
-            <a href="{{ route('mundos-de-mim.register') }}"
-                class="glass border border-white/20 px-10 py-5 rounded-2xl font-black text-xl hover:bg-white/10 transition flex items-center gap-3">
-                COMEÇAR AGORA <i class="fa-solid fa-bolt text-[#62A87C]"></i>
-            </a>
-        </div>
-
-        <div class="relative max-w-6xl mx-auto mt-20">
-            @if(count($images) > 0)
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                    @php
-                        // Divide as imagens em 4 colunas para manter o efeito staggered
-                        $columns = [[], [], [], []];
-                        foreach ($images as $index => $image) {
-                            $columns[$index % 4][] = $image;
-                        }
-                    @endphp
-
-                    @foreach($columns as $colIndex => $columnImages)
-                        <div class="space-y-4 md:space-y-6 {{ $colIndex % 2 !== 0 ? 'pt-8 md:pt-12' : '' }}">
-                            @foreach($columnImages as $image)
-                                <img src="{{ $image }}"
-                                    class="rounded-3xl shadow-2xl hover:scale-105 transition transform duration-500 border border-white/10"
-                                    alt="Arte Curada Mundos de Mim" title="Explore novos horizontes com Mundos de Mim">
-                            @endforeach
-                        </div>
-                    @endforeach
+    <main>
+        <section id="topo" class="ld-wrap" style="padding-top:56px;padding-bottom:40px;display:flex;flex-wrap:wrap;gap:48px;align-items:center">
+            <div style="flex:1 1 440px;min-width:0;display:flex;flex-direction:column;gap:28px">
+                <span class="mm-chip" style="align-self:flex-start;background:var(--mm-crepusculo);color:var(--mm-bruma);padding:8px 16px;font-size:14px">Um postal novo, todo dia</span>
+                <h1 class="ld-titulo" style="font-size:clamp(46px,7vw,88px)">Todo dia, um mundo novo de <span style="color:var(--mm-poente)">você</span>.</h1>
+                <p class="mm-lead" style="font-size:20px;line-height:1.55;max-width:520px">Conte como você é e quem viaja com você. Toda manhã chega no seu celular um postal de um mundo onde você mora: um planeta de marés, uma cidade de aurora, um deserto de duas luas.</p>
+                <div style="display:flex;flex-wrap:wrap;gap:12px">
+                    <a href="#planos" class="mm-btn mm-btn-primario" style="padding:16px 28px;font-size:17px">Começar a viajar</a>
+                    <a href="#como" class="mm-btn mm-btn-contorno" style="padding:16px 28px;font-size:17px">Ver como funciona</a>
                 </div>
-            @else
-                <div class="py-20 text-center glass rounded-3xl border border-white/10">
-                    <p class="text-slate-400">Nossa galeria de sonhos está sendo preparada. Volte em breve!</p>
-                </div>
-            @endif
-            <div
-                class="absolute inset-0 bg-gradient-to-t from-[#1E1E24] via-transparent to-transparent pointer-events-none">
             </div>
-        </div>
-        <div
-            class="absolute inset-0 bg-gradient-to-t from-[#1E1E24] via-transparent to-transparent pointer-events-none">
-        </div>
-        </div>
+
+            <div style="flex:1 1 380px;min-width:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px" aria-hidden="true">
+                @foreach($cenas as $i => $cena)
+                    <div class="mm-postal {{ isset($destaques[$i]) ? '' : $cena }}" style="border-radius:24px;border-width:6px;{{ ['', 'margin-top:48px', 'margin-top:-24px', 'margin-top:24px'][$i] }}">
+                        @isset($destaques[$i])
+                            <img src="{{ $destaques[$i] }}" alt="" loading="lazy">
+                        @endisset
+                    </div>
+                @endforeach
+            </div>
+        </section>
+
+        <section id="como" class="ld-wrap" style="padding-top:88px;padding-bottom:40px;display:flex;flex-direction:column;gap:40px">
+            <h2 class="ld-titulo" style="font-size:clamp(34px,5vw,56px);max-width:720px">Três passos até o primeiro postal.</h2>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px">
+                <div class="ld-passo">
+                    <b class="n" style="color:var(--mm-poente)">1</b>
+                    <h3>Faça seu retrato</h3>
+                    <p>Envie uma foto e descreva seus traços, seu jeito e o que você gosta. Se preferir, sugerimos uma primeira versão para você ajustar.</p>
+                </div>
+                <div class="ld-passo">
+                    <b class="n" style="color:var(--mm-bruma)">2</b>
+                    <h3>Escolha seus mundos</h3>
+                    <p>Ligue os universos que combinam com você, dos de cada estação aos que ficam o ano todo. Chame quem viaja junto: parceiro, filhos, amigos.</p>
+                </div>
+                <div class="ld-passo">
+                    <b class="n" style="color:var(--mm-menta)">3</b>
+                    <h3>Receba o postal</h3>
+                    <p>Todo dia uma arte nova chega no Telegram ou no WhatsApp e fica guardada no seu atlas, junto com todas as outras.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="ld-wrap" style="padding-top:56px;padding-bottom:56px;display:flex;flex-wrap:wrap;gap:32px;align-items:center">
+            <div class="mm-cena-1" role="img" aria-label="Ilustração de um mundo ao entardecer" style="flex:1 1 360px;min-width:0;height:380px;border-radius:32px"></div>
+            <div style="flex:1 1 360px;min-width:0;display:flex;flex-direction:column;gap:18px">
+                <h2 class="ld-titulo" style="font-size:clamp(32px,4.5vw,48px)">Ninguém viaja sozinho.</h2>
+                <p class="mm-lead" style="font-size:18px;line-height:1.6">Cadastre suas companhias e escolha quem aparece em cada mundo. Postais a dois, em família ou só seus.</p>
+                <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;font-size:17px">
+                    <li style="display:flex;gap:12px;align-items:center"><span style="width:10px;height:10px;border-radius:50%;background:var(--mm-poente);flex:none"></span>Você decide quem pode aparecer, a qualquer hora</li>
+                    <li style="display:flex;gap:12px;align-items:center"><span style="width:10px;height:10px;border-radius:50%;background:var(--mm-bruma);flex:none"></span>Mundos para crianças, jovens e adultos</li>
+                    <li style="display:flex;gap:12px;align-items:center"><span style="width:10px;height:10px;border-radius:50%;background:var(--mm-menta);flex:none"></span>Diga o que nunca deve aparecer nos seus postais</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="planos" class="ld-wrap" style="padding-top:88px;padding-bottom:88px;display:flex;flex-direction:column;gap:40px">
+            <div style="display:flex;flex-direction:column;gap:12px;text-align:center;align-items:center">
+                <h2 class="ld-titulo" style="font-size:clamp(34px,5vw,56px)">Escolha como viajar.</h2>
+                <p class="mm-lead">Os dois dão um postal por dia e 5 extras por semana. Muda o caminho até você.</p>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:24px;justify-content:center;align-items:stretch">
+                <div class="ld-plano" style="background:var(--mm-crepusculo)">
+                    <h3 class="mm-display" style="margin:0;font-size:30px;font-weight:700">Passagem</h3>
+                    <div class="preco"><b>R$ 14,90</b><span style="color:var(--mm-texto-suave)">/mês</span></div>
+                    <ul style="color:#D6D3EE">
+                        <li>1 postal por dia</li><li>Entrega pelo Telegram</li><li>5 extras por semana, quando você quiser</li><li>Atlas completo online</li>
+                    </ul>
+                    <a href="{{ route('mundos-de-mim.register') }}" class="mm-btn mm-btn-contorno mm-btn-bloco" style="padding:16px">Começar com a Passagem</a>
+                </div>
+                <div class="ld-plano" style="background:var(--mm-lua);color:var(--mm-noite)">
+                    <span class="mm-chip" style="position:absolute;top:28px;right:28px;background:var(--mm-poente);color:var(--mm-noite);font-size:12px">Mais escolhido</span>
+                    <h3 class="mm-display" style="margin:0;font-size:30px;font-weight:700">Expedição</h3>
+                    <div class="preco"><b>R$ 34,90</b><span style="color:var(--mm-texto-papel)">/mês</span></div>
+                    <ul style="color:#2B2850">
+                        <li>1 postal por dia</li><li>Entrega pelo WhatsApp</li><li>5 extras por semana, quando você quiser</li><li>Mundos de temporada premium</li><li>Atendimento prioritário</li>
+                    </ul>
+                    <a href="{{ route('mundos-de-mim.register') }}" class="mm-btn mm-btn-escuro mm-btn-bloco" style="padding:16px">Embarcar na Expedição</a>
+                </div>
+            </div>
+        </section>
     </main>
 
-    {{-- Features Grid --}}
-    <section class="relative z-10 px-6 py-20 bg-black/30 backdrop-blur-sm">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="glass p-8 rounded-3xl border border-white/5 hover:border-[#62A87C]/30 transition group">
-                <div
-                    class="w-12 h-12 bg-[#62A87C]/10 rounded-xl flex items-center justify-center text-[#62A87C] mb-6 group-hover:scale-110 transition-transform">
-                    <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-3 font-heading">Artes Diárias</h3>
-                <p class="text-slate-400">Uma nova surpresa todo dia. Nossa IA cria cenários baseados no seu perfil visual,
-                    preferências.</p>
-            </div>
-            <div class="glass p-8 rounded-3xl border border-white/5 hover:border-[#62A87C]/30 transition group">
-                <div
-                    class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-400 mb-6 group-hover:scale-110 transition-transform">
-                    <i class="fa-solid fa-users text-xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-3 font-heading">Você e Criaturas</h3>
-                <p class="text-slate-400">Adicione seu parceiro(a) ou filhos e receba artes memoráveis em família.</p>
-            </div>
-            <div class="glass p-8 rounded-3xl border border-white/5 hover:border-[#62A87C]/30 transition group">
-                <div
-                    class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-400 mb-6 group-hover:scale-110 transition-transform">
-                    <i class="fa-brands fa-whatsapp text-xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-3 font-heading">Direto no Celular</h3>
-                <p class="text-slate-400">Assine o plano Prime e receba as artes diretamente no seu WhatsApp sem
-                    complicações.</p>
-            </div>
-        </div>
-    </section>
-
-    {{-- Pricing --}}
-    <section id="planos" class="relative z-10 px-6 py-24 max-w-7xl mx-auto">
-        <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold mb-4 font-heading">Escolha o seu Mundo</h2>
-            <p class="text-slate-400">Planos flexíveis para quem ama arte e tecnologia.</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {{-- Eco --}}
-            <div class="glass p-10 rounded-[3rem] border border-white/5 relative overflow-hidden group">
-                <div
-                    class="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/10 blur-3xl group-hover:bg-blue-500/20 transition-colors">
-                </div>
-                <h3 class="text-2xl font-bold mb-2 font-heading">Plano ECO</h3>
-                <div class="flex items-baseline gap-1 mb-6">
-                    <span class="text-4xl font-extrabold text-[#62A87C]">R$ 14,90</span>
-                    <span class="text-slate-400">/mês</span>
-                </div>
-                <ul class="space-y-4 mb-10 text-slate-300">
-                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-[#62A87C]"></i> 1 Arte por dia
-                    </li>
-                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-[#62A87C]"></i> Entrega via
-                        <strong>Telegram</strong>
-                    </li>
-                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-[#62A87C]"></i> 5 Créditos
-                        semanais sob demanda</li>
-                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-[#62A87C]"></i> Galeria Online
-                        Completa</li>
-                </ul>
-                <a href="{{ route('mundos-de-mim.register') }}"
-                    class="block w-full text-center bg-white/5 hover:bg-white/10 border border-white/10 py-4 rounded-2xl font-bold transition">Começar
-                    Agora</a>
-            </div>
-
-            {{-- Prime --}}
-            <div
-                class="bg-white text-black p-10 rounded-[3rem] relative shadow-[0_0_40px_rgba(163,230,53,0.3)] transform scale-105 border-4 border-[#62A87C]">
-                <div
-                    class="absolute top-6 right-8 bg-[#62A87C] text-black text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">
-                    Recomendado</div>
-                <h3 class="text-2xl font-bold mb-2 font-heading">Plano PRIME</h3>
-                <div class="flex items-baseline gap-1 mb-6">
-                    <span class="text-4xl font-extrabold">R$ 34,90</span>
-                    <span class="text-slate-600">/mês</span>
-                </div>
-                <ul class="space-y-4 mb-10 text-slate-700">
-                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-green-600"></i> 1 Arte por dia
-                    </li>
-                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-green-600"></i> Entrega via
-                        <strong>WhatsApp API</strong>
-                    </li>
-                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-green-600"></i> 5 Créditos
-                        semanais sob demanda</li>
-                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-green-600"></i> Temas Sazonais
-                        Premium</li>
-                    <li class="flex items-center gap-3"><i class="fa-solid fa-check text-green-600"></i> Suporte
-                        Prioritário</li>
-                </ul>
-                <a href="{{ route('mundos-de-mim.register') }}"
-                    class="block w-full text-center bg-black text-white py-4 rounded-2xl font-bold hover:bg-slate-800 transition">Assinar
-                    Agora</a>
-            </div>
-        </div>
-    </section>
-
-    {{-- Footer --}}
-    <footer class="relative z-10 border-t border-white/5 py-12 px-6">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-            <div class="text-sm text-slate-500">
-                &copy; 2026 Mundos de Mim. Powered by Spigo.net IA Tools.
-            </div>
-            <div class="flex gap-6 text-slate-400">
-                <a href="#" class="hover:text-white transition">Privacidade</a>
-                <a href="#" class="hover:text-white transition">Termos de Uso</a>
-                <a href="#" class="hover:text-white transition">Ajuda</a>
-            </div>
+    <footer style="border-top:1px solid #2c2860">
+        <div class="ld-wrap" style="padding-top:32px;padding-bottom:32px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center;font-size:14px;color:var(--mm-texto-suave)">
+            <span>© {{ date('Y') }} Mundos de Mim · um app Spigo.net</span>
+            <span style="display:flex;gap:8px;flex-wrap:wrap"><a href="#topo" style="padding:12px">Privacidade</a><a href="#topo" style="padding:12px">Termos</a><a href="#topo" style="padding:12px">Ajuda</a></span>
         </div>
     </footer>
-
 </body>
-
 </html>

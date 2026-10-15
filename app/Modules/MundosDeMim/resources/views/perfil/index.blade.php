@@ -1,216 +1,132 @@
 <x-MundosDeMim::layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Meu Perfil') }}
-        </h2>
-    </x-slot>
+    <div class="mm-wrap mm-wrap-estreito mm-stack" style="max-width:960px;gap:32px">
 
-    <div class="py-12">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
-            @if(session('success'))
-                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded">
-                    {{ session('success') }}
-                </div>
-            @endif
+        <div style="display:flex;flex-direction:column;gap:10px;max-width:700px">
+            <h1 class="mm-h1">Seu retrato</h1>
+            <p class="mm-lead">Quanto mais a gente sabe de você, mais os postais parecem você. Dá para mudar tudo quando quiser.</p>
+        </div>
 
-            @if($errors->any())
-                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
-                    <p class="font-semibold mb-2">Revise os campos abaixo:</p>
-                    <ul class="list-disc list-inside text-sm space-y-1">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+        @if(session('success'))
+            <div role="status" class="mm-alerta mm-alerta-ok">{{ session('success') }}</div>
+        @endif
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <form action="{{ route('mundos-de-mim.perfil.update') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
-                        @csrf
+        @if($errors->any())
+            <div role="alert" class="mm-alerta mm-alerta-erro">
+                <b>Revise os campos abaixo:</b>
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-                        <section class="border-b pb-8">
-                            <div class="flex flex-col gap-2 mb-5">
-                                <h3 class="text-lg font-medium text-gray-900">Foto de referência</h3>
-                                <p class="text-sm text-gray-500">
-                                    Envie uma foto nítida para a IA reconhecer seus traços e sugerir seu perfil visual.
-                                </p>
-                            </div>
+        <form action="{{ route('mundos-de-mim.perfil.update') }}" method="POST" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:20px">
+            @csrf
 
-                            <div class="flex flex-col md:flex-row md:items-center gap-6">
-                                <div class="shrink-0">
-                                    @if(isset($attributes->photo_path))
-                                        <img class="h-28 w-28 object-cover rounded-full border-2 border-indigo-200"
-                                             src="{{ Storage::url($attributes->photo_path) }}"
-                                             alt="Foto atual">
-                                    @else
-                                        <div class="h-28 w-28 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">
-                                            <svg class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                        </div>
-                                    @endif
-                                </div>
-
-                                <div class="flex-1">
-                                    <label class="block text-sm font-medium text-gray-700">Carregar nova foto</label>
-                                    <p class="text-xs text-gray-500 mb-2">Prefira uma imagem bem iluminada, de frente e com o rosto visível.</p>
-                                    <input type="file" name="photo" accept="image/*"
-                                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                                    @error('photo')
-                                        <span class="text-red-500 text-xs">{{ $message }}</span>
-                                    @enderror
-
-                                    @if(isset($attributes->photo_path))
-                                        <div class="mt-4">
-                                            <button type="button" id="btn-analyze-ia"
-                                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                                <span id="analyze-spinner" class="hidden mr-2 animate-spin">🌀</span>
-                                                ✨ Sugerir perfil visual com IA
-                                            </button>
-                                            <p class="text-[11px] text-gray-500 mt-2">
-                                                A IA preenche sugestões para o perfil visual e, quando possível, para estilo e roupas. Você revisa antes de salvar.
-                                            </p>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </section>
-
-                        <section class="border-b pb-8">
-                            <div class="mb-5">
-                                <h3 class="text-lg font-medium text-gray-900">Perfil visual</h3>
-                                <p class="text-sm text-gray-500 mt-1">
-                                    Este é o campo mais importante. Descreva tom de pele, olhos, cabelo, formato e comprimento do cabelo, traços únicos, manchas, cicatrizes, tatuagens e detalhes que fazem você ser você.
-                                </p>
-                            </div>
-
-                            <label for="visual_profile" class="block font-medium text-sm text-gray-700 mb-2">Como você se descreveria visualmente?</label>
-                            <textarea name="visual_profile" id="visual_profile" rows="7" required
-                                      class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
-                                      placeholder="Ex.: Tenho pele morena clara, olhos castanhos amendoados e cabelo cacheado escuro na altura dos ombros. Tenho sardas leves no rosto, sorriso marcante e costumo aparecer com brincos pequenos e roupas em tons terrosos.">{{ old('visual_profile', $attributes->visual_profile ?? '') }}</textarea>
-                            <p class="text-xs text-gray-500 mt-2">
-                                Dica: escreva como se estivesse explicando sua aparência para alguém que precisa te reconhecer em diferentes cenários.
-                            </p>
-
-                            <div class="mt-5">
-                                <label for="gender_identity" class="block font-medium text-sm text-gray-700 mb-2">Gênero com que você se identifica</label>
-                                <input type="text" name="gender_identity" id="gender_identity" required
-                                       value="{{ old('gender_identity', $attributes->gender_identity ?? '') }}"
-                                       class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
-                                       placeholder="Ex.: mulher, homem, mulher trans, homem trans, não binárie, travesti...">
-                                <p class="text-xs text-gray-500 mt-2">
-                                    Essa informação ajuda a geração de imagens a respeitar melhor sua identidade. A IA da foto não tenta adivinhar isso por você.
-                                </p>
-                            </div>
-                        </section>
-
-                        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 border-b pb-8">
-                            <div>
-                                <label for="personality_vibe" class="block font-medium text-sm text-gray-700 mb-2">Jeito, energia e presença</label>
-                                <textarea name="personality_vibe" id="personality_vibe" rows="5"
-                                          class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
-                                          placeholder="Ex.: Tenho uma energia calma e acolhedora, mas também criativa e curiosa. Gosto de um ar elegante, sonhador e um pouco misterioso.">{{ old('personality_vibe', $attributes->personality_vibe ?? '') }}</textarea>
-                                <p class="text-xs text-gray-500 mt-2">Ajuda a IA a acertar expressão, postura e clima emocional.</p>
-                            </div>
-
-                            <div>
-                                <label for="interests_and_symbols" class="block font-medium text-sm text-gray-700 mb-2">Gostos, interesses e símbolos</label>
-                                <textarea name="interests_and_symbols" id="interests_and_symbols" rows="5"
-                                          class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
-                                          placeholder="Ex.: Amo leitura, natureza, gatos, fotografia, fantasia, café, céu estrelado e trilhas sonoras suaves.">{{ old('interests_and_symbols', $attributes->interests_and_symbols ?? '') }}</textarea>
-                                <p class="text-xs text-gray-500 mt-2">Inclua hobbies, paixões, temas recorrentes, animais, esportes ou objetos que te representam.</p>
-                            </div>
-
-                            <div>
-                                <label for="style_and_wardrobe" class="block font-medium text-sm text-gray-700 mb-2">Estilo, roupas e estética</label>
-                                <textarea name="style_and_wardrobe" id="style_and_wardrobe" rows="5"
-                                          class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
-                                          placeholder="Ex.: Gosto de vestidos fluidos, tecidos leves, acessórios discretos, maquiagem natural e uma estética romântica com tons de verde, vinho e creme.">{{ old('style_and_wardrobe', $attributes->style_and_wardrobe ?? '') }}</textarea>
-                                <p class="text-xs text-gray-500 mt-2">Pode falar de paleta de cores, acessórios, maquiagem, tecidos e referências estéticas.</p>
-                            </div>
-
-                            <div>
-                                <label for="favorite_settings" class="block font-medium text-sm text-gray-700 mb-2">Cenários, lugares e atmosferas favoritas</label>
-                                <textarea name="favorite_settings" id="favorite_settings" rows="5"
-                                          class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
-                                          placeholder="Ex.: Amo me imaginar em florestas com neblina, cafés aconchegantes, cidades à noite, pôr do sol dourado, chuva leve e ambientes com luz suave.">{{ old('favorite_settings', $attributes->favorite_settings ?? '') }}</textarea>
-                                <p class="text-xs text-gray-500 mt-2">Fale de lugares, estações do ano, luz, clima, hora do dia e atmosfera.</p>
-                            </div>
-
-                            <div>
-                                <label for="identity_details" class="block font-medium text-sm text-gray-700 mb-2">Detalhes marcantes da sua identidade</label>
-                                <textarea name="identity_details" id="identity_details" rows="5"
-                                          class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
-                                          placeholder="Ex.: Meu time é o Bahia, adoro azul petróleo, meu animal favorito é a raposa, trabalho com design e sempre me identifico com elementos de lua, mar e cadernos.">{{ old('identity_details', $attributes->identity_details ?? '') }}</textarea>
-                                <p class="text-xs text-gray-500 mt-2">Aqui entram cor favorita, time favorito, profissão, símbolos, flores, objetos, artistas, filmes e referências que são muito suas.</p>
-                            </div>
-
-                            <div>
-                                <label for="avoid_in_generations" class="block font-medium text-sm text-gray-700 mb-2">O que evitar nas gerações</label>
-                                <textarea name="avoid_in_generations" id="avoid_in_generations" rows="5"
-                                          class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
-                                          placeholder="Ex.: Não gosto de estética neon, terror, exageros futuristas, roupas muito formais ou imagens com sensualização excessiva.">{{ old('avoid_in_generations', $attributes->avoid_in_generations ?? '') }}</textarea>
-                                <p class="text-xs text-gray-500 mt-2">Use este espaço para colocar limites claros de estilo, cenário, cor, clima ou tipo de imagem.</p>
-                            </div>
-                        </section>
-
-                        <section>
-                            <div class="mb-5">
-                                <h3 class="text-lg font-medium text-gray-900">Receber a foto do dia</h3>
-                                <p class="text-sm text-gray-500 mt-1">Escolha por onde deseja receber sua arte gerada diariamente.</p>
-                            </div>
-
-                            <div class="space-y-3">
-                                <label class="flex items-center">
-                                    <input type="radio" name="notification_preference" value="none"
-                                        {{ old('notification_preference', $attributes->notification_preference ?? 'none') === 'none' ? 'checked' : '' }}
-                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                                    <span class="ml-2 text-sm text-gray-700">Não receber</span>
-                                </label>
-
-                                <label class="flex items-center">
-                                    <input type="radio" name="notification_preference" value="email"
-                                        {{ old('notification_preference', $attributes->notification_preference ?? 'none') === 'email' ? 'checked' : '' }}
-                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                                    <span class="ml-2 text-sm text-gray-700"><i class="fa-solid fa-envelope"></i> E-mail</span>
-                                </label>
-
-                                <label class="flex items-center">
-                                    <input type="radio" name="notification_preference" value="telegram"
-                                        {{ old('notification_preference', $attributes->notification_preference ?? 'none') === 'telegram' ? 'checked' : '' }}
-                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                                    <span class="ml-2 text-sm text-gray-700"><i class="fa-brands fa-telegram"></i> Telegram</span>
-                                </label>
-
-                                <label class="flex items-center opacity-50 cursor-not-allowed" title="Em breve">
-                                    <input type="radio" name="notification_preference" value="whatsapp" disabled
-                                        {{ old('notification_preference', $attributes->notification_preference ?? 'none') === 'whatsapp' ? 'checked' : '' }}
-                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                                    <span class="ml-2 text-sm text-gray-700"><i class="fa-brands fa-whatsapp"></i> WhatsApp (em breve)</span>
-                                </label>
-                            </div>
-                        </section>
-
-                        <div class="pt-2">
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Salvar meu perfil
+            <div class="mm-card" style="display:flex;flex-wrap:wrap;gap:24px;align-items:center">
+                @if(isset($attributes->photo_path))
+                    <img src="{{ Storage::url($attributes->photo_path) }}" alt="Sua foto atual" style="width:120px;height:120px;border-radius:50%;object-fit:cover;flex:none;border:3px solid var(--mm-bruma)">
+                @else
+                    <div aria-hidden="true" style="width:120px;height:120px;border-radius:50%;background:var(--mm-noite);border:2px dashed #6a64b0;display:flex;align-items:center;justify-content:center;color:var(--mm-bruma);font-size:13px;flex:none">Sua foto</div>
+                @endif
+                <div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:12px">
+                    <h2 class="mm-display" style="margin:0;font-size:24px;font-weight:700">Foto de referência</h2>
+                    <p style="margin:0;font-size:15px;line-height:1.5;color:var(--mm-texto-suave)">Uma foto de frente, com boa luz e o rosto à mostra.</p>
+                    <input type="file" name="photo" id="photo" accept="image/*" class="mm-input" style="padding:12px" aria-label="Enviar nova foto">
+                    @error('photo')<span class="mm-dica" style="color:#FFB09B">{{ $message }}</span>@enderror
+                    @if(isset($attributes->photo_path))
+                        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+                            <button type="button" id="btn-analyze-ia" class="mm-btn mm-btn-bruma">
+                                <span id="analyze-spinner" class="mm-sr-only">Analisando...</span>
+                                <span id="analyze-label">Sugerir meu retrato</span>
                             </button>
+                            <span class="mm-dica" style="flex:1 1 220px">Preenchemos uma primeira versão do retrato e do estilo. Você revisa antes de salvar.</span>
                         </div>
-                    </form>
+                    @endif
                 </div>
             </div>
-        </div>
+
+            <div class="mm-card" style="display:flex;flex-direction:column;gap:22px">
+                <div class="mm-campo">
+                    <label for="visual_profile">Como você se vê</label>
+                    <span class="mm-dica">Esse é o campo mais importante. Tom de pele, olhos, cabelo, tatuagens, cicatrizes, manchas e o que mais faz você ser você.</span>
+                    <textarea name="visual_profile" id="visual_profile" rows="6" required class="mm-input"
+                              placeholder="Ex.: pele morena clara, olhos castanhos amendoados e cabelo cacheado escuro na altura dos ombros, sardas leves no rosto...">{{ old('visual_profile', $attributes->visual_profile ?? '') }}</textarea>
+                    <span class="mm-dica">Escreva como se explicasse sua aparência para alguém que precisa te reconhecer em qualquer cenário.</span>
+                </div>
+                <div class="mm-campo">
+                    <label for="gender_identity">Gênero com que você se identifica</label>
+                    <input type="text" name="gender_identity" id="gender_identity" required class="mm-input"
+                           value="{{ old('gender_identity', $attributes->gender_identity ?? '') }}"
+                           placeholder="Ex.: mulher, homem, mulher trans, homem trans, não binárie, travesti...">
+                    <span class="mm-dica">Ajuda os postais a respeitar sua identidade. A análise da foto não tenta adivinhar isso por você.</span>
+                </div>
+            </div>
+
+            <div class="mm-card" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px">
+
+                <div class="mm-campo">
+                    <label for="personality_vibe">Jeito, energia e presença</label>
+                    <textarea name="personality_vibe" id="personality_vibe" rows="4" class="mm-input" placeholder="Ex.: Calmo, acolhedor, curioso, um pouco misterioso...">{{ old('personality_vibe', $attributes->personality_vibe ?? '') }}</textarea>
+                    <span class="mm-dica">Ajuda a acertar expressão, postura e clima.</span>
+                </div>
+
+                <div class="mm-campo">
+                    <label for="style_and_wardrobe">Estilo, roupas e estética</label>
+                    <textarea name="style_and_wardrobe" id="style_and_wardrobe" rows="4" class="mm-input" placeholder="Ex.: Vestidos fluidos, tons terrosos, acessórios discretos...">{{ old('style_and_wardrobe', $attributes->style_and_wardrobe ?? '') }}</textarea>
+                    <span class="mm-dica">Cores, acessórios, tecidos e referências.</span>
+                </div>
+
+                <div class="mm-campo">
+                    <label for="interests_and_symbols">Gostos, interesses e símbolos</label>
+                    <textarea name="interests_and_symbols" id="interests_and_symbols" rows="4" class="mm-input" placeholder="Ex.: Livros, gatos, fotografia, café, céu estrelado...">{{ old('interests_and_symbols', $attributes->interests_and_symbols ?? '') }}</textarea>
+                    <span class="mm-dica">Hobbies, paixões, bichos, esportes e objetos que te representam.</span>
+                </div>
+
+                <div class="mm-campo">
+                    <label for="favorite_settings">Cenários, lugares e atmosferas favoritas</label>
+                    <textarea name="favorite_settings" id="favorite_settings" rows="4" class="mm-input" placeholder="Ex.: Florestas com neblina, cafés aconchegantes, cidades à noite...">{{ old('favorite_settings', $attributes->favorite_settings ?? '') }}</textarea>
+                    <span class="mm-dica">Lugares, estações, luz, clima e hora do dia.</span>
+                </div>
+
+                <div class="mm-campo">
+                    <label for="identity_details">Detalhes marcantes da sua identidade</label>
+                    <textarea name="identity_details" id="identity_details" rows="4" class="mm-input" placeholder="Ex.: Meu time, cor favorita, profissão, animal, símbolos...">{{ old('identity_details', $attributes->identity_details ?? '') }}</textarea>
+                    <span class="mm-dica">Tudo o que é muito seu.</span>
+                </div>
+
+                <div class="mm-campo">
+                    <label for="avoid_in_generations">O que nunca deve aparecer</label>
+                    <textarea name="avoid_in_generations" id="avoid_in_generations" rows="4" class="mm-input" placeholder="Ex.: Terror, neon, roupas muito formais...">{{ old('avoid_in_generations', $attributes->avoid_in_generations ?? '') }}</textarea>
+                    <span class="mm-dica">Limites claros de estilo, cenário, cor ou clima.</span>
+                </div>
+            </div>
+
+            <fieldset class="mm-card" style="border:0;margin:0;display:flex;flex-direction:column;gap:4px">
+                <legend class="mm-display" style="padding:0;font-size:24px;font-weight:700;margin-bottom:8px">Receber o postal do dia</legend>
+                <span class="mm-dica" style="margin-bottom:8px">Por onde você quer receber a arte de cada dia.</span>
+                @php $preferencia = old('notification_preference', $attributes->notification_preference ?? 'none'); @endphp
+                <label class="mm-opcao"><input type="radio" name="notification_preference" value="none" {{ $preferencia === 'none' ? 'checked' : '' }}> Não receber</label>
+                <label class="mm-opcao"><input type="radio" name="notification_preference" value="email" {{ $preferencia === 'email' ? 'checked' : '' }}> E-mail</label>
+                <label class="mm-opcao"><input type="radio" name="notification_preference" value="telegram" {{ $preferencia === 'telegram' ? 'checked' : '' }}> Telegram</label>
+                <label class="mm-opcao" aria-disabled="true" title="Em breve"><input type="radio" name="notification_preference" value="whatsapp" disabled {{ $preferencia === 'whatsapp' ? 'checked' : '' }}> WhatsApp (em breve)</label>
+            </fieldset>
+
+            <div style="display:flex;justify-content:flex-end">
+                <button type="submit" class="mm-btn mm-btn-primario" style="padding:16px 32px;font-size:17px">Salvar retrato</button>
+            </div>
+        </form>
     </div>
 
     <script>
-        document.getElementById('btn-analyze-ia')?.addEventListener('click', async function() {
+        document.getElementById('btn-analyze-ia')?.addEventListener('click', async function () {
             const btn = this;
-            const spinner = document.getElementById('analyze-spinner');
+            const rotulo = document.getElementById('analyze-label');
+            const original = rotulo.textContent;
 
             btn.disabled = true;
-            spinner.classList.remove('hidden');
+            rotulo.textContent = 'Analisando sua foto...';
 
             try {
                 const response = await fetch("{{ route('mundos-de-mim.perfil.analyze') }}", {
@@ -226,21 +142,15 @@
                 if (data.error) {
                     alert('Erro: ' + data.error);
                 } else {
-                    const fields = ['visual_profile', 'style_and_wardrobe'];
-
-                    fields.forEach(id => {
-                        if (!data[id]) {
-                            return;
-                        }
-
+                    ['visual_profile', 'style_and_wardrobe'].forEach(id => {
                         const element = document.getElementById(id);
-                        if (!element) {
+                        if (!data[id] || !element) {
                             return;
                         }
 
                         element.value = data[id];
-                        element.classList.add('bg-green-50', 'border-green-500');
-                        setTimeout(() => element.classList.remove('bg-green-50', 'border-green-500'), 2000);
+                        element.style.borderColor = '#7FE0C2';
+                        setTimeout(() => { element.style.borderColor = ''; }, 2500);
                     });
                 }
             } catch (error) {
@@ -248,7 +158,7 @@
                 alert('Erro na comunicação com o servidor.');
             } finally {
                 btn.disabled = false;
-                spinner.classList.add('hidden');
+                rotulo.textContent = original;
             }
         });
     </script>

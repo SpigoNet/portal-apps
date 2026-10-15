@@ -1,84 +1,44 @@
 <x-MundosDeMim::layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Pessoas Relacionadas') }}
-        </h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
-            <div class="flex justify-end mb-4">
-                <a href="{{ route('mundos-de-mim.pessoas.create') }}" class="bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-500">
-                    + Adicionar Pessoa
-                </a>
+    <div class="mm-wrap mm-stack" style="gap:32px">
+        <div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-end">
+            <div style="display:flex;flex-direction:column;gap:10px;max-width:640px">
+                <h1 class="mm-h1">Companhias</h1>
+                <p class="mm-lead">Quem pode aparecer nos seus postais a dois ou em família. Quem está em casa fica de fora, sem apagar o cadastro.</p>
             </div>
-
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    @if($pessoas->isEmpty())
-                        <p class="text-gray-500">Nenhuma pessoa cadastrada. Adicione alguém para gerar artes em dupla!</p>
-                    @else
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pessoa</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Relacionamento</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status na IA</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                            </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($pessoas as $pessoa)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10">
-                                                <img class="h-10 w-10 rounded-full object-cover border border-gray-200"
-                                                     src="{{ Storage::url($pessoa->photo_path) }}"
-                                                     alt="{{ $pessoa->name }}">
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">{{ $pessoa->name }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="text-sm text-gray-500">{{ $pessoa->relationship }}</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($pessoa->is_active)
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                        Ativo (Pode aparecer)
-                    </span>
-                                        @else
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                        Pausado
-                    </span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <form action="{{ route('mundos-de-mim.pessoas.toggle', $pessoa->id) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" class="text-indigo-600 hover:text-indigo-900 font-bold">
-                                                {{ $pessoa->is_active ? 'Pausar' : 'Ativar' }}
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="px-6 py-10 text-center text-gray-500">
-                                        <p class="mb-2">Você ainda não adicionou ninguém.</p>
-                                        <p class="text-sm">Adicione amigos ou familiares para gerar artes temáticas (ex: Natal, Festas).</p>
-                                    </td>
-                                </tr>
-                            @endforelse
-                            </tbody>
-                        </table>
-                    @endif
-                </div>
-            </div>
+            <a href="{{ route('mundos-de-mim.pessoas.create') }}" class="mm-btn mm-btn-primario">Adicionar companhia</a>
         </div>
+
+        @if(session('success'))
+            <div role="status" class="mm-alerta mm-alerta-ok">{{ session('success') }}</div>
+        @endif
+
+        @if($pessoas->isEmpty())
+            <div class="mm-card" style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+                <h2 class="mm-display" style="margin:0;font-size:28px;font-weight:700">Você ainda viaja sozinho</h2>
+                <p style="margin:0;color:var(--mm-texto-suave);font-size:16px;line-height:1.5">Adicione parceiro, filhos, amigos ou até o pet para ganhar postais a dois ou em família, como os de Natal.</p>
+            </div>
+        @else
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px">
+                @foreach($pessoas as $pessoa)
+                    <div class="mm-card" style="display:flex;align-items:center;gap:16px;padding:20px">
+                        @if($pessoa->photo_path)
+                            <img src="{{ Storage::url($pessoa->photo_path) }}" alt="Foto de {{ $pessoa->name }}"
+                                 style="width:64px;height:64px;border-radius:50%;object-fit:cover;flex:none;{{ $pessoa->is_active ? '' : 'filter:grayscale(1);opacity:.7' }}">
+                        @else
+                            <span aria-hidden="true" style="width:64px;height:64px;border-radius:50%;background:var(--mm-bruma);color:var(--mm-noite);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;flex:none">{{ mb_strtoupper(mb_substr($pessoa->name, 0, 1)) }}</span>
+                        @endif
+                        <div style="flex-grow:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+                            <b style="font-size:18px;overflow:hidden;text-overflow:ellipsis">{{ $pessoa->name }}</b>
+                            <span style="font-size:14px;color:var(--mm-texto-suave)">{{ $pessoa->relationship }}</span>
+                            <span class="mm-chip {{ $pessoa->is_active ? 'mm-chip-ok' : '' }}" style="align-self:flex-start;{{ $pessoa->is_active ? '' : 'color:var(--mm-texto-suave)' }}">{{ $pessoa->is_active ? 'Viajando' : 'Em casa' }}</span>
+                        </div>
+                        <form action="{{ route('mundos-de-mim.pessoas.toggle', $pessoa->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="mm-btn mm-btn-contorno" style="padding:12px 16px">{{ $pessoa->is_active ? 'Deixar em casa' : 'Chamar' }}</button>
+                        </form>
+                    </div>
+                @endforeach
+            </div>
+        @endif
     </div>
 </x-MundosDeMim::layout>

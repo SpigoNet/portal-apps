@@ -3,10 +3,10 @@
 namespace App\Modules\MundosDeMim\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\MundosDeMim\Models\UserAttribute;
+use App\Modules\MundosDeMim\Models\DailyGeneration;
 use App\Modules\MundosDeMim\Models\RelatedPerson;
-use App\Modules\MundosDeMim\Models\DailyGeneration; // <--- Novo
-use App\Modules\MundosDeMim\Models\Theme;           // <--- Novo
+use App\Modules\MundosDeMim\Models\Theme; // <--- Novo
+use App\Modules\MundosDeMim\Models\UserAttribute;           // <--- Novo
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -26,7 +26,7 @@ class DashboardController extends Controller
             $files = scandir($imagePath);
             foreach ($files as $file) {
                 if (in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'webp'])) {
-                    $images[] = '/images/mundos-de-mim/' . $file;
+                    $images[] = '/images/mundos-de-mim/'.$file;
                 }
             }
         }
@@ -60,9 +60,17 @@ class DashboardController extends Controller
             'total_artes' => $artCount,      // <--- Novo
             'temas_sazonais' => $activeSeasonal, // <--- Novo
             'plano' => $user->subscription_plan,
-            'creditos' => $user->credits
+            'creditos' => $user->credits,
         ];
 
-        return view('MundosDeMim::index', compact('stats'));
+        $recentes = DailyGeneration::with('theme')
+            ->where('user_id', $userId)
+            ->latest('reference_date')
+            ->latest('id')
+            ->limit(6)
+            ->get();
+        $ultima = $recentes->first();
+
+        return view('MundosDeMim::index', compact('stats', 'recentes', 'ultima'));
     }
 }

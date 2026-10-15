@@ -1,176 +1,114 @@
+@php
+    $papel = request()->routeIs('mundos-de-mim.admin.*') || request()->routeIs('mundos-de-mim.playground.*');
+    $usuario = auth()->user();
+    $atual = fn (string ...$rotas) => request()->routeIs(...$rotas) ? 'page' : 'false';
+    $linksPrincipais = [
+        ['Início', 'mundos-de-mim.index', ['mundos-de-mim.index']],
+        ['Mundos', 'mundos-de-mim.estilos.index', ['mundos-de-mim.estilos.*']],
+        ['Postais', 'mundos-de-mim.galeria.index', ['mundos-de-mim.galeria.*']],
+        ['Retrato', 'mundos-de-mim.perfil.index', ['mundos-de-mim.perfil.*']],
+        ['Companhias', 'mundos-de-mim.pessoas.index', ['mundos-de-mim.pessoas.*']],
+    ];
+    $linksAdmin = [
+        ['Ateliê', 'mundos-de-mim.playground.index'],
+        ['Mundos e prompts', 'mundos-de-mim.admin.themes.index'],
+        ['Importador', 'mundos-de-mim.admin.importador.index'],
+        ['Vitrine pública', 'mundos-de-mim.admin.gallery.index'],
+        ['Atlas dos usuários', 'mundos-de-mim.admin.user-gallery.index'],
+    ];
+@endphp
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#14122B">
 
     <title>Mundos de Mim</title>
+    <x-pwa-head start-link="/mundos-de-mim" />
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
-    <!-- Scripts -->
     @livewireStyles
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    <style>
-        [x-cloak] { display: none !important; }
-        body { font-family: 'Inter', sans-serif; background-color: #F8F9FA; color: #1E1E24; }
-        .font-heading { font-family: 'Space Grotesk', sans-serif; }
-        .bg-dark-tech {
-            background-color: #1E1E24;
-            background-image: radial-gradient(circle at top right, rgba(123, 44, 191, 0.15), transparent 40%),
-                              radial-gradient(circle at bottom left, rgba(0, 119, 182, 0.15), transparent 40%);
-        }
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-    </style>
+    @include('MundosDeMim::partials.tema')
 </head>
-<body class="antialiased min-h-screen flex flex-col">
+<body class="mm antialiased min-h-screen flex flex-col">
 
-    <!-- Navbar Exclusiva do Módulo -->
-    <nav x-data="{ open: false, profileOpen: false }" class="bg-dark-tech text-white sticky top-0 z-50 shadow-lg">
-        <div class="glass px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <!-- Esquerda: Logo e Links -->
-                <div class="flex items-center gap-8">
-                    <a href="{{ route('mundos-de-mim.index') }}" class="flex items-center gap-2 hover:opacity-80 transition">
-                        <span class="text-xl font-black tracking-tighter font-heading">MUNDOS DE <span class="text-[#62A87C]">MIM</span></span>
-                    </a>
+    <header x-data="{ aberto: false }" style="border-bottom:1px solid #2c2860;position:sticky;top:0;z-index:40;background:var(--mm-noite)">
+        <div style="max-width:1280px;margin:0 auto;padding:12px 24px;display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center">
+            <a href="{{ route('mundos-de-mim.index') }}" aria-label="Mundos de Mim, ir para o início">
+                <x-MundosDeMim::logo />
+            </a>
 
-                    <!-- Desktop Menu -->
-                    <div class="hidden md:flex items-center space-x-1">
-                        <a href="{{ route('mundos-de-mim.index') }}" class="px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('mundos-de-mim.index') ? 'bg-[#62A87C]/20 text-[#62A87C]' : 'text-slate-300 hover:text-white hover:bg-white/5' }} transition">Dashboard</a>
+            <button type="button" @click="aberto = !aberto" :aria-expanded="aberto" aria-label="Abrir menu"
+                    class="mm-hamburguer" style="margin-left:auto;padding:12px;background:none;border:0;color:var(--mm-lua);cursor:pointer">
+                <i class="fa-solid fa-bars" style="font-size:20px"></i>
+            </button>
 
-                        {{-- Dropdown: Meu Espaço --}}
-                        @php
-                            $menuAtivo = request()->routeIs('mundos-de-mim.perfil.*') || request()->routeIs('mundos-de-mim.pessoas.*') || request()->routeIs('mundos-de-mim.galeria.*') || request()->routeIs('mundos-de-mim.estilos.*');
-                        @endphp
-                        <div x-data="{ menuOpen: false }" class="relative">
-                            <button @click="menuOpen = !menuOpen" @click.away="menuOpen = false"
-                                class="px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1 transition
-                                    {{ $menuAtivo ? 'bg-[#3B9AB2]/20 text-[#3B9AB2]' : 'text-slate-300 hover:text-white hover:bg-white/5' }}">
-                                Meu Espaço <i class="fa-solid fa-chevron-down text-[10px]"></i>
+            <div class="mm-barra" :class="{ 'mm-barra-aberta': aberto }">
+                <nav aria-label="Principal" style="display:flex;flex-wrap:wrap;gap:4px;flex-grow:1;align-items:center">
+                    @foreach($linksPrincipais as [$rotulo, $rota, $padroes])
+                        <a href="{{ route($rota) }}" class="mm-nav-link" aria-current="{{ $atual(...$padroes) }}">{{ $rotulo }}</a>
+                    @endforeach
+
+                    @can('admin-do-app')
+                        <div x-data="{ menu: false }" style="position:relative" @click.outside="menu = false" @keydown.escape="menu = false">
+                            <button type="button" class="mm-nav-link" @click="menu = !menu" :aria-expanded="menu" aria-haspopup="true"
+                                    aria-current="{{ $papel ? 'true' : 'false' }}" style="{{ $papel ? 'color:var(--mm-poente)' : '' }}">
+                                Admin <i class="fa-solid fa-chevron-down" style="font-size:10px"></i>
                             </button>
-                            <div x-show="menuOpen" x-cloak class="absolute left-0 mt-2 w-52 bg-[#141419] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
-                                <a href="{{ route('mundos-de-mim.perfil.index') }}" class="block px-4 py-2.5 text-sm {{ request()->routeIs('mundos-de-mim.perfil.*') ? 'text-[#3B9AB2] bg-[#3B9AB2]/10' : 'text-slate-300 hover:bg-white/5' }} transition">Meu Perfil</a>
-                                <a href="{{ route('mundos-de-mim.pessoas.index') }}" class="block px-4 py-2.5 text-sm {{ request()->routeIs('mundos-de-mim.pessoas.*') ? 'text-[#7B2CBF] bg-[#7B2CBF]/10' : 'text-slate-300 hover:bg-white/5' }} transition">Entes Queridos</a>
-                                <a href="{{ route('mundos-de-mim.galeria.index') }}" class="block px-4 py-2.5 text-sm {{ request()->routeIs('mundos-de-mim.galeria.*') ? 'text-[#0077B6] bg-[#0077B6]/10' : 'text-slate-300 hover:bg-white/5' }} transition">Minha Galeria</a>
-                                <a href="{{ route('mundos-de-mim.estilos.index') }}" class="block px-4 py-2.5 text-sm {{ request()->routeIs('mundos-de-mim.estilos.*') ? 'text-[#62A87C] bg-[#62A87C]/10' : 'text-slate-300 hover:bg-white/5' }} transition">Estilos & Temas</a>
+                            <div class="mm-menu" x-show="menu" x-cloak>
+                                @foreach($linksAdmin as [$rotulo, $rota])
+                                    <a href="{{ route($rota) }}">{{ $rotulo }}</a>
+                                @endforeach
                             </div>
                         </div>
+                    @endcan
+                </nav>
 
-                        @can('admin-do-app')
-                        <div x-data="{ adminOpen: false }" class="relative">
-                            <button @click="adminOpen = !adminOpen" @click.away="adminOpen = false" class="px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition flex items-center gap-1">
-                                Admin <i class="fa-solid fa-chevron-down text-[10px]"></i>
-                            </button>
-                            <div x-show="adminOpen" x-cloak class="absolute left-0 mt-2 w-52 bg-[#141419] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
-                                <a href="{{ route('mundos-de-mim.playground.index') }}" class="block px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 transition">Playground</a>
-                                <a href="{{ route('mundos-de-mim.admin.themes.index') }}" class="block px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 transition">Temas</a>
-                                <a href="{{ route('mundos-de-mim.admin.importador.index') }}" class="block px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 transition">Importador</a>
-                                <a href="{{ route('mundos-de-mim.admin.gallery.index') }}" class="block px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 transition">Galeria Pública</a>
-                                <a href="{{ route('mundos-de-mim.admin.user-gallery.index') }}" class="block px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 transition">Galeria de Usuários</a>
-                            </div>
-                        </div>
-                        @endcan
-                    </div>
-                </div>
-
-                <!-- Direita: Perfil -->
-                <div class="hidden md:flex items-center">
-                    <div class="relative" x-data="{ profileOpen: false }">
-                        <button @click="profileOpen = !profileOpen" @click.away="profileOpen = false" class="flex items-center gap-3 focus:outline-none pl-4 border-l border-white/20">
-                            <div class="text-right">
-                                <div class="text-[10px] text-slate-400 uppercase tracking-wider">Estúdio de</div>
-                                <div class="text-sm font-bold text-white">{{ auth()->user()->name ?? 'Usuário' }}</div>
-                            </div>
-                            @if(auth()->user()->avatar)
-                                <img src="{{ auth()->user()->avatar }}" alt="Avatar" class="w-9 h-9 rounded-full border border-[#62A87C]/50 object-cover">
-                            @else
-                                <div class="w-9 h-9 rounded-full bg-[#62A87C]/20 border border-[#62A87C]/50 flex items-center justify-center text-[#62A87C] font-bold">
-                                    {{ substr(auth()->user()->name ?? 'U', 0, 1) }}
-                                </div>
-                            @endif
-                            <i class="fa-solid fa-chevron-down text-xs text-slate-400"></i>
-                        </button>
-
-                        <div x-show="profileOpen" x-cloak class="absolute right-0 mt-2 w-48 bg-[#141419] border border-white/10 rounded-xl shadow-xl overflow-hidden z-50">
-                            <form method="POST" action="{{ route('mundos-de-mim.logout') }}">
-                                @csrf
-                                <button type="submit" class="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-white/5 transition flex items-center gap-2">
-                                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair do Estúdio
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Botão Mobile -->
-                <div class="flex items-center md:hidden">
-                    <button @click="open = !open" class="text-slate-300 hover:text-white focus:outline-none p-2">
-                        <i class="fa-solid fa-bars text-xl" x-show="!open"></i>
-                        <i class="fa-solid fa-xmark text-xl" x-show="open" x-cloak></i>
+                <div x-data="{ menu: false }" style="position:relative" @click.outside="menu = false" @keydown.escape="menu = false">
+                    <button type="button" @click="menu = !menu" :aria-expanded="menu" aria-haspopup="true"
+                            style="display:flex;align-items:center;gap:12px;background:none;border:0;color:inherit;cursor:pointer;padding:4px;font-family:inherit">
+                        <span style="text-align:right;line-height:1.2">
+                            <span style="display:block;font-size:12px;color:var(--mm-texto-suave)">Atlas de</span>
+                            <span style="display:block;font-size:15px;font-weight:600">{{ \Illuminate\Support\Str::before($usuario->name ?? 'Viajante', ' ') }}</span>
+                        </span>
+                        @if($usuario->avatar ?? null)
+                            <img src="{{ $usuario->avatar }}" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover">
+                        @else
+                            <span aria-hidden="true" style="width:40px;height:40px;border-radius:50%;background:var(--mm-bruma);color:var(--mm-noite);display:flex;align-items:center;justify-content:center;font-weight:700">{{ mb_strtoupper(mb_substr($usuario->name ?? 'V', 0, 1)) }}</span>
+                        @endif
                     </button>
+                    <div class="mm-menu" x-show="menu" x-cloak style="left:auto;right:0">
+                        <form method="POST" action="{{ route('mundos-de-mim.logout') }}">
+                            @csrf
+                            <button type="submit">Sair do atlas</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
+    </header>
 
-        <!-- Menu Mobile -->
-        <div x-show="open" x-cloak class="md:hidden bg-[#141419] border-t border-white/10">
-            <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="{{ route('mundos-de-mim.index') }}" class="block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('mundos-de-mim.index') ? 'bg-[#62A87C]/20 text-[#62A87C]' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">Dashboard</a>
-                <a href="{{ route('mundos-de-mim.perfil.index') }}" class="block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('mundos-de-mim.perfil.*') ? 'bg-[#3B9AB2]/20 text-[#3B9AB2]' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">Meu Perfil</a>
-                <a href="{{ route('mundos-de-mim.pessoas.index') }}" class="block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('mundos-de-mim.pessoas.*') ? 'bg-[#7B2CBF]/20 text-[#7B2CBF]' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">Entes Queridos</a>
-                <a href="{{ route('mundos-de-mim.galeria.index') }}" class="block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('mundos-de-mim.galeria.*') ? 'bg-[#0077B6]/20 text-[#0077B6]' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">Minha Galeria</a>
-                <a href="{{ route('mundos-de-mim.estilos.index') }}" class="block px-3 py-2 rounded-md text-base font-medium {{ request()->routeIs('mundos-de-mim.estilos.*') ? 'bg-[#62A87C]/20 text-[#62A87C]' : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">Estilos & Temas</a>
-                
-                @can('admin-do-app')
-                    <div class="border-t border-white/10 my-2"></div>
-                    <div class="px-3 py-1 text-xs uppercase font-bold text-slate-500 tracking-wider">Admin</div>
-                    <a href="{{ route('mundos-de-mim.playground.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Playground</a>
-                    <a href="{{ route('mundos-de-mim.admin.themes.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Temas</a>
-                    <a href="{{ route('mundos-de-mim.admin.importador.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Importador</a>
-                    <a href="{{ route('mundos-de-mim.admin.gallery.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Galeria Pública</a>
-                    <a href="{{ route('mundos-de-mim.admin.user-gallery.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-white">Galeria de Usuários</a>
-                @endcan
-
-                <div class="border-t border-white/10 my-2 pt-2">
-                    <form method="POST" action="{{ route('mundos-de-mim.logout') }}">
-                        @csrf
-                        <button type="submit" class="w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-400 hover:bg-white/5 hover:text-red-300">
-                            Sair do Estúdio
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Header Opcional (Se houver $header injetado) -->
     @if(isset($header))
-        <header class="bg-white shadow-sm border-b border-gray-200">
-            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                {{ $header }}
+        <div class="{{ $papel ? 'mm-papel-cabecalho' : '' }}" style="{{ $papel ? '' : 'border-bottom:1px solid #2c2860' }}">
+            <div style="max-width:1280px;margin:0 auto;padding:20px 24px">
+                <div class="mm-display" style="font-size:22px;font-weight:700;{{ $papel ? 'color:var(--mm-noite)' : '' }}">
+                    {{ $header }}
+                </div>
             </div>
-        </header>
+        </div>
     @endif
 
-    <!-- Conteúdo Principal -->
-    <main class="flex-grow">
+    <main class="flex-grow {{ $papel ? 'mm-papel' : 'mm-pagina' }}">
         {{ $slot }}
     </main>
 
-    <!-- Footer do Módulo -->
-    <footer class="bg-white border-t border-gray-200 mt-auto py-6">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
-            &copy; {{ date('Y') }} Mundos de Mim. Todos os direitos reservados.
+    <footer style="border-top:1px solid #2c2860;margin-top:auto">
+        <div style="max-width:1280px;margin:0 auto;padding:24px;display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;font-size:14px;color:var(--mm-texto-suave)">
+            <span>© {{ date('Y') }} Mundos de Mim · um app Spigo.net</span>
+            <span>Um postal novo, todo dia.</span>
         </div>
     </footer>
 

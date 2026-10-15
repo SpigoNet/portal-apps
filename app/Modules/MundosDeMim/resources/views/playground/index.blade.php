@@ -1,7 +1,7 @@
 <x-MundosDeMim::layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Laboratório de Criação (Playground)') }}
+        <h2 class="font-semibold text-xl text-[#14122B] leading-tight font-heading">
+            {{ __('Ateliê') }}
         </h2>
     </x-slot>
 
@@ -38,7 +38,7 @@
 
                     <div class="mb-8 border-b pb-6">
                         <h3 class="text-lg font-bold mb-2 flex items-center gap-2">
-                            <span>📸</span> 1. Imagem de Referência
+                            1. Imagem de Referência
                         </h3>
                         <p class="text-sm text-gray-500 mb-4">
                             A foto de referência é enviada junto com o perfil e o prompt final para preservar a identidade na nova imagem.
@@ -161,14 +161,14 @@
 
                                         <button type="button" id="btn-magic-wand"
                                             class="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full text-white text-xs font-bold hover:shadow-md transition">
-                                            <span id="magic-spinner" class="hidden animate-spin">🌀</span>
+                                            <span id="magic-spinner" class="hidden">Gerando...</span>
                                             <i id="magic-icon" class="fa-solid fa-wand-magic-sparkles"></i>
                                             Refinar (Varinha Mágica)
                                         </button>
 
                                         <button type="button" id="btn-preview-prompt"
                                             class="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 rounded-full text-slate-700 text-xs font-bold border border-slate-200 hover:bg-slate-200 transition">
-                                            <span id="preview-spinner" class="hidden animate-spin">🌀</span>
+                                            <span id="preview-spinner" class="hidden">Gerando...</span>
                                             <i id="preview-icon" class="fa-solid fa-eye"></i>
                                             Ver prévia enviada para IA
                                         </button>
@@ -186,8 +186,7 @@
                             <button type="submit"
                                 {{ $providers->isEmpty() ? 'disabled' : '' }}
                                 class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded shadow-lg transition-all transform hover:scale-105">
-                                Executar Teste 🚀
-                            </button>
+                                Executar Teste                             </button>
                         </div>
                     </form>
 

@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-[#14122B] leading-tight font-heading">
             Revisão da Importação
         </h2>
     </x-slot>
@@ -70,7 +70,7 @@
                                     @endforeach
                                 </select>
                                 @if($suggestedThemeId)
-                                    <p class="text-xs text-green-600 mt-1">✨ Sugerido com base no texto.</p>
+                                    <p class="text-xs text-green-600 mt-1">Sugerido com base no texto.</p>
                                 @endif
                             </div>
 
@@ -97,7 +97,7 @@
                         Cancelar
                     </a>
                     <button type="submit" class="px-8 py-3 bg-indigo-600 text-white rounded shadow-lg font-bold hover:bg-indigo-700 transform hover:scale-105 transition-all">
-                        🚀 Importar e Salvar
+                        Importar e Salvar
                     </button>
                 </div>
             </form>

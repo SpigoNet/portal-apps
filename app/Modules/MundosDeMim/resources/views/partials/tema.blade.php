@@ -78,6 +78,27 @@
     .mm-barra-aberta { display: flex; }
     @media (min-width: 768px) { .mm-barra { display: flex; width: auto; } .mm-hamburguer { display: none; } }
 
+
+    /* Telas administrativas e Ateliê: remapeia as cores genéricas do Tailwind para a paleta da marca */
+    .mm-papel { font-family: 'Instrument Sans', system-ui, sans-serif; }
+    .mm-papel h1, .mm-papel h2, .mm-papel h3 { font-family: 'Bricolage Grotesque', system-ui, sans-serif; letter-spacing: -0.02em; color: var(--mm-noite); }
+    .mm-papel .bg-white { border-radius: 20px; }
+    .mm-papel .shadow, .mm-papel .shadow-sm, .mm-papel .shadow-md, .mm-papel .shadow-lg { box-shadow: none; }
+    .mm-papel .bg-indigo-600, .mm-papel .bg-indigo-700, .mm-papel .bg-blue-500, .mm-papel .bg-blue-600, .mm-papel .bg-blue-700,
+    .mm-papel .hover\:bg-indigo-700:hover, .mm-papel .hover\:bg-indigo-500:hover, .mm-papel .hover\:bg-blue-700:hover { background-color: var(--mm-poente) !important; color: var(--mm-noite) !important; border-radius: 999px; font-weight: 600; }
+    .mm-papel .bg-indigo-600:hover, .mm-papel .bg-blue-500:hover, .mm-papel .bg-blue-600:hover { filter: brightness(.95); }
+    .mm-papel .bg-indigo-50, .mm-papel .bg-indigo-100, .mm-papel .bg-blue-50, .mm-papel .bg-blue-100 { background-color: #E6E1F7 !important; }
+    .mm-papel .text-indigo-500, .mm-papel .text-indigo-600, .mm-papel .text-indigo-700, .mm-papel .text-indigo-900, .mm-papel .text-blue-500, .mm-papel .text-blue-700, .mm-papel .text-blue-800 { color: #4B3FA8 !important; }
+    .mm-papel .bg-indigo-600 .text-indigo-600 { color: inherit !important; }
+    .mm-papel .border-indigo-100, .mm-papel .border-indigo-200, .mm-papel .border-indigo-300 { border-color: #cfc8ee !important; }
+    .mm-papel .border-indigo-500, .mm-papel .ring-indigo-500 { border-color: var(--mm-bruma) !important; --tw-ring-color: var(--mm-bruma) !important; }
+    .mm-papel .bg-red-600, .mm-papel .bg-red-700 { background-color: #C2410C !important; color: #fff !important; border-radius: 999px; }
+    .mm-papel input[type="text"], .mm-papel input[type="email"], .mm-papel input[type="url"], .mm-papel input[type="number"], .mm-papel input[type="date"], .mm-papel input[type="password"], .mm-papel select, .mm-papel textarea { border-color: #cfc8ee; border-radius: 12px; }
+    .mm-papel input:focus, .mm-papel select:focus, .mm-papel textarea:focus { border-color: var(--mm-bruma); --tw-ring-color: var(--mm-bruma); }
+    .mm-papel input[type="checkbox"], .mm-papel input[type="radio"] { accent-color: var(--mm-poente); color: var(--mm-poente); }
+    .mm-papel table thead { background: #E6E1F7 !important; }
+    .mm-papel .container-admin { max-width: 1280px; margin: 0 auto; }
+
     .mm-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
     .mm-pagina nav[role="navigation"] svg { width: 20px; height: 20px; }
     .mm-pagina nav[role="navigation"] a, .mm-pagina nav[role="navigation"] span[aria-current] > span { color: var(--mm-lua); }

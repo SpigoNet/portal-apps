@@ -1,6 +1,6 @@
 <x-MundosDeMim::layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-[#14122B] leading-tight font-heading">
             Editando: {{ $theme->name }}
         </h2>
     </x-slot>
@@ -184,8 +184,7 @@
                                         <button type="submit"
                                                 class="p-1 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 rounded"
                                                 title="Gerar a partir do Antes">
-                                            🖼️
-                                        </button>
+                                                                                    </button>
                                     </form>
                                 @endif
 

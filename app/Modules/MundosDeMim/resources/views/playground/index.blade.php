@@ -1,252 +1,176 @@
 <x-MundosDeMim::layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-[#14122B] leading-tight font-heading">
-            {{ __('Ateliê') }}
-        </h2>
-    </x-slot>
+    <div class="mm-wrap mm-stack" style="gap:32px">
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+        <div style="display:flex;flex-direction:column;gap:10px;max-width:700px">
+            <h1 class="mm-h1">Ateliê</h1>
+            <p class="mm-lead">Teste prompts, refine o texto e veja o resultado antes de publicar em um mundo.</p>
+        </div>
 
-            @if($currentUser->can('admin-do-app') && $allUsers->isNotEmpty())
-                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6">
-                    <form action="{{ route('mundos-de-mim.playground.select-user') }}" method="POST" class="flex items-center gap-4">
-                        @csrf
-                        <label class="text-sm font-bold text-indigo-700">Testar como usuário:</label>
-                        <select name="user_id" onchange="this.form.submit()" class="rounded-md border-gray-300 text-sm">
-                            @foreach($allUsers as $u)
-                                <option value="{{ $u->id }}" {{ $u->id === $targetUser->id ? 'selected' : '' }}>
-                                    {{ $u->name }} ({{ $u->email }})
+        @if($currentUser->can('admin-do-app') && $allUsers->isNotEmpty())
+            <form action="{{ route('mundos-de-mim.playground.select-user') }}" method="POST" class="mm-card" style="display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;padding:20px 24px">
+                @csrf
+                <label for="user_id" class="mm-rotulo-campo" style="font-size:15px">Testar como</label>
+                <select name="user_id" id="user_id" onchange="this.form.submit()" class="mm-input" style="width:auto;flex:1 1 260px;max-width:460px">
+                    @foreach($allUsers as $u)
+                        <option value="{{ $u->id }}" {{ $u->id === $targetUser->id ? 'selected' : '' }}>{{ $u->name }} ({{ $u->email }})</option>
+                    @endforeach
+                </select>
+                <span class="mm-chip mm-chip-ok">{{ $targetUser->credits }} {{ $targetUser->credits === 1 ? 'extra' : 'extras' }}</span>
+            </form>
+        @endif
+
+        @if(session('error'))
+            <div role="alert" class="mm-alerta mm-alerta-erro"><b>Algo deu errado:</b> {{ session('error') }}</div>
+        @endif
+
+        <form action="{{ route('mundos-de-mim.playground.generate') }}" method="POST" style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+            @csrf
+
+            <div style="flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:24px">
+
+                <section class="mm-card" style="display:flex;flex-direction:column;gap:14px">
+                    <span class="mm-rotulo">1 · Referência</span>
+                    @if($hasPhoto)
+                        <div style="display:flex;gap:16px;align-items:center">
+                            <img src="{{ Storage::url($attributes->photo_path) }}" alt="Foto de referência atual" style="width:88px;height:88px;border-radius:20px;object-fit:cover;border:3px solid var(--mm-bruma);flex:none">
+                            <div style="display:flex;flex-direction:column;gap:6px">
+                                <span class="mm-chip mm-chip-ok" style="align-self:flex-start">Foto carregada</span>
+                                <span class="mm-dica">Enviada junto com o retrato e o prompt para manter a identidade.</span>
+                            </div>
+                        </div>
+                    @else
+                        <div class="mm-alerta mm-alerta-erro">
+                            Sem foto de referência. Complete o <a href="{{ route('mundos-de-mim.perfil.index') }}" style="text-decoration:underline;font-weight:600">retrato</a> para gerar imagens aqui.
+                        </div>
+                    @endif
+                </section>
+
+                <section class="mm-card" style="display:flex;flex-direction:column;gap:14px">
+                    <span class="mm-rotulo">2 · Modelo de IA</span>
+                    <div class="mm-campo">
+                        <label for="ai_provider_id" class="mm-sr-only">Provedor e modelo</label>
+                        <select name="ai_provider_id" id="ai_provider_id" class="mm-input">
+                            @foreach($providers as $provider)
+                                <option value="{{ $provider->id }}" {{ (string) old('ai_provider_id', optional($selectedProvider)->id) === (string) $provider->id ? 'selected' : '' }}>
+                                    {{ $provider->name }} ({{ $provider->driver }} / {{ $provider->model }})
                                 </option>
                             @endforeach
                         </select>
-                        <span class="text-xs text-indigo-600">
-                            <i class="fa-solid fa-coins"></i> {{ $targetUser->credits }} créditos
-                        </span>
-                    </form>
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow-sm">
-                    <strong>Erro:</strong> {{ session('error') }}
-                </div>
-            @endif
-
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-
-                    <div class="mb-8 border-b pb-6">
-                        <h3 class="text-lg font-bold mb-2 flex items-center gap-2">
-                            1. Imagem de Referência
-                        </h3>
-                        <p class="text-sm text-gray-500 mb-4">
-                            A foto de referência é enviada junto com o perfil e o prompt final para preservar a identidade na nova imagem.
-                        </p>
-
-                        @if($hasPhoto)
-                            <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                <img src="{{ Storage::url($attributes->photo_path) }}" alt="Foto de Referência"
-                                    class="h-24 w-24 object-cover rounded-lg shadow-sm border-2 border-indigo-200">
-                                <div>
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        Imagem Carregada
-                                    </span>
-                                    <p class="text-xs text-gray-400 mt-1 break-all">{{ $attributes->photo_path }}</p>
-                                </div>
-                            </div>
-                        @else
-                            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-                                <p class="text-yellow-700 text-sm">
-                                    <strong>Sem foto:</strong> Configure seu <a
-                                        href="{{ route('mundos-de-mim.perfil.index') }}" class="underline font-bold">Perfil</a> para gerar imagens no playground.
-                                </p>
-                            </div>
+                        @if($providers->isEmpty())
+                            <span class="mm-dica" style="color:#FFB09B">Nenhum provedor ativo encontrado.</span>
                         @endif
                     </div>
 
-                    <form action="{{ route('mundos-de-mim.playground.generate') }}" method="POST">
-                        @csrf
+                    @if($currentUser->can('admin-do-app'))
+                        <label class="mm-opcao" style="padding:4px 0">
+                            <input type="checkbox" name="send_to_user" value="1">
+                            <span>Enviar o resultado para o usuário<br><span class="mm-dica">Manda a imagem por e-mail para a pessoa escolhida acima.</span></span>
+                        </label>
+                    @endif
+                </section>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                            <div class="col-span-1 space-y-4">
-                                <div>
-                                    <label for="ai_provider_id" class="block text-sm font-bold text-gray-700 mb-2">2. Provedor / Modelo</label>
-                                    <select name="ai_provider_id" id="ai_provider_id"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                        @foreach($providers as $provider)
-                                            <option value="{{ $provider->id }}"
-                                                {{ (string) old('ai_provider_id', optional($selectedProvider)->id) === (string) $provider->id ? 'selected' : '' }}>
-                                                {{ $provider->name }} ({{ $provider->driver }} / {{ $provider->model }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @if($providers->isEmpty())
-                                        <p class="text-xs text-red-500 mt-2 font-semibold">
-                                            Nenhum provedor ativo encontrado.
-                                        </p>
+                @if($prompts->isNotEmpty())
+                    <section class="mm-card" style="display:flex;flex-direction:column;gap:14px">
+                        <span class="mm-rotulo">Prompts cadastrados</span>
+                        <div class="mm-campo">
+                            <label for="prompt_id" class="mm-sr-only">Escolher um prompt cadastrado</label>
+                            <select name="prompt_id" id="prompt_id" onchange="loadPrompt(this.value)" class="mm-input">
+                                <option value="">Escolha um prompt...</option>
+                                @foreach($prompts as $prompt)
+                                    <option value="{{ $prompt->id }}" data-prompt="{{ $prompt->prompt_text }}">{{ $prompt->theme->name ?? 'Sem mundo' }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div style="max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px">
+                            @foreach($prompts as $promptItem)
+                                @php
+                                    $promptExample = $promptItem->generatedExamples->first();
+                                    $themeExample = optional($promptItem->theme)->examples->first();
+                                    $previewImage = $promptExample ? $promptExample->image_path : ($themeExample ? $themeExample->image_path : null);
+                                    $previewUrl = $previewImage ? Storage::url($previewImage) : null;
+                                @endphp
+                                <button type="button" onclick="applyPromptFromList('{{ $promptItem->id }}', @js($promptItem->prompt_text))"
+                                        style="display:flex;gap:12px;align-items:flex-start;text-align:left;padding:10px;border:1px solid var(--mm-linha);border-radius:16px;background:var(--mm-noite);color:inherit;cursor:pointer;font-family:inherit;width:100%">
+                                    @if($previewUrl)
+                                        <img src="{{ $previewUrl }}" alt="" loading="lazy" style="width:72px;height:96px;object-fit:cover;border-radius:10px;flex:none">
+                                    @else
+                                        <span class="mm-cena-{{ ($promptItem->id % 4) + 1 }}" aria-hidden="true" style="width:72px;height:96px;border-radius:10px;flex:none"></span>
                                     @endif
-                                </div>
-
-                                @if($prompts->isNotEmpty())
-                                <div>
-                                    <label for="prompt_id" class="block text-sm font-bold text-gray-700 mb-2">Ou use um Prompt Cadastrado</label>
-                                    <select name="prompt_id" id="prompt_id" onchange="loadPrompt(this.value)"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                        <option value="">-- Selecione --</option>
-                                        @foreach($prompts as $prompt)
-                                            <option value="{{ $prompt->id }}" data-prompt="{{ $prompt->prompt_text }}">
-                                                {{ $prompt->theme->name ?? 'Sem tema' }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="max-h-80 overflow-y-auto space-y-2 pr-1">
-                                    <p class="text-xs font-bold uppercase tracking-wide text-gray-500">Lista de prompts para gerar</p>
-                                    @foreach($prompts as $promptItem)
-                                        @php
-                                            $promptExample = $promptItem->generatedExamples->first();
-                                            $themeExample = optional($promptItem->theme)->examples->first();
-                                            
-                                            $previewImage = $promptExample ? $promptExample->image_path : ($themeExample ? $themeExample->image_path : null);
-                                            $previewUrl = $previewImage ? Storage::url($previewImage) : null;
-                                        @endphp
-                                        <button type="button"
-                                                onclick="applyPromptFromList('{{ $promptItem->id }}', @js($promptItem->prompt_text))"
-                                                class="w-full text-left p-3 border border-gray-200 rounded-xl hover:border-[#62A87C] hover:bg-[#62A87C]/5 transition group">
-                                            <div class="flex gap-4 items-start">
-                                                @if($previewUrl)
-                                                    <img src="{{ $previewUrl }}" class="h-20 w-20 object-cover rounded-lg border border-gray-200 shadow-sm group-hover:scale-105 transition-transform" alt="Resultado">
-                                                @else
-                                                    <div class="h-20 w-20 rounded-lg border border-gray-200 bg-gray-50 flex flex-col items-center justify-center text-gray-400">
-                                                        <i class="fa-solid fa-image text-xl mb-1"></i>
-                                                        <span class="text-[9px] uppercase tracking-wider">Sem Img</span>
-                                                    </div>
-                                                @endif
-                                                <div class="min-w-0 flex-1 pt-1">
-                                                    <p class="text-sm font-bold text-[#7B2CBF] truncate mb-1">{{ $promptItem->theme->name ?? 'Sem tema' }}</p>
-                                                    <p class="text-xs text-gray-600 line-clamp-3 leading-relaxed">{{ $promptItem->prompt_text }}</p>
-                                                </div>
-                                            </div>
-                                        </button>
-                                    @endforeach
-                                </div>
-                                @endif
-
-                                @if($currentUser->can('admin-do-app'))
-                                <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-200">
-                                    <label class="flex items-center cursor-pointer">
-                                        <input type="checkbox" name="send_to_user" value="1" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                                        <span class="ml-2 text-sm text-indigo-700 font-medium">
-                                            <i class="fa-solid fa-paper-plane"></i> Enviar para o usuário
-                                        </span>
-                                    </label>
-                                    <p class="text-xs text-indigo-600 mt-1">Envia a imagem gerada por email para o usuário selecionado</p>
-                                </div>
-                                @endif
-                            </div>
-
-                            <div class="col-span-2">
-                                <div class="flex justify-between items-center mb-2">
-                                    <label for="prompt" class="block text-sm font-bold text-gray-700">3. Prompt
-                                        (Comando)</label>
-
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 rounded-full text-indigo-700 text-xs font-bold border border-indigo-100">
-                                            <i class="fa-solid fa-coins"></i> {{ $targetUser->credits }} Créditos
-                                        </div>
-
-                                        <button type="button" id="btn-magic-wand"
-                                            class="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full text-white text-xs font-bold hover:shadow-md transition">
-                                            <span id="magic-spinner" class="hidden">Gerando...</span>
-                                            <i id="magic-icon" class="fa-solid fa-wand-magic-sparkles"></i>
-                                            Refinar (Varinha Mágica)
-                                        </button>
-
-                                        <button type="button" id="btn-preview-prompt"
-                                            class="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 rounded-full text-slate-700 text-xs font-bold border border-slate-200 hover:bg-slate-200 transition">
-                                            <span id="preview-spinner" class="hidden">Gerando...</span>
-                                            <i id="preview-icon" class="fa-solid fa-eye"></i>
-                                            Ver prévia enviada para IA
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <textarea name="prompt" id="prompt" rows="5"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    placeholder="Ex: Cyberpunk portrait of a hero, cinematic lighting, ultra detailed"
-                                    required>{{ old('prompt') ?? ($latestPrompt ? $latestPrompt->prompt_text : '') }}</textarea>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end pt-4 border-t">
-                            <button type="submit"
-                                {{ $providers->isEmpty() ? 'disabled' : '' }}
-                                class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded shadow-lg transition-all transform hover:scale-105">
-                                Executar Teste                             </button>
-                        </div>
-                    </form>
-
-                    <div id="prompt-preview-panel" class="hidden mt-6 rounded-xl border border-slate-200 bg-slate-50 shadow-sm">
-                        <div class="flex items-center justify-between gap-4 px-4 py-3 border-b border-slate-200">
-                            <div>
-                                <h4 class="font-bold text-slate-800">Prévia do texto final enviado para a IA</h4>
-                                <p id="prompt-preview-note" class="text-xs text-slate-500 mt-1">
-                                    Esta prévia usa a mesma montagem aplicada na geração.
-                                </p>
-                            </div>
-                            <button type="button" id="btn-close-preview" class="text-slate-500 hover:text-slate-700">
-                                <i class="fa-solid fa-xmark"></i>
-                            </button>
-                        </div>
-                        <div class="p-4">
-                            <pre id="prompt-preview-content" class="whitespace-pre-wrap break-words text-sm text-slate-700 font-sans leading-6"></pre>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            @if(session('result'))
-                <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-lg border-t-4 border-indigo-500">
-                    <div class="p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b">Resultado da Geração:</h3>
-
-                        <div class="w-full">
-                            {!! session('result') !!}
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            @if(isset($recentGenerations) && $recentGenerations->isNotEmpty())
-                <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-lg border-t-4 border-emerald-500">
-                    <div class="p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-4 pb-2 border-b">Resultados Recentes (clique para reutilizar prompt)</h3>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            @foreach($recentGenerations as $generation)
-                                <button type="button"
-                                        onclick="applyPromptFromList('{{ $generation->prompt_id ?? '' }}', @js($generation->final_prompt_used))"
-                                        class="text-left border rounded-lg overflow-hidden hover:border-indigo-300 transition bg-white">
-                                    <div class="aspect-video bg-gray-100">
-                                        <img src="{{ $generation->image_url }}" class="w-full h-full object-cover" alt="Resultado gerado">
-                                    </div>
-                                    <div class="p-3">
-                                        <p class="text-xs text-gray-500 mb-1">{{ optional($generation->created_at)->format('d/m/Y H:i') }}</p>
-                                        <p class="text-sm text-gray-700 line-clamp-3">{{ $generation->final_prompt_used }}</p>
-                                    </div>
+                                    <span style="min-width:0;display:flex;flex-direction:column;gap:4px">
+                                        <b style="font-size:15px;color:var(--mm-bruma)">{{ $promptItem->theme->name ?? 'Sem mundo' }}</b>
+                                        <span style="font-size:13px;line-height:1.45;color:var(--mm-texto-suave);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">{{ $promptItem->prompt_text }}</span>
+                                    </span>
                                 </button>
                             @endforeach
                         </div>
-                    </div>
-                </div>
-            @endif
+                    </section>
+                @endif
+            </div>
 
-        </div>
+            <section class="mm-card" style="flex:2 1 460px;min-width:0;display:flex;flex-direction:column;gap:16px">
+                <div style="display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:space-between;align-items:center">
+                    <label for="prompt" class="mm-rotulo" style="margin:0">3 · Prompt</label>
+                    <span class="mm-chip mm-chip-ok">{{ $targetUser->credits }} {{ $targetUser->credits === 1 ? 'extra disponível' : 'extras disponíveis' }}</span>
+                </div>
+
+                <textarea name="prompt" id="prompt" rows="9" required class="mm-input"
+                          placeholder="Descreva a cena. Ex.: retrato cinematográfico em uma cidade que acende ao amanhecer, luz dourada, muito detalhe">{{ old('prompt') ?? ($latestPrompt ? $latestPrompt->prompt_text : '') }}</textarea>
+
+                <div style="display:flex;flex-wrap:wrap;gap:10px">
+                    <button type="button" id="btn-magic-wand" class="mm-btn mm-btn-bruma">
+                        <span id="magic-spinner" class="hidden">Refinando...</span>
+                        <span id="magic-icon"><i class="fa-solid fa-wand-magic-sparkles"></i> Refinar o texto</span>
+                    </button>
+                    <button type="button" id="btn-preview-prompt" class="mm-btn mm-btn-contorno">
+                        <span id="preview-spinner" class="hidden">Montando...</span>
+                        <span id="preview-icon"><i class="fa-solid fa-eye"></i> Ver o que vai para a IA</span>
+                    </button>
+                </div>
+
+                <div id="prompt-preview-panel" class="hidden" style="border:1px solid var(--mm-linha);border-radius:18px;background:var(--mm-noite)">
+                    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:14px 16px;border-bottom:1px solid var(--mm-linha)">
+                        <div>
+                            <b>Texto final enviado para a IA</b>
+                            <p id="prompt-preview-note" class="mm-dica" style="margin:4px 0 0">Esta prévia usa a mesma montagem aplicada na geração.</p>
+                        </div>
+                        <button type="button" id="btn-close-preview" aria-label="Fechar prévia" style="background:none;border:0;color:var(--mm-texto-suave);cursor:pointer;padding:8px;font-size:18px"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <pre id="prompt-preview-content" style="margin:0;padding:16px;white-space:pre-wrap;word-break:break-word;font:14px/1.6 'Instrument Sans',sans-serif;color:#D6D3EE"></pre>
+                </div>
+
+                <div style="display:flex;justify-content:flex-end;padding-top:8px;border-top:1px solid var(--mm-linha)">
+                    <button type="submit" {{ $providers->isEmpty() ? 'disabled' : '' }} class="mm-btn mm-btn-primario" style="padding:16px 32px;font-size:17px">Gerar postal de teste</button>
+                </div>
+            </section>
+        </form>
+
+        @if(session('result'))
+            <section class="mm-card mm-card-lua" style="display:flex;flex-direction:column;gap:16px">
+                <h2 class="mm-display" style="margin:0;font-size:28px;font-weight:700">Resultado</h2>
+                <div style="width:100%;overflow-x:auto">{!! session('result') !!}</div>
+            </section>
+        @endif
+
+        @if(isset($recentGenerations) && $recentGenerations->isNotEmpty())
+            <section style="display:flex;flex-direction:column;gap:20px">
+                <div>
+                    <h2 class="mm-display" style="margin:0;font-size:32px;font-weight:700">Testes recentes</h2>
+                    <p class="mm-dica" style="margin:6px 0 0">Toque em um para reaproveitar o prompt.</p>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px">
+                    @foreach($recentGenerations as $generation)
+                        <button type="button" onclick="applyPromptFromList('{{ $generation->prompt_id ?? '' }}', @js($generation->final_prompt_used))"
+                                style="text-align:left;padding:0;border:0;background:var(--mm-crepusculo);color:inherit;border-radius:20px;overflow:hidden;cursor:pointer;font-family:inherit;display:flex;flex-direction:column">
+                            <span class="mm-postal" style="border:0;border-radius:0;aspect-ratio:4/3;display:block"><img src="{{ $generation->image_url }}" alt="Resultado gerado" loading="lazy"></span>
+                            <span style="padding:14px;display:flex;flex-direction:column;gap:6px">
+                                <span class="mm-dica">{{ optional($generation->created_at)->format('d/m/Y H:i') }}</span>
+                                <span style="font-size:14px;line-height:1.45;color:#D6D3EE;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">{{ $generation->final_prompt_used }}</span>
+                            </span>
+                        </button>
+                    @endforeach
+                </div>
+            </section>
+        @endif
     </div>
 
     <script>
@@ -315,8 +239,8 @@
                     alert('Erro: ' + data.error);
                 } else if (data.refined) {
                     promptArea.value = data.refined;
-                    promptArea.classList.add('bg-indigo-50');
-                    setTimeout(() => promptArea.classList.remove('bg-indigo-50'), 1000);
+                    promptArea.style.borderColor = '#7FE0C2';
+                    setTimeout(() => { promptArea.style.borderColor = ''; }, 1500);
                 }
             } catch (error) {
                 console.error(error);

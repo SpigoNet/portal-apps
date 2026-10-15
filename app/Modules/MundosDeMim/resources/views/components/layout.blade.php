@@ -1,5 +1,5 @@
 @php
-    $papel = request()->routeIs('mundos-de-mim.admin.themes.*', 'mundos-de-mim.admin.prompts.*', 'mundos-de-mim.admin.importador.*', 'mundos-de-mim.playground.*');
+    $papel = request()->routeIs('mundos-de-mim.admin.themes.*', 'mundos-de-mim.admin.prompts.*', 'mundos-de-mim.admin.importador.*');
     $emAdmin = request()->routeIs('mundos-de-mim.admin.*', 'mundos-de-mim.playground.*');
     $usuario = auth()->user();
     $atual = fn (string ...$rotas) => request()->routeIs(...$rotas) ? 'page' : 'false';

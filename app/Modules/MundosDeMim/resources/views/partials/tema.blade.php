@@ -116,6 +116,7 @@
         .mm-papel .max-w-7xl, .mm-papel .max-w-5xl, .mm-papel .max-w-4xl { padding-left: 4px; padding-right: 4px; }
     }
 
+    .mm .hidden { display: none !important; }
     .mm-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
     .mm-pagina nav[role="navigation"] svg { width: 20px; height: 20px; }
     .mm-pagina nav[role="navigation"] a, .mm-pagina nav[role="navigation"] span[aria-current] > span { color: var(--mm-lua); }

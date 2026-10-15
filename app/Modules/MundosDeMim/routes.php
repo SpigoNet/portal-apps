@@ -6,6 +6,7 @@ use App\Modules\MundosDeMim\Http\Controllers\GaleriaController;
 use App\Modules\MundosDeMim\Http\Controllers\PerfilBiometricoController;
 use App\Modules\MundosDeMim\Http\Controllers\PessoasRelacionadasController;
 use App\Modules\MundosDeMim\Http\Controllers\PlaygroundController;
+use App\Modules\MundosDeMim\Http\Controllers\TelegramController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('mundos-de-mim')
@@ -17,6 +18,9 @@ Route::prefix('mundos-de-mim')
 
         // Rota de Avaliação por Email (Auto-login)
         Route::get('/avaliar/{generation}', [GaleriaController::class, 'rate'])->name('rate');
+
+        // Webhook do bot do Telegram (sem login; protegido pelo segredo no cabeçalho)
+        Route::post('/telegram/webhook', [TelegramController::class, 'webhook'])->name('telegram.webhook');
 
         // Auth Routes Específicas do Módulo
         Route::get('/login', [\App\Modules\MundosDeMim\Http\Controllers\AuthController::class, 'showLogin'])->name('login')->middleware('guest');
@@ -37,6 +41,8 @@ Route::prefix('mundos-de-mim')
             // Rotas de Biometria
             Route::get('/meu-perfil', [PerfilBiometricoController::class, 'index'])->name('perfil.index');
             Route::post('/meu-perfil', [PerfilBiometricoController::class, 'update'])->name('perfil.update');
+            Route::post('/meu-perfil/telegram/conectar', [TelegramController::class, 'conectar'])->name('perfil.telegram.conectar');
+            Route::post('/meu-perfil/telegram/desconectar', [TelegramController::class, 'desconectar'])->name('perfil.telegram.desconectar');
             Route::post('/meu-perfil/analisar', [PerfilBiometricoController::class, 'analyze'])->name('perfil.analyze');
 
             // Rotas de Pessoas

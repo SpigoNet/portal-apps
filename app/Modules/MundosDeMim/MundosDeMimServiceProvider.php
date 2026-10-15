@@ -28,6 +28,7 @@ class MundosDeMimServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 Console\Commands\RechargeCredits::class,
+                Console\Commands\RegistrarWebhookTelegram::class,
             ]);
         }
 

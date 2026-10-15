@@ -28,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // CSRF é desabilitado nestas rotas pois o acesso é externo/iframe.
         $middleware->validateCsrfTokens(except: [
             'vocabulario-controlado/*',
+            'mundos-de-mim/telegram/webhook',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

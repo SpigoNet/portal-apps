@@ -117,6 +117,29 @@
                 <button type="submit" class="mm-btn mm-btn-primario" style="padding:16px 32px;font-size:17px">Salvar retrato</button>
             </div>
         </form>
+
+        <section class="mm-card" style="display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;justify-content:space-between">
+            <div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:8px">
+                <h2 class="mm-display" style="margin:0;font-size:24px;font-weight:700">Telegram</h2>
+                @if($telegramConectado)
+                    <span class="mm-chip mm-chip-ok" style="align-self:flex-start">Conectado</span>
+                    <p class="mm-dica" style="margin:0">Os postais chegam no seu Telegram quando você escolhe essa opção acima. Para parar, desconecte aqui ou envie /parar para o bot.</p>
+                @else
+                    <p class="mm-dica" style="margin:0">Conecte o bot @mundosdemim_bot para receber o postal do dia no Telegram. Você abre o bot e toca em Iniciar; a conexão é feita sozinha.</p>
+                @endif
+            </div>
+            @if($telegramConectado)
+                <form action="{{ route('mundos-de-mim.perfil.telegram.desconectar') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="mm-btn mm-btn-contorno">Desconectar</button>
+                </form>
+            @else
+                <form action="{{ route('mundos-de-mim.perfil.telegram.conectar') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="mm-btn mm-btn-bruma">Conectar ao Telegram</button>
+                </form>
+            @endif
+        </section>
     </div>
 
     <script>

@@ -73,6 +73,8 @@ return [
 
     'mundos_de_mim' => [
         'telegram_token' => env('MUNDOS_DE_MIM_TELEGRAM_TOKEN', ''),
+        'telegram_bot' => env('MUNDOS_DE_MIM_TELEGRAM_BOT', 'mundosdemim_bot'),
+        'telegram_webhook_secret' => env('MUNDOS_DE_MIM_TELEGRAM_WEBHOOK_SECRET', ''),
     ],
 
     'pidgey' => [

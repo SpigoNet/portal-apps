@@ -17,7 +17,9 @@ class PerfilBiometricoController extends Controller
     {
         $attributes = UserAttribute::where('user_id', Auth::id())->first();
 
-        return view('MundosDeMim::perfil.index', compact('attributes'));
+        $telegramConectado = filled(Auth::user()->telegram_id);
+
+        return view('MundosDeMim::perfil.index', compact('attributes', 'telegramConectado'));
     }
 
     public function analyze(Request $request)

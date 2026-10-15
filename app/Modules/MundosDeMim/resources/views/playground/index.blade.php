@@ -15,7 +15,7 @@
                         <option value="{{ $u->id }}" {{ $u->id === $targetUser->id ? 'selected' : '' }}>{{ $u->name }} ({{ $u->email }})</option>
                     @endforeach
                 </select>
-                <span class="mm-chip mm-chip-ok">{{ $targetUser->credits }} {{ $targetUser->credits === 1 ? 'extra' : 'extras' }}</span>
+                <span class="mm-chip mm-chip-ok">{{ max(0, $targetUser->credits) }} {{ $targetUser->credits === 1 ? 'extra' : 'extras' }}</span>
             </form>
         @endif
 
@@ -81,7 +81,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div style="max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px">
+                        <div style="max-height:460px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-right:4px;-webkit-overflow-scrolling:touch">
                             @foreach($prompts as $promptItem)
                                 @php
                                     $promptExample = $promptItem->generatedExamples->first();
@@ -90,13 +90,13 @@
                                     $previewUrl = $previewImage ? Storage::url($previewImage) : null;
                                 @endphp
                                 <button type="button" onclick="applyPromptFromList('{{ $promptItem->id }}', @js($promptItem->prompt_text))"
-                                        style="display:flex;gap:12px;align-items:flex-start;text-align:left;padding:10px;border:1px solid var(--mm-linha);border-radius:16px;background:var(--mm-noite);color:inherit;cursor:pointer;font-family:inherit;width:100%">
+                                        style="display:flex;flex:none;gap:12px;align-items:flex-start;text-align:left;padding:10px;border:1px solid var(--mm-linha);border-radius:16px;background:var(--mm-noite);color:inherit;cursor:pointer;font-family:inherit;width:100%;height:auto;overflow:hidden">
                                     @if($previewUrl)
                                         <img src="{{ $previewUrl }}" alt="" loading="lazy" style="width:72px;height:96px;object-fit:cover;border-radius:10px;flex:none">
                                     @else
                                         <span class="mm-cena-{{ ($promptItem->id % 4) + 1 }}" aria-hidden="true" style="width:72px;height:96px;border-radius:10px;flex:none"></span>
                                     @endif
-                                    <span style="min-width:0;display:flex;flex-direction:column;gap:4px">
+                                    <span style="min-width:0;flex:1 1 auto;display:flex;flex-direction:column;gap:4px">
                                         <b style="font-size:15px;color:var(--mm-bruma)">{{ $promptItem->theme->name ?? 'Sem mundo' }}</b>
                                         <span style="font-size:13px;line-height:1.45;color:var(--mm-texto-suave);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">{{ $promptItem->prompt_text }}</span>
                                     </span>
@@ -110,7 +110,7 @@
             <section class="mm-card" style="flex:2 1 460px;min-width:0;display:flex;flex-direction:column;gap:16px">
                 <div style="display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:space-between;align-items:center">
                     <label for="prompt" class="mm-rotulo" style="margin:0">3 · Prompt</label>
-                    <span class="mm-chip mm-chip-ok">{{ $targetUser->credits }} {{ $targetUser->credits === 1 ? 'extra disponível' : 'extras disponíveis' }}</span>
+                    <span class="mm-chip mm-chip-ok">{{ max(0, $targetUser->credits) }} {{ $targetUser->credits === 1 ? 'extra disponível' : 'extras disponíveis' }}</span>
                 </div>
 
                 <textarea name="prompt" id="prompt" rows="9" required class="mm-input"

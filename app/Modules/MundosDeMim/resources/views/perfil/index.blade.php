@@ -21,7 +21,7 @@
             </div>
         @endif
 
-        <form action="{{ route('mundos-de-mim.perfil.update') }}" method="POST" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:20px">
+        <form action="{{ route('mundos-de-mim.perfil.update') }}" method="POST" enctype="multipart/form-data" data-aguarde="Salvando seu retrato…" style="display:flex;flex-direction:column;gap:20px">
             @csrf
 
             <div class="mm-card" style="display:flex;flex-wrap:wrap;gap:24px;align-items:center">
@@ -127,6 +127,7 @@
 
             btn.disabled = true;
             rotulo.textContent = 'Analisando sua foto...';
+            window.mmAguarde('Analisando sua foto…');
 
             try {
                 const response = await fetch("{{ route('mundos-de-mim.perfil.analyze') }}", {
@@ -159,6 +160,7 @@
             } finally {
                 btn.disabled = false;
                 rotulo.textContent = original;
+                window.mmLiberar();
             }
         });
     </script>

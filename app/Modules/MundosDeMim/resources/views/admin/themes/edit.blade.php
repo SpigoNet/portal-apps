@@ -10,7 +10,7 @@
 
             <div class="bg-white p-6 rounded shadow-sm">
                 <form action="{{ route('mundos-de-mim.admin.themes.update', $theme->id) }}" method="POST"
-                      enctype="multipart/form-data">
+                      enctype="multipart/form-data" data-aguarde="Salvando o mundo e enviando as imagens…">
                     @csrf
                     @method('PUT')
 
@@ -179,12 +179,13 @@
                             <div class="absolute top-2 right-2 flex items-center gap-2">
                                 @if($theme->example_input_path)
                                     <form action="{{ route('mundos-de-mim.admin.prompts.generateFromBefore', $prompt->id) }}"
-                                          method="POST" class="inline">
+                                          method="POST" class="inline" data-aguarde="Gerando a imagem com IA…">
                                         @csrf
                                         <button type="submit"
                                                 class="p-1 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 rounded"
-                                                title="Gerar a partir do Antes">
-                                                                                    </button>
+                                                title="Gerar a partir do Antes" aria-label="Gerar a partir do Antes">
+                                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                        </button>
                                     </form>
                                 @endif
 

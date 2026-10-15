@@ -23,7 +23,7 @@
             <div role="alert" class="mm-alerta mm-alerta-erro"><b>Algo deu errado:</b> {{ session('error') }}</div>
         @endif
 
-        <form id="form-gerar" action="{{ route('mundos-de-mim.playground.generate') }}" method="POST" style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+        <form id="form-gerar" data-aguarde="Gerando o postal… pode levar alguns instantes." action="{{ route('mundos-de-mim.playground.generate') }}" method="POST" style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
             @csrf
 
             <div style="flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:24px">
@@ -172,35 +172,6 @@
             </section>
         @endif
     </div>
-
-    <div id="aguarde" class="hidden" role="alertdialog" aria-live="assertive" aria-labelledby="aguarde-titulo"
-         style="position:fixed;inset:0;z-index:100;background:rgba(20,18,43,.92);display:flex;align-items:center;justify-content:center;padding:24px">
-        <div style="max-width:380px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:20px">
-            <span aria-hidden="true" style="width:56px;height:56px;border-radius:50%;border:5px solid var(--mm-linha);border-top-color:var(--mm-poente);animation:mm-gira 1s linear infinite"></span>
-            <h2 id="aguarde-titulo" class="mm-display" style="margin:0;font-size:28px;font-weight:700">Aguarde, processando…</h2>
-            <p style="margin:0;font-size:16px;line-height:1.5;color:var(--mm-texto-suave)">Estamos gerando o postal. Pode levar alguns instantes, não feche nem recarregue esta página.</p>
-        </div>
-    </div>
-    <style>@keyframes mm-gira { to { transform: rotate(360deg) } } @media (prefers-reduced-motion: reduce) { #aguarde span[aria-hidden] { animation-duration: 3s } }</style>
-
-    <script>
-        document.getElementById('form-gerar')?.addEventListener('submit', function (e) {
-            if (!this.checkValidity()) return;
-            document.getElementById('aguarde').classList.remove('hidden');
-            const btn = document.getElementById('btn-gerar');
-            btn.disabled = true;
-            btn.textContent = 'Processando…';
-        });
-        // Voltar pelo navegador não deve manter a tela de espera
-        window.addEventListener('pageshow', function (e) {
-            if (e.persisted) {
-                document.getElementById('aguarde').classList.add('hidden');
-                const btn = document.getElementById('btn-gerar');
-                btn.disabled = false;
-                btn.textContent = 'Gerar postal de teste';
-            }
-        });
-    </script>
 
     <script>
         function loadPrompt(promptId) {

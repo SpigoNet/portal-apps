@@ -9,7 +9,7 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
 
-                <form action="{{ route('mundos-de-mim.admin.themes.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('mundos-de-mim.admin.themes.store') }}" method="POST" enctype="multipart/form-data" data-aguarde="Criando o mundo e enviando as imagens…">
                     @csrf
 
                     <h3 class="text-lg font-bold mb-4 border-b pb-2">1. Dados Básicos</h3>

@@ -15,7 +15,7 @@
                     O sistema irá identificar padrões, sugerir variáveis dinâmicas e vincular a um tema.
                 </p>
 
-                <form action="{{ route('mundos-de-mim.admin.importador.analyze') }}" method="POST">
+                <form action="{{ route('mundos-de-mim.admin.importador.analyze') }}" method="POST" data-aguarde="Analisando o texto com IA…">
                     @csrf
                     <textarea name="raw_prompt" rows="8" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 font-mono text-sm p-4" placeholder="Ex: A futuristic photo of a woman with blonde hair and blue eyes standing next to her cyborg dog..." required></textarea>
 

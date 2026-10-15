@@ -35,7 +35,7 @@
                             <div
                                 class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-3">
                                 <form action="{{ route('mundos-de-mim.admin.user-gallery.send', $gen->id) }}"
-                                    method="POST">
+                                    method="POST" data-aguarde="Reenviando o postal…">
                                     @csrf
                                     <button type="submit" title="Reenviar para o Usuário"
                                         class="bg-[#FF7A59] text-[#14122B] p-4 rounded-2xl hover:scale-110 transition">

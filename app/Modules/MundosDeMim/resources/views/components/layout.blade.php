@@ -113,6 +113,46 @@
         </div>
     </footer>
 
+    <div id="mm-aguarde" class="hidden" role="alertdialog" aria-live="assertive" aria-labelledby="mm-aguarde-titulo"
+         style="position:fixed;inset:0;z-index:100;background:rgba(20,18,43,.92);display:flex;align-items:center;justify-content:center;padding:24px">
+        <div style="max-width:380px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:20px">
+            <span aria-hidden="true" class="mm-giro" style="width:56px;height:56px;border-radius:50%;border:5px solid var(--mm-linha);border-top-color:var(--mm-poente)"></span>
+            <h2 id="mm-aguarde-titulo" class="mm-display" style="margin:0;font-size:28px;font-weight:700;color:var(--mm-lua)">Aguarde, processando…</h2>
+            <p style="margin:0;font-size:16px;line-height:1.5;color:var(--mm-texto-suave)">Pode levar alguns instantes. Não feche nem recarregue esta página.</p>
+        </div>
+    </div>
+    <script>
+        (function () {
+            const painel = document.getElementById('mm-aguarde');
+            const titulo = document.getElementById('mm-aguarde-titulo');
+            window.mmAguarde = function (texto) {
+                titulo.textContent = texto || 'Aguarde, processando…';
+                painel.classList.remove('hidden');
+            };
+            window.mmLiberar = function () { painel.classList.add('hidden'); };
+
+            document.addEventListener('submit', function (e) {
+                const form = e.target;
+                const texto = form.dataset ? form.dataset.aguarde : undefined;
+                if (texto === undefined || !form.checkValidity()) return;
+                // Se outro handler cancelou o envio (ex.: confirm), não mostra o aviso
+                setTimeout(function () {
+                    if (e.defaultPrevented) return;
+                    window.mmAguarde(texto);
+                    form.querySelectorAll('button[type="submit"]').forEach(function (b) { b.disabled = true; });
+                }, 0);
+            });
+
+            // Voltar pelo navegador não deve manter a tela de espera
+            window.addEventListener('pageshow', function (e) {
+                if (e.persisted) {
+                    window.mmLiberar();
+                    document.querySelectorAll('form[data-aguarde] button[type="submit"]').forEach(function (b) { b.disabled = false; });
+                }
+            });
+        })();
+    </script>
+
     @livewireScripts
 </body>
 </html>

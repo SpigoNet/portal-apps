@@ -117,6 +117,9 @@
     }
 
     .mm .hidden { display: none !important; }
+    @keyframes mm-gira { to { transform: rotate(360deg); } }
+    .mm-giro { animation: mm-gira 1s linear infinite; }
+    @media (prefers-reduced-motion: reduce) { .mm-giro { animation-duration: 3s; } }
     .mm-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
     .mm-pagina nav[role="navigation"] svg { width: 20px; height: 20px; }
     .mm-pagina nav[role="navigation"] a, .mm-pagina nav[role="navigation"] span[aria-current] > span { color: var(--mm-lua); }

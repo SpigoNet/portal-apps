@@ -5,7 +5,7 @@
             <p class="mm-lead">Alguém especial para aparecer junto com você nos mundos. As fotos ficam isoladas na sua conta.</p>
         </div>
 
-        <form action="{{ route('mundos-de-mim.pessoas.store') }}" method="POST" enctype="multipart/form-data" class="mm-card" style="display:flex;flex-direction:column;gap:24px">
+        <form action="{{ route('mundos-de-mim.pessoas.store') }}" method="POST" enctype="multipart/form-data" data-aguarde="Salvando a companhia e enviando a foto…" class="mm-card" style="display:flex;flex-direction:column;gap:24px">
             @csrf
 
             <div class="mm-campo">

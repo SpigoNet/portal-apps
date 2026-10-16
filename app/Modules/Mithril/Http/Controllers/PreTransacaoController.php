@@ -28,6 +28,7 @@ class PreTransacaoController extends Controller
     public function create()
     {
         $contas = Conta::where('tipo', 'normal')->orderBy('nome')->get();
+
         return view('Mithril::pre_transacoes.create', compact('contas'));
     }
 
@@ -119,7 +120,7 @@ class PreTransacaoController extends Controller
     public function toggleStatus($id)
     {
         $pt = PreTransacao::findOrFail($id);
-        $pt->ativa = !$pt->ativa;
+        $pt->ativa = ! $pt->ativa;
         $pt->save();
 
         return redirect()->back()->with('success', 'Status alterado.');
@@ -149,6 +150,7 @@ class PreTransacaoController extends Controller
             $valor = str_replace('.', '', $valor); // Remove milhar
             $valor = str_replace(',', '.', $valor); // Troca vírgula por ponto
         }
+
         return (float) $valor;
     }
 }

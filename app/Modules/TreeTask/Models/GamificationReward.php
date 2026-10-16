@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class GamificationReward extends Model
 {
     protected $table = 'treetask_gamification_rewards';
+
     protected $primaryKey = 'id_reward';
 
     protected $fillable = [
@@ -14,6 +15,6 @@ class GamificationReward extends Model
         'tipo',
         'chance',
         'moeda_ganha',
-        'descricao'
+        'descricao',
     ];
 }

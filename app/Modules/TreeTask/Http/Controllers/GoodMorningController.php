@@ -4,8 +4,6 @@ namespace App\Modules\TreeTask\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\TreeTask\Models\Projeto;
-use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class GoodMorningController extends Controller
 {
@@ -17,11 +15,11 @@ class GoodMorningController extends Controller
         $projetos = Projeto::where('id_user_owner', $userId)
             ->whereNotIn('status', ['Concluído', 'Cancelado'])
             ->with([
-                'fases.tarefas' => function ($q) use ($userId) {
+                'fases.tarefas' => function ($q) {
                     // Carregar tarefas para calcular última interação e próximas tarefas
                     // Otimização: Poderíamos carregar apenas dados necessários, mas para MVP isso serve
                     $q->select('id_tarefa', 'id_fase', 'titulo', 'updated_at', 'created_at', 'status', 'data_vencimento', 'prioridade', 'id_user_responsavel');
-                }
+                },
             ])
             ->get();
 
@@ -46,11 +44,11 @@ class GoodMorningController extends Controller
 
             // Filtrar tarefas pendentes
             $proximasTarefas = $todasTarefas->filter(function ($tarefa) {
-                return !in_array($tarefa->status, ['Concluído', 'Cancelado']);
+                return ! in_array($tarefa->status, ['Concluído', 'Cancelado']);
             })->sortBy([
-                        ['data_vencimento', 'asc'], // Vencimento mais próximo primeiro
-                        ['prioridade', 'desc'],     // Maior prioridade primeiro (se houver lógica numérica, aqui é string, cuidado)
-                    ])->take(3);
+                ['data_vencimento', 'asc'], // Vencimento mais próximo primeiro
+                ['prioridade', 'desc'],     // Maior prioridade primeiro (se houver lógica numérica, aqui é string, cuidado)
+            ])->take(3);
 
             $projeto->last_interaction = $lastInteraction;
             $projeto->proximas_tarefas = $proximasTarefas;
@@ -65,7 +63,7 @@ class GoodMorningController extends Controller
         $projetosOrdenados = $projetosData->sortByDesc('days_since_interaction');
 
         return view('TreeTask::good_morning', [
-            'projetos' => $projetosOrdenados
+            'projetos' => $projetosOrdenados,
         ]);
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Modules\Mithril\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Conta extends Model
 {
@@ -27,7 +27,7 @@ class Conta extends Model
     protected static function booted()
     {
         static::creating(function ($conta) {
-            if (!$conta->user_id && auth()->check()) {
+            if (! $conta->user_id && auth()->check()) {
                 $conta->user_id = auth()->id();
             }
         });

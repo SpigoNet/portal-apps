@@ -2,11 +2,11 @@
 
 namespace App\Modules\Metricas\Http\Middleware;
 
+use App\Modules\Metricas\Models\MetricaAcesso;
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
-use App\Modules\Metricas\Models\MetricaAcesso;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class RegistrarAcesso
 {

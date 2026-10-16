@@ -13,6 +13,7 @@ use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
 use App\Services\AI\Drivers\LmStudioDriver;
 use App\Services\AI\Drivers\OllamaDriver;
+use App\Services\AI\Drivers\OpenAiCompatibleDriver;
 use App\Services\AI\Drivers\PollinationDriver;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -23,6 +24,7 @@ class AiProviderService
         'pollination_image_edit',
         'airforce',
         'gemini',
+        'openai',
     ];
 
     private function getModelByDefaultMapping(string $inputType, string $outputType): ?AiModel
@@ -203,6 +205,7 @@ class AiProviderService
 
         return match ($driverName) {
             'airforce' => new AirForceDriver($modelName, $apiKey, $baseUrl),
+            'openai' => new OpenAiCompatibleDriver($modelName, $apiKey, $baseUrl),
             'kdjingpai' => new KdjingpaiDriver($modelName, $apiKey, $baseUrl),
             'gemini' => new GeminiDriver($apiKey, $modelName, $baseUrl),
             'lm_studio' => new LmStudioDriver($baseUrl),

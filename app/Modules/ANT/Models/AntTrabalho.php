@@ -10,7 +10,7 @@ class AntTrabalho extends Model
 
     protected $fillable = [
         'semestre', 'nome', 'descricao', 'dicas_correcao',
-        'materia_id', 'tipo_trabalho_id', 'tipos_trabalho_ids', 'prazo', 'maximo_alunos', 'peso_id'
+        'materia_id', 'tipo_trabalho_id', 'tipos_trabalho_ids', 'prazo', 'maximo_alunos', 'peso_id',
     ];
 
     protected $casts = [
@@ -35,7 +35,7 @@ class AntTrabalho extends Model
      *
      * Result is memoized per model instance to avoid repeated queries.
      *
-     * @return string[]  Uppercase extension strings, e.g. ['PDF', 'ZIP', 'LINK']
+     * @return string[] Uppercase extension strings, e.g. ['PDF', 'ZIP', 'LINK']
      */
     public function getAllowedExtensions(): array
     {
@@ -43,7 +43,7 @@ class AntTrabalho extends Model
             return $this->cachedAllowedExtensions;
         }
 
-        if (!empty($this->tipos_trabalho_ids)) {
+        if (! empty($this->tipos_trabalho_ids)) {
             $tipos = AntTipoTrabalho::whereIn('id', $this->tipos_trabalho_ids)->get();
         } else {
             $tipos = collect([$this->tipoTrabalho])->filter();

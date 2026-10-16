@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class AntTipoTrabalho extends Model
 {
     protected $table = 'ant_tipos_trabalho';
+
     protected $fillable = ['descricao', 'arquivos'];
 
     public function trabalhos()

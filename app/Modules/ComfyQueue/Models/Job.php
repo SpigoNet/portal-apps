@@ -27,13 +27,13 @@ class Job extends Model
     ];
 
     protected $casts = [
-        'params'          => 'array',
+        'params' => 'array',
         'required_models' => 'array',
-        'input_files'     => 'array',
-        'output_files'    => 'array',
-        'last_heartbeat'  => 'datetime',
-        'started_at'      => 'datetime',
-        'finished_at'     => 'datetime',
+        'input_files' => 'array',
+        'output_files' => 'array',
+        'last_heartbeat' => 'datetime',
+        'started_at' => 'datetime',
+        'finished_at' => 'datetime',
     ];
 
     protected function executionLogEntries(): Attribute

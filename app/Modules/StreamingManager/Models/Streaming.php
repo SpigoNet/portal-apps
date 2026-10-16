@@ -44,12 +44,14 @@ class Streaming extends Model
         }
 
         $dailyCost = $this->monthly_cost / 30;
+
         return (int) ($this->balance / $dailyCost);
     }
 
     public function getFundsUntilAttribute(): string
     {
         $days = $this->daysRemaining;
+
         return now()->addDays($days)->format('d/m/Y');
     }
 }

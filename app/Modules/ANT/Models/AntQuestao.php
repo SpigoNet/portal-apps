@@ -10,7 +10,7 @@ class AntQuestao extends Model
 
     protected $fillable = [
         'enunciado', 'database_name', 'query_correta',
-        'dissertativa', 'multipla_escolha'
+        'dissertativa', 'multipla_escolha',
     ];
 
     protected $casts = [

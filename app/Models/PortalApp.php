@@ -20,7 +20,7 @@ class PortalApp extends Model
         'pwa_theme_color',
         'pwa_display',
         'pwa_orientation',
-        'pwa_scope'
+        'pwa_scope',
     ];
 
     public function package()
@@ -39,5 +39,38 @@ class PortalApp extends Model
     public function getManifestUrlAttribute()
     {
         return route('pwa.manifest', ['id' => $this->id]);
+    }
+
+    /**
+     * Caminho (relativo a public/) do ícone do app, ou null se o campo `icon`
+     * não apontar para um arquivo existente (ex.: valores antigos "fa-solid ...").
+     */
+    public function getIconFileAttribute(): ?string
+    {
+        $icone = ltrim((string) $this->icon, '/');
+
+        if ($icone === '' || ! str_contains($icone, '/') || ! is_file(public_path($icone))) {
+            return null;
+        }
+
+        return $icone;
+    }
+
+    /** URL absoluta do ícone, com o ícone padrão do portal como fallback. */
+    public function getIconUrlAttribute(): string
+    {
+        return asset($this->icon_file ?? 'apple-touch-icon.png');
+    }
+
+    /** Caminho (relativo a public/) da versão "maskable" do ícone, se existir. */
+    public function getMaskableIconFileAttribute(): ?string
+    {
+        if ($this->icon_file === null) {
+            return null;
+        }
+
+        $maskable = 'images/apps/maskable/'.basename($this->icon_file);
+
+        return is_file(public_path($maskable)) ? $maskable : null;
     }
 }

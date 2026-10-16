@@ -15,7 +15,7 @@ class AntProvaResposta extends Model
         'resposta',
         'pre_avaliacao',
         'pontuacao',
-        'quando'
+        'quando',
     ];
 
     protected $casts = [

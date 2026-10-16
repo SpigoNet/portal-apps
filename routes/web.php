@@ -29,5 +29,4 @@ Route::get('/google/callback', [GoogleController::class, 'callback'])->name('goo
 
 require __DIR__.'/auth.php';
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-});
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {});

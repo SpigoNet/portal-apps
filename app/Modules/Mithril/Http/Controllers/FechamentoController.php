@@ -57,7 +57,7 @@ class FechamentoController extends Controller
                 'alvo_ano' => $dataAlvo->year,
                 'alvo_data_formatada' => ucfirst($dataAlvo->translatedFormat('F Y')),
                 'saldo_sugerido' => $saldoSugerido,
-                'movimentacoes' => $transacoesMes
+                'movimentacoes' => $transacoesMes,
             ];
         }
 
@@ -73,7 +73,7 @@ class FechamentoController extends Controller
             'conta_id' => 'required|exists:mithril_contas,id',
             'mes' => 'required|integer|min:1|max:12',
             'ano' => 'required|integer|min:2000',
-            'saldo_final' => 'required|numeric'
+            'saldo_final' => 'required|numeric',
         ]);
 
         // Cria ou Atualiza o fechamento (caso re-faça o mesmo mês)
@@ -86,7 +86,7 @@ class FechamentoController extends Controller
             ],
             [
                 'saldo_final' => $request->saldo_final,
-                'data_fechamento' => now()
+                'data_fechamento' => now(),
             ]
         );
 

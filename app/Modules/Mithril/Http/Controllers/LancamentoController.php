@@ -67,15 +67,21 @@ class LancamentoController extends Controller
         $idsJaEfetivados = $transacoes->pluck('pre_transacao_id')->filter()->toArray();
 
         foreach ($preTransacoesTodas as $pt) {
-            if (in_array($pt->id, $idsJaEfetivados)) continue;
+            if (in_array($pt->id, $idsJaEfetivados)) {
+                continue;
+            }
 
             $parcelaAtualCalculada = null;
 
             if ($pt->tipo === 'recorrente') {
-                if ($pt->data_inicio->startOfMonth()->gt($fimMes)) continue;
+                if ($pt->data_inicio->startOfMonth()->gt($fimMes)) {
+                    continue;
+                }
             } elseif ($pt->tipo === 'parcelada') {
                 $diffMeses = $this->diffEmMeses($pt->data_inicio, $dataBase);
-                if ($diffMeses < 0 || $diffMeses >= $pt->total_parcelas) continue;
+                if ($diffMeses < 0 || $diffMeses >= $pt->total_parcelas) {
+                    continue;
+                }
                 $parcelaAtualCalculada = $diffMeses + 1;
             }
 
@@ -154,6 +160,7 @@ class LancamentoController extends Controller
     {
         $inicio = Carbon::parse($dataInicio)->startOfMonth();
         $atual = Carbon::parse($dataAtual)->startOfMonth();
+
         return $inicio->diffInMonths($atual, false);
     }
 
@@ -165,6 +172,7 @@ class LancamentoController extends Controller
                 return 'confirmado';
             }
         }
+
         return 'pendente';
     }
 }

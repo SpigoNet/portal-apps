@@ -3,14 +3,13 @@
 namespace App\Modules\GestorHoras\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\GestorHoras\Models\Contrato;
 use App\Modules\GestorHoras\Models\Cliente;
+use App\Modules\GestorHoras\Models\Contrato;
+use App\Modules\GestorHoras\Models\ContratoItem;
+use App\Modules\GestorHoras\Models\LogAceite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
-use App\Modules\GestorHoras\Models\ContratoItem;
-use App\Modules\GestorHoras\Models\LogAceite;
-use Illuminate\Support\Str;
 
 class ContratoController extends Controller
 {
@@ -26,7 +25,9 @@ class ContratoController extends Controller
 
         // Filtro por Cliente
         if ($user->gh_role === 'client') {
-            if (!$user->gh_cliente_id) abort(403);
+            if (! $user->gh_cliente_id) {
+                abort(403);
+            }
             $query->where('gh_cliente_id', $user->gh_cliente_id);
         }
 
@@ -49,6 +50,7 @@ class ContratoController extends Controller
         Gate::authorize('gh.operacional');
 
         $clientes = Cliente::all(); // Precisa listar clientes para selecionar
+
         return view('GestorHoras::create', compact('clientes'));
     }
 
@@ -118,16 +120,16 @@ class ContratoController extends Controller
         // 3. Os apontamentos gerais do contrato
         $contrato = Contrato::with([
             'cliente',
-            'itens' => function($q) {
+            'itens' => function ($q) {
                 // Ordena primeiro por data_referencia (para os mensais), depois por ID
                 $q->orderBy('data_referencia', 'asc')->orderBy('id', 'asc');
             },
-            'itens.apontamentos' => function($q) {
+            'itens.apontamentos' => function ($q) {
                 $q->orderBy('data_realizacao', 'desc');
             },
-            'apontamentos' => function($q) {
+            'apontamentos' => function ($q) {
                 $q->orderBy('data_realizacao', 'desc');
-            }
+            },
         ])->findOrFail($id);
 
         // Segurança...
@@ -159,7 +161,7 @@ class ContratoController extends Controller
                 'horas_estimadas' => $item->horas_estimadas,
                 'data_referencia' => optional($item->data_referencia)->toDateString(),
             ],
-            'apontamentos' => $item->apontamentos->map(function($a){
+            'apontamentos' => $item->apontamentos->map(function ($a) {
                 return [
                     'id' => $a->id,
                     'user_id' => $a->user_id,
@@ -193,7 +195,7 @@ class ContratoController extends Controller
 
         // Envia e-mail de notificação
         $titulo = sprintf('[ACEITE DIGITAL] - Item Homologado - Spigo.Net - %s', $item->titulo);
-        $corpo = "Item: {$item->titulo}\nContrato: {$item->contrato->titulo}\nAceito por: " . auth()->user()->name . " (ID: " . auth()->id() . ")\nData: " . now()->toDateTimeString() . "\nHash: {$hash}\n\nResumo:\n" . strip_tags($item->descricao);
+        $corpo = "Item: {$item->titulo}\nContrato: {$item->contrato->titulo}\nAceito por: ".auth()->user()->name.' (ID: '.auth()->id().")\nData: ".now()->toDateTimeString()."\nHash: {$hash}\n\nResumo:\n".strip_tags($item->descricao);
 
         // Destinatários: gustavo@spigo.net e financeiro (ajustar e-mail de financeiro conforme necessário)
         $emails = ['gustavo@spigo.net', 'financeiro@nw.com'];
@@ -218,15 +220,15 @@ class ContratoController extends Controller
 
         // Carrega os contratos desse cliente específico
         $contratos = Contrato::with([
-                'itens',
-                'apontamentos' => function($q) {
-                    $q->orderBy('data_realizacao', 'desc');
-                },
-                'itens' => function($q) {
-                    // Ordena primeiro por data_referencia (para os mensais), depois por ID
-                    $q->orderBy('data_referencia', 'asc')->orderBy('id', 'asc');
-                },
-            ])
+            'itens',
+            'apontamentos' => function ($q) {
+                $q->orderBy('data_realizacao', 'desc');
+            },
+            'itens' => function ($q) {
+                // Ordena primeiro por data_referencia (para os mensais), depois por ID
+                $q->orderBy('data_referencia', 'asc')->orderBy('id', 'asc');
+            },
+        ])
             ->where('gh_cliente_id', $cliente->id)
             ->orderBy('created_at', 'desc')
             ->get();

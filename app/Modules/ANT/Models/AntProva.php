@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class AntProva extends Model
 {
     protected $table = 'ant_provas';
+
     protected $fillable = ['descricao', 'disponivel', 'trabalho_id'];
 
     protected $casts = [

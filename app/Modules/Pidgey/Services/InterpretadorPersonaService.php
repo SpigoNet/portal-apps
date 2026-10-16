@@ -95,6 +95,46 @@ class InterpretadorPersonaService
     }
 
     /**
+     * A persona escreve só a abertura/comentário de uma mensagem, a partir de fatos já apurados. O resumo
+     * completo é acrescentado depois, pelo chamador, abaixo do texto dela. Devolve texto puro (sem
+     * markdown/HTML) ou '' se a IA falhar.
+     */
+    public function narrar(Persona $persona, string $fatos, ?AiModel $aiModel = null): string
+    {
+        $fatos = trim($fatos);
+        if ($fatos === '') {
+            return '';
+        }
+
+        $personalityJson = json_encode($persona->personality ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
+
+        $messages = [
+            [
+                'role' => 'system',
+                'content' => "Você é a persona {$persona->name} e vai escrever, na primeira pessoa, a abertura da mensagem que ela manda hoje cedo no Telegram, com base nos FATOS abaixo.\n".
+                    "Regras:\n".
+                    "- O resumo completo (listas de refeições, alimentos vencendo e compras) será ACRESCENTADO AUTOMATICAMENTE logo abaixo do seu texto. Por isso NÃO repita as listas nem enumere todos os itens: introduza, comente e prepare quem lê.\n".
+                    "- Você pode destacar uma receita ou um alimento específico dos fatos (citando o nome exatamente como está) e reagir ao que mostram, no tom da persona: se algo falta (ex.: cardápio não definido) ou preocupa (alimentos vencendo), cobre ou alerte; se está tudo em ordem, seja caloroso.\n".
+                    "- Não invente receitas, alimentos, prazos nem quantidades que não estejam nos fatos.\n".
+                    "- Texto curto (2 a 5 frases), em português do Brasil, puro: sem markdown, sem HTML, sem listas, sem aspas, sem explicações.\n".
+                    '- Você É o remetente; não responda a ninguém.',
+            ],
+            [
+                'role' => 'user',
+                'content' => "Perfil da persona (JSON): {$personalityJson}\n\nFATOS:\n{$fatos}\n\nAbertura escrita pela {$persona->name}:",
+            ],
+        ];
+
+        try {
+            return trim((string) $this->resolverDriver($aiModel)->generateText($messages, ['temperature' => 0.5]));
+        } catch (\Throwable $e) {
+            Log::warning('Pidgey: falha ao narrar mensagem da persona', ['persona_id' => $persona->id, 'error' => $e->getMessage()]);
+
+            return '';
+        }
+    }
+
+    /**
      * Gera UMA RESPOSTA da persona para a mensagem recebida do usuário,
      * usando o perfil (personality) dela como referência de estilo.
      * Diferente de `interpretar()`, aqui a persona responde ao conteúdo,

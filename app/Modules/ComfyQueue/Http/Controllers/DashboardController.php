@@ -25,9 +25,9 @@ class DashboardController extends Controller
                     $inner->orWhere('id', (int) $search);
                 }
 
-                $inner->orWhere('type', 'like', '%' . $search . '%')
-                    ->orWhere('prompt_id', 'like', '%' . $search . '%')
-                    ->orWhere('error', 'like', '%' . $search . '%');
+                $inner->orWhere('type', 'like', '%'.$search.'%')
+                    ->orWhere('prompt_id', 'like', '%'.$search.'%')
+                    ->orWhere('error', 'like', '%'.$search.'%');
             });
         }
 
@@ -54,9 +54,9 @@ class DashboardController extends Controller
                     $inner->orWhere('id', (int) $search);
                 }
 
-                $inner->orWhere('type', 'like', '%' . $search . '%')
-                    ->orWhere('prompt_id', 'like', '%' . $search . '%')
-                    ->orWhere('error', 'like', '%' . $search . '%');
+                $inner->orWhere('type', 'like', '%'.$search.'%')
+                    ->orWhere('prompt_id', 'like', '%'.$search.'%')
+                    ->orWhere('error', 'like', '%'.$search.'%');
             });
         }
 
@@ -68,11 +68,12 @@ class DashboardController extends Controller
                 $validOutputFiles = [];
                 if (is_array($job->output_files)) {
                     foreach ($job->output_files as $file) {
-                        if (is_array($file) && !empty($file['url'])) {
+                        if (is_array($file) && ! empty($file['url'])) {
                             $validOutputFiles[] = $file;
                         }
                     }
                 }
+
                 return [
                     'id' => $job->id,
                     'type' => $job->type,
@@ -103,10 +104,10 @@ class DashboardController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'type'            => 'required|string',
-            'params'          => 'required|string',
+            'type' => 'required|string',
+            'params' => 'required|string',
             'required_models' => 'nullable|string',
-            'input_files'     => 'nullable|string',
+            'input_files' => 'nullable|string',
         ]);
 
         $params = json_decode($validated['params'], true);
@@ -131,11 +132,11 @@ class DashboardController extends Controller
         }
 
         Job::create([
-            'type'            => $validated['type'],
-            'params'          => $params,
+            'type' => $validated['type'],
+            'params' => $params,
             'required_models' => $requiredModels,
-            'input_files'     => $inputFiles,
-            'status'          => 'pending',
+            'input_files' => $inputFiles,
+            'status' => 'pending',
         ]);
 
         return redirect()->route('comfy-queue.index')->with('success', 'Job criado com sucesso.');
@@ -153,13 +154,13 @@ class DashboardController extends Controller
         $job = Job::findOrFail($id);
 
         $validated = $request->validate([
-            'type'            => 'required|string|max:120',
-            'status'          => 'required|in:pending,processing,done,error',
-            'params'          => 'required|string',
+            'type' => 'required|string|max:120',
+            'status' => 'required|in:pending,processing,done,error',
+            'params' => 'required|string',
             'required_models' => 'nullable|string',
-            'input_files'     => 'nullable|string',
-            'error'           => 'nullable|string|max:5000',
-            'prompt_id'       => 'nullable|string|max:255',
+            'input_files' => 'nullable|string',
+            'error' => 'nullable|string|max:5000',
+            'prompt_id' => 'nullable|string|max:255',
         ]);
 
         $params = json_decode($validated['params'], true);

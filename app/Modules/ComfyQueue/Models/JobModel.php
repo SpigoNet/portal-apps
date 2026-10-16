@@ -42,7 +42,7 @@ class JobModel extends Model
         } elseif (is_string($data)) {
             if (preg_match_all('/__(\w+)__/', $data, $matches)) {
                 foreach ($matches[1] as $varName) {
-                    if (!in_array($varName, $variaveis)) {
+                    if (! in_array($varName, $variaveis)) {
                         $variaveis[] = $varName;
                     }
                 }
@@ -63,11 +63,13 @@ class JobModel extends Model
             foreach ($data as $key => $value) {
                 $data[$key] = $this->replaceVariaveis($value, $valores);
             }
+
             return $data;
         } elseif (is_string($data)) {
             foreach ($valores as $varName => $varValue) {
                 $data = str_replace("__{$varName}__", (string) $varValue, $data);
             }
+
             return $data;
         }
 

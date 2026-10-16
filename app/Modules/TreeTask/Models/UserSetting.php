@@ -2,8 +2,8 @@
 
 namespace App\Modules\TreeTask\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 class UserSetting extends Model
 {
@@ -15,7 +15,7 @@ class UserSetting extends Model
         'use_analog_timer',
         'palette_style',
         'enable_haptic_feedback',
-        'enable_streak_repair'
+        'enable_streak_repair',
     ];
 
     public function user()

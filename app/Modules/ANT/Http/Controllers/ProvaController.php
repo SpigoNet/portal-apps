@@ -3,10 +3,9 @@
 namespace App\Modules\ANT\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Modules\ANT\Models\AntAluno;
-use App\Modules\ANT\Models\AntTrabalho;
 use App\Modules\ANT\Models\AntProvaResposta;
+use App\Modules\ANT\Models\AntTrabalho;
 
 class ProvaController extends Controller
 {
@@ -22,7 +21,7 @@ class ProvaController extends Controller
         $trabalho = AntTrabalho::with(['prova.questoes.alternativas'])
             ->findOrFail($idTrabalho);
 
-        if (!$trabalho->prova) {
+        if (! $trabalho->prova) {
             abort(404, 'Este trabalho não possui uma prova vinculada.');
         }
 

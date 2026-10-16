@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Modules\StreamingManager\Http\Controllers\StreamingController;
 use App\Modules\StreamingManager\Http\Controllers\MemberController;
 use App\Modules\StreamingManager\Http\Controllers\PaymentController;
+use App\Modules\StreamingManager\Http\Controllers\StreamingController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('streaming-manager')->name('streaming-manager.')->group(function () {
     Route::get('/', [StreamingController::class, 'index'])->name('index');

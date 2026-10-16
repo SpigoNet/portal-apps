@@ -35,7 +35,7 @@ class WhatsappController extends Controller
         $headers = [];
         $preview = [];
 
-        if (file_exists($fullPath) && ($handle = fopen($fullPath, "r")) !== FALSE) {
+        if (file_exists($fullPath) && ($handle = fopen($fullPath, 'r')) !== false) {
             // Lê a primeira linha (cabeçalhos)
             $data = fgetcsv($handle, 0, ',');
             if ($data) {
@@ -72,7 +72,7 @@ class WhatsappController extends Controller
         $path = $request->input('file_path');
 
         // CORREÇÃO: Verifica se o arquivo existe no disco do Laravel antes de pegar o caminho
-        if (!Storage::exists($path)) {
+        if (! Storage::exists($path)) {
             return redirect()->route('envio-whatsapp.index')
                 ->withErrors(['arquivo' => 'O arquivo expirou ou não existe. Envie novamente.']);
         }
@@ -87,19 +87,20 @@ class WhatsappController extends Controller
         $erros = [];
         $headers = [];
 
-        if (($handle = fopen($fullPath, "r")) !== FALSE) {
+        if (($handle = fopen($fullPath, 'r')) !== false) {
 
             // 1. Ler Cabeçalhos (Linha 0)
             $headers = fgetcsv($handle, 0, ',');
 
             // Validação se a coluna escolhida ainda existe
-            if (!isset($headers[$colTelefoneIdx])) {
+            if (! isset($headers[$colTelefoneIdx])) {
                 fclose($handle);
+
                 return back()->withErrors(['geral' => 'A coluna selecionada não existe no arquivo.']);
             }
 
             // 2. Ler o restante das linhas
-            while (($row = fgetcsv($handle, 0, ',')) !== FALSE) {
+            while (($row = fgetcsv($handle, 0, ',')) !== false) {
 
                 // Pula linhas vazias ou incompletas
                 if (count($row) < count($headers)) {
@@ -108,7 +109,7 @@ class WhatsappController extends Controller
 
                 // Processa o telefone
                 $telefoneRaw = $row[$colTelefoneIdx];
-                $telefone = str_replace([' ', '-', '(', ')', '+', '\'', '.'], "", $telefoneRaw);
+                $telefone = str_replace([' ', '-', '(', ')', '+', '\'', '.'], '', $telefoneRaw);
 
                 // Processa a Mensagem
                 $msgFinal = $mensagemOriginal;
@@ -116,10 +117,10 @@ class WhatsappController extends Controller
                 // Substitui variáveis
                 foreach ($headers as $index => $colName) {
                     $valor = $row[$index] ?? '';
-                    $msgFinal = str_ireplace("%".trim($colName)."%", $valor, $msgFinal);
+                    $msgFinal = str_ireplace('%'.trim($colName).'%', $valor, $msgFinal);
                 }
 
-                $msgFinal = str_replace(["\r\n", "\r", "\n"], "%0A", $msgFinal);
+                $msgFinal = str_replace(["\r\n", "\r", "\n"], '%0A', $msgFinal);
 
                 // Regras de validação do número
                 $link = null;
@@ -128,25 +129,24 @@ class WhatsappController extends Controller
 
                 if (strlen($telefone) >= 10 && strlen($telefone) <= 11) {
                     $link = "https://api.whatsapp.com/send?phone=55{$telefone}&text={$msgFinal}";
-                    $displayTel = "+55 " . $telefone;
+                    $displayTel = '+55 '.$telefone;
                     $valido = true;
-                }
-                elseif (strlen($telefone) > 11 && is_numeric($telefone)) {
+                } elseif (strlen($telefone) > 11 && is_numeric($telefone)) {
                     $link = "https://api.whatsapp.com/send?phone={$telefone}&text={$msgFinal}";
-                    $displayTel = "+" . $telefone;
+                    $displayTel = '+'.$telefone;
                     $valido = true;
                 }
 
                 if ($valido) {
-                    $uniqueId = md5($telefone . $msgFinal);
+                    $uniqueId = md5($telefone.$msgFinal);
                     $resultados[] = [
                         'id' => $uniqueId,
                         'dados' => array_combine($headers, $row),
                         'telefone' => $displayTel,
-                        'link' => $link
+                        'link' => $link,
                     ];
                 } else {
-                    $erros[] = "Tel. Inválido: " . $telefoneRaw;
+                    $erros[] = 'Tel. Inválido: '.$telefoneRaw;
                 }
             }
             fclose($handle);

@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Modules\GestorHoras;
 
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Gate;
-use App\Models\User;
 
 class GestorHorasServiceProvider extends ServiceProvider
 {
@@ -15,12 +16,12 @@ class GestorHorasServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/resources/views', $this->namespace);
 
         Route::middleware('web')
-            ->group(__DIR__ . '/routes.php');
+            ->group(__DIR__.'/routes.php');
 
         // Carrega as rotas de API do módulo
         Route::middleware('api')
             ->prefix('api')
-            ->group(__DIR__ . '/api.php');
+            ->group(__DIR__.'/api.php');
 
         // --- DEFINIÇÃO DE PERMISSÕES (GATES) ---
 

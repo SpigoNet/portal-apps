@@ -5,19 +5,14 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- PWA Manifest Dinâmico -->
     @if($attributes->get('module-id'))
-    @php($app = (new \App\Services\ModuleService($attributes->get('module-id')))->getCurrentApp())
-        <title>{{ config('app.name', 'Spigo Apps') }} {{ $app['title'] ? '- ' . $app['title'] : '' }}</title>
-        <link rel="manifest" href="{{ route('pwa.manifest', ['id' => $attributes->get('module-id')]) }}">
-        <meta name="theme-color" content="#D9F99D">
-        <!-- Icones PWA Dinâmicos -->
-        <link rel="apple-touch-icon" sizes="180x180" href="{{ $app['icon'] ?? '' }}">
-        <link rel="icon" type="image/png" sizes="32x32" href="{{ $app['icon'] ?? '' }}">
-        <link rel="icon" type="image/png" sizes="16x16" href="{{ $app['icon'] ?? '' }}">
+    @php($portalApp = \App\Models\PortalApp::find($attributes->get('module-id')))
+        <title>{{ config('app.name', 'Spigo Apps') }} {{ $portalApp ? '- ' . $portalApp->title : '' }}</title>
+        <x-pwa-head :portal-app="$portalApp" />
 
     @else
     <title>{{ config('app.name', 'Spigo Apps') }}</title>

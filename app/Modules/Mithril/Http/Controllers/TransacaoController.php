@@ -3,10 +3,10 @@
 namespace App\Modules\Mithril\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Mithril\Models\Transacao;
 use App\Modules\Mithril\Models\Conta;
-use Illuminate\Http\Request;
+use App\Modules\Mithril\Models\Transacao;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class TransacaoController extends Controller
 {
@@ -64,6 +64,7 @@ class TransacaoController extends Controller
     public function create()
     {
         $contas = Conta::orderBy('nome')->get();
+
         return view('Mithril::create', compact('contas'));
     }
 

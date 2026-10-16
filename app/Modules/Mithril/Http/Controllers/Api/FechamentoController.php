@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Modules\Mithril\Models\Conta;
 use App\Modules\Mithril\Models\SaldoFechamento;
 use App\Modules\Mithril\Models\Transacao;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class FechamentoController extends Controller
 {

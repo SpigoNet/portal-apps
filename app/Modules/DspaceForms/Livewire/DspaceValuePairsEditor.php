@@ -2,25 +2,29 @@
 
 namespace App\Modules\DspaceForms\Livewire;
 
-use Livewire\Component;
-use App\Modules\DspaceForms\Models\DspaceValuePairsList;
 use App\Modules\DspaceForms\Models\DspaceValuePair;
+use App\Modules\DspaceForms\Models\DspaceValuePairsList;
+use Livewire\Component;
 
 class DspaceValuePairsEditor extends Component
 {
     public $lists;
+
     public $selectedList = null;
+
     public $pairs = [];
 
     // Propriedades para o novo item
     public $newDisplayedValue = '';
+
     public $newStoredValue = '';
 
     // Propriedades para edição (se precisar de um modal ou edição inline)
     public $editingPairId = null;
-    public $editingDisplayedValue = '';
-    public $editingStoredValue = '';
 
+    public $editingDisplayedValue = '';
+
+    public $editingStoredValue = '';
 
     public function mount()
     {
@@ -118,7 +122,7 @@ class DspaceValuePairsEditor extends Component
     {
         DspaceValuePair::destroy($pairId);
         // Remove do array local
-        $this->pairs = array_filter($this->pairs, fn($pair) => $pair['id'] != $pairId);
+        $this->pairs = array_filter($this->pairs, fn ($pair) => $pair['id'] != $pairId);
         // Reindexa as chaves (opcional, mas bom para consistência)
         $this->pairs = array_values($this->pairs);
 

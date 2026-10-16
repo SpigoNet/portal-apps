@@ -1,8 +1,8 @@
 <?php
 
 use App\Modules\ComfyQueue\Http\Controllers\DashboardController;
-use App\Modules\ComfyQueue\Http\Controllers\WorkerApiController;
 use App\Modules\ComfyQueue\Http\Controllers\JobModelController;
+use App\Modules\ComfyQueue\Http\Controllers\WorkerApiController;
 use Illuminate\Support\Facades\Route;
 
 // Web Routes
@@ -37,7 +37,7 @@ Route::prefix('api/comfy-queue')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
     ->group(function () {
         Route::get('/models', [WorkerApiController::class, 'pendingModels'])->name('models');
-        Route::get('/next',   [WorkerApiController::class, 'nextJob'])->name('next');
+        Route::get('/next', [WorkerApiController::class, 'nextJob'])->name('next');
         Route::get('/job/{id}/done', [WorkerApiController::class, 'done'])->name('job.done.get');
         Route::post('/job/{id}/done', [WorkerApiController::class, 'done'])->name('job.done');
         Route::get('/job/{id}/u', [WorkerApiController::class, 'uploadChunk'])->name('job.upload-short.get');

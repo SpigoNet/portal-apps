@@ -5,9 +5,9 @@ namespace App\Modules\Mithril\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Modules\Mithril\Models\PreTransacao;
 use App\Modules\Mithril\Models\Transacao;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class PreTransacaoController extends Controller
 {
@@ -131,7 +131,7 @@ class PreTransacaoController extends Controller
     public function toggle(int $id): JsonResponse
     {
         $pt = PreTransacao::findOrFail($id);
-        $pt->ativa = !$pt->ativa;
+        $pt->ativa = ! $pt->ativa;
         $pt->save();
 
         return response()->json([

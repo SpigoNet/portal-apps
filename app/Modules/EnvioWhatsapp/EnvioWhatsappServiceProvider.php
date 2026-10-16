@@ -9,6 +9,7 @@ class EnvioWhatsappServiceProvider extends ServiceProvider
 {
     /**
      * Define o namespace do módulo para as views.
+     *
      * @var string
      */
     protected $namespace = 'EnvioWhatsapp';
@@ -20,7 +21,7 @@ class EnvioWhatsappServiceProvider extends ServiceProvider
 
         // Carrega as rotas
         Route::middleware('web')
-            ->group(__DIR__ . '/routes.php');
+            ->group(__DIR__.'/routes.php');
     }
 
     public function register()

@@ -21,12 +21,12 @@ class IconGeneratorController extends Controller
         ]);
 
         $folderPath = public_path('images/apps');
-        if (!file_exists($folderPath)) {
+        if (! file_exists($folderPath)) {
             mkdir($folderPath, 0755, true);
         }
 
         $filename = $request->filename;
-        if (!str_ends_with($filename, '.png')) {
+        if (! str_ends_with($filename, '.png')) {
             $filename .= '.png';
         }
 
@@ -37,7 +37,7 @@ class IconGeneratorController extends Controller
             if (preg_match('/^data:image\/(\w+);base64,/', $data, $type)) {
                 $data = substr($data, strpos($data, ',') + 1);
                 $data = base64_decode($data);
-                file_put_contents($folderPath . '/' . $filename, $data);
+                file_put_contents($folderPath.'/'.$filename, $data);
             }
         } else {
             return back()->with('error', 'Nenhuma imagem fornecida.');

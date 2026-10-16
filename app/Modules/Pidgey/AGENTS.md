@@ -37,6 +37,25 @@ that are delivered by their Alfred `Persona` (Telegram) on a schedule.
 - **WhatsApp / Email:** planned. Add a `Services\*` service per channel and branch
   in `MensagemController`.
 
+## Bots por módulo (Telegram)
+
+Cada módulo tem **o seu bot e a sua persona** (`Alfred\Persona`: token, slug, personalidade; ex.: Cardápio = `sanji`).
+O Pidgey cuida do canal; o módulo implementa `Contracts\ManipuladorTelegram` (persona, ajuda, mensagem, botão) e se
+registra em `Services\TelegramRoteador` (singleton) no seu ServiceProvider.
+
+- **Webhook:** `POST /api/pidgey/webhook/bot/{slug}`, protegido por segredo derivado do slug (`TelegramRoteador::segredo`).
+  Registrar no Telegram: `php artisan pidgey:telegram-webhook sanji`.
+- **Vínculo:** tela `/pidgey/telegram` gera um código de uso único (10 min); o usuário envia `/start CÓDIGO` a qualquer bot.
+  Tabela `pidgey_telegram_vinculos` (um chat por usuário). Chat não vinculado não acessa nada; grupos são ignorados.
+- **Dados nunca passam pela IA**; a persona só dá voz a frases curtas (ver `Cardapio\Services\Telegram\VozPersona`).
+
+## Conteúdo dinâmico de módulos
+
+Um módulo pode fornecer a mensagem inteira de um agendamento: implementa `Contracts\ProvedorConteudo` (`tipo()` +
+`mensagem()`) e se registra em `Services\ProvedoresConteudo` (singleton). O `EnvioService` envia o texto pronto (sem IA)
+ao chat vinculado do dono do agendamento; `null` = nada a dizer hoje (não é erro). Ao vincular um chat, o evento
+`Events\TelegramVinculado` é disparado para os módulos criarem seus agendamentos (ex.: Cardápio → `resumo_cardapio`).
+
 ## Endpoints
 
 | Método | URI | Descrição |

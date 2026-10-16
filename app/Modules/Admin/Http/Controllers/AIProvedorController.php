@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Admin\Models\AIModelo;
 use App\Modules\Admin\Models\AIModeloPadrao;
 use App\Modules\Admin\Models\AIProvedor;
+use App\Modules\Admin\Services\AiModelTesterService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -17,6 +18,26 @@ class AIProvedorController extends Controller
         $modelosPadrao = AIModeloPadrao::with('modelo.provedor')->get();
 
         return view('Admin::ai.index', compact('provedores', 'modelosPadrao'));
+    }
+
+    public function testarPadrao(AIModeloPadrao $padrao, AiModelTesterService $tester)
+    {
+        set_time_limit(300);
+
+        return redirect()->route('admin.ai.provedores.index')
+            ->with('testes', [$padrao->id => $tester->testar($padrao)]);
+    }
+
+    public function testarPadroes(AiModelTesterService $tester)
+    {
+        set_time_limit(900);
+
+        $testes = [];
+        foreach (AIModeloPadrao::with('modelo.provedor')->get() as $padrao) {
+            $testes[$padrao->id] = $tester->testar($padrao);
+        }
+
+        return redirect()->route('admin.ai.provedores.index')->with('testes', $testes);
     }
 
     public function create()

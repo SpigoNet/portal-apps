@@ -21,6 +21,7 @@ class AntConfiguracao extends Model
 
         // Separa por vírgula, remove espaços e verifica
         $listaAdmins = array_map('trim', explode(',', $this->admins));
+
         return in_array($email, $listaAdmins);
     }
 }

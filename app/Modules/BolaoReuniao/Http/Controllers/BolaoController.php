@@ -3,10 +3,9 @@
 namespace App\Modules\BolaoReuniao\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\BolaoMeeting;
 use App\Models\BolaoGuess;
+use App\Models\BolaoMeeting;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 
 class BolaoController extends Controller
@@ -14,6 +13,7 @@ class BolaoController extends Controller
     public function index()
     {
         $activeMeeting = BolaoMeeting::where('status', 'open')->latest()->first();
+
         return view('BolaoReuniao::index', compact('activeMeeting'));
     }
 
@@ -24,13 +24,13 @@ class BolaoController extends Controller
         // Close any existing open meetings
         BolaoMeeting::where('status', 'open')->update([
             'status' => 'closed',
-            'finished_at' => now()
+            'finished_at' => now(),
         ]);
 
         $meeting = BolaoMeeting::create([
             'name' => $request->name,
             'status' => 'open',
-            'user_id' => auth()->id()
+            'user_id' => auth()->id(),
         ]);
 
         return redirect()->route('bolao.index');
@@ -42,6 +42,7 @@ class BolaoController extends Controller
         if ($meeting->status !== 'open') {
             return redirect()->route('bolao.results', $id);
         }
+
         return view('BolaoReuniao::participate', compact('meeting'));
     }
 
@@ -58,7 +59,7 @@ class BolaoController extends Controller
                     return $query->where('meeting_id', $request->meeting_id);
                 }),
             ],
-            'guess' => 'required'
+            'guess' => 'required',
         ]);
 
         $guess = BolaoGuess::create($request->all());
@@ -90,6 +91,7 @@ class BolaoController extends Controller
     public function admin()
     {
         $activeMeeting = BolaoMeeting::where('status', 'open')->latest()->first();
+
         return view('BolaoReuniao::admin', compact('activeMeeting'));
     }
 
@@ -106,7 +108,7 @@ class BolaoController extends Controller
         $now = now();
         $meeting->update([
             'status' => 'closed',
-            'finished_at' => $now
+            'finished_at' => $now,
         ]);
 
         $actualSeconds = $now->hour * 3600 + $now->minute * 60 + $now->second;
@@ -124,7 +126,7 @@ class BolaoController extends Controller
         $meeting = BolaoMeeting::with([
             'guesses' => function ($q) {
                 $q->orderBy('diff_seconds', 'asc');
-            }
+            },
         ])->findOrFail($id);
 
         return view('BolaoReuniao::results', compact('meeting'));
@@ -133,6 +135,7 @@ class BolaoController extends Controller
     public function checkStatus($id)
     {
         $meeting = BolaoMeeting::findOrFail($id);
+
         return response()->json(['status' => $meeting->status]);
     }
 }

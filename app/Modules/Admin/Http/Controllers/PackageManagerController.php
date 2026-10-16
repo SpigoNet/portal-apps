@@ -11,6 +11,7 @@ class PackageManagerController extends Controller
     public function index()
     {
         $packages = Package::orderBy('name')->get();
+
         return view('Admin::packages.index', compact('packages'));
     }
 
@@ -53,6 +54,7 @@ class PackageManagerController extends Controller
     public function destroy(Package $package)
     {
         $package->delete();
+
         return redirect()->route('admin.packages.index')->with('success', 'Pacote excluído com sucesso!');
     }
 }

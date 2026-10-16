@@ -53,6 +53,7 @@ class Contrato extends Model
     {
         // A soma total é simplesmente a soma de todos os apontamentos vinculados a este contrato
         $minutos = $this->apontamentos->sum('minutos_gastos');
+
         return $minutos > 0 ? round($minutos / 60, 2) : 0;
     }
 

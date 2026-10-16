@@ -2,12 +2,13 @@
 
 namespace App\Modules\TreeTask\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 class Anexo extends Model
 {
     protected $table = 'treetask_anexos';
+
     protected $primaryKey = 'id_anexo';
 
     protected $fillable = [
@@ -15,7 +16,7 @@ class Anexo extends Model
         'nome_arquivo',
         'path_arquivo',
         'mime_type',
-        'tamanho'
+        'tamanho',
     ];
 
     public function uploader()

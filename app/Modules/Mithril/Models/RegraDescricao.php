@@ -2,8 +2,8 @@
 
 namespace App\Modules\Mithril\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class RegraDescricao extends Model
 {
@@ -21,7 +21,7 @@ class RegraDescricao extends Model
     protected static function booted()
     {
         static::creating(function ($model) {
-            if (!$model->user_id && auth()->check()) {
+            if (! $model->user_id && auth()->check()) {
                 $model->user_id = auth()->id();
             }
         });

@@ -8,10 +8,11 @@ use Illuminate\Support\Facades\Cache;
 class ModuleService
 {
     public $appId;
+
     public function __construct($appId)
     {
         $this->appId = $appId;
-        if (!Cache::has('current_app_id')) {
+        if (! Cache::has('current_app_id')) {
             Cache::put('current_app_id', $appId);
             $a = PortalApp::query()
                 ->where('id', $appId)
@@ -27,6 +28,7 @@ class ModuleService
             }
         }
     }
+
     public function getCurrentApp()
     {
         return Cache::get('current_app');

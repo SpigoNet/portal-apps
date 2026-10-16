@@ -14,7 +14,7 @@ class OllamaDriver implements AiDriverInterface
 
     public function __construct(?string $model = null, ?string $apiKey = null, ?string $baseUrl = null)
     {
-        $this->baseUrl = rtrim($baseUrl ?: 'http://localhost:11434', '/');
+        $this->baseUrl = preg_replace('#/v1/?$#', '', rtrim($baseUrl ?: 'http://localhost:11434', '/'));
         $this->model = $model ?: 'llama3';
     }
 

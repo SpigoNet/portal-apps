@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Pidgey\Http\Controllers\BotTelegramController;
 use App\Modules\Pidgey\Http\Controllers\MensagemController;
 use App\Modules\Pidgey\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
@@ -11,3 +12,5 @@ Route::post('/mensagens', [MensagemController::class, 'enviar'])->name('mensagen
 Route::post('/resumo-financeiro', [MensagemController::class, 'resumoFinanceiro'])->name('resumo-financeiro.enviar');
 
 Route::post('/webhook/telegram/{persona}', [WebhookController::class, 'receber'])->name('webhook.telegram');
+
+Route::post('/webhook/bot/{persona}', [BotTelegramController::class, 'receber'])->name('webhook.bot');

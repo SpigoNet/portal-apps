@@ -1,0 +1,1 @@
+{ "name": "deploy-bar", "version": "0.1.0", "description": "Botoes acima do prompt que rodam deploy.sh e deploy-fast.sh do Portal Apps sem passar pelo modelo" }

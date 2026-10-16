@@ -3,14 +3,15 @@
 namespace App\Modules\TreeTask\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Modules\TreeTask\Models\Fase;
-use App\Modules\TreeTask\Models\Tarefa;
-use App\Models\User; // Modelo global de usuário
+use App\Modules\TreeTask\Models\Tarefa; // Modelo global de usuário
 use Illuminate\Http\Request;
 
 class TarefaController extends Controller
 {
     private $statusList = 'A Fazer,Em Andamento,Concluído,Planejamento,Aguardando resposta';
+
     public function create($id_fase)
     {
         $fase = Fase::with('projeto')->findOrFail($id_fase);
@@ -52,6 +53,7 @@ class TarefaController extends Controller
         return redirect()->route('treetask.show', $projetoId)
             ->with('success', 'Tarefa criada com sucesso.');
     }
+
     /**
      * Exibe o formulário de edição.
      */
@@ -90,14 +92,14 @@ class TarefaController extends Controller
             'id_fase' => 'required|exists:treetask_fases,id_fase', // <--- Aqui acontece a mágica da movimentação
             'id_user_responsavel' => 'required|exists:users,id',
             'prioridade' => 'nullable|string',
-            'status' => 'required|string|in:' . $this->statusList,
+            'status' => 'required|string|in:'.$this->statusList,
             'data_vencimento' => 'nullable|date',
             'estimativa_tempo' => 'nullable|numeric',
         ]);
 
         // Verifica se a fase pertence ao mesmo projeto (segurança)
         $novaFase = Fase::findOrFail($validated['id_fase']);
-        if($novaFase->id_projeto != $tarefa->fase->id_projeto) {
+        if ($novaFase->id_projeto != $tarefa->fase->id_projeto) {
             abort(403, 'Não é possível mover a tarefa para uma fase de outro projeto.');
         }
 
@@ -135,13 +137,14 @@ class TarefaController extends Controller
         return redirect()->route('treetask.focus.index')
             ->with('success', 'Descrição atualizada com sucesso.');
     }
+
     /**
      * Atualiza apenas o status da tarefa (Ação Rápida)
      */
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|string|in:' . $this->statusList,
+            'status' => 'required|string|in:'.$this->statusList,
         ]);
 
         $tarefa = Tarefa::with('fase.projeto')->findOrFail($id);
@@ -160,6 +163,7 @@ class TarefaController extends Controller
         return redirect()->route('treetask.focus.index')
             ->with('success', "Status alterado para: {$request->status}");
     }
+
     public function show($id)
     {
         $tarefa = Tarefa::with(['fase.projeto', 'responsavel'])->findOrFail($id);

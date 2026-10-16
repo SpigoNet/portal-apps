@@ -297,7 +297,7 @@ class ApontamentoController extends Controller
             return back()->withErrors(['erro' => 'Não foi possível preparar o modelo de exportação.']);
         }
 
-        $zip = new \ZipArchive();
+        $zip = new \ZipArchive;
         if ($zip->open($tmpFile) !== true) {
             return back()->withErrors(['erro' => 'Não foi possível abrir o modelo de exportação.']);
         }

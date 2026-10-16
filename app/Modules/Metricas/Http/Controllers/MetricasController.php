@@ -4,7 +4,6 @@ namespace App\Modules\Metricas\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Metricas\Models\MetricaAcesso;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class MetricasController extends Controller

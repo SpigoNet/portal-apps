@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class AntAlternativa extends Model
 {
     protected $table = 'ant_alternativas';
+
     protected $fillable = ['questao_id', 'texto', 'correta',
         'explicacao'];
 

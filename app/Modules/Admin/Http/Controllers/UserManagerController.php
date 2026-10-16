@@ -13,6 +13,7 @@ class UserManagerController extends Controller
     public function index()
     {
         $users = User::orderBy('name')->get();
+
         return view('Admin::users.index', compact('users'));
     }
 
@@ -25,7 +26,7 @@ class UserManagerController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -47,7 +48,7 @@ class UserManagerController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'role' => 'nullable|string',
             'avatar' => 'nullable|string',
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
@@ -72,6 +73,7 @@ class UserManagerController extends Controller
     public function destroy(User $user)
     {
         $user->delete();
+
         return redirect()->route('admin.users.index')->with('success', 'Usuário excluído com sucesso!');
     }
 }

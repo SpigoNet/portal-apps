@@ -1,16 +1,16 @@
 <?php
 
 use App\Modules\Metricas\Http\Middleware\RegistrarAcesso;
+use App\Modules\Mithril\Http\Controllers\DashboardController;
 use App\Modules\Mithril\Http\Controllers\FechamentoController;
 use App\Modules\Mithril\Http\Controllers\PreTransacaoAcoesController;
 use App\Modules\Mithril\Http\Controllers\PreTransacaoController;
 use Illuminate\Support\Facades\Route;
-use App\Modules\Mithril\Http\Controllers\DashboardController;
 
 Route::prefix('mithril')
     ->name('mithril.')
     ->middleware(['web', 'auth']) // Garante autenticação
-    ->middleware(RegistrarAcesso::class . ':Mithril')
+    ->middleware(RegistrarAcesso::class.':Mithril')
     ->group(function () {
 
         // Dashboard
@@ -19,8 +19,12 @@ Route::prefix('mithril')
 
         // Placeholders para as próximas rotas (evita erro na View)
         Route::get('/lancamentos', [\App\Modules\Mithril\Http\Controllers\LancamentoController::class, 'index'])->name('lancamentos.index');
-        Route::get('/transacao/criar', function() { return 'Em breve'; })->name('transacoes.create');
-        Route::get('/fatura/{id}', function($id) { return 'Fatura ' . $id; })->name('faturas.show');
+        Route::get('/transacao/criar', function () {
+            return 'Em breve';
+        })->name('transacoes.create');
+        Route::get('/fatura/{id}', function ($id) {
+            return 'Fatura '.$id;
+        })->name('faturas.show');
 
         Route::resource('pre-transacoes', PreTransacaoController::class);
         Route::get('pre-transacoes/{id}/toggle', [PreTransacaoController::class, 'toggleStatus'])->name('pre-transacoes.toggle');

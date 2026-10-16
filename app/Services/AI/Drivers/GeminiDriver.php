@@ -40,6 +40,7 @@ class GeminiDriver implements AiDriverInterface
             // Extrai instrução de sistema
             if ($msg['role'] === 'system') {
                 $systemInstruction = ['parts' => ['text' => $msg['content']]];
+
                 continue;
             }
 
@@ -47,12 +48,12 @@ class GeminiDriver implements AiDriverInterface
             $parts = [];
 
             // 1. Texto
-            if (!empty($msg['content'])) {
+            if (! empty($msg['content'])) {
                 $parts[] = ['text' => $msg['content']];
             }
 
             // 2. Imagem (Correção do Storage)
-            if (!empty($msg['image'])) {
+            if (! empty($msg['image'])) {
                 try {
                     $imagePath = $msg['image'];
                     $fileContent = null;
@@ -73,21 +74,21 @@ class GeminiDriver implements AiDriverInterface
                         $parts[] = [
                             'inline_data' => [
                                 'mime_type' => $mimeType,
-                                'data' => base64_encode($fileContent)
-                            ]
+                                'data' => base64_encode($fileContent),
+                            ],
                         ];
                     } else {
                         Log::warning("GeminiDriver: Imagem não encontrada (Public/Default): {$imagePath}");
                     }
                 } catch (\Exception $e) {
-                    Log::error("GeminiDriver: Erro ao ler imagem: " . $e->getMessage());
+                    Log::error('GeminiDriver: Erro ao ler imagem: '.$e->getMessage());
                 }
             }
 
-            if (!empty($parts)) {
+            if (! empty($parts)) {
                 $contents[] = [
                     'role' => $role,
-                    'parts' => $parts
+                    'parts' => $parts,
                 ];
             }
         }
@@ -105,7 +106,7 @@ class GeminiDriver implements AiDriverInterface
                 'temperature' => 1.0,
                 'maxOutputTokens' => 2000,
                 'responseMimeType' => ($options['jsonMode'] ?? false) ? 'application/json' : 'text/plain',
-            ]
+            ],
         ];
 
         if ($systemInstruction) {
@@ -213,29 +214,33 @@ class GeminiDriver implements AiDriverInterface
                     ->post($url, $payload);
 
                 // --- NOVO: Logar o que voltou ---
-                Log::debug('🤖 [GEMINI RESPONSE] Status: ' . $response->status());
+                Log::debug('🤖 [GEMINI RESPONSE] Status: '.$response->status());
                 if ($response->failed()) {
-                    Log::error('🤖 [GEMINI ERROR] Body: ' . $response->body());
+                    Log::error('🤖 [GEMINI ERROR] Body: '.$response->body());
                 }
                 // --------------------------------
 
                 if ($response->successful()) {
-                    Log::debug('🤖 [GEMINI SUCCESS] Body: ' . $response->body());
+                    Log::debug('🤖 [GEMINI SUCCESS] Body: '.$response->body());
+
                     return $this->decodeGeminiResponse($response->body());
                 }
 
                 if ($response->status() === 429 || $response->status() >= 500) {
                     usleep($delay * 1000);
                     $delay *= 2;
+
                     continue;
                 }
 
-                Log::error("Gemini API Error: " . $response->body());
+                Log::error('Gemini API Error: '.$response->body());
+
                 return null;
 
             } catch (\Exception $e) {
                 if ($i === $maxRetries - 1) {
-                    Log::error("Gemini Connection Error: " . $e->getMessage());
+                    Log::error('Gemini Connection Error: '.$e->getMessage());
+
                     return null;
                 }
                 usleep($delay * 1000);

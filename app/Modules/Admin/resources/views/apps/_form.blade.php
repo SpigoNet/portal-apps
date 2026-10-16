@@ -108,13 +108,13 @@
                 <label for="pwa_display" class="block font-medium text-sm text-gray-700">Modo de Exibição</label>
                 <select id="pwa_display" name="pwa_display"
                     class="block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                    <option value="standalone" @selected(old('pwa_display', $portalApp->pwa_display ?? '') == 'standalone')>
+                    <option value="standalone" @selected(old('pwa_display', $portalApp->pwa_display ?? 'fullscreen') == 'standalone')>
                         Standalone (App Nativo)</option>
-                    <option value="fullscreen" @selected(old('pwa_display', $portalApp->pwa_display ?? '') == 'fullscreen')>
+                    <option value="fullscreen" @selected(old('pwa_display', $portalApp->pwa_display ?? 'fullscreen') == 'fullscreen')>
                         Fullscreen (Tela Cheia)</option>
-                    <option value="minimal-ui" @selected(old('pwa_display', $portalApp->pwa_display ?? '') == 'minimal-ui')>
+                    <option value="minimal-ui" @selected(old('pwa_display', $portalApp->pwa_display ?? 'fullscreen') == 'minimal-ui')>
                         Minimal UI</option>
-                    <option value="browser" @selected(old('pwa_display', $portalApp->pwa_display ?? '') == 'browser')>Browser
+                    <option value="browser" @selected(old('pwa_display', $portalApp->pwa_display ?? 'fullscreen') == 'browser')>Browser
                         (Navegador)</option>
                 </select>
             </div>

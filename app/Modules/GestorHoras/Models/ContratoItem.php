@@ -38,11 +38,12 @@ class ContratoItem extends Model
     public function getHorasRealizadasAttribute()
     {
         // Se a relação não foi carregada, retorna 0 para evitar erro
-        if (!$this->relationLoaded('apontamentos')) {
+        if (! $this->relationLoaded('apontamentos')) {
             $this->load('apontamentos');
         }
 
         $minutos = $this->apontamentos->sum('minutos_gastos');
+
         return $minutos > 0 ? round($minutos / 60, 2) : 0;
     }
 }

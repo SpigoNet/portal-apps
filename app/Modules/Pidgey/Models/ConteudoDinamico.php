@@ -35,6 +35,7 @@ class ConteudoDinamico extends Model
     {
         return match ($this->tipo) {
             'relatorio_financeiro' => 'Relatório Financeiro',
+            'resumo_cardapio' => 'Resumo do Cardápio',
             'texto' => 'Texto pré-pronto',
             default => (string) $this->tipo,
         };

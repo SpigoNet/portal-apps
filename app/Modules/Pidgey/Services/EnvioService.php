@@ -6,6 +6,7 @@ use App\Models\AiModel;
 use App\Modules\Alfred\Models\Persona;
 use App\Modules\Pidgey\Models\Agendamento;
 use App\Modules\Pidgey\Models\ConteudoDinamico;
+use App\Modules\Pidgey\Models\TelegramVinculo;
 use Illuminate\Support\Collection;
 
 class EnvioService
@@ -14,6 +15,7 @@ class EnvioService
         private TelegramService $telegram,
         private InterpretadorPersonaService $interpretador,
         private ResumoFinanceiroService $resumo,
+        private ProvedoresConteudo $provedores,
     ) {}
 
     /**
@@ -96,6 +98,16 @@ class EnvioService
 
         $conteudos = $agendamento->conteudosDinamicos;
 
+        // Conteúdo fornecido por um módulo (ex.: resumo do Cardápio): mensagem pronta, sem IA,
+        // enviada ao chat vinculado do dono do agendamento.
+        foreach ($conteudos->where('ativo', true) as $conteudo) {
+            $provedor = $this->provedores->para((string) $conteudo->tipo);
+
+            if ($provedor !== null) {
+                return $this->enviarDeProvedor($agendamento, $persona, $provedor->mensagem($agendamento, $persona));
+            }
+        }
+
         // Relatório financeiro: usa o resumo especializado da persona
         // (análise charmosa, com lógica de "no vermelho"), em vez da
         // reescrita genérica. O relatório do Mithril é buscado aqui.
@@ -127,6 +139,29 @@ class EnvioService
             $contextos,
             $agendamento->aiModelEfetivo()
         );
+    }
+
+    /**
+     * @return array{ok:bool,status:?int,error:?string,interpretada:bool,mensagem_final:string}
+     */
+    private function enviarDeProvedor(Agendamento $agendamento, Persona $persona, ?string $texto): array
+    {
+        $resultado = ['ok' => true, 'status' => null, 'error' => null, 'interpretada' => false, 'mensagem_final' => (string) $texto];
+
+        // Nada a dizer hoje: não é falha, o agendamento segue para a próxima execução.
+        if ($texto === null || trim($texto) === '') {
+            return $resultado;
+        }
+
+        $vinculo = TelegramVinculo::where('user_id', $agendamento->user_id)->first();
+
+        if (empty($persona->telegram_token) || $vinculo === null) {
+            return [...$resultado, 'ok' => false, 'error' => 'Persona sem token do Telegram ou usuário sem Telegram vinculado'];
+        }
+
+        $envio = $this->telegram->sendMessage((string) $persona->telegram_token, $vinculo->chat_id, $texto);
+
+        return [...$resultado, 'ok' => $envio['ok'], 'status' => $envio['status'] ?? null, 'error' => $envio['error'] ?? null];
     }
 
     /**

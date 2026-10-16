@@ -256,6 +256,13 @@
     </dialog>
 
     <style>
+        dialog.mithril-theme-surface {
+            background-color: var(--mithril-secondary);
+            color: #e2e8f0;
+            color-scheme: dark;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
         .selected-row {
             background-color: rgba(255, 255, 255, 0.04) !important;
             box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.06);

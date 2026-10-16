@@ -41,7 +41,7 @@ class ContratoLivreFlowTest extends TestCase
 
     private function createMinimalSchema(): void
     {
-        if (!Schema::hasTable('users')) {
+        if (! Schema::hasTable('users')) {
             Schema::create('users', function (Blueprint $table) {
                 $table->id();
                 $table->string('name');
@@ -60,7 +60,7 @@ class ContratoLivreFlowTest extends TestCase
             });
         }
 
-        if (!Schema::hasTable('portal_apps')) {
+        if (! Schema::hasTable('portal_apps')) {
             Schema::create('portal_apps', function (Blueprint $table) {
                 $table->id();
                 $table->string('title');
@@ -71,7 +71,7 @@ class ContratoLivreFlowTest extends TestCase
             });
         }
 
-        if (!Schema::hasTable('portal_app_user')) {
+        if (! Schema::hasTable('portal_app_user')) {
             Schema::create('portal_app_user', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('portal_app_id');
@@ -80,7 +80,7 @@ class ContratoLivreFlowTest extends TestCase
             });
         }
 
-        if (!Schema::hasTable('gh_clientes')) {
+        if (! Schema::hasTable('gh_clientes')) {
             Schema::create('gh_clientes', function (Blueprint $table) {
                 $table->id();
                 $table->string('nome');
@@ -91,7 +91,7 @@ class ContratoLivreFlowTest extends TestCase
             });
         }
 
-        if (!Schema::hasTable('gh_contratos')) {
+        if (! Schema::hasTable('gh_contratos')) {
             Schema::create('gh_contratos', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('gh_cliente_id');
@@ -106,7 +106,7 @@ class ContratoLivreFlowTest extends TestCase
             });
         }
 
-        if (!Schema::hasTable('gh_contrato_itens')) {
+        if (! Schema::hasTable('gh_contrato_itens')) {
             Schema::create('gh_contrato_itens', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('gh_contrato_id');
@@ -118,7 +118,7 @@ class ContratoLivreFlowTest extends TestCase
             });
         }
 
-        if (!Schema::hasTable('gh_apontamentos')) {
+        if (! Schema::hasTable('gh_apontamentos')) {
             Schema::create('gh_apontamentos', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('gh_contrato_id');
@@ -139,7 +139,7 @@ class ContratoLivreFlowTest extends TestCase
             });
         }
 
-        if (!Schema::hasTable('ant_configuracoes')) {
+        if (! Schema::hasTable('ant_configuracoes')) {
             Schema::create('ant_configuracoes', function (Blueprint $table) {
                 $table->id();
                 $table->string('ia_driver')->nullable();
@@ -149,7 +149,7 @@ class ContratoLivreFlowTest extends TestCase
             });
         }
 
-        if (!Schema::hasTable('ant_professor_materia')) {
+        if (! Schema::hasTable('ant_professor_materia')) {
             Schema::create('ant_professor_materia', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('user_id');

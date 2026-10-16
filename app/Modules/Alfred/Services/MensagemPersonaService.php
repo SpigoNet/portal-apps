@@ -28,14 +28,14 @@ class MensagemPersonaService
                 'role' => 'system',
                 'content' => "Você cria mensagens curtas de WhatsApp em português do Brasil no estilo da persona.\n".
                     "Responda apenas com o texto final da mensagem, sem explicações, sem markdown e sem aspas.\n".
-                    "Mantenha tom humano, acolhedor e direto.",
+                    'Mantenha tom humano, acolhedor e direto.',
             ],
             [
                 'role' => 'user',
                 'content' => "Persona: {$persona->name}\n".
                     "Perfil da persona (JSON): {$personalityJson}\n".
                     "Intenção da mensagem: {$instrucao}\n".
-                    "Gere a mensagem final para envio.",
+                    'Gere a mensagem final para envio.',
             ],
         ];
 

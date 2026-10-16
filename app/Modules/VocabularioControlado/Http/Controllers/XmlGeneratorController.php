@@ -2,8 +2,8 @@
 
 namespace App\Modules\VocabularioControlado\Http\Controllers;
 
-use Illuminate\Routing\Controller;
 use App\Modules\VocabularioControlado\Models\Vocabulario;
+use Illuminate\Routing\Controller;
 
 class XmlGeneratorController extends Controller
 {
@@ -21,7 +21,7 @@ class XmlGeneratorController extends Controller
         foreach ($termos as $t) {
             $palavra = trim($t->palavra);
             $id = $t->id;
-            $xml .= '        <node label="' . e($palavra) . '" id="' . $id . '"></node>' . "\n";
+            $xml .= '        <node label="'.e($palavra).'" id="'.$id.'"></node>'."\n";
         }
 
         $xml .= "    </isComposedBy>\n</node>";

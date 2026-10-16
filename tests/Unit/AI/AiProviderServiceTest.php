@@ -29,7 +29,7 @@ class AiProviderServiceTest extends TestCase
         ]);
         $model->setRelation('provedor', $provider);
 
-        $service = new AiProviderService();
+        $service = new AiProviderService;
 
         $this->assertSame('pollination_image_edit', $service->getDriverForProvider($model));
     }
@@ -65,7 +65,7 @@ class AiProviderServiceTest extends TestCase
     public function it_treats_gemini_as_a_supported_image_to_image_provider(): void
     {
         $gemini = $this->makeImageModel('Gemini Vision', 'gemini');
-        $service = new AiProviderService();
+        $service = new AiProviderService;
 
         $this->assertTrue($service->supportsImageToImageProvider($gemini));
     }

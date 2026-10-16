@@ -2,9 +2,9 @@
 
 namespace App\Modules\GestorHoras\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\User;
 use Illuminate\Support\Str;
 
 class Cliente extends Model
@@ -12,7 +12,9 @@ class Cliente extends Model
     protected $table = 'gh_clientes';
 
     protected $fillable = ['nome', 'documento', 'email_financeiro'];
+
     protected $hidden = ['access_token']; // Ocultar em arrays por segurança
+
     /**
      * Um cliente (empresa) tem vários usuários (funcionários/sócios).
      */
@@ -28,9 +30,10 @@ class Cliente extends Model
     {
         return $this->hasMany(Contrato::class, 'gh_cliente_id');
     }
+
     public function getPublicLinkAttribute()
     {
-        if (!$this->access_token) {
+        if (! $this->access_token) {
             $this->access_token = Str::random(32);
             $this->save();
         }

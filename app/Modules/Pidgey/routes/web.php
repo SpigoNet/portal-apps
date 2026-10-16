@@ -3,6 +3,7 @@
 use App\Modules\Metricas\Http\Middleware\RegistrarAcesso;
 use App\Modules\Pidgey\Http\Controllers\AgendamentoController;
 use App\Modules\Pidgey\Http\Controllers\ConteudoDinamicoController;
+use App\Modules\Pidgey\Http\Controllers\TelegramVinculoController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(RegistrarAcesso::class.':Pidgey')
@@ -12,6 +13,10 @@ Route::middleware(RegistrarAcesso::class.':Pidgey')
         Route::delete('/agendamentos/{agendamento}', [AgendamentoController::class, 'destroy'])->name('agendamentos.destroy');
         Route::post('/agendamentos/{agendamento}/toggle', [AgendamentoController::class, 'toggle'])->name('agendamentos.toggle');
         Route::post('/agendamentos/{agendamento}/enviar-agora', [AgendamentoController::class, 'enviarAgora'])->name('agendamentos.enviar-agora');
+
+        Route::get('/telegram', [TelegramVinculoController::class, 'index'])->name('telegram.index');
+        Route::post('/telegram/codigo', [TelegramVinculoController::class, 'gerarCodigo'])->name('telegram.codigo');
+        Route::delete('/telegram', [TelegramVinculoController::class, 'desvincular'])->name('telegram.desvincular');
 
         Route::get('/conteudos-dinamicos', [ConteudoDinamicoController::class, 'index'])->name('conteudos.index');
         Route::post('/conteudos-dinamicos', [ConteudoDinamicoController::class, 'store'])->name('conteudos.store');

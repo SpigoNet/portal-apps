@@ -1,9 +1,9 @@
 <?php
 
+use App\Modules\GestorHoras\Http\Controllers\ApontamentoController;
+use App\Modules\GestorHoras\Http\Controllers\ContratoController;
 use App\Modules\Metricas\Http\Middleware\RegistrarAcesso;
 use Illuminate\Support\Facades\Route;
-use App\Modules\GestorHoras\Http\Controllers\ContratoController;
-use App\Modules\GestorHoras\Http\Controllers\ApontamentoController;
 
 Route::get('/acompanhamento/{token}', [ContratoController::class, 'publicView'])
     ->name('gestor-horas.publico');
@@ -11,7 +11,7 @@ Route::get('/acompanhamento/{token}', [ContratoController::class, 'publicView'])
 Route::middleware(['web', 'auth'])
     ->prefix('gestor-horas')
     ->name('gestor-horas.')
-    ->middleware(RegistrarAcesso::class . ':GestorHoras')
+    ->middleware(RegistrarAcesso::class.':GestorHoras')
     ->group(function () {
 
         // Listagem (Dashboard) - Acesso controlado no Controller

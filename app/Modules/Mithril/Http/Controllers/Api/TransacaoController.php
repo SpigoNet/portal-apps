@@ -4,10 +4,8 @@ namespace App\Modules\Mithril\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Mithril\Models\Transacao;
-use App\Modules\Mithril\Models\Conta;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class TransacaoController extends Controller
 {

@@ -2,9 +2,9 @@
 
 namespace App\Modules\Metricas\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\User; // Importando o model de usuário global
+use Illuminate\Database\Eloquent\Model; // Importando o model de usuário global
 
 class MetricaAcesso extends Model
 {

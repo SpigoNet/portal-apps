@@ -3,7 +3,6 @@
 namespace App\Modules\ANT;
 
 use App\Models\PortalAppUser;
-use Illuminate\Auth\Access\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -17,7 +16,7 @@ class ANTServiceProvider extends ServiceProvider
     public function boot()
     {
         // 1. Carregar Views (ex: view('ANT::index'))
-        $this->loadViewsFrom(__DIR__ . '/resources/views', 'ANT');
+        $this->loadViewsFrom(__DIR__.'/resources/views', 'ANT');
 
         // 2. Carregar Migrations (opcional, se quiser que fiquem dentro do módulo)
         // $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
@@ -25,7 +24,7 @@ class ANTServiceProvider extends ServiceProvider
         // 3. Carregar Rotas
         Route::middleware('web')
             ->namespace($this->namespace)
-            ->group(__DIR__ . '/routes.php');
+            ->group(__DIR__.'/routes.php');
 
         \Illuminate\Support\Facades\Gate::define('admin-do-app', function ($user) {
             return PortalAppUser::where('user_id', $user->id)

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Modules\ANT\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ class AntEntrega extends Model
 
     protected $fillable = [
         'trabalho_id', 'aluno_ra', 'arquivos',
-        'comentario_aluno', 'data_entrega', 'nota', 'comentario_professor'
+        'comentario_aluno', 'data_entrega', 'nota', 'comentario_professor',
     ];
 
     protected $casts = [

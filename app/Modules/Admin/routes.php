@@ -38,6 +38,10 @@ Route::middleware([EnsureUserIsAdmin::class])->prefix('admin')->name('admin.')->
         ]);
         Route::post('/provedores/{provedor}/sync', [AIProvedorController::class, 'sync'])->name('provedores.sync');
 
+        // Testes dos modelos padrão
+        Route::post('/padroes/testar', [AIProvedorController::class, 'testarPadroes'])->name('padroes.testar');
+        Route::post('/padroes/{padrao}/testar', [AIProvedorController::class, 'testarPadrao'])->name('padroes.testar-um');
+
         // Gerenciamento de Modelos
         Route::get('/provedores/{provedor}/modelos', [AIModeloController::class, 'index'])->name('modelos.index');
         Route::post('/modelos/{modelo}/toggle', [AIModeloController::class, 'toggle'])->name('modelos.toggle');

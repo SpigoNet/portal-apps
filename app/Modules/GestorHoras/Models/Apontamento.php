@@ -37,6 +37,7 @@ class Apontamento extends Model
     {
         return $this->belongsTo(ContratoItem::class, 'gh_contrato_item_id');
     }
+
     public function contrato(): BelongsTo
     {
         return $this->belongsTo(Contrato::class, 'gh_contrato_id');
@@ -65,18 +66,22 @@ class Apontamento extends Model
         return $this->hasMany(Apontamento::class, 'gh_contrato_item_id');
     }
 
-// Acessor para saber quantas horas já foram gastas neste item
+    // Acessor para saber quantas horas já foram gastas neste item
     public function getHorasRealizadasAttribute()
     {
         $minutos = $this->apontamentos->sum('minutos_gastos');
+
         return $minutos > 0 ? round($minutos / 60, 2) : 0;
     }
 
-// Acessor para percentual de conclusão (baseado em horas)
+    // Acessor para percentual de conclusão (baseado em horas)
     public function getProgressoAttribute()
     {
-        if ($this->horas_estimadas <= 0) return 0;
+        if ($this->horas_estimadas <= 0) {
+            return 0;
+        }
         $percentual = ($this->horas_realizadas / $this->horas_estimadas) * 100;
+
         return min($percentual, 100); // Trava em 100% visualmente
     }
 }

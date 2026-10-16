@@ -2,8 +2,8 @@
 
 namespace App\Modules\TreeTask\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 class UserAvatar extends Model
 {
@@ -15,7 +15,7 @@ class UserAvatar extends Model
         'tipo_pet',
         'nivel',
         'energia',
-        'ultimo_checkin'
+        'ultimo_checkin',
     ];
 
     public function user()

@@ -3,8 +3,8 @@
 namespace App\Modules\TreeTask\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Modules\TreeTask\Models\Projeto;
 use App\Modules\TreeTask\Models\Fase;
+use App\Modules\TreeTask\Models\Projeto;
 use App\Modules\TreeTask\Models\Tarefa; // Adicionado
 use App\Services\IaService;
 use Illuminate\Http\Request;
@@ -31,13 +31,13 @@ class AiCommandController extends Controller
         if ($type && $id) {
             if ($type === 'project') {
                 $p = Projeto::find($id);
-                $contextLabel = "Projeto: " . ($p->nome ?? 'N/A');
+                $contextLabel = 'Projeto: '.($p->nome ?? 'N/A');
             } elseif ($type === 'phase') {
                 $f = Fase::with('projeto')->find($id);
-                $contextLabel = "Fase: " . ($f->nome ?? 'N/A') . " (Proj: " . ($f->projeto->nome ?? '') . ")";
+                $contextLabel = 'Fase: '.($f->nome ?? 'N/A').' (Proj: '.($f->projeto->nome ?? '').')';
             } elseif ($type === 'task') {
                 $t = Tarefa::find($id);
-                $contextLabel = "Tarefa: " . ($t->titulo ?? 'N/A');
+                $contextLabel = 'Tarefa: '.($t->titulo ?? 'N/A');
             }
         }
 
@@ -54,7 +54,7 @@ class AiCommandController extends Controller
         $userId = auth()->id();
 
         // --- 1. Construção do Contexto Específico ---
-        $specificContextData = "";
+        $specificContextData = '';
 
         if ($type === 'project' && $id) {
             $projeto = Projeto::with(['fases.tarefas'])->find($id);
@@ -63,27 +63,25 @@ class AiCommandController extends Controller
                 $specificContextData .= "ID: {$projeto->id_projeto} | Nome: {$projeto->nome}\n";
                 $specificContextData .= "Descrição: {$projeto->descricao}\n";
                 $specificContextData .= "FASES E TAREFAS ATUAIS:\n";
-                foreach($projeto->fases as $fase) {
+                foreach ($projeto->fases as $fase) {
                     $specificContextData .= "- Fase ID {$fase->id_fase}: {$fase->nome}\n";
-                    foreach($fase->tarefas as $tarefa) {
+                    foreach ($fase->tarefas as $tarefa) {
                         $specificContextData .= "   * Tarefa ID {$tarefa->id_tarefa}: {$tarefa->titulo} (Status: {$tarefa->status}, Prio: {$tarefa->prioridade})\n";
                     }
                 }
             }
-        }
-        elseif ($type === 'phase' && $id) {
+        } elseif ($type === 'phase' && $id) {
             $fase = Fase::with(['projeto', 'tarefas'])->find($id);
             if ($fase) {
                 $specificContextData .= "CONTEXTO DA FASE SELECIONADA:\n";
                 $specificContextData .= "Projeto: {$fase->projeto->nome} (ID Proj: {$fase->id_projeto})\n";
                 $specificContextData .= "Fase ID: {$fase->id_fase} | Nome: {$fase->nome}\n";
                 $specificContextData .= "TAREFAS NESTA FASE:\n";
-                foreach($fase->tarefas as $tarefa) {
+                foreach ($fase->tarefas as $tarefa) {
                     $specificContextData .= "   * Tarefa ID {$tarefa->id_tarefa}: {$tarefa->titulo} (Status: {$tarefa->status})\n";
                 }
             }
-        }
-        elseif ($type === 'task' && $id) {
+        } elseif ($type === 'task' && $id) {
             $tarefa = Tarefa::with('fase.projeto')->find($id);
             if ($tarefa) {
                 $specificContextData .= "CONTEXTO DA TAREFA SELECIONADA:\n";
@@ -97,10 +95,10 @@ class AiCommandController extends Controller
         // --- 2. Contexto Geral (Backup para a IA saber de outros IDs se necessário) ---
         // Buscamos apenas listas simples para não estourar tokens
         $projetos = Projeto::where('id_user_owner', $userId)->take(20)->get(['id_projeto', 'nome']);
-        $generalContext = "OUTROS PROJETOS DISPONÍVEIS (ID: Nome): " . $projetos->map(fn($p) => "{$p->id_projeto}: {$p->nome}")->implode(", ");
+        $generalContext = 'OUTROS PROJETOS DISPONÍVEIS (ID: Nome): '.$projetos->map(fn ($p) => "{$p->id_projeto}: {$p->nome}")->implode(', ');
 
         // --- 3. Schema (Mantido) ---
-        $schema = <<<EOT
+        $schema = <<<'EOT'
         TABELAS:
         1. treetask_projetos (id_projeto, nome, descricao, status, id_user_owner)
         2. treetask_tarefas (id_tarefa, id_fase, titulo, descricao, status, id_user_responsavel, prioridade, data_vencimento)
@@ -131,7 +129,7 @@ class AiCommandController extends Controller
 
         $messages = [
             ['role' => 'system', 'content' => $systemPrompt],
-            ['role' => 'user', 'content' => $userPrompt]
+            ['role' => 'user', 'content' => $userPrompt],
         ];
 
         try {
@@ -139,15 +137,15 @@ class AiCommandController extends Controller
             $cleanResponse = str_replace(['```json', '```'], '', $response);
             $data = json_decode($cleanResponse, true);
 
-            if (!$data || !isset($data['sql_command'])) {
+            if (! $data || ! isset($data['sql_command'])) {
                 // Tentar extrair JSON na força bruta caso venha texto junto
                 preg_match('/\{.*\}/s', $cleanResponse, $matches);
-                if(isset($matches[0])) {
+                if (isset($matches[0])) {
                     $data = json_decode($matches[0], true);
                 }
-                if (!$data || !isset($data['sql_command'])) {
-                    Log::log('error', 'Falha ao parsear JSON da IA. Resposta bruta: ' . $response);
-                    throw new \Exception("Falha ao parsear JSON da IA.");
+                if (! $data || ! isset($data['sql_command'])) {
+                    Log::log('error', 'Falha ao parsear JSON da IA. Resposta bruta: '.$response);
+                    throw new \Exception('Falha ao parsear JSON da IA.');
                 }
 
             }
@@ -155,11 +153,11 @@ class AiCommandController extends Controller
             return view('TreeTask::ai_command.preview', [
                 'prompt' => $userPrompt,
                 'html_preview' => $data['html_preview'],
-                'sql_command' => $data['sql_command']
+                'sql_command' => $data['sql_command'],
             ]);
 
         } catch (\Exception $e) {
-            return back()->withErrors(['msg' => 'Erro: ' . $e->getMessage()]);
+            return back()->withErrors(['msg' => 'Erro: '.$e->getMessage()]);
         }
     }
 
@@ -178,10 +176,11 @@ class AiCommandController extends Controller
             DB::commit();
 
             return redirect()->route('treetask.index') // Poderíamos redirecionar de volta para o contexto original se salvássemos a URL
-            ->with('success', 'Comandos IA executados!');
+                ->with('success', 'Comandos IA executados!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Erro SQL: ' . $e->getMessage());
+
+            return back()->with('error', 'Erro SQL: '.$e->getMessage());
         }
     }
 }

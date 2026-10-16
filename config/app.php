@@ -125,6 +125,4 @@ return [
 
     'POLLINATION_API_KEY' => env('POLLINATION_API_KEY', ''),
 
-
-
 ];

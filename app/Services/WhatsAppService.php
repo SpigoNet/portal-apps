@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth; // Importante
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http; // Importante
+use Illuminate\Support\Facades\Log;
 
 class WhatsAppService
 {
     protected string $baseUrl = 'https://api.callmebot.com/whatsapp.php';
+
     protected string $adminEmail = 'spiriguidiberto@gmail.com';
 
     /**
@@ -19,12 +20,13 @@ class WhatsAppService
     {
         $admin = User::where('email', $this->adminEmail)->first();
 
-        if (!$admin) {
-            Log::error("WhatsApp: Admin não encontrado.");
+        if (! $admin) {
+            Log::error('WhatsApp: Admin não encontrado.');
+
             return false;
         }
 
-        return $this->sendToUser($admin, "[ADMIN] " . $message);
+        return $this->sendToUser($admin, '[ADMIN] '.$message);
     }
 
     /**
@@ -33,8 +35,9 @@ class WhatsAppService
      */
     public function sendToMe(string $message): bool
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             Log::warning('WhatsApp: Tentativa de uso de sendToMe sem usuário logado.');
+
             return false;
         }
 
@@ -50,6 +53,7 @@ class WhatsAppService
             if ($user->email !== $this->adminEmail) {
                 Log::warning("WhatsApp: Usuário {$user->id} sem credenciais.");
             }
+
             return false;
         }
 
@@ -70,7 +74,8 @@ class WhatsAppService
 
             return $response->successful();
         } catch (\Exception $e) {
-            Log::error('WhatsApp Exception: ' . $e->getMessage());
+            Log::error('WhatsApp Exception: '.$e->getMessage());
+
             return false;
         }
     }

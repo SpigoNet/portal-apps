@@ -48,6 +48,12 @@ class AppManagerController extends Controller
             'icon' => 'nullable|string',
             'visibility' => 'required|in:public,private,specific',
             'users' => 'required_if:visibility,specific|array',
+            'pwa_short_name' => 'nullable|string|max:30',
+            'pwa_scope' => 'nullable|string|max:255',
+            'pwa_background_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'pwa_theme_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'pwa_display' => 'nullable|in:standalone,fullscreen,minimal-ui,browser',
+            'pwa_orientation' => 'nullable|in:any,natural,portrait,landscape',
         ]);
 
         $app = PortalApp::create($validated);
@@ -76,6 +82,12 @@ class AppManagerController extends Controller
             'icon' => 'nullable|string',
             'visibility' => 'required|in:public,private,specific',
             'users' => 'required_if:visibility,specific|array',
+            'pwa_short_name' => 'nullable|string|max:30',
+            'pwa_scope' => 'nullable|string|max:255',
+            'pwa_background_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'pwa_theme_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'pwa_display' => 'nullable|in:standalone,fullscreen,minimal-ui,browser',
+            'pwa_orientation' => 'nullable|in:any,natural,portrait,landscape',
         ]);
 
         $app->update($validated);

@@ -9,7 +9,6 @@ use App\Modules\Mithril\Models\PreTransacao;
 use App\Modules\Mithril\Models\SaldoFechamento;
 use App\Modules\Mithril\Models\Transacao;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -51,7 +50,6 @@ class DashboardController extends Controller
             })
             ->whereNotIn('id', $idsPreTransacoesEfetivadas)
             ->get();
-
 
         // --- PROCESSAMENTO ---
 
@@ -121,7 +119,7 @@ class DashboardController extends Controller
                     'nome' => $conta->nome,
                     'saldo_anterior' => $saldoInicial,
                     'fatura_aberta' => $faturaAberta,
-                    'total_pagar' => $totalPagar
+                    'total_pagar' => $totalPagar,
                 ];
             }
         }
@@ -133,6 +131,7 @@ class DashboardController extends Controller
     {
         $theme = $request->get('theme', 'mithril');
         session(['mithril_theme' => $theme]);
+
         return back();
     }
 }

@@ -29,7 +29,7 @@ class JobModelController extends Controller
 
         $jsonDecoded = json_decode($validated['json'], true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return back()->withErrors(['json' => 'JSON inválido: ' . json_last_error_msg()])->withInput();
+            return back()->withErrors(['json' => 'JSON inválido: '.json_last_error_msg()])->withInput();
         }
 
         JobModel::create([
@@ -59,7 +59,7 @@ class JobModelController extends Controller
 
         $jsonDecoded = json_decode($validated['json'], true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return back()->withErrors(['json' => 'JSON inválido: ' . json_last_error_msg()])->withInput();
+            return back()->withErrors(['json' => 'JSON inválido: '.json_last_error_msg()])->withInput();
         }
 
         $modelo->update([

@@ -2,8 +2,8 @@
 
 namespace App\Modules\Mithril\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Transacao extends Model
 {
@@ -22,13 +22,13 @@ class Transacao extends Model
 
     protected $casts = [
         'data_efetiva' => 'date',
-        'valor' => 'decimal:2'
+        'valor' => 'decimal:2',
     ];
 
     protected static function booted()
     {
         static::creating(function ($model) {
-            if (!$model->user_id && auth()->check()) {
+            if (! $model->user_id && auth()->check()) {
                 $model->user_id = auth()->id();
             }
         });

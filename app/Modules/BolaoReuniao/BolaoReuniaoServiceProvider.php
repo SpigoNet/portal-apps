@@ -10,8 +10,8 @@ class BolaoReuniaoServiceProvider extends ServiceProvider
     public function boot()
     {
         Route::middleware('web')
-            ->group(__DIR__ . '/routes.php');
+            ->group(__DIR__.'/routes.php');
 
-        $this->loadViewsFrom(__DIR__ . '/resources/views', 'BolaoReuniao');
+        $this->loadViewsFrom(__DIR__.'/resources/views', 'BolaoReuniao');
     }
 }

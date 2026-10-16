@@ -12,12 +12,19 @@ class Imagem extends Model
 
     protected $fillable = [
         'user_id',
+        'grupo_id',
         'nome',
+        'orientacao',
         'caminho',
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function grupo(): BelongsTo
+    {
+        return $this->belongsTo(Grupo::class, 'grupo_id');
     }
 }

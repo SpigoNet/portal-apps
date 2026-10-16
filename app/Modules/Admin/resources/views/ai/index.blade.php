@@ -109,7 +109,17 @@
             @if ($modelosPadrao->count() > 0)
                 <div class="mt-8 overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
                     <div class="p-6 text-gray-900 dark:text-gray-100">
-                        <h3 class="text-lg font-medium mb-4">Modelos Padrão por Capacidade</h3>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-medium">Modelos Padrão por Capacidade</h3>
+                            <form action="{{ route('admin.ai.padroes.testar') }}" method="POST"
+                                onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').textContent = 'Testando…';">
+                                @csrf
+                                <button type="submit"
+                                    class="text-sm bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded transition">
+                                    <i class="fa-solid fa-vial"></i> Testar todos
+                                </button>
+                            </form>
+                        </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             @foreach ($modelosPadrao as $mp)
                                 <div class="border dark:border-gray-700 p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
@@ -128,6 +138,26 @@
                                         Provedor: <span
                                             class="font-medium text-gray-700 dark:text-gray-300">{{ $mp->modelo->provedor->nome }}</span>
                                     </div>
+                                    @php($teste = session('testes')[$mp->id] ?? null)
+                                    @if ($teste)
+                                        @php($cor = ['ok' => 'bg-green-100 text-green-800 border-green-200', 'erro' => 'bg-red-100 text-red-800 border-red-200'][$teste['status']] ?? 'bg-gray-100 text-gray-700 border-gray-200')
+                                        <div class="mt-3 text-xs p-2 rounded border {{ $cor }}">
+                                            <strong>{{ strtoupper($teste['status']) }}</strong>
+                                            ({{ number_format($teste['duracao_ms'] / 1000, 1, ',', '') }}s)
+                                            — {{ $teste['mensagem'] }}
+                                            @if ($teste['detalhe'])
+                                                <pre class="mt-1 whitespace-pre-wrap break-words">{{ $teste['detalhe'] }}</pre>
+                                            @endif
+                                        </div>
+                                    @endif
+                                    <form action="{{ route('admin.ai.padroes.testar-um', $mp->id) }}" method="POST" class="mt-3"
+                                        onsubmit="this.querySelector('button').disabled = true; this.querySelector('button').textContent = 'Testando…';">
+                                        @csrf
+                                        <button type="submit"
+                                            class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded transition">
+                                            <i class="fa-solid fa-vial"></i> Testar
+                                        </button>
+                                    </form>
                                 </div>
                             @endforeach
                         </div>

@@ -3,14 +3,15 @@
 namespace App\Modules\ANT\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Modules\ANT\Models\AntMateria;
+use Illuminate\Http\Request;
 
 class AdminMateriaController extends Controller
 {
     public function index()
     {
         $materias = AntMateria::orderBy('nome')->get();
+
         return view('ANT::admin.materias.index', compact('materias'));
     }
 
@@ -35,6 +36,7 @@ class AdminMateriaController extends Controller
     public function edit($id)
     {
         $materia = AntMateria::findOrFail($id);
+
         return view('ANT::admin.materias.form', compact('materia'));
     }
 
@@ -42,7 +44,7 @@ class AdminMateriaController extends Controller
     {
         $request->validate([
             'nome' => 'required|string|max:255',
-            'nome_curto' => 'required|string|max:20|unique:ant_materias,nome_curto,' . $id,
+            'nome_curto' => 'required|string|max:20|unique:ant_materias,nome_curto,'.$id,
         ]);
 
         $materia = AntMateria::findOrFail($id);

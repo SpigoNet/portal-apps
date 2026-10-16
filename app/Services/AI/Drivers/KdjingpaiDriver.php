@@ -15,7 +15,7 @@ class KdjingpaiDriver implements AiDriverInterface
     public function __construct(?string $model = null, ?string $apiKey = null, ?string $baseUrl = null)
     {
         if ($baseUrl) {
-            $this->baseUrl = rtrim($baseUrl, '/') . '/';
+            $this->baseUrl = rtrim($baseUrl, '/').'/';
         }
     }
 
@@ -34,7 +34,7 @@ class KdjingpaiDriver implements AiDriverInterface
             'optimization' => $options['optimization'] ?? ($options['optimize'] ?? 0),
         ];
 
-        $requestUrl = $this->baseUrl . '?' . http_build_query($queryParams);
+        $requestUrl = $this->baseUrl.'?'.http_build_query($queryParams);
 
         try {
             $response = Http::timeout(90)->get($requestUrl);
@@ -44,7 +44,8 @@ class KdjingpaiDriver implements AiDriverInterface
 
                 // Validação mínima de conteúdo (deve ser uma imagem, não HTML/Erro)
                 if (strlen($imageContent) < 1000 || str_starts_with($imageContent, '<')) {
-                    Log::error('Kdjingpai: Retorno inválido (não parece uma imagem). Body: ' . substr($imageContent, 0, 100));
+                    Log::error('Kdjingpai: Retorno inválido (não parece uma imagem). Body: '.substr($imageContent, 0, 100));
+
                     return null;
                 }
 
@@ -56,17 +57,19 @@ class KdjingpaiDriver implements AiDriverInterface
                     $extension = 'webp';
                 }
 
-                $filename = 'generations/kdjingpai_' . Str::uuid() . '.' . $extension;
+                $filename = 'generations/kdjingpai_'.Str::uuid().'.'.$extension;
                 Storage::disk('public')->put($filename, $imageContent);
 
                 return Storage::disk('public')->url($filename);
             }
 
-            Log::error('Kdjingpai Failed: ' . $response->status() . ' URL: ' . $requestUrl);
+            Log::error('Kdjingpai Failed: '.$response->status().' URL: '.$requestUrl);
+
             return null;
 
         } catch (\Exception $e) {
-            Log::error('Kdjingpai Exception: ' . $e->getMessage());
+            Log::error('Kdjingpai Exception: '.$e->getMessage());
+
             return null;
         }
     }
@@ -74,6 +77,7 @@ class KdjingpaiDriver implements AiDriverInterface
     protected function cleanPrompt(string $prompt): string
     {
         $prompt = preg_replace('/[^\p{L}\p{N}\s,.-]/u', '', $prompt);
+
         return trim($prompt);
     }
 }

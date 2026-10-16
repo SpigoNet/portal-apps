@@ -33,15 +33,15 @@ class GamificationController extends Controller
                 ->first();
         }
 
-        if (!$tarefaAtual) {
+        if (! $tarefaAtual) {
             return response()->json([
                 'message' => 'Nenhuma missão ativa no radar. Selecione uma tarefa para iniciar o protocolo.',
-                'universo' => 'Standby'
+                'universo' => 'Standby',
             ]);
         }
 
         // Prompt Engenharia Reversa: Focado em Alto QI Visual + Baixa Iniciação
-        $systemPrompt = <<<EOT
+        $systemPrompt = <<<'EOT'
 ATUAR COMO: Um Estrategista Lógico e Pragmático (Estilo Sci-Fi/Cyberpunk).
 CONTEXTO: O usuário tem inteligência visual alta, mas dificuldade severa de iniciação (TDAH).
 OBJETIVO: Receba a tarefa e quebre-a em 3 passos microscópicos, ridículos de tão fáceis, para vencer a inércia.
@@ -55,19 +55,19 @@ EOT;
 
         $messages = [
             ['role' => 'system', 'content' => $systemPrompt],
-            ['role' => 'user', 'content' => $userPrompt]
+            ['role' => 'user', 'content' => $userPrompt],
         ];
 
         // Temperatura baixa para respostas mais diretas e lógicas
         $textoGerado = $this->iaService->generateText($messages, ['temperature' => 0.4]);
 
-        if (!$textoGerado) {
-            $textoGerado = "Erro de conexão com o núcleo estratégico. Tente reiniciar o passo 1 manualmente.";
+        if (! $textoGerado) {
+            $textoGerado = 'Erro de conexão com o núcleo estratégico. Tente reiniciar o passo 1 manualmente.';
         }
 
         return response()->json([
             'message' => $textoGerado,
-            'universo' => 'Estrategista Lógico'
+            'universo' => 'Estrategista Lógico',
         ]);
     }
 }

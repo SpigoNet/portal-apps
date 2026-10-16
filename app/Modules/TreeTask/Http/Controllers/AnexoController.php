@@ -54,7 +54,7 @@ class AnexoController extends Controller
         $anexo = Anexo::findOrFail($id_anexo);
 
         // Verificação de segurança básica: O arquivo existe?
-        if (!Storage::exists($anexo->path_arquivo)) {
+        if (! Storage::exists($anexo->path_arquivo)) {
             abort(404, 'Arquivo físico não encontrado.');
         }
 

@@ -3,10 +3,10 @@
 namespace Tests\Feature\Mithril;
 
 use App\Models\User;
+use App\Modules\Metricas\Http\Middleware\RegistrarAcesso;
 use App\Modules\Mithril\Models\Conta;
 use App\Modules\Mithril\Models\PreTransacao;
 use App\Modules\Mithril\Models\Transacao;
-use App\Modules\Metricas\Http\Middleware\RegistrarAcesso;
 use Tests\TestCase;
 
 class LancamentosDinamicosTest extends TestCase

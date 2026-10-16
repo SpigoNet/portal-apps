@@ -2,7 +2,6 @@
 
 namespace App\Modules\DspaceForms\Models;
 
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,4 +26,3 @@ class DspaceFormField extends Model
         return $this->belongsTo(DspaceFormRow::class, 'row_id');
     }
 }
-

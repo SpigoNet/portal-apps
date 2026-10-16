@@ -13,6 +13,7 @@ class AppUserManagerController extends Controller
     {
         $app->load('users');
         $allUsers = User::orderBy('name')->get();
+
         return view('Admin::apps.users.index', compact('app', 'allUsers'));
     }
 
@@ -46,6 +47,7 @@ class AppUserManagerController extends Controller
     public function destroy(PortalApp $app, User $user)
     {
         $app->users()->detach($user->id);
+
         return back()->with('success', 'Usuário removido do app.');
     }
 }

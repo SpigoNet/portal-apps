@@ -56,6 +56,11 @@
 - **Prefix:** `/bolao`
 - **Key Note:** Models are global in `app/Models/` (not inside the module folder).
 
+### Cardapio
+- **Purpose:** Home cooking assistant: pantry stock with expiry, recipes, people/routine, restrictions and preferences → weekly menu and shopping list (deficit only).
+- **Prefix:** `/cardapio`
+- **Key Note:** All phases implemented (stock, recipes, weekly plan with auto-generation/optimisation, shopping list, history, leftovers, agenda, lunchbox, recurring products, natural-language assistant that only proposes validated actions for the user to confirm; progress in `PLANO.md`). A household has several `Pessoa`; a login is optional (`cardapio_pessoas.user_id` nullable), so kids or staff without an account still take part in menus and quantities. AI only interprets/explains; stock, restrictions and shopping are deterministic. See `app/Modules/Cardapio/AGENTS.md`.
+
 ### ComfyQueue
 - **Purpose:** Queue management.
 
@@ -92,7 +97,7 @@
 ### QuebraCabeca
 - **Purpose:** Classic rectangular-tile jigsaw: shuffled pieces are freely swapped until the image is rebuilt.
 - **Prefix:** `/quebra-cabeca`
-- **Key Note:** Auth-only. Users upload images (`Imagem` model, `public` disk, served via owner-checked route). Game logic is 100% Alpine.js in `index.blade.php`; best times live in `localStorage`. Built-in images are SVG data URIs from the controller, plus the user's uploaded images.
+- **Key Note:** Auth-only. Users upload images (`Imagem` model, `public` disk, served via owner-checked route). Game logic is 100% Alpine.js in `index.blade.php`; best times live in `localStorage`. Default images are the files in `app/Modules/QuebraCabeca/imagens/` (drop a jpg/png/webp there, optionally naming it in `imagens/nomes.json`; served via the `padrao` route), plus the user's uploaded images.
 
 ### StreamingManager
 - **Purpose:** Shared streaming subscription management.
@@ -103,6 +108,11 @@
 - **Purpose:** Project/Task management (Hierarchy: Project $\to$ Phase $\to$ Task).
 - **Prefix:** `/treetask` (Web), `/treetask/api/v1` (REST API).
 - **Key Note:** Custom PK names (e.g., `id_projeto`) instead of `id`. Full REST API documentation in `API_DOCUMENTATION.md`.
+
+### Terminal
+- **Purpose:** Bus-terminal puzzle presented as an old CRT computer: fill each bus in the right order before the parking slots run out.
+- **Prefix:** `/terminal`
+- **Key Note:** Auth-only, no models/DB beyond the `PortalApp` row. Game logic 100% Alpine.js in `index.blade.php`; progress/phosphor/mute in `localStorage`. PWA fullscreen + own icon. See `app/Modules/Terminal/AGENTS.md`.
 
 ### VocabularioControlado
 - **Purpose:** Controlled vocabulary management.

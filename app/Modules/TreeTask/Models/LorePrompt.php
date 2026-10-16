@@ -11,6 +11,6 @@ class LorePrompt extends Model
     protected $fillable = [
         'universo',
         'prompt_personagem',
-        'ativo'
+        'ativo',
     ];
 }

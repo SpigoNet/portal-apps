@@ -109,6 +109,8 @@ class AiProvider extends Model
             str_contains($haystack, 'pollination edit') => 'pollination_image_edit',
             str_contains($haystack, 'pollination') => 'pollination',
             str_contains($haystack, 'airforce') => 'airforce',
+            str_contains($haystack, 'codex'),
+            str_contains($haystack, 'openai') => 'openai',
             str_contains($haystack, 'kdjingpai') => 'kdjingpai',
             str_contains($haystack, 'gemini') => 'gemini',
             str_contains($haystack, 'ollama'),

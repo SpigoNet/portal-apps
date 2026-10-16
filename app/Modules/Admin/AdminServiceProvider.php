@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Modules\Admin;
 
 use Illuminate\Support\Facades\Route;
@@ -10,7 +11,7 @@ class AdminServiceProvider extends ServiceProvider
     {
 
         Route::middleware('web')
-            ->group(__DIR__ . '/routes.php');
+            ->group(__DIR__.'/routes.php');
 
         // O namespace 'Admin' permite usar views como 'Admin::apps.index'
         $this->loadViewsFrom(__DIR__.'/resources/views', 'Admin');

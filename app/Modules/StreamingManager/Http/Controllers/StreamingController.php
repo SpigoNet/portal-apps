@@ -42,7 +42,7 @@ class StreamingController extends Controller
     public function show(Streaming $streaming)
     {
         // Check access
-        if ($streaming->user_id !== Auth::id() && !$streaming->members()->where('user_id', Auth::id())->exists()) {
+        if ($streaming->user_id !== Auth::id() && ! $streaming->members()->where('user_id', Auth::id())->exists()) {
             abort(403);
         }
 

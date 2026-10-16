@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Modules\Metricas;
 
 use Illuminate\Support\Facades\Route;
@@ -18,7 +19,7 @@ class MetricasServiceProvider extends ServiceProvider
 
         // Carrega as rotas
         Route::middleware('web')
-            ->group(__DIR__ . '/routes.php');
+            ->group(__DIR__.'/routes.php');
     }
 
     public function register()

@@ -16,7 +16,7 @@ class PaymentController extends Controller
         $isOwner = $streaming->user_id === Auth::id();
         $isMember = $streaming->members()->where('user_id', Auth::id())->exists();
 
-        if (!$isOwner && !$isMember) {
+        if (! $isOwner && ! $isMember) {
             abort(403);
         }
 
@@ -32,18 +32,18 @@ class PaymentController extends Controller
         // If owner is adding
         if ($isOwner) {
             // Check if they are paying for someone else (registered user)
-            if (!empty($validated['target_user_id'])) {
+            if (! empty($validated['target_user_id'])) {
                 $userId = $validated['target_user_id'];
-                // Verify if this user is actually a member of the streaming? 
-                // Flexible: Maybe they are paying for someone who just left? 
-                // Strict: Only allow members. Let's start flexible or strict? 
+                // Verify if this user is actually a member of the streaming?
+                // Flexible: Maybe they are paying for someone who just left?
+                // Strict: Only allow members. Let's start flexible or strict?
                 // Strict ensures data integrity mostly.
-                if (!$streaming->members()->where('user_id', $userId)->exists() && $userId != Auth::id()) {
+                if (! $streaming->members()->where('user_id', $userId)->exists() && $userId != Auth::id()) {
                     // Allow paying for self (owner)
                 }
             }
             // Check if they provided a note (Guest payment)
-            elseif (!empty($validated['note'])) {
+            elseif (! empty($validated['note'])) {
                 $userId = null;
                 $note = $validated['note'];
             }

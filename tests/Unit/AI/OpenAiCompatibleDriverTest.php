@@ -60,6 +60,29 @@ class OpenAiCompatibleDriverTest extends TestCase
     }
 
     #[Test]
+    public function it_forwards_image_parameters_to_the_gateway(): void
+    {
+        Storage::fake('public');
+        Http::fake(['gateway.test/v1/images/generations' => Http::response([
+            'data' => [['b64_json' => base64_encode('jpg-bytes')]],
+        ])]);
+
+        $url = (new OpenAiCompatibleDriver(null, null, 'http://gateway.test'))->generateImage('Um gato', [
+            'quality' => 'high', 'background' => 'opaque', 'output_format' => 'jpeg',
+            'output_compression' => 0, 'style' => 'natural', 'size' => '1024x1536', 'ignorado' => 'x',
+        ]);
+
+        $this->assertStringEndsWith('.jpg', $url);
+        Http::assertSent(fn ($request) => $request['quality'] === 'high'
+            && $request['background'] === 'opaque'
+            && $request['output_format'] === 'jpeg'
+            && $request['output_compression'] === 0
+            && $request['style'] === 'natural'
+            && $request['size'] === '1024x1536'
+            && ! isset($request['ignorado']));
+    }
+
+    #[Test]
     public function it_returns_null_when_the_gateway_fails(): void
     {
         Http::fake(['*' => Http::response(['error' => ['message' => 'falhou']], 502)]);

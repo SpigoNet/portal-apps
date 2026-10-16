@@ -1,6 +1,8 @@
 """Gateway compatível com a API da OpenAI que delega ao CLI `codex` (login de conta, sem API key).
 
-Endpoints: /v1/models, /v1/chat/completions (texto e visão), /v1/images/generations e /v1/images/edits.
+Endpoints: /v1/models, /v1/chat/completions (texto e visão), /v1/images/generations e /v1/images/edits
+(parâmetros de imagem: prompt, n, size, quality, background, output_format, output_compression, moderation,
+style, input_fidelity, mask, response_format, stream, reasoning_effort).
 """
 import asyncio
 import base64
@@ -17,7 +19,7 @@ from typing import Any, AsyncIterator
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
-from PIL import Image
+from PIL import Image, ImageChops
 
 GATEWAY_TOKEN = os.getenv("GATEWAY_TOKEN", "")  # opcional: protege este gateway (não é chave da OpenAI)
 DEFAULT_MODEL = os.getenv("CODEX_DEFAULT_MODEL", "")  # vazio = padrão do CLI
@@ -274,13 +276,104 @@ async def chat(body: dict):
 
 
 # --------------------------------------------------------------------------- imagens
+#
+# A ferramenta `imagegen` do Codex só recebe o prompt (e imagens de referência): não há parâmetros nativos.
+# Os parâmetros da API de imagens da OpenAI são atendidos assim:
+#   - prompt:  quality, style, moderation, input_fidelity, background=transparent, orientação/proporção
+#   - pós-processamento (Pillow): size, output_format, output_compression, background=transparent
+
+KEY_COLOR = (0, 255, 0)  # cor de fundo pedida ao modelo para recortar o fundo (background=transparent)
+MIN_SIDE, MAX_SIDE = 16, int(os.getenv("GATEWAY_IMAGE_MAX_SIDE", "4096"))
+MAX_N = int(os.getenv("GATEWAY_IMAGE_MAX_N", "10"))
+QUALITY_HINTS = {
+    "low": " Qualidade: rascunho rápido, detalhes simples e poucos elementos.",
+    "medium": " Qualidade: equilibrada, com bom nível de detalhe.",
+    "high": " Qualidade: máxima, com detalhes ricos, texturas nítidas e acabamento primoroso.",
+    "auto": "",
+}
+STYLE_HINTS = {
+    "vivid": " Estilo: vívido, com cores intensas, alto contraste e aspecto dramático.",
+    "natural": " Estilo: natural, com cores e iluminação realistas e discretas, sem exagero.",
+}
+FIDELITY_HINTS = {
+    "high": " Fidelidade alta: preserve com precisão rostos, traços, texturas, logotipos e demais detalhes das imagens de entrada.",
+    "low": "",
+}
+MODERATION_HINTS = {"low": " Aplique uma moderação de conteúdo menos restritiva dentro do que a política permitir."}
+BACKGROUND_HINTS = {
+    "transparent": (" O fundo deve ser UMA cor chapada e uniforme verde puro (#00FF00), sem gradiente, sombras no chão, "
+                    "reflexos ou textura, para ser recortado depois; o sujeito NÃO pode usar essa cor de verde."),
+    "opaque": " O fundo deve ser opaco e totalmente preenchido, sem transparência.",
+}
+ENUMS = {
+    "quality": ("auto", "low", "medium", "high"),
+    "background": ("auto", "transparent", "opaque"),
+    "moderation": ("auto", "low"),
+    "style": ("vivid", "natural"),
+    "input_fidelity": ("low", "high"),
+    "response_format": ("b64_json", "url"),
+    "output_format": ("png", "jpeg", "webp"),
+    "reasoning_effort": ("minimal", "low", "medium", "high", "xhigh"),
+}
+
+
+def blank(v: Any) -> bool:
+    return v is None or (isinstance(v, str) and not v.strip())
+
 
 def parse_size(size: str | None) -> tuple[int, int] | None:
     try:
-        w, h = (int(x) for x in (size or "").lower().split("x"))
+        w, h = (int(x) for x in (size or "").lower().strip().split("x"))
         return (w, h) if w > 0 and h > 0 else None
     except ValueError:
         return None
+
+
+def validate_options(raw: dict) -> dict:
+    """Normaliza e valida os parâmetros (JSON ou multipart); levanta CliError(400) se inválidos."""
+    o: dict[str, Any] = {}
+    for key, allowed in ENUMS.items():
+        v = raw.get(key)
+        if blank(v):
+            continue
+        v = str(v).strip().lower()
+        if key == "output_format" and v == "jpg":
+            v = "jpeg"
+        if v not in allowed:
+            raise CliError(400, f"Valor inválido para '{key}': {v}. Aceitos: {', '.join(allowed)}")
+        o[key] = v
+    try:
+        n = int(raw.get("n") if not blank(raw.get("n")) else 1)
+    except (TypeError, ValueError):
+        raise CliError(400, "'n' deve ser um inteiro")
+    if not 1 <= n <= MAX_N:
+        raise CliError(400, f"'n' deve estar entre 1 e {MAX_N}")
+    o["n"] = n
+
+    size = raw.get("size")
+    o["size"] = None
+    if not blank(size) and str(size).strip().lower() != "auto":
+        o["size"] = parse_size(str(size))
+        if not o["size"] or not all(MIN_SIDE <= s <= MAX_SIDE for s in o["size"]):
+            raise CliError(400, f"'size' inválido: use 'auto' ou LARGURAxALTURA (cada lado de {MIN_SIDE} a {MAX_SIDE})")
+
+    comp = raw.get("output_compression")
+    o["output_compression"] = None
+    if not blank(comp):
+        try:
+            o["output_compression"] = int(comp)
+        except (TypeError, ValueError):
+            raise CliError(400, "'output_compression' deve ser um inteiro de 0 a 100")
+        if not 0 <= o["output_compression"] <= 100:
+            raise CliError(400, "'output_compression' deve estar entre 0 e 100")
+
+    o.setdefault("output_format", "png")
+    o.setdefault("response_format", "b64_json")
+    if o.get("background") == "transparent" and o["output_format"] == "jpeg":
+        raise CliError(400, "background=transparent exige output_format png ou webp")
+    o["stream"] = str(raw.get("stream") or "").lower() in ("1", "true", "yes")
+    # aceitos por compatibilidade, sem efeito: model (o CLI escolhe), user, partial_images
+    return o
 
 
 def orientation_hint(size: tuple[int, int] | None) -> str:
@@ -291,9 +384,34 @@ def orientation_hint(size: tuple[int, int] | None) -> str:
     return f" Composição {shape}, proporção aproximada {w}:{h}."
 
 
-def finish_image(raw: bytes, size: tuple[int, int] | None, fmt: str) -> tuple[bytes, str]:
-    """Ajusta ao tamanho pedido (corte centralizado + redimensionamento) e ao formato."""
+def option_hints(o: dict, edit: bool) -> str:
+    hint = orientation_hint(o["size"])
+    hint += QUALITY_HINTS.get(o.get("quality", "auto"), "")
+    hint += STYLE_HINTS.get(o.get("style", ""), "")
+    hint += BACKGROUND_HINTS.get(o.get("background", ""), "")
+    hint += MODERATION_HINTS.get(o.get("moderation", ""), "")
+    if edit:
+        hint += FIDELITY_HINTS.get(o.get("input_fidelity", ""), "")
+    return hint
+
+
+def remove_key_color(img: Image.Image) -> Image.Image:
+    """Transforma o fundo verde chapado em transparência (com suavização de borda e remoção do respingo verde)."""
+    rgb = img.convert("RGB")
+    r, g, b = rgb.split()
+    dominance = ImageChops.subtract(g, ImageChops.lighter(r, b))  # quanto o verde excede os outros canais
+    alpha = dominance.point(lambda d: 255 - min(255, max(0, (d - 40) * 4)))
+    despilled_g = ImageChops.darker(g, ImageChops.lighter(r, b))
+    clean = Image.merge("RGB", (r, despilled_g, b))
+    out = Image.composite(rgb, clean, alpha.point(lambda a: 255 if a == 255 else 0))  # só mexe nas bordas
+    out.putalpha(alpha)
+    return out
+
+
+def finish_image(raw: bytes, o: dict) -> tuple[bytes, str]:
+    """Aplica tamanho (corte centralizado + redimensionamento), transparência, formato e compressão."""
     img = Image.open(io.BytesIO(raw))
+    size = o["size"]
     if size and img.size != size:
         tw, th = size
         sw, sh = img.size
@@ -301,11 +419,21 @@ def finish_image(raw: bytes, size: tuple[int, int] | None, fmt: str) -> tuple[by
         img = img.resize((max(tw, round(sw * scale)), max(th, round(sh * scale))), Image.LANCZOS)
         left, top = (img.width - tw) // 2, (img.height - th) // 2
         img = img.crop((left, top, left + tw, top + th))
-    pil_fmt, mime = FORMATS.get(fmt, FORMATS["png"])
-    if pil_fmt == "JPEG" and img.mode in ("RGBA", "LA", "P"):
+    if o.get("background") == "transparent":
+        img = remove_key_color(img)
+    pil_fmt, mime = FORMATS[o["output_format"]]
+    if pil_fmt == "JPEG" and img.mode != "RGB":
         img = img.convert("RGB")
+    kwargs: dict[str, Any] = {}
+    comp = o["output_compression"]
+    if pil_fmt == "JPEG":
+        kwargs = {"quality": 95 if comp is None else max(1, comp)}
+    elif pil_fmt == "WEBP":
+        kwargs = {"quality": 95 if comp is None else comp}
+    elif pil_fmt == "PNG" and comp is not None:
+        kwargs = {"compress_level": round(comp * 9 / 100)}
     out = io.BytesIO()
-    img.save(out, pil_fmt)
+    img.save(out, pil_fmt, **kwargs)
     return out.getvalue(), mime
 
 
@@ -345,21 +473,56 @@ def image_payload(req: Request, raw: bytes, mime: str, response_format: str) -> 
     return {"b64_json": base64.b64encode(raw).decode()}
 
 
-async def respond_images(req: Request, prompts: list[str], refs: list[Path], opts: dict) -> dict:
-    n = max(1, min(int(opts.get("n") or 1), 4))
-    size = parse_size(opts.get("size"))
-    fmt = opts.get("output_format") or "png"
-    fmt = "jpeg" if fmt == "jpg" else fmt
-    results = await asyncio.gather(*(make_image(prompts[0], refs, opts.get("reasoning_effort")) for _ in range(n)))
-    data, usage = [], {"input_tokens": 0, "output_tokens": 0}
-    for raw, u in results:
-        out, mime = await asyncio.to_thread(finish_image, raw, size, fmt)
-        item = image_payload(req, out, mime, opts.get("response_format") or "b64_json")
-        data.append(item)
-        usage["input_tokens"] += u.get("input_tokens", 0)
-        usage["output_tokens"] += u.get("output_tokens", 0)
-    usage["total_tokens"] = usage["input_tokens"] + usage["output_tokens"]
-    return {"created": int(time.time()), "data": data, "usage": usage}
+async def one_image(req: Request, prompt: str, refs: list[Path], o: dict) -> tuple[dict, dict]:
+    raw, usage = await make_image(prompt, refs, o.get("reasoning_effort"))
+    out, mime = await asyncio.to_thread(finish_image, raw, o)
+    return image_payload(req, out, mime, o["response_format"]), usage
+
+
+def totals(usages: list[dict]) -> dict:
+    i, p = sum(u.get("input_tokens", 0) for u in usages), sum(u.get("output_tokens", 0) for u in usages)
+    return {"input_tokens": i, "output_tokens": p, "total_tokens": i + p}
+
+
+def response_meta(o: dict) -> dict:
+    return {"background": o.get("background", "auto"), "output_format": o["output_format"],
+            "quality": o.get("quality", "auto"), "size": "{}x{}".format(*o["size"]) if o["size"] else "auto"}
+
+
+async def respond_images(req: Request, prompt: str, refs: list[Path], o: dict, tmp: Path):
+    """`tmp` (pasta das referências) é apagada ao terminar, inclusive no modo stream."""
+    if not o["stream"]:
+        try:
+            results = await asyncio.gather(*(one_image(req, prompt, refs, o) for _ in range(o["n"])))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+        return {"created": int(time.time()), "data": [r[0] for r in results],
+                "usage": totals([r[1] for r in results]), **response_meta(o)}
+
+    # stream: um evento `image_generation.completed` por imagem, com keep-alive enquanto o CLI trabalha
+    tasks = [asyncio.create_task(one_image(req, prompt, refs, o)) for _ in range(o["n"])]
+
+    async def gen() -> AsyncIterator[str]:
+        try:
+            pending = set(tasks)
+            while pending:
+                done, pending = await asyncio.wait(pending, timeout=10, return_when=asyncio.FIRST_COMPLETED)
+                if not done:
+                    yield ": keep-alive\n\n"
+                for t in done:
+                    item, usage = t.result()
+                    ev = {"type": "image_generation.completed", "created_at": int(time.time()), **item,
+                          "usage": totals([usage]), **response_meta(o)}
+                    yield f"event: image_generation.completed\ndata: {json.dumps(ev)}\n\n"
+        except CliError as e:
+            yield f"event: error\ndata: {json.dumps({'error': {'message': e.msg}})}\n\n"
+        finally:
+            for t in tasks:
+                t.cancel()
+            shutil.rmtree(tmp, ignore_errors=True)
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(gen(), media_type="text/event-stream")
 
 
 GEN_TEMPLATE = ("Use a ferramenta de geração de imagem (imagegen) para criar UMA imagem nova com a descrição abaixo."
@@ -369,6 +532,28 @@ EDIT_TEMPLATE = ("Use a ferramenta de geração de imagem (imagegen) no modo de 
                  "da(s) imagem(ns) anexada(s), aplicando a instrução abaixo e preservando o que não for mencionado."
                  "{hint}{mask} Não escreva nenhum arquivo na pasta de trabalho e responda apenas \"ok\" ao terminar.\n\n"
                  "Instrução:\n{prompt}")
+MASK_NOTE = (" A ÚLTIMA imagem anexada é uma máscara: as áreas transparentes (ou pretas) indicam "
+             "exatamente a região que deve ser alterada; o restante deve permanecer idêntico.")
+
+
+def to_png(path: Path, data: bytes) -> None:
+    try:
+        Image.open(io.BytesIO(data)).save(path, "PNG")
+    except Exception as e:  # noqa: BLE001
+        raise CliError(400, f"Imagem inválida ({path.name}): {e}")
+
+
+def as_list(v: Any) -> list:
+    return v if isinstance(v, list) else [] if v is None else [v]
+
+
+def ref_url(v: Any) -> str | None:
+    """Aceita string (URL/data URL) ou objeto {image_url: ...} / {url: ...}."""
+    if isinstance(v, dict):
+        v = v.get("image_url") or v.get("url")
+        if isinstance(v, dict):
+            v = v.get("url")
+    return v if isinstance(v, str) and v else None
 
 
 @app.post("/v1/images/generations", dependencies=[Depends(auth)])
@@ -376,38 +561,62 @@ async def image_generations(request: Request, body: dict):
     prompt = (body.get("prompt") or "").strip()
     if not prompt:
         return err(400, "prompt vazio")
-    full = GEN_TEMPLATE.format(hint=orientation_hint(parse_size(body.get("size"))), prompt=prompt)
-    return await respond_images(request, [full], [], body)
+    o = validate_options(body)
+    # extensão: "images" (URLs ou data URLs) como referências visuais numa geração
+    urls = [u for u in (ref_url(x) for x in as_list(body.get("images") or body.get("image"))) if u]
+    tmp = Path(tempfile.mkdtemp(prefix="gen-"))
+    try:
+        refs: list[Path] = []
+        for i, u in enumerate(urls[:16]):
+            try:
+                data = await asyncio.to_thread(fetch_url, u)
+            except Exception as e:  # noqa: BLE001
+                raise CliError(400, f"Não foi possível obter a imagem de referência: {e}")
+            to_png(tmp / f"ref{i}.png", data)
+            refs.append(tmp / f"ref{i}.png")
+        hint = option_hints(o, edit=False) + (" Use as imagens anexadas como referência visual." if refs else "")
+        return await respond_images(request, GEN_TEMPLATE.format(hint=hint, prompt=prompt), refs, o, tmp)
+    except BaseException:
+        shutil.rmtree(tmp, ignore_errors=True)
+        raise
 
 
 @app.post("/v1/images/edits", dependencies=[Depends(auth)])
 async def image_edits(request: Request):
-    form = await request.form()
-    prompt = str(form.get("prompt") or "").strip()
-    uploads = [v for k, v in form.multi_items() if k in ("image", "image[]") and hasattr(v, "read")]
-    mask = form.get("mask")
-    if not prompt or not uploads:
+    ctype = request.headers.get("content-type", "")
+    if ctype.startswith("application/json"):  # variante JSON: images/mask como URL ou data URL
+        body = await request.json()
+        prompt = str(body.get("prompt") or "").strip()
+        sources = [ref_url(x) for x in as_list(body.get("images") or body.get("image"))]
+        mask_src = ref_url(body.get("mask"))
+        raw_opts = body
+        blobs = [await asyncio.to_thread(fetch_url, u) for u in sources if u]
+        mask_blob = await asyncio.to_thread(fetch_url, mask_src) if mask_src else None
+    else:
+        form = await request.form()
+        prompt = str(form.get("prompt") or "").strip()
+        uploads = [v for k, v in form.multi_items() if k in ("image", "image[]") and hasattr(v, "read")]
+        blobs = [await u.read() for u in uploads]
+        mask = form.get("mask")
+        mask_blob = await mask.read() if mask is not None and hasattr(mask, "read") else None
+        raw_opts = dict(form.items())
+    if not prompt or not blobs:
         return err(400, "prompt e image são obrigatórios")
+    o = validate_options(raw_opts)
     tmp = Path(tempfile.mkdtemp(prefix="edit-"))
     try:
         refs: list[Path] = []
-        for i, up in enumerate(uploads):
-            p = tmp / f"imagem{i}.png"
-            Image.open(io.BytesIO(await up.read())).save(p, "PNG")
-            refs.append(p)
-        mask_note = ""
-        if mask is not None and hasattr(mask, "read"):
-            p = tmp / "mascara.png"
-            Image.open(io.BytesIO(await mask.read())).save(p, "PNG")
-            refs.append(p)
-            mask_note = (" A ÚLTIMA imagem anexada é uma máscara: as áreas transparentes (ou pretas) indicam "
-                         "exatamente a região que deve ser alterada; o restante deve permanecer idêntico.")
-        opts = {k: form.get(k) for k in ("n", "size", "response_format", "output_format", "reasoning_effort")}
-        size = parse_size(opts["size"])
-        full = EDIT_TEMPLATE.format(hint=orientation_hint(size), mask=mask_note, prompt=prompt)
-        return await respond_images(request, [full], refs, opts)
-    finally:
+        for i, data in enumerate(blobs):
+            to_png(tmp / f"imagem{i}.png", data)
+            refs.append(tmp / f"imagem{i}.png")
+        if mask_blob:
+            to_png(tmp / "mascara.png", mask_blob)
+            refs.append(tmp / "mascara.png")
+        full = EDIT_TEMPLATE.format(hint=option_hints(o, edit=True), mask=MASK_NOTE if mask_blob else "", prompt=prompt)
+        return await respond_images(request, full, refs, o, tmp)
+    except BaseException:
         shutil.rmtree(tmp, ignore_errors=True)
+        raise
 
 
 @app.get("/v1/files/{name}")

@@ -46,6 +46,9 @@
             <x-dropdown-link :href="route('mundos-de-mim.admin.user-gallery.index')">
                 Galeria dos Usuários
             </x-dropdown-link>
+            <x-dropdown-link :href="route('mundos-de-mim.admin.parametros-imagem.index')">
+                Parâmetros de Imagem
+            </x-dropdown-link>
             <x-dropdown-link :href="route('admin.logs.index')">
                 📋 Logs
             </x-dropdown-link>

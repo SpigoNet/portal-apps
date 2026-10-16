@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Admin\Services\AiProviderService;
 use App\Modules\MundosDeMim\Models\Prompt;
 use App\Modules\MundosDeMim\Models\Theme;
+use App\Modules\MundosDeMim\Services\ParametrosImagemService;
 use App\Services\AI\Drivers\AirForceDriver;
 use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
@@ -84,9 +85,9 @@ class AdminPromptController extends Controller
         $baseUrl = $aiProviderService->getBaseUrlForProvider($provider);
         $driver = $this->createImageDriver($driverName, $provider->model, $apiKey, $baseUrl);
 
-        $imageUrl = $driver->generateImage($prompt->prompt_text, [
+        $imageUrl = $driver->generateImage($prompt->prompt_text, (new ParametrosImagemService)->aplicar($provider, [
             'reference_image_path' => $theme->example_input_path,
-        ]);
+        ]));
 
         if (! $imageUrl) {
             return back()->with('error', 'Falha ao gerar imagem a partir do "Antes".');

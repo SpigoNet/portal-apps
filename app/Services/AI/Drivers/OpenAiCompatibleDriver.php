@@ -24,6 +24,12 @@ class OpenAiCompatibleDriver implements AiDriverInterface
 
     protected string $model = 'gpt-image-1';
 
+    /** Parâmetros de imagem repassados ao gateway quando presentes em $options. */
+    private const IMAGE_PARAMS = [
+        'quality', 'background', 'output_format', 'output_compression', 'moderation',
+        'style', 'input_fidelity', 'reasoning_effort',
+    ];
+
     public function __construct(?string $model = null, ?string $apiKey = null, ?string $baseUrl = null)
     {
         if ($model) {
@@ -85,17 +91,11 @@ class OpenAiCompatibleDriver implements AiDriverInterface
                     $request = $this->attachImage($request, 'mask', $options['mask_image_path']);
                 }
 
-                $payload = ['model' => $this->model, 'prompt' => $prompt, 'response_format' => 'b64_json'];
-                if ($size) {
-                    $payload['size'] = $size;
-                }
+                $payload = $this->imagePayload($prompt, $size, $options);
 
                 $response = $request->post($this->baseUrl.'/v1/images/edits', $payload);
             } else {
-                $payload = ['model' => $this->model, 'prompt' => $prompt, 'response_format' => 'b64_json'];
-                if ($size) {
-                    $payload['size'] = $size;
-                }
+                $payload = $this->imagePayload($prompt, $size, $options);
 
                 $response = $this->http(600)->asJson()->post($this->baseUrl.'/v1/images/generations', $payload);
             }
@@ -106,12 +106,33 @@ class OpenAiCompatibleDriver implements AiDriverInterface
                 return null;
             }
 
-            return $this->storeResult($response->json('data.0') ?? []);
+            return $this->storeResult($response->json('data.0') ?? [], $payload['output_format'] ?? 'png');
         } catch (\Throwable $e) {
             Log::error('OpenAI-compatible image exception: '.$e->getMessage());
 
             return null;
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $options
+     * @return array<string, mixed>
+     */
+    private function imagePayload(string $prompt, ?string $size, array $options): array
+    {
+        $payload = ['model' => $this->model, 'prompt' => $prompt, 'response_format' => 'b64_json'];
+
+        if ($size) {
+            $payload['size'] = $size;
+        }
+
+        foreach (self::IMAGE_PARAMS as $param) {
+            if (isset($options[$param]) && $options[$param] !== '') {
+                $payload[$param] = $options[$param];
+            }
+        }
+
+        return $payload;
     }
 
     private function http(int $timeout): PendingRequest
@@ -140,7 +161,7 @@ class OpenAiCompatibleDriver implements AiDriverInterface
         return $request->attach($field, Storage::disk('public')->get($pathOrUrl), basename($pathOrUrl));
     }
 
-    private function storeResult(array $item): ?string
+    private function storeResult(array $item, string $format = 'png'): ?string
     {
         if (! empty($item['b64_json'])) {
             $contents = base64_decode($item['b64_json'], true);
@@ -149,7 +170,7 @@ class OpenAiCompatibleDriver implements AiDriverInterface
                 return null;
             }
 
-            $filename = 'generations/openai_'.Str::uuid().'.png';
+            $filename = 'generations/openai_'.Str::uuid().'.'.($format === 'jpeg' ? 'jpg' : $format);
             Storage::disk('public')->put($filename, $contents);
 
             return Storage::disk('public')->url($filename);

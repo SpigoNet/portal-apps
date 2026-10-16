@@ -28,6 +28,9 @@ class DailyPhotoService
 
     protected ?string $baseUrl = null;
 
+    /** @var array<string, string|int> */
+    protected array $parametrosImagem = [];
+
     public function __construct()
     {
         $service = new AiProviderService;
@@ -38,6 +41,7 @@ class DailyPhotoService
             $this->model = $provider->model;
             $this->apiKey = $service->getApiKeyForProvider($provider);
             $this->baseUrl = $service->getBaseUrlForProvider($provider);
+            $this->parametrosImagem = (new ParametrosImagemService)->para($provider);
         }
     }
 
@@ -102,7 +106,7 @@ class DailyPhotoService
             return null;
         }
 
-        $options = [];
+        $options = $this->parametrosImagem;
         if ($userAttr->photo_path && in_array($this->driver, ['pollination', 'pollination_image_edit', 'airforce', 'gemini', 'openai'], true)) {
             $options['reference_image_path'] = $userAttr->photo_path;
         }

@@ -10,6 +10,7 @@ use App\Modules\MundosDeMim\Models\DailyGeneration;
 use App\Modules\MundosDeMim\Models\Prompt;
 use App\Modules\MundosDeMim\Models\UserAttribute;
 use App\Modules\MundosDeMim\Services\DailyPhotoService;
+use App\Modules\MundosDeMim\Services\ParametrosImagemService;
 use App\Services\AI\Drivers\AirForceDriver;
 use App\Services\AI\Drivers\GeminiDriver;
 use App\Services\AI\Drivers\KdjingpaiDriver;
@@ -177,7 +178,7 @@ class PlaygroundController extends Controller
 
             $driver = $this->createDriver($driverName, $provider->model, $apiKey, $baseUrl);
 
-            $options = [];
+            $options = (new ParametrosImagemService)->aplicar($provider);
             if ($photoPath) {
                 $options['reference_image_path'] = $photoPath;
             }

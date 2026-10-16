@@ -16,6 +16,7 @@
         ['Importador', 'mundos-de-mim.admin.importador.index'],
         ['Vitrine pública', 'mundos-de-mim.admin.gallery.index'],
         ['Atlas dos usuários', 'mundos-de-mim.admin.user-gallery.index'],
+        ['Parâmetros de imagem', 'mundos-de-mim.admin.parametros-imagem.index'],
     ];
 @endphp
 <!DOCTYPE html>

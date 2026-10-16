@@ -73,6 +73,10 @@ Route::middleware(['web', 'auth', 'admin'])
     ->name('mundos-de-mim.admin.')
     ->group(function () {
 
+        // Parâmetros de geração de imagem por provedor
+        Route::get('/parametros-imagem', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminParametrosImagemController::class, 'index'])->name('parametros-imagem.index');
+        Route::put('/parametros-imagem/{provedor}', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminParametrosImagemController::class, 'update'])->name('parametros-imagem.update');
+
         // CRUD de Temas
         Route::get('/temas', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminThemeController::class, 'index'])->name('themes.index');
         Route::get('/temas/novo', [\App\Modules\MundosDeMim\Http\Controllers\Admin\AdminThemeController::class, 'create'])->name('themes.create');

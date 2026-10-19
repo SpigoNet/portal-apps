@@ -7,6 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tarefa extends Model
 {
+    public const CONCLUIDA = 'Concluído';
+
+    /** Colunas do kanban, na ordem do fluxo. */
+    public const STATUS = ['Planejamento', 'A Fazer', 'Em Andamento', 'Aguardando resposta', self::CONCLUIDA];
+
+    public const PRIORIDADES = ['Baixa', 'Média', 'Alta', 'Urgente'];
+
     protected $table = 'treetask_tarefas';
 
     protected $primaryKey = 'id_tarefa';

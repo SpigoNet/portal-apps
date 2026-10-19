@@ -33,6 +33,7 @@ app/Modules/TreeTask/
 │   │   ├── FocusController.php          # Modo foco/zen
 │   │   ├── GamificationController.php   # Mensagens motivacionais
 │   │   ├── GoodMorningController.php    # Relatório matinal
+│   │   ├── KanbanController.php         # Kanban por status com filtros
 │   │   ├── OrderController.php          # Reordenação drag-and-drop
 │   │   ├── ProjetoController.php        # CRUD de projetos
 │   │   └── TarefaController.php         # CRUD de tarefas
@@ -52,8 +53,9 @@ app/Modules/TreeTask/
 ├── resources/
 │   └── views/
 │       ├── index.blade.php              # Lista de projetos
-│       ├── show.blade.php               # Projeto com fases e tarefas (kanban)
+│       ├── kanban.blade.php             # Kanban: uma coluna por status, filtros por projeto/responsável/etc.
 │       ├── create.blade.php             # Criar projeto
+│       ├── lista.blade.php              # Visão em lista do projeto (fases e tarefas, reordenação por arrastar)
 │       ├── tree.blade.php               # Visualização em árvore
 │       ├── good_morning.blade.php       # Relatório matinal
 │       ├── tarefas/
@@ -64,7 +66,11 @@ app/Modules/TreeTask/
 │       ├── ai_command/                  # Interface de comando IA
 │       ├── celebration/
 │       │   └── show.blade.php           # Animação de conclusão
-│       └── components/                  # Componentes de layout
+│       ├── partials/                    # estilos.blade.php (CSS do módulo) e cabeçalho das visões do projeto
+│       └── components/layout.blade.php  # Shell do módulo: barra lateral, troca de módulos, abas no mobile
+├── Support/
+│   ├── Aparencia.php                    # Status/prioridade → classes CSS, cores de projeto e avatar, iniciais
+│   └── ResumoProjeto.php                # Progresso, atrasos, fase atual e situação de um projeto
 ├── TreeTaskServiceProvider.php
 ├── routes.php
 └── API_DOCUMENTATION.md                 # Documentação completa da API REST
@@ -84,7 +90,12 @@ app/Modules/TreeTask/
 | GET | `/treetask/criar` | `treetask.create` | Formulário de novo projeto |
 | POST | `/treetask` | `treetask.store` | Salvar projeto |
 | GET | `/treetask/bom-dia` | `treetask.bom-dia` | Relatório matinal |
-| GET | `/treetask/projeto/{id}` | `treetask.projeto.show` | Projeto com kanban |
+| GET | `/treetask/projeto/{id}` | `treetask.show` | Redireciona para o kanban filtrado pelo projeto |
+| GET | `/treetask/projeto/{id}/lista` | `treetask.lista` | Visão em lista do projeto (abas Lista / Kanban / Árvore) |
+| POST | `/treetask/sair` | `treetask.sair` | Encerra a sessão (a barra lateral do módulo não usa o menu global) |
+| GET | `/treetask/kanban` | `treetask.kanban` | Kanban por status (filtros: `projeto`, `responsavel`, `prioridade`, `busca`, `atrasadas`, `todas_concluidas`) |
+| GET | `/treetask/kanban/nova-tarefa` | `treetask.kanban.nova_tarefa` | Atalho para criar tarefa num projeto (usa a 1ª fase, cria "Geral" se não houver) |
+| PATCH | `/treetask/kanban/tarefas/{id}/mover` | `treetask.kanban.mover` | Arrastar cartão: muda status e ordem da coluna (AJAX) |
 | GET | `/treetask/projeto/{id}/arvore` | `treetask.projeto.arvore` | Visualização em árvore |
 | POST | `/treetask/fases` | `treetask.fases.store` | Criar fase |
 | DELETE | `/treetask/fases/{id}` | `treetask.fases.destroy` | Excluir fase |
@@ -145,7 +156,10 @@ X-Token: md5(email + password_hash)
 ### Web
 
 #### `ProjetoController`
-CRUD de projetos. Exibe a view kanban com fases e tarefas. Também gerencia a visualização em árvore.
+CRUD de projetos e visualização em árvore. `show` apenas redireciona para o kanban.
+
+#### `KanbanController`
+Kanban único: colunas = status da tarefa (Planejamento, A Fazer, Em Andamento, Aguardando resposta, Concluído), com filtros. Concluídas com mais de 14 dias ficam ocultas por padrão. As fases continuam existindo (estrutura da árvore e `id_fase` obrigatório na tarefa) e aparecem no cartão, mas não definem colunas.
 
 #### `TarefaController`
 CRUD completo de tarefas. Atualização parcial de status. Upload e download de anexos.
@@ -304,3 +318,11 @@ O token permanece válido enquanto a senha do usuário não for alterada.
 - Para integrar com o assistente Alfred, utilize os endpoints de integração: `/tarefas`, `/tarefas/relatorio/manha`, `/tarefas/paradas`, `/tarefas/{id}/completa`.
 - As migrations ficam dentro do módulo em `database/migrations/`.
 - Drag-and-drop funciona via chamadas AJAX para os endpoints `/reorder/*`.
+
+### Visual (rebrand Spigo.net)
+
+- O módulo é **autocontido**: `TreeTask::components.layout` renderiza o HTML completo (sem `x-app-layout` nem o menu Livewire do portal), com barra lateral no desktop e barra de abas + botão de módulos no mobile (≤ 860px).
+- Todo o CSS vive em `resources/views/partials/estilos.blade.php`, só com classes `tt-*`, `st-*` (status), `p-*` (prioridade) e `chip-*`. **Não use utilitários do Tailwind** nas views do módulo; ele não é carregado aqui. Alpine vem do `@livewireScripts` do layout.
+- Cores e formas da marca: roxo `#7B4FA8`, verde-limão `#C9E86B` (só como destaque), títulos em Montserrat e texto em Hanken Grotesk. Logo SN em `public/images/treetask/logo-sn.png`.
+- A troca de módulos usa a mesma regra de visibilidade do menu global (`PortalApp`), fornecida por um View Composer no `TreeTaskServiceProvider`.
+- Layout `:bare="true"` esconde o menu (modo foco com tarefa em andamento e celebração). Passe `:quill="true"` para carregar o CSS do editor.

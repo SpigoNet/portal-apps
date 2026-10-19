@@ -1,105 +1,71 @@
-<x-TreeTask::layout>
-    <div class="relative min-h-screen bg-gray-900 flex items-center justify-center overflow-hidden">
+@php
+    use App\Modules\TreeTask\Support\Aparencia;
+@endphp
+<x-TreeTask::layout titulo="Tarefa concluída" :bare="true">
+    <style>
+        .tt-fest { position: relative; min-height: 100vh; background: radial-gradient(900px 500px at 50% -10%, #3A2457 0%, #17121D 70%); display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 24px 16px; }
+        .tt-fest canvas { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+        .tt-fest-card { position: relative; z-index: 1; width: 100%; max-width: 680px; background: #fff; border-radius: 28px; padding: 40px clamp(20px, 5vw, 44px); text-align: center; box-shadow: 0 30px 80px rgba(0, 0, 0, .4); animation: tt-sobe .6s ease-out both; }
+        @keyframes tt-sobe { from { opacity: 0; transform: translate3d(0, 40px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+        .tt-fest-sel { width: 64px; height: 64px; border-radius: 20px; margin: 0 auto 16px; display: grid; place-items: center; background: var(--tt-lime); color: #2B1B3D; box-shadow: 0 10px 24px rgba(120, 150, 20, .35); }
+        .tt-sugs { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; text-align: left; }
+    </style>
 
-        <canvas id="fireworks-canvas" class="absolute inset-0 z-0 pointer-events-none"></canvas>
+    <div class="tt-fest">
+        <canvas id="fireworks-canvas" aria-hidden="true"></canvas>
 
-        <div class="relative z-10 bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-8 m-4 text-center animate-fade-in-up">
+        <div class="tt-fest-card">
+            <div class="tt-fest-sel">
+                <svg class="tt-i l" viewBox="0 0 24 24" aria-hidden="true" style="width:34px;height:34px;stroke-width:2.4"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+            </div>
+            <h1 style="font-size:30px;font-weight:800;letter-spacing:-.02em">Tarefa concluída!</h1>
+            <p class="tt-muted" style="margin:10px 0 2px;font-size:16px">Você finalizou</p>
+            <h2 style="font-size:22px;font-weight:700;color:var(--tt-brand-d)">{{ $tarefa->titulo }}</h2>
+            <p class="tt-muted" style="margin:4px 0 0;font-size:13px">{{ $tarefa->fase->projeto->nome }} › {{ $tarefa->fase->nome }}</p>
 
-            <div class="mb-6">
-                <div class="text-7xl mb-2 animate-bounce">🎉</div>
-                <h1 class="text-3xl font-black text-gray-800 uppercase tracking-wide">Tarefa Concluída!</h1>
-                <p class="text-gray-500 mt-2 text-lg">Você finalizou:</p>
-                <h2 class="text-2xl font-bold text-blue-600 mt-1">{{ $tarefa->titulo }}</h2>
-                <p class="text-sm text-gray-400 mt-1">{{ $tarefa->fase->projeto->nome }} > {{ $tarefa->fase->nome }}</p>
+            <hr style="border:0;border-top:1px solid var(--tt-line);margin:26px 0">
+
+            <h3 style="font-size:18px;font-weight:700;margin-bottom:14px">O que fazer agora?</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:24px">
+                <a href="{{ route('treetask.focus.index') }}" class="tt-btn">Nada por enquanto</a>
+                <a href="{{ route('treetask.index') }}" class="tt-btn">Procurar em outro projeto</a>
             </div>
 
-            <hr class="border-gray-200 my-6">
-
-            <div class="text-center">
-                <h3 class="text-xl font-bold text-gray-700 mb-4 flex justify-center sm:justify-center">
-                    <span class="mr-2">🤔</span> O que fazer agora?
-                </h3>
-
-                <div class="flex flex-wrap gap-3 mb-8 justify-center sm:justify-center">
-                    <a href="{{ route('treetask.focus.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-6 rounded-full transition transform hover:scale-105">
-                        ☕ Nada por enquanto
-                    </a>
-                    <a href="{{ route('treetask.index') }}" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold py-2 px-6 rounded-full transition transform hover:scale-105">
-                        🔍 Procurar em outro projeto...
-                    </a>
+            <div style="background:var(--tt-brand-soft);border-radius:18px;padding:18px;text-align:left">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px">
+                    <span class="tt-sec-tit" style="color:#4B2A72">Próximas nesta fase · {{ $tarefa->fase->nome }}</span>
+                    <span class="tt-chip" style="background:#fff;color:#4B2A72">{{ $sugestoes->count() }}</span>
                 </div>
 
-                <div class="bg-blue-50 rounded-xl p-5 border border-blue-100">
-                    <h4 class="text-sm font-bold text-blue-800 uppercase tracking-wider mb-3 flex justify-between items-center">
-                        <span>Próximas nesta fase ({{ $tarefa->fase->nome }})</span>
-                        <span class="bg-blue-200 text-blue-800 text-xs py-0.5 px-2 rounded-full">{{ $sugestoes->count() }}</span>
-                    </h4>
-
-                    @if($sugestoes->count() > 0)
-                        <div class="space-y-2 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-                            @foreach($sugestoes as $sugestao)
-                                <div class="bg-white p-3 rounded-lg shadow-sm border border-blue-100 flex justify-between items-center hover:shadow-md transition group">
-                                    <div class="flex items-center overflow-hidden">
-                                        @php
-                                            $cor = match($sugestao->prioridade) {
-                                                'Urgente' => 'bg-red-500',
-                                                'Alta' => 'bg-orange-400',
-                                                'Média' => 'bg-blue-400',
-                                                default => 'bg-gray-300'
-                                            };
-                                        @endphp
-                                        <span class="w-3 h-3 rounded-full {{ $cor }} mr-3 flex-shrink-0" title="Prioridade: {{ $sugestao->prioridade }}"></span>
-
-                                        <div class="truncate">
-                                            <span class="text-gray-800 font-medium block truncate">{{ $sugestao->titulo }}</span>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex space-x-2 flex-shrink-0 ml-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                                        <form action="{{ route('treetask.tarefas.updateStatus', $sugestao->id_tarefa) }}" method="POST">
-                                            @csrf @method('PATCH')
-                                            <input type="hidden" name="status" value="Em Andamento">
-                                            <button type="submit" style="line-height: 2rem;" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-1.5 px-3 rounded transition">
-                                                Iniciar
-                                            </button>
-                                        </form>
-
-                                        <a style="line-height: 2rem;" href="{{ route('treetask.tarefas.edit', ['id' => $sugestao->id_tarefa, 'origin' => 'focus']) }}" class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold py-1.5 px-3 rounded transition">
-                                            Ver
-                                        </a>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="text-center py-4 text-blue-400 italic text-sm">
-                            Não há mais tarefas pendentes nesta fase! Bom trabalho! 👏
-                        </div>
-                    @endif
-                </div>
+                @if($sugestoes->count() > 0)
+                    <div class="tt-sugs">
+                        @foreach($sugestoes as $sugestao)
+                            <div class="tt-card" style="padding:10px 12px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;box-shadow:none">
+                                <span style="display:flex;align-items:center;gap:10px;min-width:0;flex:1 1 180px">
+                                    <span class="tt-prio {{ Aparencia::prioridadeClasse($sugestao->prioridade) }}" style="font-size:0" title="Prioridade: {{ $sugestao->prioridade }}"></span>
+                                    <span style="font-weight:600;overflow-wrap:anywhere">{{ $sugestao->titulo }}</span>
+                                </span>
+                                <span style="display:flex;gap:8px">
+                                    <form action="{{ route('treetask.tarefas.updateStatus', $sugestao->id_tarefa) }}" method="POST">
+                                        @csrf @method('PATCH')
+                                        <input type="hidden" name="status" value="Em Andamento">
+                                        <button type="submit" class="tt-btn pri sm">Iniciar</button>
+                                    </form>
+                                    <a class="tt-btn sm" href="{{ route('treetask.tarefas.edit', ['id' => $sugestao->id_tarefa, 'origin' => 'focus']) }}">Ver</a>
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="tt-muted" style="margin:0;text-align:center;font-style:italic">Não há mais tarefas pendentes nesta fase. Bom trabalho!</p>
+                @endif
             </div>
 
-            <div class="mt-6 text-center">
-                <a href="{{ route('treetask.focus.index') }}" style="line-height: 2rem;display: inline-block;" class="mb-6 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold py-1.5 px-3 rounded transition">Voltar ao Modo Zen</a>
+            <div style="margin-top:22px">
+                <a href="{{ route('treetask.focus.index') }}" class="tt-btn ghost">Voltar ao modo foco</a>
             </div>
         </div>
     </div>
-
-    <style>
-        /* Animação simples de entrada */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translate3d(0, 40px, 0); }
-            to { opacity: 1; transform: translate3d(0, 0, 0); }
-        }
-        .animate-fade-in-up {
-            animation: fadeInUp 0.6s ease-out forwards;
-        }
-        /* Scrollbar bonita para a lista */
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #eff6ff; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #bfdbfe; border-radius: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #60a5fa; }
-    </style>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -115,7 +81,7 @@
             resizeCanvas();
 
             function createParticle(x, y) {
-                const colors = ['#ff4d4d', '#4dff4d', '#4d4dff', '#ffff4d', '#ff4dff', '#4dffff'];
+                const colors = ['#C9E86B', '#A47BC7', '#FFFFFF', '#8A58BD', '#E0CBF5', '#DDF58E'];
                 const color = colors[Math.floor(Math.random() * colors.length)];
                 const count = 40; // Mais partículas por explosão
                 for (let i = 0; i < count; i++) {

@@ -13,173 +13,7 @@
         <section class="rounded-2xl border border-white/10 bg-white/5 p-6">
             <h2 class="text-lg font-bold mb-4 text-slate-200">Novo agendamento</h2>
 
-            <form action="{{ route('pidgey.agendamentos.store') }}" method="POST" class="space-y-4" x-data="{
-                frequencia: 'una_vez',
-                interpretar: true,
-                canal: 'telegram',
-                dias: [1,2,3,4,5],
-            }">
-                @csrf
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Persona</label>
-                        <select name="persona_slug" required
-                            class="w-full rounded-lg bg-slate-900 border border-white/10 px-3 py-2 text-sm text-slate-100 focus:border-amber-400 focus:ring-amber-400">
-                            @foreach ($personas as $p)
-                                <option value="{{ $p->slug }}">{{ $p->slug }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Canal</label>
-                        <select name="canal" x-model="canal"
-                            class="w-full rounded-lg bg-slate-900 border border-white/10 px-3 py-2 text-sm text-slate-100 focus:border-amber-400 focus:ring-amber-400">
-                            <option value="telegram">Telegram</option>
-                            <option value="whatsapp">WhatsApp</option>
-                            <option value="email">E-mail</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Mensagem</label>
-                    <textarea name="mensagem" rows="3" required
-                        class="w-full rounded-lg bg-slate-900 border border-white/10 px-3 py-2 text-sm text-slate-100 focus:border-amber-400 focus:ring-amber-400"
-                        placeholder="Escreva a mensagem que a persona deve enviar..."></textarea>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Frequência</label>
-                        <select name="frequencia" x-model="frequencia"
-                            class="w-full rounded-lg bg-slate-900 border border-white/10 px-3 py-2 text-sm text-slate-100 focus:border-amber-400 focus:ring-amber-400">
-                            <option value="una_vez">Uma vez</option>
-                            <option value="diario">Diário (1x/dia)</option>
-                            <option value="semanal">Semanal</option>
-                            <option value="intervalo">Intervalo (a cada N min)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Horário</label>
-                        <input type="time" name="hora" value="09:00"
-                            class="w-full rounded-lg bg-slate-900 border border-white/10 px-3 py-2 text-sm text-slate-100 focus:border-amber-400 focus:ring-amber-400"
-                            x-bind:required="['una_vez','diario','semanal'].includes(frequencia)" />
-                    </div>
-
-                    <div x-show="frequencia === 'semanal'">
-                        <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Dia da semana</label>
-                        <select name="dia_semana"
-                            class="w-full rounded-lg bg-slate-900 border border-white/10 px-3 py-2 text-sm text-slate-100 focus:border-amber-400 focus:ring-amber-400">
-                            @foreach (['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'] as $i => $d)
-                                <option value="{{ $i }}">{{ $d }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
-                {{-- Intervalo --}}
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4" x-show="frequencia === 'intervalo'">
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">A cada (minutos)</label>
-                        <input type="number" name="intervalo_minutos" value="120" min="10" max="1440"
-                            class="w-full rounded-lg bg-slate-900 border border-white/10 px-3 py-2 text-sm text-slate-100 focus:border-amber-400 focus:ring-amber-400" />
-                        <small class="text-[11px] text-slate-500">Ex: 120 = de 2 em 2 horas</small>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Horário início</label>
-                        <input type="time" name="hora_inicio" value="08:00"
-                            class="w-full rounded-lg bg-slate-900 border border-white/10 px-3 py-2 text-sm text-slate-100 focus:border-amber-400 focus:ring-amber-400" />
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Horário fim</label>
-                        <input type="time" name="hora_fim" value="22:00"
-                            class="w-full rounded-lg bg-slate-900 border border-white/10 px-3 py-2 text-sm text-slate-100 focus:border-amber-400 focus:ring-amber-400" />
-                    </div>
-                </div>
-
-                {{-- Dias da semana (diario/intervalo) --}}
-                <div x-show="['diario','intervalo'].includes(frequencia)" class="rounded-lg border border-white/10 bg-slate-900/40 p-3">
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="block text-xs font-bold uppercase tracking-widest text-slate-400">Dias</label>
-                        <div class="flex gap-2">
-                            <button type="button" @click="dias = [1,2,3,4,5]"
-                                class="rounded bg-slate-700 px-2 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-600">Dias úteis</button>
-                            <button type="button" @click="dias = [0,1,2,3,4,5,6]"
-                                class="rounded bg-slate-700 px-2 py-1 text-[11px] font-bold text-slate-200 hover:bg-slate-600">Todos</button>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap gap-3">
-                        @foreach (['Dom' => 0,'Seg' => 1,'Ter' => 2,'Qua' => 3,'Qui' => 4,'Sex' => 5,'Sáb' => 6] as $nome => $valor)
-                            <label class="flex items-center gap-1 text-sm text-slate-300">
-                                <input type="checkbox" name="dias_semana[]" value="{{ $valor }}" x-model="dias"
-                                    class="rounded border-white/20 bg-slate-900 text-amber-500 focus:ring-amber-400" />
-                                {{ $nome }}
-                            </label>
-                        @endforeach
-                    </div>
-                    <small class="text-[11px] text-slate-500">Deixe marcado "Dias úteis" para enviar só de Seg a Sex.</small>
-                </div>
-
-                {{-- Período (data início / fim) --}}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-show="['diario','semanal','intervalo'].includes(frequencia)">
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Data início <span class="text-slate-500 normal-case">(opcional)</span></label>
-                        <input type="date" name="data_inicio"
-                            class="w-full rounded-lg bg-slate-900 border border-white/10 px-3 py-2 text-sm text-slate-100 focus:border-amber-400 focus:ring-amber-400" />
-                        <small class="text-[11px] text-slate-500">Se vazio, começa imediatamente.</small>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Data fim <span class="text-slate-500 normal-case">(opcional)</span></label>
-                        <input type="date" name="data_fim"
-                            class="w-full rounded-lg bg-slate-900 border border-white/10 px-3 py-2 text-sm text-slate-100 focus:border-amber-400 focus:ring-amber-400" />
-                        <small class="text-[11px] text-slate-500">Ex: remédio por 5 dias — após essa data o agendamento é encerrado.</small>
-                    </div>
-                </div>
-
-                <label class="flex items-center gap-2 text-sm text-slate-300">
-                    <input type="checkbox" name="interpretar" value="1" x-model="interpretar"
-                        class="rounded border-white/20 bg-slate-900 text-amber-500 focus:ring-amber-400" />
-                    Reescrever no estilo da persona (IA)
-                </label>
-
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Modelo de IA</label>
-                    <select name="ai_model_id"
-                        class="w-full rounded-lg bg-slate-900 border border-white/10 px-3 py-2 text-sm text-slate-100 focus:border-amber-400 focus:ring-amber-400">
-                        <option value="">Padrão do sistema</option>
-                        @foreach ($modelos as $m)
-                            <option value="{{ $m->id }}">{{ $m->nome }} ({{ $m->provedor->nome ?? '—' }})</option>
-                        @endforeach
-                    </select>
-                    <small class="text-[11px] text-slate-500">Modelo usado para reescrever a mensagem. Se vazio, usa o padrão do portal.</small>
-                </div>
-
-                <div>
-                    <div class="flex items-center justify-between mb-1">
-                        <label class="block text-xs font-bold uppercase tracking-widest text-slate-400">Conteúdos dinâmicos <span class="text-slate-500 normal-case">(opcional)</span></label>
-                        <a href="{{ route('pidgey.conteudos.index') }}" class="text-[11px] font-bold text-amber-400 hover:underline">
-                            Gerenciar
-                        </a>
-                    </div>
-                    <select name="conteudos_dinamico[]" multiple
-                        class="w-full rounded-lg bg-slate-900 border border-white/10 px-3 py-2 text-sm text-slate-100 focus:border-amber-400 focus:ring-amber-400">
-                    @foreach ($conteudos as $c)
-                        <option value="{{ $c->id }}">{{ $c->nome }} — {{ $c->tipo_label }}{{ $c->sistema ? ' (Sistema)' : '' }}</option>
-                    @endforeach
-                    </select>
-                    <small class="text-[11px] text-slate-500">São adicionados ao contexto da IA ao gerar a mensagem.</small>
-                </div>
-
-                <div>
-                    <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-5 py-2.5 text-sm font-black uppercase tracking-widest text-slate-950 hover:bg-amber-400 transition">
-                        <i class="fa-solid fa-paper-plane"></i> Agendar
-                    </button>
-                </div>
-            </form>
+            @include('Pidgey::agendamentos._form', ['agendamento' => new \App\Modules\Pidgey\Models\Agendamento])
         </section>
 
         {{-- Lista --}}
@@ -214,6 +48,11 @@
                                     @if ($a->interpretar)
                                         <span class="text-xs text-indigo-400" title="Reescrita por IA">
                                             <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                        </span>
+                                    @endif
+                                    @if ($a->enviar_imagem)
+                                        <span class="text-xs text-amber-300" title="Envia imagem do personagem">
+                                            <i class="fa-solid fa-image"></i>
                                         </span>
                                     @endif
                                     @foreach ($a->conteudosDinamicos as $c)
@@ -252,6 +91,10 @@
                                         <i class="fa-solid fa-paper-plane"></i> Enviar agora
                                     </button>
                                 </form>
+                                <a href="{{ route('pidgey.agendamentos.edit', $a) }}"
+                                    class="rounded-lg border border-amber-500/30 px-3 py-1.5 text-xs font-bold text-amber-300 hover:bg-amber-500/10 transition">
+                                    <i class="fa-solid fa-pen"></i> Editar
+                                </a>
                                 <form action="{{ route('pidgey.agendamentos.toggle', $a) }}" method="POST">
                                     @csrf
                                     <button type="submit"

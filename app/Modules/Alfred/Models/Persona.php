@@ -19,6 +19,8 @@ class Persona extends Model
         'telegram_token',
         'telegram_chat_id',
         'personality',
+        'aparencia',
+        'imagem_referencia',
         'metadata',
         'active',
     ];

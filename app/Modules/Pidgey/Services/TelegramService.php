@@ -4,6 +4,7 @@ namespace App\Modules\Pidgey\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class TelegramService
 {
@@ -53,6 +54,86 @@ class TelegramService
 
             return ['ok' => false, 'status' => null, 'body' => null, 'error' => $e->getMessage()];
         }
+    }
+
+    /**
+     * Envia uma foto com legenda. A imagem é enviada como arquivo (multipart), porque a URL do
+     * portal nem sempre é acessível pelo Telegram. Legendas acima de 1024 caracteres (limite do
+     * Telegram) vão numa mensagem de texto logo depois da foto.
+     *
+     * @param  string  $imagem  URL (do disco `public` ou externa) ou caminho no disco `public`
+     */
+    public function sendPhoto(string $token, string $chatId, string $imagem, string $legenda = ''): array
+    {
+        if (empty($token) || empty($chatId)) {
+            return ['ok' => false, 'status' => null, 'body' => null, 'error' => 'Telegram: token ou chat_id ausente'];
+        }
+
+        $arquivo = $this->lerImagem($imagem);
+
+        if ($arquivo === null) {
+            return ['ok' => false, 'status' => null, 'body' => null, 'error' => 'Imagem indisponível para envio'];
+        }
+
+        $legendaCabe = mb_strlen($legenda) <= 1024;
+
+        try {
+            $req = Http::timeout(max($this->timeout, 60))
+                ->attach('photo', $arquivo, 'personagem.'.$this->extensao($imagem))
+                ->post('https://api.telegram.org/bot'.$token.'/sendPhoto', array_filter([
+                    'chat_id' => $chatId,
+                    'caption' => $legendaCabe && $legenda !== '' ? $legenda : null,
+                    'parse_mode' => $legendaCabe && $legenda !== '' ? 'HTML' : null,
+                ], fn ($v) => $v !== null));
+
+            if (! $req->successful()) {
+                Log::error('Telegram sendPhoto falhou', ['status' => $req->status(), 'body' => $req->body()]);
+
+                return ['ok' => false, 'status' => $req->status(), 'body' => $req->body(), 'error' => 'request_failed'];
+            }
+        } catch (\Exception $e) {
+            Log::error('Telegram sendPhoto exceção', ['error' => $e->getMessage()]);
+
+            return ['ok' => false, 'status' => null, 'body' => null, 'error' => $e->getMessage()];
+        }
+
+        if (! $legendaCabe) {
+            return $this->sendMessage($token, $chatId, $legenda);
+        }
+
+        return ['ok' => true, 'status' => $req->status(), 'body' => $req->body(), 'error' => null];
+    }
+
+    private function lerImagem(string $imagem): ?string
+    {
+        $disco = Storage::disk('public');
+        $prefixo = rtrim($disco->url(''), '/').'/';
+        $caminho = str_starts_with($imagem, $prefixo) ? substr($imagem, strlen($prefixo)) : $imagem;
+
+        if (! str_starts_with($caminho, 'http') && $disco->exists($caminho)) {
+            return $disco->get($caminho);
+        }
+
+        if (! str_starts_with($imagem, 'http')) {
+            return null;
+        }
+
+        try {
+            $resposta = Http::timeout(max($this->timeout, 60))->get($imagem);
+
+            return $resposta->successful() && $resposta->body() !== '' ? $resposta->body() : null;
+        } catch (\Exception $e) {
+            Log::warning('Telegram: não foi possível baixar a imagem', ['error' => $e->getMessage()]);
+
+            return null;
+        }
+    }
+
+    private function extensao(string $imagem): string
+    {
+        $ext = strtolower(pathinfo((string) parse_url($imagem, PHP_URL_PATH), PATHINFO_EXTENSION));
+
+        return in_array($ext, ['jpg', 'jpeg', 'png', 'webp'], true) ? $ext : 'png';
     }
 
     /**

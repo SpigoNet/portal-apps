@@ -2,6 +2,9 @@
 
 namespace App\Modules\Mithril;
 
+use App\Modules\Mithril\Services\Pidgey\ContasAPagarProvedor;
+use App\Modules\Mithril\Services\Pidgey\RelatorioFinanceiroProvedor;
+use App\Modules\Pidgey\Services\ProvedoresConteudo;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -35,6 +38,10 @@ class MithrilServiceProvider extends ServiceProvider
 
     public function register()
     {
-        //
+        // Conteúdos dinâmicos que o Pidgey envia pelas personas (Nami).
+        $this->callAfterResolving(ProvedoresConteudo::class, function (ProvedoresConteudo $p): void {
+            $p->registrar($this->app->make(RelatorioFinanceiroProvedor::class));
+            $p->registrar($this->app->make(ContasAPagarProvedor::class));
+        });
     }
 }

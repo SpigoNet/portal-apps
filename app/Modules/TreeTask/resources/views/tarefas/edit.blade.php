@@ -1,157 +1,123 @@
-<x-TreeTask::layout>
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+@php
+    use App\Modules\TreeTask\Models\Tarefa;
 
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Editar Tarefa') }}
-            </h2>
+    $voltar = request('origin') === 'focus' ? route('treetask.focus.index') : route('treetask.tarefas.show', $tarefa->id_tarefa);
+@endphp
+<x-TreeTask::layout titulo="Editar tarefa" ativo="projetos" :quill="true">
+    <nav class="tt-crumb" aria-label="Trilha">
+        <a href="{{ route('treetask.index') }}">Projetos</a>
+        <svg class="tt-i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        <a href="{{ route('treetask.lista', $tarefa->fase->id_projeto) }}">{{ $tarefa->fase->projeto->nome }}</a>
+        <svg class="tt-i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        <a href="{{ $voltar }}">{{ \Illuminate\Support\Str::limit($tarefa->titulo, 40) }}</a>
+        <svg class="tt-i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        <b>Editar</b>
+    </nav>
 
-            <div class="flex space-x-2">
-                <a href="{{ route('treetask.index') }}" class="text-sm text-gray-600 hover:text-gray-900 underline px-2">
-                    Projetos
-                </a>
+    <header>
+        <h1 class="tt-h1">Editar tarefa</h1>
+    </header>
 
-                <span class="text-gray-300">|</span>
+    <form id="edit-task-form" class="tt-card pad" style="max-width:820px;display:flex;flex-direction:column;gap:18px" action="{{ route('treetask.tarefas.update', $tarefa->id_tarefa) }}" method="POST">
+        @csrf
+        @method('PUT')
+        <input type="hidden" name="origin" value="{{ request('origin') }}">
 
-                <a href="{{ route('treetask.focus.index') }}" class="text-sm text-indigo-600 hover:text-indigo-900 font-bold px-2">
-                    Modo Zen 🧘
-                </a>
+        <div class="tt-form-grid" style="padding:16px;border-radius:14px;background:#FBF9FD;border:1px solid var(--tt-line)">
+            <div class="tt-field">
+                <label class="tt-label" for="id_fase">Fase</label>
+                <select class="tt-select" id="id_fase" name="id_fase">
+                    @foreach($fases as $fase)
+                        <option value="{{ $fase->id_fase }}" @selected($tarefa->id_fase == $fase->id_fase)>{{ $fase->nome }}</option>
+                    @endforeach
+                </select>
+            </div>
 
-                @if(request('origin') === 'focus')
-                    <a href="{{ route('treetask.focus.index') }}" class="ml-4 bg-gray-200 hover:bg-gray-300 text-gray-700 py-1 px-3 rounded text-sm font-bold">
-                        ⬅ Voltar
-                    </a>
-                @else
-                    <a href="{{ route('treetask.show', $tarefa->fase->id_projeto) }}" class="ml-4 bg-gray-200 hover:bg-gray-300 text-gray-700 py-1 px-3 rounded text-sm font-bold">
-                        ⬅ Voltar
-                    </a>
-                @endif
+            <div class="tt-field">
+                <label class="tt-label" for="status">Status</label>
+                <select class="tt-select" id="status" name="status" style="font-weight:700">
+                    @foreach(['A Fazer', 'Planejamento', 'Em Andamento', 'Aguardando resposta', Tarefa::CONCLUIDA] as $status)
+                        <option value="{{ $status }}" @selected($tarefa->status == $status)>{{ $status }}</option>
+                    @endforeach
+                </select>
             </div>
         </div>
-    </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <form id="edit-task-form" action="{{ route('treetask.tarefas.update', $tarefa->id_tarefa) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" name="origin" value="{{ request('origin') }}">
+        <div class="tt-field">
+            <label class="tt-label" for="titulo">Título *</label>
+            <input class="tt-input" id="titulo" type="text" name="titulo" value="{{ old('titulo', $tarefa->titulo) }}" required>
+            @error('titulo') <span class="tt-erro">{{ $message }}</span> @enderror
+        </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded border border-gray-200">
-
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Fase (Coluna):</label>
-                                <select name="id_fase" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    @foreach($fases as $fase)
-                                        <option value="{{ $fase->id_fase }}" {{ $tarefa->id_fase == $fase->id_fase ? 'selected' : '' }}>
-                                            {{ $fase->nome }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Status da Tarefa:</label>
-                                <select name="status" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 font-bold text-gray-700">
-                                    <option value="A Fazer" {{ $tarefa->status == 'A Fazer' ? 'selected' : '' }}>⚪ A Fazer</option>
-                                    <option value="Planejamento" {{ $tarefa->status == 'Planejamento' ? 'selected' : '' }}>🟣 Planejamento</option>
-                                    <option value="Em Andamento" {{ $tarefa->status == 'Em Andamento' ? 'selected' : '' }}>🔵 Em Andamento</option>
-                                    <option value="Aguardando resposta" {{ $tarefa->status == 'Aguardando resposta' ? 'selected' : '' }}>🟡 Aguardando resposta</option>
-                                    <option value="Concluído" {{ $tarefa->status == 'Concluído' ? 'selected' : '' }}>🟢 Concluído</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Título *</label>
-                            <input type="text" name="titulo" value="{{ old('titulo', $tarefa->titulo) }}" class="w-full border-gray-300 rounded-md shadow-sm" required>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Descrição</label>
-                            <div id="editor-container" class="bg-white" style="height: 200px;">
-                                {!! old('descricao', $tarefa->descricao) !!}
-                            </div>
-                            <input type="hidden" name="descricao" id="descricao-hidden">
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Responsável *</label>
-                                <select name="id_user_responsavel" class="w-full border-gray-300 rounded-md shadow-sm" required>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}" {{ $tarefa->id_user_responsavel == $user->id ? 'selected' : '' }}>
-                                            {{ $user->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Prioridade</label>
-                                <select name="prioridade" class="w-full border-gray-300 rounded-md shadow-sm">
-                                    @foreach(['Baixa', 'Média', 'Alta', 'Urgente'] as $prio)
-                                        <option value="{{ $prio }}" {{ $tarefa->prioridade == $prio ? 'selected' : '' }}>{{ $prio }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Vencimento</label>
-                                <input type="date" name="data_vencimento"
-                                       value="{{ $tarefa->data_vencimento ? \Carbon\Carbon::parse($tarefa->data_vencimento)->format('Y-m-d') : '' }}"
-                                       class="w-full border-gray-300 rounded-md shadow-sm">
-                            </div>
-
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Estimativa (h)</label>
-                                <input type="number" step="0.5" name="estimativa_tempo" value="{{ old('estimativa_tempo', $tarefa->estimativa_tempo) }}" class="w-full border-gray-300 rounded-md shadow-sm">
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-100">
-                            <a href="{{ url()->previous() }}" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded shadow-sm hover:bg-gray-50">Cancelar</a>
-                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded shadow hover:bg-blue-700">Salvar Alterações</button>
-                        </div>
-                    </form>
+        <div class="tt-field">
+            <span class="tt-label">Descrição</span>
+            <div class="tt-editor">
+                <div id="editor-container" style="height: 220px; background:#fff">
+                    {!! old('descricao', $tarefa->descricao) !!}
                 </div>
             </div>
+            <input type="hidden" name="descricao" id="descricao-hidden">
         </div>
-    </div>
+
+        <div class="tt-form-grid">
+            <div class="tt-field">
+                <label class="tt-label" for="id_user_responsavel">Responsável *</label>
+                <select class="tt-select" id="id_user_responsavel" name="id_user_responsavel" required>
+                    @foreach($users as $user)
+                        <option value="{{ $user->id }}" @selected($tarefa->id_user_responsavel == $user->id)>{{ $user->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="tt-field">
+                <label class="tt-label" for="prioridade">Prioridade</label>
+                <select class="tt-select" id="prioridade" name="prioridade">
+                    @foreach(Tarefa::PRIORIDADES as $prio)
+                        <option value="{{ $prio }}" @selected($tarefa->prioridade == $prio)>{{ $prio }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="tt-field">
+                <label class="tt-label" for="data_vencimento">Vencimento</label>
+                <input class="tt-input" id="data_vencimento" type="date" name="data_vencimento"
+                       value="{{ $tarefa->data_vencimento ? \Carbon\Carbon::parse($tarefa->data_vencimento)->format('Y-m-d') : '' }}">
+            </div>
+
+            <div class="tt-field">
+                <label class="tt-label" for="estimativa_tempo">Estimativa (h)</label>
+                <input class="tt-input" id="estimativa_tempo" type="number" step="0.5" name="estimativa_tempo" value="{{ old('estimativa_tempo', $tarefa->estimativa_tempo) }}">
+            </div>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end;padding-top:16px;border-top:1px solid var(--tt-line-2)">
+            <a class="tt-btn" href="{{ $voltar }}">Cancelar</a>
+            <button type="submit" class="tt-btn pri">Salvar alterações</button>
+        </div>
+    </form>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Inicializa o Quill no container
+        document.addEventListener('DOMContentLoaded', function () {
             var quill = new Quill('#editor-container', {
                 theme: 'snow',
                 placeholder: 'Descreva os detalhes da tarefa...',
                 modules: {
                     toolbar: [
-                        ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+                        ['bold', 'italic', 'underline', 'strike'],
                         ['blockquote', 'code-block'],
                         [{ 'list': 'ordered'}, { 'list': 'bullet' }],
                         [{ 'header': [1, 2, 3, false] }],
-                        [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
-                        ['clean']                                         // remove formatting button
+                        [{ 'color': [] }, { 'background': [] }],
+                        ['clean']
                     ]
                 }
             });
 
-            // Antes do submit, copia o HTML do editor para o input hidden
-            var form = document.getElementById('edit-task-form');
-            form.onsubmit = function() {
-                // Pega o conteúdo HTML do editor
+            // Antes do envio, copia o HTML do editor para o campo escondido
+            document.getElementById('edit-task-form').onsubmit = function () {
                 var description = document.querySelector('input[name=descricao]');
-                // Se o editor estiver vazio (apenas <p><br></p>), envia vazio
-                if (quill.root.innerHTML === '<p><br></p>') {
-                    description.value = '';
-                } else {
-                    description.value = quill.root.innerHTML;
-                }
+                description.value = quill.root.innerHTML === '<p><br></p>' ? '' : quill.root.innerHTML;
             };
         });
     </script>

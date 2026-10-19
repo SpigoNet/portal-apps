@@ -23,4 +23,5 @@ return [
     App\Modules\QuebraCabeca\QuebraCabecaServiceProvider::class,
     App\Modules\Terminal\TerminalServiceProvider::class,
     App\Modules\Cardapio\CardapioServiceProvider::class,
+    App\Modules\Engenhocopolis\EngenhocopolisServiceProvider::class,
 ];

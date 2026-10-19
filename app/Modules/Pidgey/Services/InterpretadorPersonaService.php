@@ -97,9 +97,9 @@ class InterpretadorPersonaService
     /**
      * A persona escreve só a abertura/comentário de uma mensagem, a partir de fatos já apurados. O resumo
      * completo é acrescentado depois, pelo chamador, abaixo do texto dela. Devolve texto puro (sem
-     * markdown/HTML) ou '' se a IA falhar.
+     * markdown/HTML) ou '' se a IA falhar. `$instrucao` substitui as regras de cardápio por outras do assunto.
      */
-    public function narrar(Persona $persona, string $fatos, ?AiModel $aiModel = null): string
+    public function narrar(Persona $persona, string $fatos, ?AiModel $aiModel = null, ?string $instrucao = null): string
     {
         $fatos = trim($fatos);
         if ($fatos === '') {
@@ -111,11 +111,13 @@ class InterpretadorPersonaService
         $messages = [
             [
                 'role' => 'system',
-                'content' => "Você é a persona {$persona->name} e vai escrever, na primeira pessoa, a abertura da mensagem que ela manda hoje cedo no Telegram, com base nos FATOS abaixo.\n".
+                'content' => "Você é a persona {$persona->name} e vai escrever, na primeira pessoa, a abertura da mensagem que ela manda hoje no Telegram, com base nos FATOS abaixo.\n".
                     "Regras:\n".
-                    "- O resumo completo (listas de refeições, alimentos vencendo e compras) será ACRESCENTADO AUTOMATICAMENTE logo abaixo do seu texto. Por isso NÃO repita as listas nem enumere todos os itens: introduza, comente e prepare quem lê.\n".
-                    "- Você pode destacar uma receita ou um alimento específico dos fatos (citando o nome exatamente como está) e reagir ao que mostram, no tom da persona: se algo falta (ex.: cardápio não definido) ou preocupa (alimentos vencendo), cobre ou alerte; se está tudo em ordem, seja caloroso.\n".
-                    "- Não invente receitas, alimentos, prazos nem quantidades que não estejam nos fatos.\n".
+                    ($instrucao !== null
+                        ? "- {$instrucao}\n"
+                        : "- O resumo completo (listas de refeições, alimentos vencendo e compras) será ACRESCENTADO AUTOMATICAMENTE logo abaixo do seu texto. Por isso NÃO repita as listas nem enumere todos os itens: introduza, comente e prepare quem lê.\n".
+                        "- Você pode destacar uma receita ou um alimento específico dos fatos (citando o nome exatamente como está) e reagir ao que mostram, no tom da persona: se algo falta (ex.: cardápio não definido) ou preocupa (alimentos vencendo), cobre ou alerte; se está tudo em ordem, seja caloroso.\n").
+                    "- Não invente receitas, alimentos, tarefas, valores, prazos nem quantidades que não estejam nos fatos.\n".
                     "- Texto curto (2 a 5 frases), em português do Brasil, puro: sem markdown, sem HTML, sem listas, sem aspas, sem explicações.\n".
                     '- Você É o remetente; não responda a ninguém.',
             ],
@@ -129,6 +131,44 @@ class InterpretadorPersonaService
             return trim((string) $this->resolverDriver($aiModel)->generateText($messages, ['temperature' => 0.5]));
         } catch (\Throwable $e) {
             Log::warning('Pidgey: falha ao narrar mensagem da persona', ['persona_id' => $persona->id, 'error' => $e->getMessage()]);
+
+            return '';
+        }
+    }
+
+    /**
+     * Descreve, para um gerador de imagens, a expressão, o sentimento e a pose com que a persona
+     * estaria ao enviar esta mensagem. Só a cena muda; a aparência vem do perfil. '' se a IA falhar.
+     */
+    public function descreverExpressao(Persona $persona, string $mensagem, ?AiModel $aiModel = null): string
+    {
+        $mensagem = trim($mensagem);
+        if ($mensagem === '') {
+            return '';
+        }
+
+        $personalityJson = json_encode($persona->personality ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}';
+
+        $messages = [
+            [
+                'role' => 'system',
+                'content' => "Você descreve cenas para um gerador de imagens. A persona {$persona->name} está enviando a mensagem abaixo.\n".
+                    "Descreva, em inglês e em UMA frase curta (até 50 palavras), a expressão facial, o sentimento, a linguagem corporal/pose e, se fizer sentido, um gesto ou objeto ligado ao assunto da mensagem.\n".
+                    "Regras:\n".
+                    "- NÃO descreva a aparência física, roupas nem estilo de arte (isso já é fixo).\n".
+                    "- Seja coerente com a personalidade da persona e com o tom da mensagem.\n".
+                    '- Retorne SOMENTE a frase, sem aspas, sem explicações e sem texto escrito na imagem.',
+            ],
+            [
+                'role' => 'user',
+                'content' => "Perfil da persona (JSON): {$personalityJson}\n\nMensagem: {$mensagem}\n\nExpressão e pose:",
+            ],
+        ];
+
+        try {
+            return trim((string) $this->resolverDriver($aiModel)->generateText($messages, ['temperature' => 0.6]), " \t\n\r\0\x0B\"'");
+        } catch (\Throwable $e) {
+            Log::warning('Pidgey: falha ao descrever expressão da persona', ['persona_id' => $persona->id, 'error' => $e->getMessage()]);
 
             return '';
         }

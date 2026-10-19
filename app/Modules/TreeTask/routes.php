@@ -9,6 +9,7 @@ use App\Modules\TreeTask\Http\Controllers\FaseController;
 use App\Modules\TreeTask\Http\Controllers\FocusController;
 use App\Modules\TreeTask\Http\Controllers\GamificationController;
 use App\Modules\TreeTask\Http\Controllers\GoodMorningController;
+use App\Modules\TreeTask\Http\Controllers\KanbanController;
 use App\Modules\TreeTask\Http\Controllers\OrderController;
 use App\Modules\TreeTask\Http\Controllers\ProjetoController;
 use App\Modules\TreeTask\Http\Controllers\TarefaController;
@@ -69,12 +70,27 @@ Route::middleware(['web', 'auth'])
     ->name('treetask.')
     ->group(function () {
 
+        // Sai da conta (a barra lateral do módulo não usa o menu global do portal).
+        Route::post('/sair', function () {
+            auth()->logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+
+            return redirect()->route('welcome');
+        })->name('sair');
+
         // --- Projetos ---
         Route::get('/', [ProjetoController::class, 'index'])->name('index');
         Route::get('/criar', [ProjetoController::class, 'create'])->name('create');
         Route::post('/', [ProjetoController::class, 'store'])->name('store');
         Route::get('/bom-dia', [GoodMorningController::class, 'index'])->name('good_morning');
         Route::get('/projeto/{id}', [ProjetoController::class, 'show'])->name('show');
+        Route::get('/projeto/{id}/lista', [ProjetoController::class, 'lista'])->name('lista');
+
+        // --- Kanban (colunas por status, com filtros) ---
+        Route::get('/kanban', [KanbanController::class, 'index'])->name('kanban');
+        Route::get('/kanban/nova-tarefa', [KanbanController::class, 'novaTarefa'])->name('kanban.nova_tarefa');
+        Route::patch('/kanban/tarefas/{id}/mover', [KanbanController::class, 'mover'])->name('kanban.mover');
 
         // --- Fases ---
         Route::post('/fases', [FaseController::class, 'store'])->name('fases.store');

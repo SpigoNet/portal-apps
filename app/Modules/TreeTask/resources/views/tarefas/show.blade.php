@@ -1,111 +1,120 @@
-<x-TreeTask::layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Tarefa: {{ $tarefa->titulo }}
-        </h2>
-    </x-slot>
+@php
+    use App\Modules\TreeTask\Models\Tarefa;
+    use App\Modules\TreeTask\Support\Aparencia;
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-                <div class="px-4 py-5 sm:px-6 flex justify-between">
-                    <div>
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">Detalhes da Tarefa</h3>
-                        <p class="mt-1 max-w-2xl text-sm text-gray-500">Status atual: {{ $tarefa->fase->nome }}</p>
+    $concluida = $tarefa->status === Tarefa::CONCLUIDA;
+    $atrasada = ! $concluida && $tarefa->data_vencimento && $tarefa->data_vencimento->isPast() && ! $tarefa->data_vencimento->isToday();
+    $projeto = $tarefa->fase->projeto;
+    $descricao = (string) $tarefa->descricao;
+@endphp
+<x-TreeTask::layout :titulo="$tarefa->titulo" ativo="projetos">
+    <nav class="tt-crumb" aria-label="Trilha">
+        <a href="{{ route('treetask.index') }}">Projetos</a>
+        <svg class="tt-i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        <a href="{{ route('treetask.lista', $projeto->id_projeto) }}">{{ $projeto->nome }}</a>
+        <svg class="tt-i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        <b>{{ $tarefa->fase->nome }}</b>
+    </nav>
+
+    <div class="tt-tarefa">
+        <div class="tt-tarefa-corpo">
+            <header style="display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+                    <span class="tt-chip g {{ Aparencia::statusClasse($tarefa->status) }}">{{ $tarefa->status }}</span>
+                    <span class="tt-prio {{ Aparencia::prioridadeClasse($tarefa->prioridade) }}" style="font-weight:600">Prioridade {{ mb_strtolower((string) $tarefa->prioridade) }}</span>
+                </div>
+                <h1 class="tt-h1" style="font-size:32px">{{ $tarefa->titulo }}</h1>
+            </header>
+
+            <section class="tt-card pad" aria-label="Descrição">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                    <h2 class="tt-sec-tit">Descrição</h2>
+                    <a class="tt-btn ghost sm" href="{{ route('treetask.tarefas.edit', $tarefa->id_tarefa) }}">Editar</a>
+                </div>
+                @if(trim(strip_tags($descricao)) !== '')
+                    <div class="tt-prosa">
+                        @if(function_exists('clean')) {!! clean($descricao) !!} @else {!! nl2br(e($descricao)) !!} @endif
                     </div>
-                    <a href="{{ route('treetask.show', $tarefa->fase->id_projeto) }}"
-                       class="text-blue-600 hover:text-blue-900">Voltar ao Board</a>
-                </div>
-                <div class="border-t border-gray-200">
-                    <dl>
-                        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt class="text-sm font-medium text-gray-500">Descrição</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                {!! nl2br($tarefa->descricao) !!}
-                            </dd>
+                @else
+                    <p class="tt-muted" style="margin:0">Sem descrição.</p>
+                @endif
+            </section>
+
+            <section class="tt-card pad" aria-label="Anexos">
+                <h2 class="tt-sec-tit">Anexos · {{ $tarefa->anexos->count() }}</h2>
+
+                @foreach($tarefa->anexos as $anexo)
+                    <div class="tt-arquivo">
+                        <div class="tt-arquivo-ic">
+                            <svg class="tt-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
                         </div>
-                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt class="text-sm font-medium text-gray-500">Responsável</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ $tarefa->responsavel->name ?? 'N/A' }}</dd>
+                        <div style="flex:1 1 200px;min-width:0">
+                            <div style="font-weight:600;overflow-wrap:anywhere">{{ $anexo->nome_arquivo }}</div>
+                            <div class="tt-muted" style="font-size:13px">{{ number_format($anexo->tamanho / 1024, 1, ',', '.') }} KB</div>
                         </div>
-                        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt class="text-sm font-medium text-gray-500">Prioridade</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ $tarefa->prioridade }}</dd>
-                        </div>
-                    </dl>
-
-
-                </div>
-
-                <div class="mt-8 border-t border-gray-200 pt-6 px-6">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Anexos</h3>
-
-                    @if($tarefa->anexos->count() > 0)
-                        <ul role="list" class="border border-gray-200 rounded-md divide-y divide-gray-200 mb-6">
-                            @foreach($tarefa->anexos as $anexo)
-                                <li class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
-                                    <div class="w-0 flex-1 flex items-center">
-                                        <svg class="flex-shrink-0 h-5 w-5 text-gray-400"
-                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                  d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z"
-                                                  clip-rule="evenodd"/>
-                                        </svg>
-                                        <span class="ml-2 flex-1 w-0 truncate">
-                            {{ $anexo->nome_arquivo }}
-                            <span
-                                class="text-gray-500 text-xs">({{ number_format($anexo->tamanho / 1024, 2) }} KB)</span>
-                        </span>
-                                    </div>
-                                    <div class="ml-4 flex-shrink-0 flex space-x-4">
-                                        <a href="{{ route('treetask.anexos.download', $anexo->id_anexo) }}"
-                                           class="font-medium text-blue-600 hover:text-blue-500">
-                                            Baixar
-                                        </a>
-
-                                        <form
-                                            action="{{ route('treetask.anexos.destroy', ['taskId' => $tarefa->id_tarefa, 'anexoId' => $anexo->id_anexo]) }}"
-                                            method="POST" onsubmit="return confirm('Tem certeza?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="font-medium text-red-600 hover:text-red-500">
-                                                Remover
-                                            </button>
-                                        </form>
-                                    </div>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @else
-                        <p class="text-sm text-gray-500 mb-6">Nenhum anexo encontrado.</p>
-                    @endif
-
-                    <div class="bg-gray-50 p-4 rounded-lg border border-dashed border-gray-300">
-                        <h4 class="text-sm font-bold text-gray-700 mb-2">Adicionar Novo Arquivo</h4>
-
-                        <form action="{{ route('treetask.anexos.store', $tarefa->id_tarefa) }}" method="POST"
-                              enctype="multipart/form-data" class="flex items-center space-x-4">
-                            @csrf
-                            <input type="file" name="arquivo" required class="block w-full text-sm text-slate-500
-              file:mr-4 file:py-2 file:px-4
-              file:rounded-full file:border-0
-              file:text-sm file:font-semibold
-              file:bg-blue-50 file:text-blue-700
-              hover:file:bg-blue-100
-            "/>
-
-                            <button type="submit"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow">
-                                Enviar
-                            </button>
+                        <a class="tt-btn ghost sm" href="{{ route('treetask.anexos.download', $anexo->id_anexo) }}" style="color:var(--tt-brand-d)">Baixar</a>
+                        <form action="{{ route('treetask.anexos.destroy', ['taskId' => $tarefa->id_tarefa, 'anexoId' => $anexo->id_anexo]) }}" method="POST" onsubmit="return confirm('Remover este anexo?');">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="tt-btn perigo sm">Remover</button>
                         </form>
-                        @error('arquivo') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
-                    <br><br>
-                </div>
+                @endforeach
 
-            </div>
+                <form class="tt-upload" action="{{ route('treetask.anexos.store', $tarefa->id_tarefa) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <svg class="tt-i l" viewBox="0 0 24 24" aria-hidden="true" style="color:var(--tt-brand)"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>
+                    <input type="file" name="arquivo" required aria-label="Escolher arquivo">
+                    <button type="submit" class="tt-btn pri">Enviar</button>
+                </form>
+                @error('arquivo') <span class="tt-erro" style="display:block;margin-top:8px">{{ $message }}</span> @enderror
+            </section>
         </div>
-    </div>
 
+        <aside class="tt-tarefa-lado">
+            <div style="display:flex;flex-direction:column;gap:10px">
+                @if(! $concluida)
+                    <form action="{{ route('treetask.tarefas.updateStatus', $tarefa->id_tarefa) }}" method="POST">
+                        @csrf @method('PATCH')
+                        <input type="hidden" name="status" value="Em Andamento">
+                        <button type="submit" class="tt-btn pri bloco">
+                            <svg class="tt-i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>Entrar em foco
+                        </button>
+                    </form>
+                    <form action="{{ route('treetask.tarefas.updateStatus', $tarefa->id_tarefa) }}" method="POST">
+                        @csrf @method('PATCH')
+                        <input type="hidden" name="status" value="Concluído">
+                        <button type="submit" class="tt-btn bloco">
+                            <svg class="tt-i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Marcar como concluída
+                        </button>
+                    </form>
+                @endif
+                <a class="tt-btn bloco" href="{{ route('treetask.tarefas.edit', $tarefa->id_tarefa) }}">Editar tarefa</a>
+            </div>
+
+            <dl class="tt-card tt-kv">
+                <div><dt>Status</dt><dd><span class="tt-chip {{ Aparencia::statusClasse($tarefa->status) }}">{{ $tarefa->status }}</span></dd></div>
+                <div><dt>Prioridade</dt><dd><span class="tt-prio {{ Aparencia::prioridadeClasse($tarefa->prioridade) }}" style="color:var(--tt-ink);font-size:14px;font-weight:600">{{ $tarefa->prioridade }}</span></dd></div>
+                <div>
+                    <dt>Responsável</dt>
+                    <dd>
+                        @if($tarefa->responsavel)
+                            <span class="tt-av" style="background: {{ Aparencia::corAvatar($tarefa->responsavel->id) }}">{{ Aparencia::iniciais($tarefa->responsavel->name) }}</span>{{ \Illuminate\Support\Str::words($tarefa->responsavel->name, 1, '') }}
+                        @else
+                            —
+                        @endif
+                    </dd>
+                </div>
+                <div><dt>Vencimento</dt><dd @if($atrasada) style="color:#A4231A" @endif>{{ $tarefa->data_vencimento ? $tarefa->data_vencimento->format('d/m/Y') : '—' }}</dd></div>
+                @if($tarefa->estimativa_tempo)
+                    <div><dt>Estimativa</dt><dd>{{ rtrim(rtrim(number_format((float) $tarefa->estimativa_tempo, 1, ',', ''), '0'), ',') }} h</dd></div>
+                @endif
+                <div><dt>Fase</dt><dd>{{ $tarefa->fase->nome }}</dd></div>
+                <div><dt>Projeto</dt><dd>{{ $projeto->nome }}</dd></div>
+            </dl>
+
+            <a class="tt-btn ghost" href="{{ route('treetask.ai.index', ['type' => 'task', 'id' => $tarefa->id_tarefa]) }}" style="align-self:flex-start">
+                <svg class="tt-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>Assistente IA nesta tarefa
+            </a>
+        </aside>
+    </div>
 </x-TreeTask::layout>

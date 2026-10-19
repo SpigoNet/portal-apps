@@ -13,6 +13,13 @@
 - **Lint:** `./vendor/bin/pint` (Dry run: `./vendor/bin/pint --test`)
 - **Test:** `php artisan test` (Specific: `php artisan test path/to/Test.php`)
 
+## GitHub & Deploy
+- **GitHub is only for branches and backup.** GitHub Actions are no longer used (there are no workflows); a push to `main` does NOT publish anything.
+- **To release a version, run a deploy script from the repo root** (production: `apps.spigo.net`, via SSH):
+  - `./deploy.sh` — full deploy: rsync of the code, rebuild of the Docker image, container restart and `migrate`. Use it when dependencies, frontend assets (CSS/JS, Tailwind), Dockerfile or non-PHP files change.
+  - `./deploy-fast.sh` (or `/deploy-fast`) — fast deploy: copies only `*.php` files (Blade views included) into the running container, restarts it and runs `migrate`. No rebuild, so new Tailwind classes/assets are not published.
+- Both scripts send the **local working tree** (including uncommitted changes), not what is on GitHub.
+
 ## Conventions 
 - **Naming:**
   - **Portuguese:** Business Entities/Models (e.g., `Tarefa`, `Contrato`). PascalCase. No module prefixes in class names.
@@ -69,6 +76,11 @@
 - **Prefix:** `/dspace-forms-editor`
 - **Key Note:** Uses session-based configuration context (`DspaceConfigSession`).
 
+### Engenhocopolis
+- **Purpose:** Isometric automation puzzle: place conveyors, gap separators and diverters so each package reaches its collector.
+- **Prefix:** `/engenhocopolis`
+- **Key Note:** Auth-only, no models/DB beyond the `PortalApp` row. Whole game (logic + SVG isometric renderer) in `index.blade.php`, Alpine.js; progress and builds in `localStorage`. Levels are verified by `ferramentas/verificar-fases.mjs` (Node). See `app/Modules/Engenhocopolis/AGENTS.md`.
+
 ### EnvioWhatsapp
 - **Purpose:** Bulk WhatsApp message sender (3-step wizard).
 - **Prefix:** `/ferramentas/whatsapp`
@@ -107,7 +119,7 @@
 ### TreeTask
 - **Purpose:** Project/Task management (Hierarchy: Project $\to$ Phase $\to$ Task).
 - **Prefix:** `/treetask` (Web), `/treetask/api/v1` (REST API).
-- **Key Note:** Custom PK names (e.g., `id_projeto`) instead of `id`. Full REST API documentation in `API_DOCUMENTATION.md`.
+- **Key Note:** Custom PK names (e.g., `id_projeto`) instead of `id`. Full REST API documentation in `API_DOCUMENTATION.md`. Self-contained layout with its own CSS (no Tailwind, Spigo.net brand), sidebar + module switcher; see "Visual" in `app/Modules/TreeTask/AGENTS.md`.
 
 ### Terminal
 - **Purpose:** Bus-terminal puzzle presented as an old CRT computer: fill each bus in the right order before the parking slots run out.

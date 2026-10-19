@@ -32,6 +32,7 @@ class MensagemController
             'mensagem' => 'required|string',
             'canal' => 'sometimes|in:telegram,whatsapp,email',
             'interpretar' => 'sometimes|boolean',
+            'imagem' => 'sometimes|boolean',
             'ai_model_id' => 'sometimes|nullable|exists:ai_modelos,id',
         ]);
 
@@ -51,7 +52,8 @@ class MensagemController
             $data['canal'] ?? null,
             ! empty($data['interpretar']),
             [],
-            $aiModel
+            $aiModel,
+            ! empty($data['imagem'])
         );
 
         if (! $result['ok']) {
@@ -67,6 +69,7 @@ class MensagemController
             'canal' => 'telegram',
             'persona' => $persona->slug,
             'status' => $result['status'],
+            'imagem' => $result['imagem'],
         ];
 
         if (! empty($data['interpretar'])) {

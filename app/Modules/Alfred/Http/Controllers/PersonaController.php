@@ -6,6 +6,7 @@ use App\Modules\Alfred\Models\Persona;
 use App\Modules\Alfred\Services\PersonaEnvioService;
 use App\Modules\Alfred\Services\TelegramWebhookService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PersonaController
 {
@@ -39,6 +40,8 @@ class PersonaController
             'telegram_chat_id' => 'nullable|string',
             'personality' => 'nullable|string',
             'metadata' => 'nullable|string',
+            'aparencia' => 'nullable|string|max:5000',
+            'imagem_referencia' => 'nullable|image|max:8192',
         ]);
 
         if (! empty($data['personality'])) {
@@ -54,6 +57,10 @@ class PersonaController
         if (! empty($data['whatsapp_group_jid'])) {
             $data['whatsapp_group_jid'] = $this->normalizeGroupJid($data['whatsapp_group_jid']);
         }
+
+        $data['imagem_referencia'] = $request->hasFile('imagem_referencia')
+            ? $request->file('imagem_referencia')->store('alfred/personas', 'public')
+            : null;
 
         $persona = Persona::create($data);
 
@@ -80,6 +87,9 @@ class PersonaController
             'telegram_chat_id' => 'nullable|string',
             'personality' => 'nullable|string',
             'metadata' => 'nullable|string',
+            'aparencia' => 'nullable|string|max:5000',
+            'imagem_referencia' => 'nullable|image|max:8192',
+            'remover_imagem_referencia' => 'nullable|boolean',
             'active' => 'nullable|boolean',
         ]);
 
@@ -103,6 +113,9 @@ class PersonaController
             $data['whatsapp_group_jid'] = $this->normalizeGroupJid($data['whatsapp_group_jid']);
         }
 
+        $data['imagem_referencia'] = $this->resolverImagemReferencia($request, $persona);
+        unset($data['remover_imagem_referencia']);
+
         $persona->update($data);
 
         return redirect()->route('alfred.admin.personas.index')->with('success', 'Persona atualizada');
@@ -113,6 +126,27 @@ class PersonaController
         $persona->delete();
 
         return redirect()->route('alfred.admin.personas.index')->with('success', 'Persona removida');
+    }
+
+    /**
+     * Imagem de referência do personagem: troca por um novo upload, remove a pedido ou mantém a atual.
+     */
+    private function resolverImagemReferencia(Request $request, Persona $persona): ?string
+    {
+        $atual = $persona->imagem_referencia;
+
+        if ($request->hasFile('imagem_referencia') || $request->boolean('remover_imagem_referencia')) {
+            if ($atual) {
+                Storage::disk('public')->delete($atual);
+            }
+            $atual = null;
+        }
+
+        if ($request->hasFile('imagem_referencia')) {
+            $atual = $request->file('imagem_referencia')->store('alfred/personas', 'public');
+        }
+
+        return $atual;
     }
 
     private function normalizeGroupJid(?string $jid): ?string

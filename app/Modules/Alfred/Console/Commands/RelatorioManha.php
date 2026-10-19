@@ -5,7 +5,7 @@ namespace App\Modules\Alfred\Console\Commands;
 use App\Modules\Alfred\Models\ConsumoAgua;
 use App\Modules\Alfred\Models\Medicamento;
 use App\Modules\Alfred\Models\UserProfile;
-use App\Modules\TreeTask\Models\Tarefa;
+use App\Modules\TreeTask\Services\TarefasDoUsuarioService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -72,13 +72,7 @@ class RelatorioManha extends Command
             }
 
             // 3. Top 3 Tarefas do TreeTask
-            $tarefas = Tarefa::with('fase.projeto.responsavel')
-                ->whereHas('fase.projeto', fn ($q) => $q->where('id_user_owner', $user->id))
-                ->whereNotIn('status', ['Concluído'])
-                ->orderByRaw("CASE prioridade WHEN 'Urgente' THEN 4 WHEN 'Alta' THEN 3 WHEN 'Média' THEN 2 WHEN 'Baixa' THEN 1 ELSE 0 END DESC")
-                ->orderBy('data_vencimento', 'asc')
-                ->take(3)
-                ->get();
+            $tarefas = app(TarefasDoUsuarioService::class)->topPrioridade($user->id);
 
             $this->info('🎯 TOP 3 TAREFAS DO TREETASK:');
             $this->newLine();

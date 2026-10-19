@@ -1001,7 +1001,7 @@
     </script>
 
     <div x-data="terminal()" :class="'t-raiz ph-' + fosforo" :style="{ '--scan': scanAlfa }" x-cloak
-         style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;overflow:hidden;
+         style="position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:min(100%,800px);box-sizing:border-box;display:flex;flex-direction:column;gap:8px;overflow:hidden;
                 padding:max(8px, env(safe-area-inset-top)) 10px max(6px, calc(env(safe-area-inset-bottom) - 16px));">
         <template x-if="g">
             <div style="display:contents">

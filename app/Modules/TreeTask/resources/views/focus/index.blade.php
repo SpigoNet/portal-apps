@@ -1,260 +1,248 @@
-<x-TreeTask::layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-400 leading-tight">
-                {{ __('Modo Zen') }} 🧘
-            </h2>
-        </div>
-    </x-slot>
+@php
+    use App\Modules\TreeTask\Support\Aparencia;
 
-    <div class="min-h-screen bg-gray-100 flex flex-col items-center py-8">
+    $arvore = '<path d="M12 21v-8M12 13c-4 0-6-2-6-5M12 13c4 0 6-2 6-5M6 8V4M18 8V4M12 13V3"/><circle cx="12" cy="21" r="1.7" fill="#C9E86B" stroke="none"/>';
+@endphp
 
-        @if(isset($focoTotal) && $focoTotal)
-            <div class="w-full max-w-4xl px-4 animate-fade-in-up">
+@if(isset($focoTotal) && $focoTotal)
+    {{-- Foco total: tela escura, sem menus, uma única tarefa --}}
+    <x-TreeTask::layout titulo="Modo foco" :bare="true">
+        <style>
+            .tt-foco { min-height: 100vh; color: #EDEFF5; background: radial-gradient(900px 500px at 50% -10%, #3A2457 0%, #17121D 70%); padding: 24px 24px 56px; display: flex; flex-direction: column; align-items: center; gap: 28px; font-size: 15px; line-height: 1.5; }
+            .tt-foco .tt-btn { min-height: 48px; padding: 0 20px; border-color: #4A3F5C; background: transparent; color: #EDEFF5; font-size: 15px; }
+            .tt-foco .tt-btn:hover { background: #2A2236; }
+            .tt-foco .tt-btn.pri { background: #8A58BD; border-color: #8A58BD; color: #fff; }
+            .tt-foco .tt-btn.pri:hover { background: #9D6FCC; }
+            .tt-foco-w { width: 100%; max-width: 960px; }
+            .tt-foco-card { background: #211A2B; border: 1px solid #342A43; border-radius: 28px; padding: 56px clamp(24px, 6vw, 72px); display: flex; flex-direction: column; gap: 28px; box-shadow: 0 30px 80px rgba(0, 0, 0, .35); }
+            .tt-foco-desc { background: #1B1524; border: 1px solid #342A43; border-radius: 16px; padding: 24px 28px; color: #D8D0E3; font-size: 17px; line-height: 1.7; overflow-wrap: anywhere; }
+            .tt-foco-desc p { margin: 0 0 10px; }
+            .tt-foco-rot { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #A79DB8; }
+            .tt-foco .tt-textarea { background: #17121D; color: #EDEFF5; border-color: #4A3F5C; font-size: 16px; }
+            .tt-foco-q { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; background: #211A2B; border: 1px solid #342A43; text-decoration: none; color: #EDEFF5; }
+            .tt-foco-q:hover { background: #2A2236; }
+            .tt-foco-ia { background: #12141C; color: #8BE0A4; border-radius: 12px; padding: 16px; font: 500 13px/1.6 'JetBrains Mono', monospace; white-space: pre-wrap; }
+        </style>
 
-                <div class="mb-8 w-full bg-gray-300 rounded-full h-4 overflow-hidden shadow-inner relative" title="Tempo Estimado Visual">
-                    <div id="visual-timer-bar" class="bg-gradient-to-r from-blue-500 to-purple-600 h-4 rounded-full transition-all duration-1000 ease-linear" style="width: 0%;"></div>
+        <div class="tt-foco">
+            <header class="tt-foco-w" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px">
+                <a href="{{ route('treetask.index') }}" style="display:inline-flex;align-items:center;gap:8px;color:#B9AFC9;text-decoration:none;font-weight:600;min-height:44px">
+                    <svg class="tt-i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>Sair do foco
+                </a>
+                <span class="tt-brand-icone" style="width:36px;height:36px;border-radius:11px"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round">{!! $arvore !!}</svg></span>
+                <div style="display:flex;align-items:center;gap:12px;color:#B9AFC9;font-weight:500">
+                    <span class="tt-mono" id="foco-relogio" style="font-size:15px;color:#EDEFF5">00:00:00</span>
+                    <span>nesta sessão</span>
                 </div>
+            </header>
 
-                <div class="bg-white rounded-2xl shadow-2xl border-2 border-indigo-100 overflow-hidden relative">
-                    <div class="bg-indigo-600 text-white text-center py-2 text-xs font-bold uppercase tracking-widest">
-                        Em Execução Agora
-                    </div>
-
-                    <div class="p-8 md:p-12 text-center">
-                        <span class="inline-block py-1 px-3 rounded-full bg-indigo-50 text-indigo-600 text-sm font-bold mb-4 border border-indigo-100">
-                            {{ $focoTotal->fase->projeto->nome }} &gt; {{ $focoTotal->fase->nome }}
-                        </span>
-
-                        <h1 class="text-4xl md:text-5xl font-black text-gray-800 mb-6 leading-tight">
-                            {{ $focoTotal->titulo }}
-                        </h1>
-
-                        <div class="mb-8 text-left">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Descrição</span>
-                                <button type="button" data-btn-editar-desc
-                                    onclick="document.getElementById('editor-descricao').classList.remove('hidden'); this.classList.add('hidden');"
-                                    class="text-sm text-indigo-600 hover:text-indigo-800 underline font-medium">
-                                    ✏️ Editar descrição
-                                </button>
-                            </div>
-
-                            <div id="visual-descricao" class="prose max-w-none text-gray-600 text-lg bg-gray-50 p-6 rounded-lg border-l-4 border-indigo-400">
-                                @if(function_exists('clean'))
-                                    {!! clean($focoTotal->descricao) !!}
-                                @else
-                                    {!! nl2br(e($focoTotal->descricao)) !!}
-                                @endif
-                            </div>
-
-                            <div id="editor-descricao" class="hidden bg-gray-50 p-6 rounded-lg border-l-4 border-indigo-400">
-                                <form action="{{ route('treetask.tarefas.updateDescricao', $focoTotal->id_tarefa) }}" method="POST">
-                                    @csrf
-                                    @method('PATCH')
-                                    <textarea name="descricao" rows="14" placeholder="Elabore a descrição da tarefa..."
-                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg text-gray-700 leading-relaxed">{{ old('descricao', $focoTotal->descricao) }}</textarea>
-                                    <div class="flex justify-end gap-3 mt-4">
-                                        <button type="button"
-                                            onclick="document.getElementById('editor-descricao').classList.add('hidden'); document.querySelector('[data-btn-editar-desc]').classList.remove('hidden');"
-                                            class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-200 font-medium">
-                                            Cancelar
-                                        </button>
-                                        <button type="submit" class="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold">
-                                            Salvar descrição
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-
-                        <div id="ai-strategy-area" class="mb-8 hidden bg-gray-900 text-green-400 p-4 rounded-lg text-left font-mono text-sm shadow-inner">
-                            <p id="ai-content" class="whitespace-pre-wrap"></p>
-                        </div>
-
-                        <div class="flex flex-col md:flex-row justify-center gap-4">
-                            <button onclick="solicitarEstrategia({{ $focoTotal->id_tarefa }})" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-bold py-4 px-8 rounded-xl transition transform hover:scale-105 flex items-center justify-center border border-yellow-300">
-                                <span class="text-2xl mr-2">🧱</span> Estou Travado / Quebrar Tarefa
-                            </button>
-
-                            <form action="{{ route('treetask.tarefas.updateStatus', $focoTotal->id_tarefa) }}" method="POST" class="flex-1 max-w-md">
-                                @csrf @method('PATCH')
-                                <input type="hidden" name="status" value="Concluído">
-                                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-black text-xl py-4 px-8 rounded-xl shadow-lg transition transform hover:scale-105 flex items-center justify-center">
-                                    <span class="mr-2">✅</span> CONCLUIR MISSÃO
-                                </button>
-                            </form>
-                        </div>
-
-                        <div class="mt-6">
-                            <form action="{{ route('treetask.tarefas.updateStatus', $focoTotal->id_tarefa) }}" method="POST">
-                                @csrf @method('PATCH')
-                                <input type="hidden" name="status" value="A Fazer"> <button type="submit" class="text-gray-400 hover:text-red-500 text-sm font-medium underline">
-                                    Pausar / Deixar para depois
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+            <div class="tt-foco-w" style="height:6px;border-radius:99px;background:#342A43;overflow:hidden" role="progressbar" aria-label="Tempo estimado" aria-valuemin="0" aria-valuemax="100" id="foco-progresso">
+                <div id="visual-timer-bar" style="width:0%;height:100%;border-radius:99px;background:linear-gradient(90deg,#8A58BD,#C9E86B);transition:width 1s linear"></div>
             </div>
 
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Configuração do Timer Visual
-                    // Como temos cegueira temporal, não usamos contagem regressiva numérica, mas visual.
-                    // Assumimos que o "bloco" de trabalho é a estimativa ou 1h padrão.
-                    const estimativaHoras = {{ $focoTotal->estimativa_tempo ?: 1 }};
-                    const totalSegundos = estimativaHoras * 3600;
-                    const bar = document.getElementById('visual-timer-bar');
+            @if(session('success'))
+                <div class="tt-alert ok tt-foco-w" role="status">{{ session('success') }}</div>
+            @endif
 
-                    // Simulação visual: começa cheio e vai esvaziando (ou enchendo, dependendo da preferência)
-                    // Aqui faremos "encher" para dar sensação de progresso/conquista visual
-                    let decorrido = 0;
-
-                    // Recuperar estado se houver (opcional, por enquanto resetamos)
-
-                    const interval = setInterval(() => {
-                        decorrido++;
-                        let pct = (decorrido / totalSegundos) * 100;
-                        if(pct > 100) pct = 100;
-
-                        bar.style.width = pct + '%';
-
-                        // Mudança de cor baseada no tempo (Azul -> Roxo -> Vermelho se estourar)
-                        if(pct > 80) {
-                            bar.classList.remove('from-blue-500', 'to-purple-600');
-                            bar.classList.add('bg-red-500');
-                        }
-                    }, 1000); // Atualiza a cada segundo
-                });
-
-                function solicitarEstrategia(taskId) {
-                    const area = document.getElementById('ai-strategy-area');
-                    const content = document.getElementById('ai-content');
-
-                    area.classList.remove('hidden');
-                    content.innerHTML = '🤖 Analisando estrutura da tarefa e calculando micro-passos...';
-
-                    fetch('{{ route("treetask.gamification.motivacao") }}?task_id=' + taskId)
-                        .then(res => res.json())
-                        .then(data => {
-                            content.innerHTML = data.message;
-                        })
-                        .catch(err => {
-                            content.innerHTML = 'Erro ao contactar o estrategista.';
-                        });
-                }
-            </script>
-
-        @else
-            <div class="max-w-3xl w-full px-4 space-y-8">
-
-                <div class="text-center mb-8">
-                    <h3 class="text-2xl font-bold text-gray-700">O que vamos construir agora?</h3>
-                    <p class="text-gray-500">Escolha um bloco para iniciar.</p>
+            <main class="tt-foco-w tt-foco-card" x-data="{ editando: false }">
+                <div style="display:flex;flex-direction:column;gap:20px;align-items:flex-start">
+                    <span style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:#3A2A55;color:#E0CBF5;font-weight:700;font-size:13px">
+                        {{ $focoTotal->fase->projeto->nome }}
+                        <svg class="tt-i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+                        {{ $focoTotal->fase->nome }}
+                    </span>
+                    <h1 style="font-size:clamp(32px,5vw,54px);line-height:1.08;font-weight:800;letter-spacing:-.03em">{{ $focoTotal->titulo }}</h1>
                 </div>
 
-                <form method="GET" action="{{ route('treetask.focus.index') }}" class="mb-6 bg-white rounded-xl shadow p-4 flex flex-wrap gap-4 items-end">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Projeto</label>
-                        <select name="projeto" onchange="this.form.submit()" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            <option value="">Todos os projetos</option>
-                            @foreach($projetos as $p)
-                                <option value="{{ $p->id_projeto }}" {{ request('projeto') == $p->id_projeto ? 'selected' : '' }}>{{ $p->nome }}</option>
-                            @endforeach
-                        </select>
+                <section aria-label="Descrição" class="tt-foco-desc">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                        <span class="tt-foco-rot">Descrição</span>
+                        <button type="button" x-show="! editando" @click="editando = true" style="background:none;border:0;color:#D6BCF2;font:600 14px 'Hanken Grotesk',sans-serif;cursor:pointer;min-height:44px;padding:0 4px">Editar descrição</button>
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Prioridade</label>
-                        <select name="prioridade" onchange="this.form.submit()" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            <option value="">Todas</option>
-                            @foreach($prioridades as $pr)
-                                <option value="{{ $pr }}" {{ request('prioridade') == $pr ? 'selected' : '' }}>{{ $pr }}</option>
-                            @endforeach
-                        </select>
+                    <div x-show="! editando">
+                        @if(trim(strip_tags((string) $focoTotal->descricao)) !== '')
+                            @if(function_exists('clean')) {!! clean($focoTotal->descricao) !!} @else {!! nl2br(e($focoTotal->descricao)) !!} @endif
+                        @else
+                            <p style="margin:0;color:#A79DB8">Sem descrição.</p>
+                        @endif
                     </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Status</label>
-                        <select name="status" onchange="this.form.submit()" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            <option value="todos" {{ $statusFiltro == 'todos' ? 'selected' : '' }}>A Fazer / Planejamento</option>
-                            <option value="A Fazer" {{ $statusFiltro == 'A Fazer' ? 'selected' : '' }}>A Fazer</option>
-                            <option value="Planejamento" {{ $statusFiltro == 'Planejamento' ? 'selected' : '' }}>Planejamento</option>
-                        </select>
+                    <form x-show="editando" x-cloak action="{{ route('treetask.tarefas.updateDescricao', $focoTotal->id_tarefa) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <textarea class="tt-textarea" name="descricao" rows="12" placeholder="Elabore a descrição da tarefa...">{{ old('descricao', $focoTotal->descricao) }}</textarea>
+                        <div style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:12px;margin-top:14px">
+                            <button type="button" class="tt-btn" @click="editando = false">Cancelar</button>
+                            <button type="submit" class="tt-btn pri">Salvar descrição</button>
+                        </div>
+                    </form>
+                </section>
+
+                <div id="ai-strategy-area" class="tt-foco-ia" style="display:none"><span id="ai-content"></span></div>
+
+                <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+                    <form action="{{ route('treetask.tarefas.updateStatus', $focoTotal->id_tarefa) }}" method="POST" style="flex:1 1 240px;display:flex">
+                        @csrf @method('PATCH')
+                        <input type="hidden" name="status" value="Concluído">
+                        <button type="submit" class="tt-btn pri" style="flex:1;min-height:56px;font-size:17px">
+                            <svg class="tt-i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Concluir e comemorar
+                        </button>
+                    </form>
+                    <button type="button" class="tt-btn" onclick="solicitarEstrategia({{ $focoTotal->id_tarefa }})">
+                        <svg class="tt-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>Estou travado
+                    </button>
+                    <form action="{{ route('treetask.tarefas.updateStatus', $focoTotal->id_tarefa) }}" method="POST" style="display:flex">
+                        @csrf @method('PATCH')
+                        <input type="hidden" name="status" value="A Fazer">
+                        <button type="submit" class="tt-btn">
+                            <svg class="tt-i" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>Pausar
+                        </button>
+                    </form>
+                </div>
+            </main>
+
+            @if($aFazer->isNotEmpty())
+                <section class="tt-foco-w" aria-label="Em seguida">
+                    <div class="tt-foco-rot" style="margin-bottom:10px">Em seguida</div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">
+                        @foreach($aFazer->take(3) as $proxima)
+                            <a class="tt-foco-q" href="{{ route('treetask.tarefas.show', $proxima->id_tarefa) }}">
+                                <span class="tt-prio {{ Aparencia::prioridadeClasse($proxima->prioridade) }}" style="font-size:0"></span>
+                                <span style="min-width:0;flex:1">
+                                    <span style="display:block;font-weight:600">{{ $proxima->titulo }}</span>
+                                    <span style="display:block;font-size:13px;color:#A79DB8">{{ $proxima->fase->projeto->nome }} · {{ $proxima->prioridade }}</span>
+                                </span>
+                            </a>
+                        @endforeach
                     </div>
+                </section>
+            @endif
+        </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Ordenar por</label>
-                        <select name="ordenar" onchange="this.form.submit()" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                            <option value="prioridade" {{ $ordenar == 'prioridade' ? 'selected' : '' }}>Prioridade</option>
-                            <option value="vencimento" {{ $ordenar == 'vencimento' ? 'selected' : '' }}>Vencimento</option>
-                            <option value="ordem" {{ $ordenar == 'ordem' ? 'selected' : '' }}>Ordem definida</option>
-                        </select>
-                    </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Progresso visual: o bloco de trabalho é a estimativa da tarefa (ou 1h), sem contagem regressiva numérica.
+                const totalSegundos = {{ $focoTotal->estimativa_tempo ?: 1 }} * 3600;
+                const barra = document.getElementById('visual-timer-bar');
+                const progresso = document.getElementById('foco-progresso');
+                const relogio = document.getElementById('foco-relogio');
+                let decorrido = 0;
 
-                    @if($filtrosAtivos)
-                        <a href="{{ route('treetask.focus.index') }}" class="ml-auto text-sm text-gray-500 hover:text-red-500 underline self-center">
-                            Limpar filtros
-                        </a>
-                    @endif
-                </form>
+                const dois = n => String(n).padStart(2, '0');
+                setInterval(() => {
+                    decorrido++;
+                    const pct = Math.min(100, (decorrido / totalSegundos) * 100);
+                    barra.style.width = pct + '%';
+                    progresso.setAttribute('aria-valuenow', Math.round(pct));
+                    if (pct > 80) barra.style.background = '#EF4444';
+                    relogio.textContent = dois(Math.floor(decorrido / 3600)) + ':' + dois(Math.floor(decorrido / 60) % 60) + ':' + dois(decorrido % 60);
+                }, 1000);
+            });
 
-                <div class="space-y-4">
-                    @forelse($aFazer as $tarefa)
-                        <div class="bg-white p-6 rounded-xl shadow-md border-l-8 border-blue-400 hover:shadow-xl hover:scale-[1.02] transition cursor-pointer group relative overflow-hidden">
-                            <form action="{{ route('treetask.tarefas.updateStatus', $tarefa->id_tarefa) }}" method="POST" class="absolute inset-0 z-10 opacity-0">
-                                @csrf @method('PATCH')
-                                <input type="hidden" name="status" value="Em Andamento">
-                                <button type="submit" class="w-full h-full cursor-pointer"></button>
-                            </form>
+            function solicitarEstrategia(taskId) {
+                const area = document.getElementById('ai-strategy-area');
+                const content = document.getElementById('ai-content');
 
-                            <div class="flex justify-between items-center pointer-events-none">
-                                <div>
-                                    <span class="text-xs font-bold text-blue-500 uppercase">{{ $tarefa->fase->projeto->nome }}</span>
-                                    <h4 class="text-xl font-bold text-gray-800">{{ $tarefa->titulo }}</h4>
+                area.style.display = 'block';
+                content.textContent = 'Analisando a tarefa e calculando micro-passos...';
 
-                                    @if($tarefa->prioridade == 'Urgente')
-                                        <span class="inline-block mt-2 bg-red-100 text-red-700 text-xs px-2 py-1 rounded font-bold">🚨 PRIORIDADE MÁXIMA</span>
+                fetch('{{ route("treetask.gamification.motivacao") }}?task_id=' + taskId)
+                    .then(res => res.json())
+                    .then(data => { content.textContent = data.message; })
+                    .catch(() => { content.textContent = 'Erro ao contactar o estrategista.'; });
+            }
+        </script>
+    </x-TreeTask::layout>
+@else
+    {{-- Escolha do próximo bloco --}}
+    <x-TreeTask::layout titulo="Modo foco" ativo="foco">
+        <header>
+            <div class="tt-eyebrow">Um bloco de cada vez</div>
+            <h1 class="tt-h1">Modo foco</h1>
+        </header>
+
+        <section style="max-width:820px;display:flex;flex-direction:column;gap:18px">
+            <div>
+                <h2 style="font-size:20px;font-weight:700">O que vamos construir agora?</h2>
+                <p class="tt-muted" style="margin:4px 0 0">Escolha um bloco para iniciar.</p>
+            </div>
+
+            <form method="GET" action="{{ route('treetask.focus.index') }}" class="tt-filtros">
+                <label class="tt-flt">Projeto:
+                    <select name="projeto" onchange="this.form.submit()" aria-label="Projeto">
+                        <option value="">Todos</option>
+                        @foreach($projetos as $p)
+                            <option value="{{ $p->id_projeto }}" @selected(request('projeto') == $p->id_projeto)>{{ $p->nome }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label class="tt-flt">Prioridade:
+                    <select name="prioridade" onchange="this.form.submit()" aria-label="Prioridade">
+                        <option value="">Todas</option>
+                        @foreach($prioridades as $pr)
+                            <option value="{{ $pr }}" @selected(request('prioridade') == $pr)>{{ $pr }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label class="tt-flt">Status:
+                    <select name="status" onchange="this.form.submit()" aria-label="Status">
+                        <option value="todos" @selected($statusFiltro == 'todos')>A Fazer / Planejamento</option>
+                        <option value="A Fazer" @selected($statusFiltro == 'A Fazer')>A Fazer</option>
+                        <option value="Planejamento" @selected($statusFiltro == 'Planejamento')>Planejamento</option>
+                    </select>
+                </label>
+                <label class="tt-flt">Ordenar por:
+                    <select name="ordenar" onchange="this.form.submit()" aria-label="Ordenar por">
+                        <option value="prioridade" @selected($ordenar == 'prioridade')>Prioridade</option>
+                        <option value="vencimento" @selected($ordenar == 'vencimento')>Vencimento</option>
+                        <option value="ordem" @selected($ordenar == 'ordem')>Ordem definida</option>
+                    </select>
+                </label>
+                @if($filtrosAtivos)
+                    <a href="{{ route('treetask.focus.index') }}" class="tt-btn ghost">Limpar filtros</a>
+                @endif
+            </form>
+
+            <div style="display:flex;flex-direction:column;gap:12px">
+                @forelse($aFazer as $tarefa)
+                    <form action="{{ route('treetask.tarefas.updateStatus', $tarefa->id_tarefa) }}" method="POST">
+                        @csrf @method('PATCH')
+                        <input type="hidden" name="status" value="Em Andamento">
+                        <button type="submit" class="tt-card tt-pc" style="width:100%;text-align:left;cursor:pointer;flex-direction:row;align-items:center;justify-content:space-between;gap:16px;font:inherit">
+                            <span style="min-width:0">
+                                <span style="display:block;font-size:12px;font-weight:700;color: {{ Aparencia::corProjeto($tarefa->fase->projeto->id_projeto) }}">{{ $tarefa->fase->projeto->nome }}</span>
+                                <span style="display:block;font-size:18px;font-weight:700;letter-spacing:-.01em">{{ $tarefa->titulo }}</span>
+                                <span style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;align-items:center">
+                                    <span class="tt-prio {{ Aparencia::prioridadeClasse($tarefa->prioridade) }}">{{ $tarefa->prioridade }}</span>
+                                    @if($tarefa->data_vencimento)
+                                        <span class="tt-meta">{{ $tarefa->data_vencimento->format('d/m') }}</span>
                                     @endif
-                                </div>
-                                <div class="bg-blue-100 text-blue-600 rounded-full p-3 group-hover:bg-blue-600 group-hover:text-white transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="text-center py-12 text-gray-400 bg-white rounded-xl border border-dashed border-gray-300">
-                            Sem blocos disponíveis. Vá para Projetos e planeje novos módulos.
-                        </div>
-                    @endforelse
-                </div>
+                                </span>
+                            </span>
+                            <span class="tt-icbtn" style="background:var(--tt-brand-soft);color:var(--tt-brand-d);width:48px;height:48px;border-radius:50%" aria-hidden="true">
+                                <svg class="tt-i l" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m10 8.5 5 3.5-5 3.5z"/></svg>
+                            </span>
+                        </button>
+                    </form>
+                @empty
+                    <div class="tt-vazio">Sem blocos disponíveis. Vá para Projetos e planeje novos módulos.</div>
+                @endforelse
+            </div>
 
-                @if($aguardando->count() > 0)
-                    <div class="mt-8 opacity-75">
-                        <h4 class="text-sm font-bold text-gray-500 uppercase mb-2">Bloqueados / Aguardando</h4>
+            @if($aguardando->count() > 0)
+                <div>
+                    <h2 class="tt-sec-tit" style="margin-bottom:10px">Bloqueadas · aguardando resposta</h2>
+                    <div style="display:flex;flex-direction:column;gap:8px">
                         @foreach($aguardando as $tarefa)
-                            <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 mb-2 flex justify-between items-center">
-                                <span class="text-yellow-800">{{ $tarefa->titulo }}</span>
-                                <a href="{{ route('treetask.tarefas.edit', $tarefa->id_tarefa) }}" class="text-xs text-yellow-600 underline">Ver</a>
+                            <div class="tt-card" style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px">
+                                <span style="font-weight:600">{{ $tarefa->titulo }}</span>
+                                <a class="tt-btn ghost sm" href="{{ route('treetask.tarefas.show', $tarefa->id_tarefa) }}">Ver</a>
                             </div>
                         @endforeach
                     </div>
-                @endif
-            </div>
-        @endif
-    </div>
-
-    <style>
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translate3d(0, 20px, 0); }
-            to { opacity: 1; transform: translate3d(0, 0, 0); }
-        }
-        .animate-fade-in-up {
-            animation: fadeInUp 0.5s ease-out forwards;
-        }
-    </style>
-</x-TreeTask::layout>
+                </div>
+            @endif
+        </section>
+    </x-TreeTask::layout>
+@endif

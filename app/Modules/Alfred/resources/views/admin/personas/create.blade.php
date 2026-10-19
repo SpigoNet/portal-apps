@@ -7,7 +7,7 @@
     <h2>Nova Persona</h2>
     <a href="{{ route('alfred.admin.personas.index') }}" class="btn btn-secondary">← Voltar</a>
 
-    <form action="{{ route('alfred.admin.personas.store') }}" method="post" style="margin-top:16px; max-width:800px;">
+    <form action="{{ route('alfred.admin.personas.store') }}" method="post" enctype="multipart/form-data" style="margin-top:16px; max-width:800px;">
         @csrf
 
         <div class="form-group">
@@ -51,6 +51,18 @@
         <div class="form-group">
             <label>Personality (JSON)</label>
             <textarea name="personality" class="form-control" rows="6">{{ old('personality') }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Aparência do personagem</label>
+            <textarea name="aparencia" class="form-control" rows="6" placeholder="Descrição visual bem detalhada: idade aparente, corpo, rosto, cabelo, olhos, roupas, acessórios, paleta de cores e estilo de arte (ex.: anime, aquarela, 3D)...">{{ old('aparencia') }}</textarea>
+            <small style="color:var(--text-muted);">Base fixa usada para gerar a imagem do personagem nos agendamentos do Pidgey (opção "Enviar imagem do personagem"). A expressão e o sentimento mudam a cada mensagem; a aparência não.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Imagem de referência (opcional)</label>
+            <input type="file" name="imagem_referencia" accept="image/*" class="form-control">
+            <small style="color:var(--text-muted);">Se o modelo de imagem aceitar referência (image-to-image), ela é usada para manter o personagem consistente.</small>
         </div>
 
         <div class="form-group">

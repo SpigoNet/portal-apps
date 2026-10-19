@@ -4,6 +4,8 @@ namespace App\Modules\Alfred;
 
 use App\Modules\Alfred\Console\Commands\EnviarMensagensAgendadas;
 use App\Modules\Alfred\Console\Commands\RelatorioManha;
+use App\Modules\Alfred\Services\Pidgey\ContextoDiaProvedor;
+use App\Modules\Pidgey\Services\ProvedoresConteudo;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +25,9 @@ class AlfredServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        // Motivação do Luffy com o contexto do dia, enviada pelo Pidgey.
+        $this->callAfterResolving(ProvedoresConteudo::class, fn (ProvedoresConteudo $p) => $p->registrar($this->app->make(ContextoDiaProvedor::class)));
+
         $this->commands([
             EnviarMensagensAgendadas::class,
             RelatorioManha::class,

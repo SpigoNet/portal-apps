@@ -7,7 +7,7 @@
     <h2>Editar Persona</h2>
     <a href="{{ route('alfred.admin.personas.index') }}" class="btn btn-secondary">← Voltar</a>
 
-    <form action="{{ route('alfred.admin.personas.update', $persona) }}" method="post" style="margin-top:16px; max-width:800px;">
+    <form action="{{ route('alfred.admin.personas.update', $persona) }}" method="post" enctype="multipart/form-data" style="margin-top:16px; max-width:800px;">
         @csrf
         @method('PUT')
 
@@ -52,6 +52,24 @@
         <div class="form-group">
             <label>Personality (JSON)</label>
             <textarea name="personality" class="form-control" rows="6">{{ old('personality', json_encode($persona->personality, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Aparência do personagem</label>
+            <textarea name="aparencia" class="form-control" rows="6" placeholder="Descrição visual bem detalhada: idade aparente, corpo, rosto, cabelo, olhos, roupas, acessórios, paleta de cores e estilo de arte (ex.: anime, aquarela, 3D)...">{{ old('aparencia', $persona->aparencia) }}</textarea>
+            <small style="color:var(--text-muted);">Base fixa usada para gerar a imagem do personagem nos agendamentos do Pidgey (opção "Enviar imagem do personagem"). A expressão e o sentimento mudam a cada mensagem; a aparência não.</small>
+        </div>
+
+        <div class="form-group">
+            <label>Imagem de referência (opcional)</label>
+            @if($persona->imagem_referencia)
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                    <img src="{{ Storage::disk('public')->url($persona->imagem_referencia) }}" alt="{{ $persona->name }}" style="width:96px; height:96px; object-fit:cover; border-radius:6px; border:1px solid #eee;">
+                    <label><input type="checkbox" name="remover_imagem_referencia" value="1"> Remover imagem</label>
+                </div>
+            @endif
+            <input type="file" name="imagem_referencia" accept="image/*" class="form-control">
+            <small style="color:var(--text-muted);">Se o modelo de imagem aceitar referência (image-to-image), ela é usada para manter o personagem consistente.</small>
         </div>
 
         <div class="form-group">

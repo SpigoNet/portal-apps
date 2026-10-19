@@ -10,6 +10,7 @@ use App\Modules\Pidgey\Services\EnvioService;
 use App\Modules\Pidgey\Services\TelegramBotService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class AgendamentoController
@@ -27,10 +28,7 @@ class AgendamentoController
         $personas = Persona::query()->orderBy('slug')->get();
         $conteudos = ConteudoDinamico::query()->orderBy('nome')->get();
 
-        $modelos = (new AiProviderService)->getActiveModels()
-            ->filter(fn ($m) => in_array('text', $m->input_types ?? [], true)
-                && in_array('text', $m->output_types ?? [], true))
-            ->values();
+        $modelos = $this->modelosTexto();
 
         $personasPorSlug = $personas->keyBy('slug');
         $fotos = [];
@@ -46,11 +44,52 @@ class AgendamentoController
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate([
+        $data = $this->validar($request);
+
+        $agendamento = new Agendamento;
+        $agendamento->user_id = auth()->id();
+        $agendamento->ativo = true;
+        $this->preencher($agendamento, $data);
+
+        return redirect()->route('pidgey.agendamentos.index')
+            ->with('success', 'Agendamento criado com sucesso.');
+    }
+
+    public function edit(Agendamento $agendamento): View
+    {
+        $agendamento->load('conteudosDinamicos');
+
+        return view('Pidgey::agendamentos.edit', [
+            'agendamento' => $agendamento,
+            'personas' => Persona::query()->orderBy('slug')->get(),
+            'conteudos' => ConteudoDinamico::query()->orderBy('nome')->get(),
+            'modelos' => $this->modelosTexto(),
+        ]);
+    }
+
+    /**
+     * Salva as alterações e recalcula a próxima execução com a nova configuração.
+     * Um agendamento pausado continua pausado.
+     */
+    public function update(Request $request, Agendamento $agendamento): RedirectResponse
+    {
+        $this->preencher($agendamento, $this->validar($request));
+
+        return redirect()->route('pidgey.agendamentos.index')
+            ->with('success', 'Agendamento atualizado.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validar(Request $request): array
+    {
+        return $request->validate([
             'persona_slug' => 'required|string',
             'mensagem' => 'required|string',
             'canal' => 'sometimes|in:telegram,whatsapp,email',
             'interpretar' => 'sometimes|boolean',
+            'enviar_imagem' => 'sometimes|boolean',
             'conteudos_dinamico' => 'sometimes|array',
             'conteudos_dinamico.*' => 'exists:pidgey_conteudos_dinamicos,id',
             'ai_model_id' => 'sometimes|nullable|exists:ai_modelos,id',
@@ -65,15 +104,22 @@ class AgendamentoController
             'data_inicio' => 'sometimes|nullable|date',
             'data_fim' => 'sometimes|nullable|date|after_or_equal:data_inicio',
         ]);
+    }
 
+    /**
+     * Aplica os dados do formulário, calcula a próxima execução, salva e sincroniza os conteúdos dinâmicos.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function preencher(Agendamento $agendamento, array $data): void
+    {
         $persona = Persona::query()->where('slug', $data['persona_slug'])->firstOrFail();
 
-        $agendamento = new Agendamento;
-        $agendamento->user_id = auth()->id();
         $agendamento->persona_slug = $persona->slug;
         $agendamento->canal = $data['canal'] ?? $persona->canal ?? 'telegram';
         $agendamento->mensagem = $data['mensagem'];
         $agendamento->interpretar = ! empty($data['interpretar']);
+        $agendamento->enviar_imagem = ! empty($data['enviar_imagem']);
         $agendamento->frequencia = $data['frequencia'];
         $agendamento->hora = $data['hora'] ?? '09:00';
         $agendamento->dia_semana = $data['frequencia'] === 'semanal'
@@ -94,7 +140,6 @@ class AgendamentoController
         $agendamento->data_inicio = $data['data_inicio'] ?? null;
         $agendamento->data_fim = $data['data_fim'] ?? null;
         $agendamento->ai_model_id = $data['ai_model_id'] ?? null;
-        $agendamento->ativo = true;
 
         if ($data['frequencia'] === 'una_vez') {
             $base = $agendamento->data_inicio ?? now();
@@ -109,9 +154,6 @@ class AgendamentoController
         $agendamento->save();
 
         $agendamento->conteudosDinamicos()->sync($data['conteudos_dinamico'] ?? []);
-
-        return redirect()->route('pidgey.agendamentos.index')
-            ->with('success', 'Agendamento criado com sucesso.');
     }
 
     public function destroy(Agendamento $agendamento): RedirectResponse
@@ -138,6 +180,11 @@ class AgendamentoController
 
     public function enviarAgora(Agendamento $agendamento, EnvioService $envio): RedirectResponse
     {
+        // Gerar a imagem do personagem pode levar mais de um minuto (o limite padrão do PHP é 30 s).
+        if ($agendamento->enviar_imagem) {
+            set_time_limit(240);
+        }
+
         $resultado = $envio->enviarAgendamento($agendamento);
 
         if (! $resultado['ok']) {
@@ -148,6 +195,15 @@ class AgendamentoController
         $agendamento->atualizarAposEnvio();
 
         return redirect()->route('pidgey.agendamentos.index')
-            ->with('success', "Mensagem enviada via {$agendamento->persona_slug} (status {$resultado['status']}).");
+            ->with('success', "Mensagem enviada via {$agendamento->persona_slug} (status {$resultado['status']})."
+                .($agendamento->enviar_imagem && $resultado['imagem'] === null ? ' A imagem do personagem não pôde ser gerada; foi só o texto.' : ''));
+    }
+
+    private function modelosTexto(): Collection
+    {
+        return (new AiProviderService)->getActiveModels()
+            ->filter(fn ($m) => in_array('text', $m->input_types ?? [], true)
+                && in_array('text', $m->output_types ?? [], true))
+            ->values();
     }
 }

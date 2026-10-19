@@ -1,68 +1,57 @@
-<x-TreeTask::layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl leading-tight text-gray-400 hover:text-white">
-                {{ __('Bom Dia! Vamos revisar seus projetos esquecidos?') }}
-            </h2>
-        </div>
-    </x-slot>
+@php
+    use App\Modules\TreeTask\Support\Aparencia;
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    $hora = (int) now()->format('G');
+    $saudacao = $hora < 12 ? 'Bom dia' : ($hora < 18 ? 'Boa tarde' : 'Boa noite');
+    $primeiroNome = \Illuminate\Support\Str::words((string) auth()->user()?->name, 1, '');
+@endphp
+<x-TreeTask::layout titulo="Bom dia" ativo="bomdia">
+    <header>
+        <div class="tt-eyebrow">{{ now()->locale('pt_BR')->translatedFormat('l, j \d\e F') }}</div>
+        <h1 class="tt-h1" style="font-size:38px">{{ $saudacao }}, {{ $primeiroNome }}</h1>
+        <p class="tt-muted" style="margin:6px 0 0;font-size:16px;max-width:620px">
+            @if($projetos->isNotEmpty())
+                Estes projetos estão esperando por você. Escolha um e dê o primeiro passo.
+            @else
+                Nenhum projeto ativo por aqui.
+            @endif
+        </p>
+    </header>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @forelse($projetos as $projeto)
-                    @php
-                        $days = $projeto->days_since_interaction;
-                        $colorClass = $days > 30 ? 'bg-red-50 border-red-200' : ($days > 7 ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-gray-200');
-                        $textClass = $days > 30 ? 'text-red-700' : ($days > 7 ? 'text-yellow-700' : 'text-gray-700');
-                    @endphp
-                    <div class="overflow-hidden shadow-sm sm:rounded-lg border {{ $colorClass }} p-6 flex flex-col h-full">
+    <section class="tt-bomdia" aria-label="Projetos esquecidos">
+        @forelse($projetos as $projeto)
+            @php
+                $dias = (int) $projeto->days_since_interaction;
+                $classe = $dias > 30 ? 'chip-risco' : ($dias > 7 ? 'chip-aviso' : 'chip-ok');
+            @endphp
+            <article class="tt-card tt-bd">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+                    <h2 style="font-size:18px;font-weight:700;letter-spacing:-.01em">{{ $projeto->nome }}</h2>
+                    <span class="tt-chip {{ $classe }}">{{ $dias }} {{ $dias === 1 ? 'dia' : 'dias' }} parado</span>
+                </div>
+                <p class="tt-muted tt-clamp2" style="margin:0">{{ $projeto->descricao }}</p>
 
-                        <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-lg font-bold text-gray-900">{{ $projeto->nome }}</h3>
-                            <span
-                                class="text-xs font-semibold px-2 py-1 rounded-full {{ $textClass }} bg-opacity-20 border border-current">
-                                {{ $days }} dias sem mexer
-                            </span>
-                        </div>
+                <div>
+                    <h3 class="tt-sec-tit" style="margin-bottom:8px">Próximas tarefas</h3>
+                    @if($projeto->proximas_tarefas->isNotEmpty())
+                        <ul class="tt-lista-simples">
+                            @foreach($projeto->proximas_tarefas as $tarefa)
+                                <li>
+                                    <span class="tt-prio {{ Aparencia::prioridadeClasse($tarefa->prioridade) }}" style="font-size:0"></span>
+                                    <span style="min-width:0;flex:1" title="{{ $tarefa->titulo }}">{{ \Illuminate\Support\Str::limit($tarefa->titulo, 60) }}</span>
+                                    <span class="tt-muted" style="font-size:12.5px;white-space:nowrap">{{ $tarefa->prioridade }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="tt-muted" style="margin:0;font-style:italic">Sem tarefas pendentes.</p>
+                    @endif
+                </div>
 
-                        <p class="text-sm text-gray-600 mb-4 flex-grow">{{ Str::limit($projeto->descricao, 100) }}</p>
-
-                        @if($projeto->proximas_tarefas->isNotEmpty())
-                            <div class="mb-4">
-                                <h4 class="text-xs uppercase font-semibold text-gray-500 mb-2">Próximas Tarefas:</h4>
-                                <ul class="space-y-2">
-                                    @foreach($projeto->proximas_tarefas as $tarefa)
-                                        <li class="flex items-center text-sm">
-                                            <span
-                                                class="w-2 h-2 rounded-full {{ $tarefa->prioridade == 'Alta' ? 'bg-red-500' : 'bg-blue-400' }} mr-2"></span>
-                                            <span class="truncate text-gray-700"
-                                                title="{{ $tarefa->titulo }}">{{ $tarefa->titulo }}</span>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @else
-                            <div class="mb-4 text-sm text-gray-400 italic">
-                                Sem tarefas pendentes.
-                            </div>
-                        @endif
-
-                        <div class="mt-auto pt-4 border-t border-gray-200/50">
-                            <a href="{{ route('treetask.show', $projeto->id_projeto) }}"
-                                class="block w-full text-center bg-white border border-gray-300 text-gray-700 font-medium py-2 px-4 rounded hover:bg-gray-50 transition duration-150 ease-in-out">
-                                Ir para o Projeto
-                            </a>
-                        </div>
-                    </div>
-                @empty
-                    <div class="col-span-3 text-center py-10 text-gray-500">
-                        <p class="text-xl">Você está em dia com todos os seus projetos! 🎉</p>
-                    </div>
-                @endforelse
-            </div>
-
-        </div>
-    </div>
+                <a class="tt-btn bloco" style="margin-top:auto" href="{{ route('treetask.lista', $projeto->id_projeto) }}">Ir para o projeto</a>
+            </article>
+        @empty
+            <div class="tt-vazio" style="grid-column:1/-1">Você está em dia com todos os seus projetos!</div>
+        @endforelse
+    </section>
 </x-TreeTask::layout>

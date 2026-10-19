@@ -15,6 +15,7 @@ use App\Services\AI\Drivers\LmStudioDriver;
 use App\Services\AI\Drivers\OllamaDriver;
 use App\Services\AI\Drivers\OpenAiCompatibleDriver;
 use App\Services\AI\Drivers\PollinationDriver;
+use App\Services\AI\Drivers\PollinationImageEditDriver;
 use Illuminate\Database\Eloquent\Collection;
 
 class AiProviderService
@@ -210,6 +211,30 @@ class AiProviderService
             'gemini' => new GeminiDriver($apiKey, $modelName, $baseUrl),
             'lm_studio' => new LmStudioDriver($baseUrl),
             'ollama' => new OllamaDriver($modelName, $apiKey, $baseUrl),
+            default => new PollinationDriver($modelName, $apiKey, $baseUrl),
+        };
+    }
+
+    /**
+     * Instancia o driver de geração de imagem apropriado para o modelo informado.
+     */
+    public function createImageDriver(?AiModel $model): ?AiDriverInterface
+    {
+        if (! $model) {
+            return null;
+        }
+
+        $driverName = $this->getDriverForProvider($model);
+        $apiKey = $this->getApiKeyForProvider($model);
+        $baseUrl = $this->getBaseUrlForProvider($model);
+        $modelName = $model->model;
+
+        return match ($driverName) {
+            'airforce' => new AirForceDriver($modelName, $apiKey, $baseUrl),
+            'openai' => new OpenAiCompatibleDriver($modelName, $apiKey, $baseUrl),
+            'gemini' => new GeminiDriver($apiKey, $modelName, $baseUrl),
+            'kdjingpai' => new KdjingpaiDriver($modelName, $apiKey, $baseUrl),
+            'pollination_image_edit' => new PollinationImageEditDriver($modelName, $apiKey, $baseUrl),
             default => new PollinationDriver($modelName, $apiKey, $baseUrl),
         };
     }

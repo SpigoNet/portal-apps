@@ -1,86 +1,67 @@
-<x-TreeTask::layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Gerenciar Tarefa') }}
-            </h2>
+<x-TreeTask::layout titulo="Nova tarefa" ativo="projetos">
+    <nav class="tt-crumb" aria-label="Trilha">
+        <a href="{{ route('treetask.index') }}">Projetos</a>
+        <svg class="tt-i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        <a href="{{ route('treetask.lista', $fase->id_projeto) }}">{{ $fase->projeto->nome }}</a>
+        <svg class="tt-i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        <b>{{ $fase->nome }}</b>
+    </nav>
 
-            @if(request('origin') === 'focus')
-                <a href="{{ route('treetask.focus.index') }}" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded inline-flex items-center">
-                    ⬅ Voltar ao Foco
-                </a>
-            @elseif(isset($tarefa))
-                <a href="{{ route('treetask.show', $tarefa->fase->id_projeto) }}" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded inline-flex items-center">
-                    ⬅ Voltar ao Projeto
-                </a>
-            @else
-                <a href="{{ url()->previous() }}" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded inline-flex items-center">
-                    ⬅ Voltar
-                </a>
-            @endif
+    <header>
+        <h1 class="tt-h1">Nova tarefa</h1>
+        <p class="tt-muted" style="margin:6px 0 0">Na fase “{{ $fase->nome }}”.</p>
+    </header>
+
+    <form class="tt-card pad" style="max-width:760px;display:flex;flex-direction:column;gap:18px" action="{{ route('treetask.tarefas.store') }}" method="POST">
+        @csrf
+        <input type="hidden" name="id_fase" value="{{ $fase->id_fase }}">
+
+        <div class="tt-field">
+            <label class="tt-label" for="titulo">Título *</label>
+            <input class="tt-input" id="titulo" type="text" name="titulo" value="{{ old('titulo') }}" required>
+            @error('titulo') <span class="tt-erro">{{ $message }}</span> @enderror
         </div>
-    </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <form action="{{ route('treetask.tarefas.store') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="id_fase" value="{{ $fase->id_fase }}">
+        <div class="tt-field">
+            <label class="tt-label" for="descricao">Descrição</label>
+            <textarea class="tt-textarea" id="descricao" name="descricao" rows="4">{{ old('descricao') }}</textarea>
+        </div>
 
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Título da Tarefa *</label>
-                            <input type="text" name="titulo" class="w-full border-gray-300 rounded-md shadow-sm" required>
-                        </div>
+        <div class="tt-form-grid">
+            <div class="tt-field">
+                <label class="tt-label" for="id_user_responsavel">Responsável *</label>
+                <select class="tt-select" id="id_user_responsavel" name="id_user_responsavel" required>
+                    <option value="">Selecione...</option>
+                    @foreach($users as $user)
+                        <option value="{{ $user->id }}" @selected((int) old('id_user_responsavel', auth()->id()) === $user->id)>{{ $user->name }}</option>
+                    @endforeach
+                </select>
+                @error('id_user_responsavel') <span class="tt-erro">{{ $message }}</span> @enderror
+            </div>
 
-                        <div class="mb-4">
-                            <label class="block text-gray-700 text-sm font-bold mb-2">Descrição</label>
-                            <textarea name="descricao" rows="4" class="w-full border-gray-300 rounded-md shadow-sm"></textarea>
-                        </div>
+            <div class="tt-field">
+                <label class="tt-label" for="prioridade">Prioridade</label>
+                <select class="tt-select" id="prioridade" name="prioridade">
+                    @foreach(['Baixa', 'Média', 'Alta', 'Urgente'] as $prio)
+                        <option value="{{ $prio }}" @selected(old('prioridade', 'Média') === $prio)>{{ $prio }}</option>
+                    @endforeach
+                </select>
+            </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div class="tt-field">
+                <label class="tt-label" for="data_vencimento">Vencimento</label>
+                <input class="tt-input" id="data_vencimento" type="date" name="data_vencimento" value="{{ old('data_vencimento') }}">
+            </div>
 
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Responsável *</label>
-                                <select name="id_user_responsavel" class="w-full border-gray-300 rounded-md shadow-sm" required>
-                                    <option value="">Selecione...</option>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}" {{ auth()->id() == $user->id ? 'selected' : '' }}>
-                                            {{ $user->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Prioridade</label>
-                                <select name="prioridade" class="w-full border-gray-300 rounded-md shadow-sm">
-                                    <option value="Baixa">Baixa</option>
-                                    <option value="Média" selected>Média</option>
-                                    <option value="Alta">Alta</option>
-                                    <option value="Urgente">Urgente</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Vencimento</label>
-                                <input type="date" name="data_vencimento" class="w-full border-gray-300 rounded-md shadow-sm">
-                            </div>
-
-                            <div>
-                                <label class="block text-gray-700 text-sm font-bold mb-2">Estimativa (horas)</label>
-                                <input type="number" step="0.5" name="estimativa_tempo" class="w-full border-gray-300 rounded-md shadow-sm">
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end space-x-2">
-                            <a href="{{ route('treetask.show', $fase->id_projeto) }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">Cancelar</a>
-                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Criar Tarefa</button>
-                        </div>
-                    </form>
-                </div>
+            <div class="tt-field">
+                <label class="tt-label" for="estimativa_tempo">Estimativa (horas)</label>
+                <input class="tt-input" id="estimativa_tempo" type="number" step="0.5" name="estimativa_tempo" value="{{ old('estimativa_tempo') }}">
             </div>
         </div>
-    </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center">
+            <a class="tt-btn ghost" href="{{ route('treetask.lista', $fase->id_projeto) }}">Cancelar</a>
+            <button type="submit" class="tt-btn pri">Criar tarefa</button>
+        </div>
+    </form>
 </x-TreeTask::layout>

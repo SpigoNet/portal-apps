@@ -22,6 +22,7 @@ class Agendamento extends Model
         'canal',
         'mensagem',
         'interpretar',
+        'enviar_imagem',
         'frequencia',
         'hora',
         'dia_semana',
@@ -38,6 +39,7 @@ class Agendamento extends Model
 
     protected $casts = [
         'interpretar' => 'boolean',
+        'enviar_imagem' => 'boolean',
         'ativo' => 'boolean',
         'dia_semana' => 'integer',
         'intervalo_minutos' => 'integer',

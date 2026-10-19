@@ -1,51 +1,46 @@
-<x-TreeTask::layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Novo Projeto') }}
-        </h2>
-    </x-slot>
+<x-TreeTask::layout titulo="Novo projeto" ativo="projetos">
+    <nav class="tt-crumb" aria-label="Trilha">
+        <a href="{{ route('treetask.index') }}">Projetos</a>
+        <svg class="tt-i s" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        <b>Novo projeto</b>
+    </nav>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <form action="{{ route('treetask.store') }}" method="POST">
-                        @csrf
+    <header>
+        <h1 class="tt-h1">Novo projeto</h1>
+        <p class="tt-muted" style="margin:6px 0 0">Dê um nome, descreva o objetivo e, se quiser, marque as datas.</p>
+    </header>
 
-                        <div class="mb-4">
-                            <label for="nome" class="block text-gray-700 text-sm font-bold mb-2">Nome do Projeto:</label>
-                            <input type="text" name="nome" id="nome" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
-                            @error('nome') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                        </div>
+    <form class="tt-card pad" style="max-width:720px;display:flex;flex-direction:column;gap:18px" action="{{ route('treetask.store') }}" method="POST">
+        @csrf
 
-                        <div class="mb-4">
-                            <label for="descricao" class="block text-gray-700 text-sm font-bold mb-2">Descrição:</label>
-                            <textarea name="descricao" id="descricao" rows="4" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required></textarea>
-                            @error('descricao') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                        </div>
+        <div class="tt-field">
+            <label class="tt-label" for="nome">Nome do projeto</label>
+            <input class="tt-input" type="text" name="nome" id="nome" value="{{ old('nome') }}" required>
+            @error('nome') <span class="tt-erro">{{ $message }}</span> @enderror
+        </div>
 
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label for="data_inicio" class="block text-gray-700 text-sm font-bold mb-2">Início:</label>
-                                <input type="date" name="data_inicio" id="data_inicio" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                            </div>
-                            <div>
-                                <label for="data_prevista_termino" class="block text-gray-700 text-sm font-bold mb-2">Previsão Término:</label>
-                                <input type="date" name="data_prevista_termino" id="data_prevista_termino" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                            </div>
-                        </div>
+        <div class="tt-field">
+            <label class="tt-label" for="descricao">Descrição</label>
+            <textarea class="tt-textarea" name="descricao" id="descricao" rows="4" required>{{ old('descricao') }}</textarea>
+            @error('descricao') <span class="tt-erro">{{ $message }}</span> @enderror
+        </div>
 
-                        <div class="flex items-center justify-between">
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                                Salvar Projeto
-                            </button>
-                            <a href="{{ route('treetask.index') }}" class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
-                                Cancelar
-                            </a>
-                        </div>
-                    </form>
-                </div>
+        <div class="tt-form-grid">
+            <div class="tt-field">
+                <label class="tt-label" for="data_inicio">Início</label>
+                <input class="tt-input" type="date" name="data_inicio" id="data_inicio" value="{{ old('data_inicio') }}">
+                @error('data_inicio') <span class="tt-erro">{{ $message }}</span> @enderror
+            </div>
+            <div class="tt-field">
+                <label class="tt-label" for="data_prevista_termino">Previsão de término</label>
+                <input class="tt-input" type="date" name="data_prevista_termino" id="data_prevista_termino" value="{{ old('data_prevista_termino') }}">
+                @error('data_prevista_termino') <span class="tt-erro">{{ $message }}</span> @enderror
             </div>
         </div>
-    </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center">
+            <a class="tt-btn ghost" href="{{ route('treetask.index') }}">Cancelar</a>
+            <button class="tt-btn pri" type="submit">Salvar projeto</button>
+        </div>
+    </form>
 </x-TreeTask::layout>

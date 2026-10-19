@@ -1,0 +1,50 @@
+# Ambiente de DEV no mesmo servidor da produção (copiado como docker-compose.yml para
+# /opt/containers/spigo-portal-dev pelo deploy-dev.sh). Isolado da produção: rede, banco e volumes próprios.
+# Sem Evolution API/gateways/Telegram: nada daqui envia mensagem de verdade.
+# Acesso: http://192.168.15.10:8084
+
+networks:
+  spigo-dev-internal:
+    driver: bridge
+
+services:
+  spigo-portal-dev-db:
+    image: postgres:17-alpine
+    container_name: spigo-portal-dev-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=spigo_portal_dev
+      - POSTGRES_USER=spigo_dev
+      - POSTGRES_PASSWORD=${DEV_DB_PASSWORD:?defina DEV_DB_PASSWORD no .env.compose}
+    volumes:
+      - spigo_portal_dev_db_data:/var/lib/postgresql/data
+    networks:
+      - spigo-dev-internal
+
+  spigo-portal-dev-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: spigo-portal-app:dev
+    container_name: spigo-portal-dev-app
+    restart: unless-stopped
+    ports:
+      - "8084:80"
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html/public
+      - DB_CONNECTION=pgsql
+      - DB_HOST=spigo-portal-dev-db
+      - DB_PORT=5432
+      - DB_DATABASE=spigo_portal_dev
+      - DB_USERNAME=spigo_dev
+      - DB_PASSWORD=${DEV_DB_PASSWORD}
+    volumes:
+      - /opt/containers/spigo-portal-dev/storage/app/public:/var/www/html/storage/app/public
+      - /opt/containers/spigo-portal-dev/.env:/var/www/html/.env
+    networks:
+      - spigo-dev-internal
+    depends_on:
+      - spigo-portal-dev-db
+
+volumes:
+  spigo_portal_dev_db_data:

@@ -23,7 +23,7 @@ return new class extends Migration
         // 2. Tabela de Prompts (Textos Base) [cite: 40-43]
         Schema::create('mundos_de_mim_prompts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('theme_id')->constrained()->onDelete('cascade');
+            $table->foreignId('theme_id')->constrained('mundos_de_mim_themes')->onDelete('cascade');
             $table->text('prompt_text');
             $table->boolean('is_couple_prompt')->default(false)->comment('Requer segunda pessoa');
             $table->timestamps();
@@ -35,8 +35,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
 
             // Referências opcionais (caso o tema seja deletado, mantemos o histórico visual)
-            $table->foreignId('theme_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('prompt_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('theme_id')->nullable()->constrained('mundos_de_mim_themes')->nullOnDelete();
+            $table->foreignId('prompt_id')->nullable()->constrained('mundos_de_mim_prompts')->nullOnDelete();
 
             $table->string('image_url'); // URL final da imagem (R2/S3)
             $table->text('final_prompt_used')->nullable()->comment('Prompt exato usado na geração');

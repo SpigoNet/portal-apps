@@ -15,7 +15,13 @@
 
 ## GitHub & Deploy
 - **GitHub is only for branches and backup.** GitHub Actions are no longer used (there are no workflows); a push to `main` does NOT publish anything.
-- **To release a version, run a deploy script from the repo root** (production: `apps.spigo.net`, via SSH):
+- **First identify which environment you are in, then pick the matching scripts.** The same files are used in more than one environment. Run `hostname -I` (or check `pwd`):
+  - **DEV server** — `hostname -I` contains `192.168.15.10` and the repo is at `/opt/containers/spigo-portal-dev` (DEV at `http://192.168.15.10:8084`). Deploy locally, with no SSH/rsync:
+    - `./deploy-local.sh` — full deploy: `docker compose up -d --build`, `migrate`, storage permissions, `optimize:clear`. Use it when dependencies, assets (CSS/JS, Tailwind), Dockerfile or non-PHP files change.
+    - `./deploy-local.sh --fast` — copies only `*.php` files (and module `.xlsx` templates) into the running `spigo-portal-dev-app` container, restarts it (flush OPcache) and runs `migrate`. No rebuild.
+    - Do NOT use `deploy.sh`, `deploy-fast.sh` or `deploy-dev.sh` here: they target `apps.spigo.net` via SSH.
+  - **Any other environment** (the original one, which reaches the servers via SSH) — use the SSH scripts below. `deploy-dev.sh` rsyncs to the DEV folder on `apps.spigo.net` (`/opt/containers/spigo-portal-dev`) with `--delete`; it excludes `deploy-local.sh`, but `AGENTS.md` is overwritten by the origin copy, so edit it in the origin environment.
+- **SSH deploy scripts** (production: `apps.spigo.net`, via SSH):
   - `./deploy.sh` — full deploy: rsync of the code, rebuild of the Docker image, container restart and `migrate`. Use it when dependencies, frontend assets (CSS/JS, Tailwind), Dockerfile or non-PHP files change.
   - `./deploy-fast.sh` (or `/deploy-fast`) — fast deploy: copies only `*.php` files (Blade views included) into the running container, restarts it and runs `migrate`. No rebuild, so new Tailwind classes/assets are not published.
 - Both scripts send the **local working tree** (including uncommitted changes), not what is on GitHub.
